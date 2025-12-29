@@ -44,7 +44,8 @@ go install github.com/QuesmaOrg/git-prompt-story@latest
 git-prompt-story install-hooks --global
 
 # 3. Enable automatic pushing of prompt notes
-git config --global --add remote.origin.push 'refs/notes/prompt-story*:refs/notes/prompt-story*'
+git config --global --add remote.origin.push 'refs/notes/commits:refs/notes/commits'
+git config --global --add remote.origin.push 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
 
 # 4. (Optional) Configure viewer URL - defaults to hosted service
 git config --global prompt-story.viewer-url 'https://prompt-story.quesma.com/{owner}/{repo}/prompt/{note}'
@@ -71,7 +72,8 @@ go install github.com/QuesmaOrg/git-prompt-story@latest
 git-prompt-story install-hooks
 
 # Enable automatic pushing of prompt notes
-git config --add remote.origin.push 'refs/notes/prompt-story*:refs/notes/prompt-story*'
+git config --add remote.origin.push 'refs/notes/commits:refs/notes/commits'
+git config --add remote.origin.push 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
 
 echo "git-prompt-story configured for this repository"
 ```
@@ -119,7 +121,9 @@ jobs:
           fetch-depth: 0
 
       - name: Fetch prompt notes
-        run: git fetch origin 'refs/notes/prompt-story*:refs/notes/prompt-story*' || true
+        run: |
+          git fetch origin 'refs/notes/commits:refs/notes/commits' || true
+          git fetch origin 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts' || true
 
       - name: Check for prompt notes
         uses: quesmaorg/prompt-story-action@v1
@@ -142,7 +146,7 @@ This action checks if commits have prompt notes attached and optionally posts a 
 │  2. prepare-commit-msg hook                                     │
 │     ├── Find active sessions for this repo                      │
 │     ├── Store transcripts ref/notes/prompt-story-transcripts/*  │
-│     ├── Save git note refs/notes/prompt-story/{nid}             │
+│     ├── Save git note as blob {nid}                             │
 │     ├── Generate summary (tools used)                           |
 │     ├── Append to commit message:                               │
 │     │   "Prompt-Story: Used Claude Code | <url>"                │
@@ -151,7 +155,7 @@ This action checks if commits have prompt notes attached and optionally posts a 
 │                    ▼                                            │
 │  3. post-commit hook                                            │
 │     ├── Read {nid} from .git/PENDING-PROMPT-STORY               │
-│     ├── Attach refs/notes/prompt-story/{nid} as note to HEAD    │
+│     ├── Attach note to HEAD via refs/notes/commits              │
 │     └── Clean up .git/PENDING-PROMPT-STORY                      │
 │                                                                 │
 │  If no active sessions for this repo:                           │
@@ -164,9 +168,9 @@ This action checks if commits have prompt notes attached and optionally posts a 
 
 Git Prompt Story uses two storage locations:
 
-#### 1. Commit Metadata (`refs/notes/prompt-story`)
+#### 1. Commit Metadata (`refs/notes/commits`)
 
-Standard git notes attached to commits. Contains a lightweight JSON manifest:
+Standard git notes attached to commits (default notes ref). Contains a lightweight JSON manifest:
 
 ```json
 {
@@ -235,7 +239,7 @@ The capture tool runs locally via git hooks. It:
 
 - Detects active LLM sessions
 - Extracts conversation data
-- Stores notes in `refs/notes/prompt-story`
+- Stores notes in `refs/notes/commits` (standard git notes)
 - Adds summary to commit messages
 
 Single binary, no runtime dependencies. Install once, works everywhere.
@@ -280,7 +284,7 @@ Notes are JSON - view them anywhere:
 
 ```bash
 # Raw JSON
-git notes --ref=prompt-story show HEAD
+git notes show HEAD
 
 # Local pretty-print
 git-prompt-story show HEAD
