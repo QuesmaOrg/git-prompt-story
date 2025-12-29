@@ -24,7 +24,11 @@ func GetPreviousCommitTimestamp() (time.Time, error) {
 		return time.Time{}, nil
 	}
 
-	return time.Parse(timestampLayout, ts)
+	t, err := time.Parse(timestampLayout, ts)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t.UTC(), nil
 }
 
 // GetLastBranchSwitchTimestamp finds the most recent checkout action in reflog
@@ -49,7 +53,7 @@ func GetLastBranchSwitchTimestamp() (time.Time, error) {
 				tsStr := line[:25]
 				t, err := time.Parse(timestampLayout, tsStr)
 				if err == nil {
-					return t, nil
+					return t.UTC(), nil
 				}
 			}
 		}
