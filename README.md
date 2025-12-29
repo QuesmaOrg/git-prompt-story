@@ -17,14 +17,19 @@ When LLM writes your code, the conversation is part of the story.
 
 git-prompt-story captures LLM sessions in your git history - making prompts reviewable, searchable, and part of your project's permanent record.
 
+## Principles
+
+- **Open standard, not a product.** We're defining a convention for storing AI prompts in git, not building a walled garden. Fork it, extend it, build on it.
+- **Vendor agnostic.** Claude Code today. Cursor, Codex, Gemini CLI tomorrow. One format for all tools.
+- **Git-native.** No databases, no services, no accounts. Just git notes - portable, mergeable, already everywhere.
+- **Privacy by default.** Notes stay local until you explicitly push. Review, redact, delete - you control what's shared.
+
 ## Features
 
-- **Git-native storage** - Uses git notes, no external databases
 - **Automatic capture** - Hooks detect active LLM sessions on commit
 - **Delta storage** - Only stores new conversation since last commit
 - **Review before push** - Curate or redact notes before sharing
 - **Viewer links** - Commit messages include links to rendered prompts
-- **Multi-tool support** - Claude Code now, Cursor/Codex/Gemini planned
 
 ## Quick Start
 
