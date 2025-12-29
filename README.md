@@ -27,14 +27,16 @@ git-prompt-story captures LLM sessions in your git history - making prompts revi
 ## Features
 
 - **Automatic capture** - Hooks detect active LLM sessions on commit
-- **Delta storage** - Only stores new conversation since last commit
 - **Review before push** - Curate or redact notes before sharing
 - **Viewer links** - Commit messages include links to rendered prompts
 
 ## Quick Start
 
 ```bash
-pip install git-prompt-story
+# Install (single binary, no dependencies)
+go install github.com/QuesmaOrg/git-prompt-story@latest
+# or: brew install git-prompt-story
+# or: download from releases
 
 cd your-repo
 git-prompt-story init
@@ -54,7 +56,6 @@ That's it. Future commits will automatically capture active LLM sessions.
 │                    ▼                                            │
 │  2. pre-commit hook                                             │
 │     ├── Detect active LLM session                               │
-│     ├── Compute delta since last commit                         │
 │     ├── Create note blob (git hash-object -w)                   │
 │     └── Save note ID to .git/GPS_PENDING_NOTE                   │
 │                    │                                            │
@@ -63,7 +64,7 @@ That's it. Future commits will automatically capture active LLM sessions.
 │     ├── Read note ID from .git/GPS_PENDING_NOTE                 │
 │     ├── Generate summary from note content                      │
 │     └── Append to commit message:                               │
-│         "AI: 3 prompts, 847 tokens | View: <url>#<note-id>"     │
+│         "Prompt-Story: 3 prompts, 847 tokens | View: <url>#<note-id>"     │
 │                    │                                            │
 │                    ▼                                            │
 │  4. post-commit hook                                            │
@@ -72,7 +73,7 @@ That's it. Future commits will automatically capture active LLM sessions.
 │     └── Clean up .git/GPS_PENDING_NOTE                          │
 │                                                                 │
 │  If no active session or no changes since last commit:          │
-│     └── Append minimal marker: "AI: none"                       │
+│     └── Append minimal marker: "Prompt-Story: none"                       │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -112,25 +113,66 @@ git-prompt-story finds active sessions by checking:
 | Codex       | TBD                                         | Planned |
 | Gemini CLI  | TBD                                         | Planned |
 
+## Architecture
+
+Git Prompt Story has two components:
+
+### `git-prompt-story` (CLI) - Go
+
+The capture tool runs locally via git hooks. It:
+
+- Detects active LLM sessions
+- Extracts conversation data
+- Stores notes in `refs/notes/llm-prompts`
+- Adds summary to commit messages
+
+Single binary, no runtime dependencies. Install once, works everywhere.
+
+### `git-prompt-story-server` (Viewer) - separate
+
+Renders stored notes for the web. Options:
+
+- **Self-hosted**: Run your own instance
+- **Hosted service**: Use our hosted viewer (planned)
+- **GitHub Action**: Auto-publish notes as PR comments (planned)
+
+For local viewing without the server:
+
+- **Raw**: `git notes --ref=llm-prompts show HEAD`
+- **CLI**: `git-prompt-story show` (built into capture tool)
+
+The CLI is essential. The server is optional.
+
 ## Commands (DRAFT)
 
+### Capture
+
 ```bash
-# Setup (DRAFT)
 git-prompt-story init          # Install hooks in current repo
 git-prompt-story init --global # Install hooks globally
+```
 
-# View (DRAFT)
+### View
+
+```bash
 git-prompt-story show          # Show note for HEAD
 git-prompt-story show abc123   # Show note for specific commit
 git-prompt-story log           # List commits with notes
+```
 
-# Curate (DRAFT - before pushing)
+### Curate
+
+```bash
 git-prompt-story review        # Interactive review of unpushed notes
 git-prompt-story edit HEAD     # Edit note content
 git-prompt-story remove HEAD   # Delete note from commit
+```
 
-# Push notes (DRAFT - git notes aren't pushed by default)
+### Sync
+
+```bash
 git-prompt-story push          # Push notes to origin
+git-prompt-story pull          # Pull notes from origin
 ```
 
 ## Configuration
