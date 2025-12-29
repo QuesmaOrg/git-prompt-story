@@ -30,19 +30,104 @@ git-prompt-story captures LLM sessions in your git history - making prompts revi
 - **Review before push** - Curate or redact notes before sharing
 - **Viewer links** - Commit messages include links to rendered prompts
 
-## Quick Start
+## Setup
+
+### Individual Developer
+
+Set up git-prompt-story on your machine to capture LLM sessions in all your repos.
 
 ```bash
-# Install (single binary, no dependencies)
+# 1. Install
 go install github.com/QuesmaOrg/git-prompt-story@latest
-# or: brew install git-prompt-story
-# or: download from releases
 
-cd your-repo
-git-prompt-story init
+# 2. Install git hooks globally
+git-prompt-story install-hooks --global
+
+# 3. Enable automatic pushing of prompt notes
+git config --global --add remote.origin.push 'refs/notes/prompt-story*:refs/notes/prompt-story*'
+
+# 4. (Optional) Configure viewer URL - defaults to hosted service
+git config --global prompt-story.viewer-url 'https://prompt-story.quesma.com/{owner}/{repo}/prompt/{note}'
 ```
 
 That's it. Future commits will automatically capture active LLM sessions.
+
+### Repository Owner
+
+Set up git-prompt-story for your team by adding a setup script to your repository.
+
+#### 1. Add setup script
+
+Create `setup-prompt-story.sh` in your repo root:
+
+```bash
+#!/bin/bash
+set -e
+
+# Install git-prompt-story
+go install github.com/QuesmaOrg/git-prompt-story@latest
+
+# Install hooks for this repo
+git-prompt-story install-hooks
+
+# Enable automatic pushing of prompt notes
+git config --add remote.origin.push 'refs/notes/prompt-story*:refs/notes/prompt-story*'
+
+echo "git-prompt-story configured for this repository"
+```
+
+Contributors run `./setup-prompt-story.sh` after cloning.
+
+#### 2. Install prompt server (optional for public repos, required for private)
+
+For private repositories, host your own viewer:
+
+```bash
+docker run -d \
+  -p 8080:8080 \
+  -e GITHUB_TOKEN=your-token \
+  ghcr.io/quesmaorg/git-prompt-story-server
+```
+
+Then configure the viewer URL in `setup-prompt-story.sh`:
+
+```bash
+git config prompt-story.viewer-url 'https://prompts.yourcompany.com/{owner}/{repo}/prompt/{note}'
+```
+
+Public repos can use the hosted service at `https://prompt-story.quesma.com`.
+
+#### 3. Add CI check (optional)
+
+Add a GitHub Action to verify prompt notes are attached to PRs:
+
+```yaml
+# .github/workflows/prompt-story.yml
+name: Prompt Story Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check-prompts:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merge_commit_sha == null  # Skip merge commits
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch prompt notes
+        run: git fetch origin 'refs/notes/prompt-story*:refs/notes/prompt-story*' || true
+
+      - name: Check for prompt notes
+        uses: quesmaorg/prompt-story-action@v1
+        with:
+          comment: true  # Post summary of LLM tools used
+```
+
+This action checks if commits have prompt notes attached and optionally posts a comment summarizing which LLM tools were used.
 
 ## How It Works
 
@@ -283,4 +368,4 @@ Each line is a JSON event with timestamps, making delta computation straightforw
 
 ## License
 
-Apache 2.0
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
