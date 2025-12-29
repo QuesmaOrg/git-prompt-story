@@ -235,7 +235,7 @@ The capture tool runs locally via git hooks. It:
 
 - Detects active LLM sessions
 - Extracts conversation data
-- Stores notes in `refs/notes/llm-prompts`
+- Stores notes in `refs/notes/prompt-story`
 - Adds summary to commit messages
 
 Single binary, no runtime dependencies. Install once, works everywhere.
@@ -254,38 +254,6 @@ For local viewing without the server:
 - **CLI**: `git-prompt-story show` (built into capture tool)
 
 The CLI is essential. The server is optional.
-
-## Commands (DRAFT)
-
-### Capture
-
-```bash
-git-prompt-story init          # Install hooks in current repo
-git-prompt-story init --global # Install hooks globally
-```
-
-### View
-
-```bash
-git-prompt-story show          # Show note for HEAD
-git-prompt-story show abc123   # Show note for specific commit
-git-prompt-story log           # List commits with notes
-```
-
-### Curate
-
-```bash
-git-prompt-story review        # Interactive review of unpushed notes
-git-prompt-story edit HEAD     # Edit note content
-git-prompt-story remove HEAD   # Delete note from commit
-```
-
-### Sync
-
-```bash
-git-prompt-story push          # Push notes to origin
-git-prompt-story pull          # Pull notes from origin
-```
 
 ## Configuration
 
@@ -345,7 +313,7 @@ git push origin refs/notes/prompt-story-transcripts
 
 ## Roadmap
 
-- [ ] Claude Code support
+- [x] Claude Code support
 - [ ] Local viewer (HTML export)
 - [ ] Hosted viewer service
 - [ ] Cursor integration
