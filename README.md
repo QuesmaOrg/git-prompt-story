@@ -1,10 +1,21 @@
-# git-prompt-story
+# Git Prompt Story
 
 Store LLM prompts and sessions alongside your git commits using git notes.
 
 ## Why
 
-When AI writes your code, the conversation is part of the story. git-prompt-story captures Claude Code sessions (and other LLM tools) in your git history - making prompts reviewable, searchable, and auditable without polluting your commit messages.
+> "I've never felt this much behind as a programmer. The profession is being dramatically refactored."
+> — [Andrej Karpathy](https://x.com/karpathy/status/2004607146781278521)
+
+When LLM writes your code, the conversation is part of the story.
+
+**Learn from your teammates.** Prompts reveal problem-solving approaches, architectural decisions, and debugging strategies. Even Karpathy admits he could be "10X more powerful" by learning how others use AI tools.
+
+**Review what matters.** Thousands of lines of generated code are hard to audit. The prompts that produced them? That's the real signal - the intent, constraints, and reasoning.
+
+**Require transparency.** Projects like [Ghostty now require AI disclosure](https://github.com/ghostty-org/ghostty/pull/8289) on PRs. We make it easy.
+
+git-prompt-story captures LLM sessions in your git history - making prompts reviewable, searchable, and part of your project's permanent record.
 
 ## Features
 
@@ -79,8 +90,8 @@ Notes are stored as JSON in `refs/notes/llm-prompts`:
   },
   "summary": "Add user authentication with JWT...",
   "messages": [
-    {"role": "user", "content": "Add user authentication..."},
-    {"role": "assistant", "content": "I'll implement JWT-based..."}
+    { "role": "user", "content": "Add user authentication..." },
+    { "role": "assistant", "content": "I'll implement JWT-based..." }
   ]
 }
 ```
@@ -90,7 +101,7 @@ Notes are stored as JSON in `refs/notes/llm-prompts`:
 git-prompt-story finds active sessions by checking:
 
 | Tool        | Location                                    | Status  |
-|-------------|---------------------------------------------|---------|
+| ----------- | ------------------------------------------- | ------- |
 | Claude Code | `~/.claude/projects/<encoded-path>/*.jsonl` | Done    |
 | Cursor      | TBD                                         | Planned |
 | Codex       | TBD                                         | Planned |
@@ -133,6 +144,7 @@ Config lives in `.git-prompt-story.json` or `~/.config/git-prompt-story.json`:
 ### Viewer URL Templates
 
 Variables available:
+
 - `{repo}` - Repository name (owner/repo for GitHub)
 - `{commit}` - Full commit SHA
 - `{short}` - Short commit SHA (7 chars)
@@ -185,6 +197,7 @@ git push origin refs/notes/llm-prompts
 ## How Claude Code Stores Sessions
 
 Claude Code saves conversations as JSONL files in:
+
 ```
 ~/.claude/projects/<encoded-path>/<session-id>.jsonl
 ```
