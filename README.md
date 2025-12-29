@@ -56,18 +56,18 @@ That's it. Future commits will automatically capture active LLM sessions.
 │                    ▼                                            │
 │  2. prepare-commit-msg hook                                     │
 │     ├── Find active sessions for this repo                      │
-│     ├── Generate summary (tools used)                           │
+│     ├── Store transcripts ref/notes/prompt-story-transcripts/*  │
+│     ├── Save git note refs/notes/prompt-story/{nid}             │
+│     ├── Generate summary (tools used)                           |
 │     ├── Append to commit message:                               │
-│     │   "Prompt-Story: Used Claude Code | [View](<url>)"        │
-│     └── Save session list to .git/GPS_PENDING                   │
+│     │   "Prompt-Story: Used Claude Code | <url>"                │
+│     └── Save {nid} to .git/PENDING-PROMPT-STORY                 │
 │                    │                                            │
 │                    ▼                                            │
 │  3. post-commit hook                                            │
-│     ├── Read session list from .git/GPS_PENDING                 │
-│     ├── Store transcripts (if new) in transcript tree           │
-│     ├── Create metadata JSON referencing transcripts            │
-│     ├── Attach metadata as note to HEAD                         │
-│     └── Clean up .git/GPS_PENDING                               │
+│     ├── Read {nid} from .git/PENDING-PROMPT-STORY               │
+│     ├── Attach refs/notes/prompt-story/{nid} as note to HEAD    │
+│     └── Clean up .git/PENDING-PROMPT-STORY                      │
 │                                                                 │
 │  If no active sessions for this repo:                           │
 │     └── Append: "Prompt-Story: none"                            │
@@ -86,16 +86,22 @@ Standard git notes attached to commits. Contains a lightweight JSON manifest:
 ```json
 {
   "v": 1,
+  "start_work": "2025-01-15T09:00:00Z",
+  "end_work": "2025-01-15T14:30:00Z",
   "sessions": [
     {
       "tool": "claude-code",
       "id": "113e0c55-64df-4b55-88f3-e06bcbc5b526",
-      "path": "claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl"
+      "path": "refs/notes/prompt-story-transcripts/claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl",
+      "created": "2025-01-15T09:15:00Z",
+      "modified": "2025-01-15T14:22:00Z"
     },
     {
       "tool": "cursor",
       "id": "a1b2c3d4",
-      "path": "cursor/a1b2c3d4.json"
+      "path": "refs/notes/prompt-story-transcripts/cursor/a1b2c3d4.json",
+      "created": "2025-01-15T10:00:00Z",
+      "modified": "2025-01-15T12:45:00Z"
     }
   ]
 }
@@ -277,4 +283,4 @@ Each line is a JSON event with timestamps, making delta computation straightforw
 
 ## License
 
-MIT
+Apache 2.0
