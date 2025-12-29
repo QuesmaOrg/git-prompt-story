@@ -54,53 +54,74 @@ That's it. Future commits will automatically capture active LLM sessions.
 │  1. You run: git commit                                         │
 │                    │                                            │
 │                    ▼                                            │
-│  2. pre-commit hook                                             │
-│     ├── Detect active LLM session                               │
-│     ├── Create note blob (git hash-object -w)                   │
-│     └── Save note ID to .git/GPS_PENDING_NOTE                   │
+│  2. prepare-commit-msg hook                                     │
+│     ├── Find active sessions for this repo                      │
+│     ├── Generate summary (session count, tools used)            │
+│     ├── Append to commit message:                               │
+│     │   "Prompt-Story: 2 sessions (claude-code) | View: <url>"  │
+│     └── Save session list to .git/GPS_PENDING                   │
 │                    │                                            │
 │                    ▼                                            │
-│  3. prepare-commit-msg hook                                     │
-│     ├── Read note ID from .git/GPS_PENDING_NOTE                 │
-│     ├── Generate summary from note content                      │
-│     └── Append to commit message:                               │
-│         "Prompt-Story: 3 prompts, 847 tokens | View: <url>#<note-id>"     │
-│                    │                                            │
-│                    ▼                                            │
-│  4. post-commit hook                                            │
-│     ├── Read note ID from .git/GPS_PENDING_NOTE                 │
-│     ├── Attach note to HEAD (git notes --ref=llm-prompts add)   │
-│     └── Clean up .git/GPS_PENDING_NOTE                          │
+│  3. post-commit hook                                            │
+│     ├── Read session list from .git/GPS_PENDING                 │
+│     ├── Store transcripts (if new) in transcript tree           │
+│     ├── Create metadata JSON referencing transcripts            │
+│     ├── Attach metadata as note to HEAD                         │
+│     └── Clean up .git/GPS_PENDING                               │
 │                                                                 │
-│  If no active session or no changes since last commit:          │
-│     └── Append minimal marker: "Prompt-Story: none"                       │
+│  If no active sessions for this repo:                           │
+│     └── Append: "Prompt-Story: none"                            │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Storage Format
 
-Notes are stored as JSON in `refs/notes/llm-prompts`:
+Git Prompt Story uses two storage locations:
+
+#### 1. Commit Metadata (`refs/notes/prompt-story`)
+
+Standard git notes attached to commits. Contains a lightweight JSON manifest:
 
 ```json
 {
   "v": 1,
-  "source": "claude-code",
-  "session": "a1b2c3",
-  "range": [42, 58],
-  "stats": {
-    "prompts": 3,
-    "tool_calls": 12,
-    "input_tokens": 2048,
-    "output_tokens": 4096
-  },
-  "summary": "Add user authentication with JWT...",
-  "messages": [
-    { "role": "user", "content": "Add user authentication..." },
-    { "role": "assistant", "content": "I'll implement JWT-based..." }
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "113e0c55-64df-4b55-88f3-e06bcbc5b526",
+      "path": "claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl"
+    },
+    {
+      "tool": "cursor",
+      "id": "a1b2c3d4",
+      "path": "cursor/a1b2c3d4.json"
+    }
   ]
 }
 ```
+
+#### 2. Transcripts (`refs/notes/prompt-story-transcripts`)
+
+A tree ref containing raw session files, organized by tool:
+
+```
+refs/notes/prompt-story-transcripts/
+├── claude-code/
+│   ├── 113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl
+│   └── 7f8a9b0c-1d2e-3f4a-5b6c-7d8e9f0a1b2c.jsonl
+├── cursor/
+│   └── a1b2c3d4.json
+└── codex/
+    └── session-2025-01-15.jsonl
+```
+
+**Key design choices:**
+
+- **Many-to-many**: One session can be referenced by many commits. One commit can reference many sessions.
+- **Whole sessions**: Transcripts stored as-is, no slicing. Parsing happens in viewer.
+- **Deduplication**: Same session blob is referenced, not copied.
+- **Lightweight capture**: Minimal processing at commit time.
 
 ### Auto-Detection
 
