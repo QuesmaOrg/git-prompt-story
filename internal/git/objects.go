@@ -75,3 +75,25 @@ func ReadTree(treeSHA string) ([]TreeEntry, error) {
 	}
 	return entries, nil
 }
+
+// GetBlobContent retrieves content from a ref:path specification
+// Example: GetBlobContent("refs/notes/prompt-story-transcripts", "claude-code/session-id.jsonl")
+func GetBlobContent(ref, path string) ([]byte, error) {
+	spec := ref + ":" + path
+	cmd := exec.Command("git", "cat-file", "-p", spec)
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("git cat-file %s: %w", spec, err)
+	}
+	return out, nil
+}
+
+// ResolveCommit resolves a commit reference (HEAD, hash, etc.) to full SHA
+func ResolveCommit(ref string) (string, error) {
+	cmd := exec.Command("git", "rev-parse", ref)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("git rev-parse %s: %w", ref, err)
+	}
+	return strings.TrimSpace(string(out)), nil
+}

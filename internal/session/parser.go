@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -57,4 +58,28 @@ func ParseSessionMetadata(sessionPath string) (created, modified time.Time, bran
 // ReadSessionContent reads the entire session file for storage
 func ReadSessionContent(sessionPath string) ([]byte, error) {
 	return os.ReadFile(sessionPath)
+}
+
+// ParseMessages parses JSONL content and returns all message entries
+func ParseMessages(content []byte) ([]MessageEntry, error) {
+	var entries []MessageEntry
+
+	scanner := bufio.NewScanner(strings.NewReader(string(content)))
+	// Increase buffer size for large lines (Claude responses can be big)
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024)
+
+	for scanner.Scan() {
+		var entry MessageEntry
+		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
+			continue // Skip malformed lines
+		}
+		entries = append(entries, entry)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return entries, nil
 }
