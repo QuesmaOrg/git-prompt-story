@@ -35,14 +35,11 @@ func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
 	}
 
 	// Calculate work start time from git reflog
-	// This gives us the most recent of: previous commit time or branch switch time
-	reflogStart, _ := git.CalculateWorkStartTime()
+	// This is the most recent of: previous commit time or branch switch time
+	note.StartWork, _ = git.CalculateWorkStartTime()
 
 	for _, s := range sessions {
-		// Track overall time range from sessions
-		if note.StartWork.IsZero() || s.Created.Before(note.StartWork) {
-			note.StartWork = s.Created
-		}
+		// Track end time from sessions (latest modified time)
 		if s.Modified.After(note.EndWork) {
 			note.EndWork = s.Modified
 		}
@@ -54,12 +51,6 @@ func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
 			Created:  s.Created,
 			Modified: s.Modified,
 		})
-	}
-
-	// Bound StartWork by reflog-based start time
-	// Work should not start before the previous commit or branch switch
-	if !reflogStart.IsZero() && reflogStart.After(note.StartWork) {
-		note.StartWork = reflogStart
 	}
 
 	return note
