@@ -56,9 +56,9 @@ That's it. Future commits will automatically capture active LLM sessions.
 │                    ▼                                            │
 │  2. prepare-commit-msg hook                                     │
 │     ├── Find active sessions for this repo                      │
-│     ├── Generate summary (session count, tools used)            │
+│     ├── Generate summary (tools used)                           │
 │     ├── Append to commit message:                               │
-│     │   "Prompt-Story: 2 sessions (claude-code) | View: <url>"  │
+│     │   "Prompt-Story: Used Claude Code | [View](<url>)"        │
 │     └── Save session list to .git/GPS_PENDING                   │
 │                    │                                            │
 │                    ▼                                            │
@@ -202,9 +202,7 @@ Config lives in `.git-prompt-story.json` or `~/.config/git-prompt-story.json`:
 
 ```json
 {
-  "viewer_url": "https://your-viewer.com/view/{repo}/{commit}",
-  "summary_format": "AI: {prompts} prompts, {tokens} tokens",
-  "include_messages": true,
+  "viewer_url": "https://prompt-story.quesma.com/{owner}/{repo}/prompt/{note}",
   "auto_push_notes": false
 }
 ```
@@ -213,9 +211,9 @@ Config lives in `.git-prompt-story.json` or `~/.config/git-prompt-story.json`:
 
 Variables available:
 
-- `{repo}` - Repository name (owner/repo for GitHub)
-- `{commit}` - Full commit SHA
-- `{short}` - Short commit SHA (7 chars)
+- `{owner}` - Repository owner (e.g., QuesmaOrg)
+- `{repo}` - Repository name (e.g., git-prompt-story)
+- `{note}` - Note blob SHA (short)
 
 ## Viewer Integration
 
@@ -223,12 +221,13 @@ Notes are JSON - view them anywhere:
 
 ```bash
 # Raw JSON
-git notes --ref=llm-prompts show HEAD
+git notes --ref=prompt-story show HEAD
 
 # Local pretty-print
 git-prompt-story show HEAD
 
-# Or host your own viewer and configure viewer_url
+# Or use the hosted viewer
+# https://prompt-story.quesma.com/{owner}/{repo}/prompt/{note-sha}
 ```
 
 ## Privacy & Curation
@@ -246,10 +245,11 @@ git-prompt-story remove <commit>
 git-prompt-story edit <commit>
 ```
 
-Notes live in a separate ref (`refs/notes/llm-prompts`) and must be explicitly pushed:
+Notes live in separate refs and must be explicitly pushed:
 
 ```bash
-git push origin refs/notes/llm-prompts
+git push origin refs/notes/prompt-story
+git push origin refs/notes/prompt-story-transcripts
 ```
 
 ## Roadmap
