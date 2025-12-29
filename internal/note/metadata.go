@@ -1,0 +1,107 @@
+package note
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+)
+
+// PromptStoryNote is the JSON structure stored as a git note on commits
+type PromptStoryNote struct {
+	Version   int            `json:"v"`
+	StartWork time.Time      `json:"start_work"`
+	EndWork   time.Time      `json:"end_work"`
+	Sessions  []SessionEntry `json:"sessions"`
+}
+
+// SessionEntry describes one LLM session referenced by the note
+type SessionEntry struct {
+	Tool     string    `json:"tool"`
+	ID       string    `json:"id"`
+	Path     string    `json:"path"`
+	Created  time.Time `json:"created"`
+	Modified time.Time `json:"modified"`
+}
+
+// NewPromptStoryNote creates a new note from discovered sessions
+func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
+	note := &PromptStoryNote{
+		Version:  1,
+		Sessions: make([]SessionEntry, 0, len(sessions)),
+	}
+
+	for _, s := range sessions {
+		// Track overall time range
+		if note.StartWork.IsZero() || s.Created.Before(note.StartWork) {
+			note.StartWork = s.Created
+		}
+		if s.Modified.After(note.EndWork) {
+			note.EndWork = s.Modified
+		}
+
+		note.Sessions = append(note.Sessions, SessionEntry{
+			Tool:     "claude-code",
+			ID:       s.ID,
+			Path:     GetTranscriptPath("claude-code", s.ID),
+			Created:  s.Created,
+			Modified: s.Modified,
+		})
+	}
+
+	return note
+}
+
+// ToJSON serializes the note to JSON
+func (n *PromptStoryNote) ToJSON() ([]byte, error) {
+	return json.MarshalIndent(n, "", "  ")
+}
+
+// GenerateSummary creates the commit message line
+// Returns: "Prompt-Story: Used Claude Code | <url>" or "Prompt-Story: none"
+func (n *PromptStoryNote) GenerateSummary(viewerURL, owner, repo, noteSHA string) string {
+	if len(n.Sessions) == 0 {
+		return "Prompt-Story: none"
+	}
+
+	// Build tool list
+	tools := make(map[string]bool)
+	for _, s := range n.Sessions {
+		tools[s.Tool] = true
+	}
+
+	var toolNames []string
+	for t := range tools {
+		// Convert tool ID to display name
+		name := t
+		switch t {
+		case "claude-code":
+			name = "Claude Code"
+		case "cursor":
+			name = "Cursor"
+		case "codex":
+			name = "Codex"
+		}
+		toolNames = append(toolNames, name)
+	}
+
+	summary := fmt.Sprintf("Prompt-Story: Used %s", strings.Join(toolNames, ", "))
+
+	// Add viewer URL if available
+	if viewerURL != "" && owner != "" && repo != "" && noteSHA != "" {
+		url := viewerURL
+		url = strings.ReplaceAll(url, "{owner}", owner)
+		url = strings.ReplaceAll(url, "{repo}", repo)
+		url = strings.ReplaceAll(url, "{note}", noteSHA[:7]) // Short SHA
+		summary += " | " + url
+	}
+
+	return summary
+}
+
+// GetTranscriptPath returns the ref path for a transcript
+func GetTranscriptPath(tool, sessionID string) string {
+	return fmt.Sprintf("refs/notes/prompt-story-transcripts/%s/%s.jsonl", tool, sessionID)
+}
