@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
@@ -33,8 +34,12 @@ func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
 		Sessions: make([]SessionEntry, 0, len(sessions)),
 	}
 
+	// Calculate work start time from git reflog
+	// This gives us the most recent of: previous commit time or branch switch time
+	reflogStart, _ := git.CalculateWorkStartTime()
+
 	for _, s := range sessions {
-		// Track overall time range
+		// Track overall time range from sessions
 		if note.StartWork.IsZero() || s.Created.Before(note.StartWork) {
 			note.StartWork = s.Created
 		}
@@ -49,6 +54,12 @@ func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
 			Created:  s.Created,
 			Modified: s.Modified,
 		})
+	}
+
+	// Bound StartWork by reflog-based start time
+	// Work should not start before the previous commit or branch switch
+	if !reflogStart.IsZero() && reflogStart.After(note.StartWork) {
+		note.StartWork = reflogStart
 	}
 
 	return note
