@@ -9,10 +9,11 @@ import (
 
 const timestampLayout = "2006-01-02 15:04:05 -0700"
 
-// GetPreviousCommitTimestamp returns the timestamp of HEAD~1 (parent commit)
-// Returns zero time if there is no parent commit
+// GetPreviousCommitTimestamp returns the timestamp of HEAD (current commit)
+// During prepare-commit-msg, HEAD is the previous commit (what will become HEAD~1)
+// Returns zero time if there is no commit yet
 func GetPreviousCommitTimestamp() (time.Time, error) {
-	cmd := exec.Command("git", "log", "-1", "--format=%ai", "HEAD~1")
+	cmd := exec.Command("git", "log", "-1", "--format=%ai", "HEAD")
 	out, err := cmd.Output()
 	if err != nil {
 		// No parent commit (initial commit case)

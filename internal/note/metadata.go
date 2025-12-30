@@ -38,12 +38,10 @@ func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
 	// This is the most recent of: previous commit time or branch switch time
 	note.StartWork, _ = git.CalculateWorkStartTime()
 
-	for _, s := range sessions {
-		// Track end time from sessions (latest modified time)
-		if s.Modified.After(note.EndWork) {
-			note.EndWork = s.Modified
-		}
+	// End work time is the commit timestamp (respects GIT_COMMITTER_DATE)
+	note.EndWork = git.GetCommitTime()
 
+	for _, s := range sessions {
 		note.Sessions = append(note.Sessions, SessionEntry{
 			Tool:     "claude-code",
 			ID:       s.ID,

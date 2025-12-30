@@ -1,8 +1,10 @@
 package git
 
 import (
+	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 // GetRepoRoot returns the root directory of the git repo
@@ -43,4 +45,51 @@ func GetHead() (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(string(out)), nil
+}
+
+// GetCommitTime returns the effective commit timestamp
+// Checks GIT_COMMITTER_DATE and GIT_AUTHOR_DATE env vars first (set by faketime or user)
+// Falls back to current time if not set
+func GetCommitTime() time.Time {
+	// Try GIT_COMMITTER_DATE first (takes precedence)
+	if dateStr := os.Getenv("GIT_COMMITTER_DATE"); dateStr != "" {
+		if t, err := parseGitDate(dateStr); err == nil {
+			return t
+		}
+	}
+
+	// Try GIT_AUTHOR_DATE
+	if dateStr := os.Getenv("GIT_AUTHOR_DATE"); dateStr != "" {
+		if t, err := parseGitDate(dateStr); err == nil {
+			return t
+		}
+	}
+
+	// Fall back to current time
+	return time.Now().UTC()
+}
+
+// parseGitDate parses common git date formats
+func parseGitDate(dateStr string) (time.Time, error) {
+	// Try RFC3339 format first
+	if t, err := time.Parse(time.RFC3339, dateStr); err == nil {
+		return t.UTC(), nil
+	}
+
+	// Try git's default format: "Mon Jan 2 15:04:05 2006 -0700"
+	if t, err := time.Parse("Mon Jan 2 15:04:05 2006 -0700", dateStr); err == nil {
+		return t.UTC(), nil
+	}
+
+	// Try ISO format: "2006-01-02 15:04:05 -0700"
+	if t, err := time.Parse("2006-01-02 15:04:05 -0700", dateStr); err == nil {
+		return t.UTC(), nil
+	}
+
+	// Try Unix timestamp
+	if t, err := time.Parse("@1136239445", dateStr); err == nil {
+		return t.UTC(), nil
+	}
+
+	return time.Time{}, nil
 }
