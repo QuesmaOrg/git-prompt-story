@@ -1,0 +1,35 @@
+{
+  "v": 1,
+  "start_work": "2025-12-30T17:09:00Z",
+  "end_work": "0001-01-01T00:00:00Z",
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "e29c25c4-a827-47bc-a769-99d3e3bbbc75",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/e29c25c4-a827-47bc-a769-99d3e3bbbc75.jsonl",
+      "created": "2025-12-29T18:12:19.299Z",
+      "modified": "2025-12-30T17:45:46.398Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "agent-a3fe68d",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/agent-a3fe68d.jsonl",
+      "created": "2025-12-29T18:12:37.805Z",
+      "modified": "2025-12-29T18:13:31.022Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "agent-a23272e",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/agent-a23272e.jsonl",
+      "created": "2025-12-29T18:10:25.186Z",
+      "modified": "2025-12-29T18:10:32.597Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "agent-abb1a50",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/agent-abb1a50.jsonl",
+      "created": "2025-12-29T18:10:25.189Z",
+      "modified": "2025-12-29T18:10:29.171Z"
+    }
+  ]
+}
