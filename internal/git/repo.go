@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -91,5 +92,5 @@ func parseGitDate(dateStr string) (time.Time, error) {
 		return t.UTC(), nil
 	}
 
-	return time.Time{}, nil
+	return time.Time{}, fmt.Errorf("unable to parse date: %s", dateStr)
 }

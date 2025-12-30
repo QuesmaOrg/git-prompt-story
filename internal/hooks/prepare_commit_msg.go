@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
@@ -19,6 +20,16 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		return fmt.Errorf("not in a git repository: %w", err)
 	}
 
+	// Get git directory for debug log
+	gitDir, err := git.GetGitDir()
+	if err != nil {
+		return err
+	}
+	debugLog := newDebugLogger(filepath.Join(gitDir, "prompt-story-debug.log"))
+	debugLog.log("=== prepare-commit-msg started at %s ===", time.Now().UTC().Format(time.RFC3339))
+	debugLog.log("repoRoot: %s", repoRoot)
+	debugLog.log("msgFile: %s, source: %q, sha: %q", msgFile, source, sha)
+
 	// Read current commit message to detect if this is an amend
 	msgContent, err := os.ReadFile(msgFile)
 	if err != nil {
@@ -28,29 +39,37 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 	// Detect amend: if message already has our marker, or source is "commit" with SHA
 	// Note: git passes source="message" when using -m flag, even with --amend
 	// So we also check for existing marker as a reliable amend indicator
-	isAmend := (source == "commit" && sha != "") ||
-		strings.Contains(string(msgContent), "Prompt-Story:")
+	hasMarker := strings.Contains(string(msgContent), "Prompt-Story:")
+	isAmend := (source == "commit" && sha != "") || hasMarker
+	debugLog.log("isAmend: %v (source=commit&&sha: %v, hasMarker: %v)", isAmend, source == "commit" && sha != "", hasMarker)
 
 	// Find Claude Code sessions for this repo
 	sessions, err := session.FindSessions(repoRoot)
 	if err != nil {
 		// Don't fail the commit, just log
 		fmt.Fprintf(os.Stderr, "git-prompt-story: warning: %v\n", err)
+		debugLog.log("FindSessions error: %v", err)
 		sessions = nil
+	}
+	debugLog.log("FindSessions returned %d sessions", len(sessions))
+	for _, s := range sessions {
+		debugLog.log("  - %s: created=%s, modified=%s", s.ID, s.Created.UTC().Format(time.RFC3339), s.Modified.UTC().Format(time.RFC3339))
 	}
 
 	// Filter sessions to only those overlapping with the work period
 	if len(sessions) > 0 {
 		startWork, _ := git.CalculateWorkStartTime(isAmend)
 		endWork := git.GetCommitTime()
+		debugLog.log("Work period: %s - %s", startWork.UTC().Format(time.RFC3339), endWork.UTC().Format(time.RFC3339))
+
+		beforeFilter := len(sessions)
 		sessions = session.FilterSessionsByTime(sessions, startWork, endWork)
+		debugLog.log("FilterSessionsByTime: %d -> %d sessions", beforeFilter, len(sessions))
+		for _, s := range sessions {
+			debugLog.log("  - kept: %s", s.ID)
+		}
 	}
 
-	// Get git directory for pending file
-	gitDir, err := git.GetGitDir()
-	if err != nil {
-		return err
-	}
 	pendingFile := filepath.Join(gitDir, "PENDING-PROMPT-STORY")
 
 	var summary string
@@ -92,6 +111,9 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		summary = psNote.GenerateSummary(noteSHA)
 	}
 
+	debugLog.log("Final summary: %s", summary)
+	debugLog.log("=== prepare-commit-msg finished ===\n")
+
 	// Append summary to commit message
 	return appendToCommitMessage(msgFile, summary)
 }
@@ -124,4 +146,22 @@ func appendToCommitMessage(msgFile, summary string) error {
 	newContent += "\n" + summary + "\n"
 
 	return os.WriteFile(msgFile, []byte(newContent), 0644)
+}
+
+// debugLogger writes debug info to a file
+type debugLogger struct {
+	path string
+}
+
+func newDebugLogger(path string) *debugLogger {
+	return &debugLogger{path: path}
+}
+
+func (d *debugLogger) log(format string, args ...interface{}) {
+	f, err := os.OpenFile(d.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return // Silently fail - debug logging shouldn't break commits
+	}
+	defer f.Close()
+	fmt.Fprintf(f, format+"\n", args...)
 }
