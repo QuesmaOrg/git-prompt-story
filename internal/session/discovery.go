@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 // FindSessions discovers Claude Code sessions for a given repo path
@@ -70,4 +71,18 @@ func getClaudeSessionDir(repoPath string) (string, error) {
 // encodePathForClaude converts /Users/jacek/git/myapp to -Users-jacek-git-myapp
 func encodePathForClaude(repoPath string) string {
 	return strings.ReplaceAll(repoPath, string(filepath.Separator), "-")
+}
+
+// FilterSessionsByTime filters sessions to only those overlapping with the work period
+// A session overlaps if: session.Modified >= startWork AND session.Created <= endWork
+func FilterSessionsByTime(sessions []ClaudeSession, startWork, endWork time.Time) []ClaudeSession {
+	var filtered []ClaudeSession
+	for _, s := range sessions {
+		// Session overlaps with work period if it was modified after work started
+		// and created before work ended
+		if !s.Modified.Before(startWork) && !s.Created.After(endWork) {
+			filtered = append(filtered, s)
+		}
+	}
+	return filtered
 }

@@ -26,6 +26,13 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		sessions = nil
 	}
 
+	// Filter sessions to only those overlapping with the work period
+	if len(sessions) > 0 {
+		startWork, _ := git.CalculateWorkStartTime()
+		endWork := git.GetCommitTime()
+		sessions = session.FilterSessionsByTime(sessions, startWork, endWork)
+	}
+
 	// Get git directory for pending file
 	gitDir, err := git.GetGitDir()
 	if err != nil {
