@@ -29,7 +29,8 @@ type SessionEntry struct {
 }
 
 // NewPromptStoryNote creates a new note from discovered sessions
-func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
+// isAmend should be true when amending a commit (affects start_work calculation)
+func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool) *PromptStoryNote {
 	note := &PromptStoryNote{
 		Version:  1,
 		Sessions: make([]SessionEntry, 0, len(sessions)),
@@ -37,7 +38,7 @@ func NewPromptStoryNote(sessions []session.ClaudeSession) *PromptStoryNote {
 
 	// Calculate work start time from git reflog
 	// This is the most recent of: previous commit time or branch switch time
-	note.StartWork, _ = git.CalculateWorkStartTime()
+	note.StartWork, _ = git.CalculateWorkStartTime(isAmend)
 
 	// End work time is the commit timestamp (respects GIT_COMMITTER_DATE)
 	note.EndWork = git.GetCommitTime()

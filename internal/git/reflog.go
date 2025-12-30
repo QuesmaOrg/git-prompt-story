@@ -9,11 +9,16 @@ import (
 
 const timestampLayout = "2006-01-02 15:04:05 -0700"
 
-// GetPreviousCommitTimestamp returns the timestamp of HEAD (current commit)
-// During prepare-commit-msg, HEAD is the previous commit (what will become HEAD~1)
+// GetPreviousCommitTimestamp returns the timestamp of the previous commit
+// The ref parameter specifies which commit to get:
+// - For normal commits: use "HEAD" (HEAD is the previous commit during prepare-commit-msg)
+// - For amend: use "HEAD^" (the parent of the commit being amended)
 // Returns zero time if there is no commit yet
-func GetPreviousCommitTimestamp() (time.Time, error) {
-	cmd := exec.Command("git", "log", "-1", "--format=%ai", "HEAD")
+func GetPreviousCommitTimestamp(ref string) (time.Time, error) {
+	if ref == "" {
+		ref = "HEAD"
+	}
+	cmd := exec.Command("git", "log", "-1", "--format=%ai", ref)
 	out, err := cmd.Output()
 	if err != nil {
 		// No parent commit (initial commit case)
@@ -65,8 +70,14 @@ func GetLastBranchSwitchTimestamp() (time.Time, error) {
 
 // CalculateWorkStartTime determines the start of work for the current commit
 // Returns the most recent of: previous commit timestamp or branch switch timestamp
-func CalculateWorkStartTime() (time.Time, error) {
-	prevTime, err := GetPreviousCommitTimestamp()
+// isAmend: set to true when amending a commit (uses HEAD^ instead of HEAD)
+func CalculateWorkStartTime(isAmend bool) (time.Time, error) {
+	ref := "HEAD"
+	if isAmend {
+		ref = "HEAD^"
+	}
+
+	prevTime, err := GetPreviousCommitTimestamp(ref)
 	if err != nil {
 		prevTime = time.Time{}
 	}
