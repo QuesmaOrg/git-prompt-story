@@ -45,40 +45,51 @@ func ShowPrompts(commitRef string, full bool) error {
 		return nil
 	}
 
-	// Process each session
+	// Process each session, filtering out empty ones
+	shownSessions := 0
 	for _, sess := range psNote.Sessions {
-		if err := showSession(sess, psNote.StartWork, psNote.EndWork, full); err != nil {
+		shown, err := showSession(sess, psNote.StartWork, psNote.EndWork, full)
+		if err != nil {
 			fmt.Printf("Warning: could not load session %s: %v\n", sess.ID, err)
 			continue
 		}
+		if shown {
+			shownSessions++
+		}
+	}
+
+	if shownSessions == 0 {
+		fmt.Println("No messages to display")
 	}
 
 	return nil
 }
 
-func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) error {
-	fmt.Printf("Session: %s/%s\n", sess.Tool, sess.ID)
-	fmt.Printf("Duration: %s - %s\n\n",
-		sess.Created.Local().Format("15:04"),
-		sess.Modified.Local().Format("15:04"))
+// displayEntry holds a parsed entry ready for display
+type displayEntry struct {
+	ts       time.Time
+	entryType string
+	text     string
+}
 
+func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (bool, error) {
 	// Extract relative path from full ref path
-	// Path is like: refs/notes/prompt-story-transcripts/claude-code/session-id.jsonl
 	relPath := strings.TrimPrefix(sess.Path, transcriptsRef+"/")
 
 	// Fetch transcript content
 	content, err := git.GetBlobContent(transcriptsRef, relPath)
 	if err != nil {
-		return fmt.Errorf("failed to fetch transcript: %w", err)
+		return false, fmt.Errorf("failed to fetch transcript: %w", err)
 	}
 
 	// Parse messages
 	entries, err := session.ParseMessages(content)
 	if err != nil {
-		return fmt.Errorf("failed to parse messages: %w", err)
+		return false, fmt.Errorf("failed to parse messages: %w", err)
 	}
 
-	// Filter and display messages within the work period
+	// Collect displayable entries within the work period
+	var displayEntries []displayEntry
 	for _, entry := range entries {
 		// Get timestamp
 		ts := entry.Timestamp
@@ -86,49 +97,100 @@ func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool
 			ts = entry.Snapshot.Timestamp
 		}
 
-		// Skip entries outside work period or without message
-		if ts.IsZero() || entry.Message == nil {
+		// Skip entries outside work period or without timestamp
+		if ts.IsZero() {
 			continue
 		}
-
-		// Filter by time range
 		if ts.Before(startWork) || ts.After(endWork) {
 			continue
 		}
 
-		// Only show user messages
-		if entry.Type != "user" {
-			continue
+		// Determine entry type and text to display
+		var entryType, text string
+
+		switch entry.Type {
+		case "user":
+			if entry.Message != nil {
+				text = entry.Message.GetTextContent()
+				if text != "" {
+					entryType = "USER"
+				}
+			}
+		case "tool_reject":
+			entryType = "TOOL_REJECT"
+			if entry.Message != nil {
+				text = entry.Message.GetTextContent()
+			}
+			if text == "" {
+				text = "User rejected tool call"
+			}
 		}
 
-		displayMessage(entry, ts, full)
+		// Check for user commands (messages starting with <command-name>)
+		if entry.Type == "user" && entry.Message != nil {
+			msgText := entry.Message.GetTextContent()
+			if strings.HasPrefix(msgText, "<command-name>") {
+				// Extract command name
+				start := strings.Index(msgText, "<command-name>") + len("<command-name>")
+				end := strings.Index(msgText, "</command-name>")
+				if end > start {
+					cmdName := msgText[start:end]
+					// Remove leading slash if present (command names may include it)
+					cmdName = strings.TrimPrefix(cmdName, "/")
+					entryType = "COMMAND"
+					text = "/" + cmdName
+				}
+			}
+			// Skip local command output entries
+			if strings.HasPrefix(msgText, "<local-command-stdout>") {
+				entryType = ""
+				text = ""
+			}
+		}
+
+		if entryType != "" {
+			displayEntries = append(displayEntries, displayEntry{
+				ts:       ts,
+				entryType: entryType,
+				text:     text,
+			})
+		}
+	}
+
+	// Skip session if no entries to display
+	if len(displayEntries) == 0 {
+		return false, nil
+	}
+
+	// Print session header
+	fmt.Printf("Session: %s/%s\n", sess.Tool, sess.ID)
+	fmt.Printf("Duration: %s - %s\n\n",
+		sess.Created.Local().Format("2006-01-02 15:04"),
+		sess.Modified.Local().Format("2006-01-02 15:04"))
+
+	// Display entries
+	for _, de := range displayEntries {
+		displayMessage(de, full)
 	}
 
 	fmt.Println()
-	return nil
+	return true, nil
 }
 
-func displayMessage(entry session.MessageEntry, ts time.Time, full bool) {
-	role := strings.ToUpper(entry.Type)
-	timeStr := ts.Local().Format("15:04")
-
-	// Extract text content from message
-	text := entry.Message.GetTextContent()
-	if text == "" {
-		return
-	}
+func displayMessage(de displayEntry, full bool) {
+	timeStr := de.ts.Local().Format("15:04")
 
 	if full {
 		// Full mode: show complete content
-		fmt.Printf("[%s] %s:\n%s\n\n", timeStr, role, text)
+		fmt.Printf("[%s] %s:\n%s\n\n", timeStr, de.entryType, de.text)
 	} else {
 		// Summary mode: truncate long content
-		summary := truncate(text, 100)
-		charCount := len(text)
+		summary := truncate(de.text, 100)
+		charCount := len(de.text)
 		if charCount > 100 {
-			fmt.Printf("[%s] %s: %s (%d chars)\n", timeStr, role, summary, charCount)
+			fmt.Printf("[%s] %s: %s (%d chars)\n", timeStr, de.entryType, summary, charCount)
 		} else {
-			fmt.Printf("[%s] %s: %s\n", timeStr, role, summary)
+			fmt.Printf("[%s] %s: %s\n", timeStr, de.entryType, summary)
 		}
 	}
 }
