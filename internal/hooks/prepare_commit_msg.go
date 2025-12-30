@@ -69,12 +69,7 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 			return fmt.Errorf("failed to write pending file: %w", err)
 		}
 
-		// Get viewer URL info
-		viewerURL := git.GetViewerURL()
-		remoteURL, _ := git.GetRemoteURL()
-		owner, repo, _ := git.ExtractOwnerRepo(remoteURL)
-
-		summary = psNote.GenerateSummary(viewerURL, owner, repo, noteSHA)
+		summary = psNote.GenerateSummary(noteSHA)
 	}
 
 	// Append summary to commit message

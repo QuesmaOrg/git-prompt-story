@@ -3,6 +3,7 @@ package note
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -60,8 +61,8 @@ func (n *PromptStoryNote) ToJSON() ([]byte, error) {
 }
 
 // GenerateSummary creates the commit message line
-// Returns: "Prompt-Story: Used Claude Code | <url>" or "Prompt-Story: none"
-func (n *PromptStoryNote) GenerateSummary(viewerURL, owner, repo, noteSHA string) string {
+// Returns: "Prompt-Story: Used Claude Code | prompt-story-{sha}" or "Prompt-Story: none"
+func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
 	if len(n.Sessions) == 0 {
 		return "Prompt-Story: none"
 	}
@@ -86,16 +87,17 @@ func (n *PromptStoryNote) GenerateSummary(viewerURL, owner, repo, noteSHA string
 		}
 		toolNames = append(toolNames, name)
 	}
+	sort.Strings(toolNames) // Consistent ordering
 
 	summary := fmt.Sprintf("Prompt-Story: Used %s", strings.Join(toolNames, ", "))
 
-	// Add viewer URL if available
-	if viewerURL != "" && owner != "" && repo != "" && noteSHA != "" {
-		url := viewerURL
-		url = strings.ReplaceAll(url, "{owner}", owner)
-		url = strings.ReplaceAll(url, "{repo}", repo)
-		url = strings.ReplaceAll(url, "{note}", noteSHA[:7]) // Short SHA
-		summary += " | " + url
+	// Add AutoLink reference (GitHub will convert to clickable link)
+	if noteSHA != "" {
+		shortSHA := noteSHA
+		if len(shortSHA) > 7 {
+			shortSHA = shortSHA[:7]
+		}
+		summary += " | prompt-story-" + shortSHA
 	}
 
 	return summary

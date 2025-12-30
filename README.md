@@ -46,16 +46,13 @@ git-prompt-story install-hooks --global
 # 3. Enable automatic pushing of prompt notes
 git config --global --add remote.origin.push 'refs/notes/commits:refs/notes/commits'
 git config --global --add remote.origin.push 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
-
-# 4. (Optional) Configure viewer URL - defaults to hosted service
-git config --global prompt-story.viewer-url 'https://prompt-story.quesma.com/{owner}/{repo}/prompt/{note}'
 ```
 
 That's it. Future commits will automatically capture active LLM sessions.
 
 ### Repository Owner
 
-Set up git-prompt-story for your team by adding a setup script to your repository.
+Set up git-prompt-story for your team by adding a setup script and configuring GitHub AutoLinks.
 
 #### 1. Add setup script
 
@@ -80,7 +77,22 @@ echo "git-prompt-story configured for this repository"
 
 Contributors run `./setup-prompt-story.sh` after cloning.
 
-#### 2. Install prompt server (optional for public repos, required for private)
+#### 2. Configure GitHub AutoLinks
+
+Set up GitHub AutoLinks to convert `prompt-story-{sha}` references into clickable links:
+
+1. Go to your repository **Settings** > **Autolink references**
+2. Click **Add autolink reference**
+3. Configure:
+   - **Reference prefix**: `prompt-story-`
+   - **Target URL**: `https://prompt-story.quesma.com/OWNER/REPO/prompt/<num>`
+   - Replace `OWNER` and `REPO` with your repository owner and name
+4. Check **Alphanumeric** (the reference contains letters and numbers)
+5. Click **Add autolink reference**
+
+Now commit messages containing `prompt-story-abc1234` will automatically link to the viewer.
+
+#### 3. Install prompt server (optional for public repos, required for private)
 
 For private repositories, host your own viewer:
 
@@ -91,15 +103,11 @@ docker run -d \
   ghcr.io/quesmaorg/git-prompt-story-server
 ```
 
-Then configure the viewer URL in `setup-prompt-story.sh`:
-
-```bash
-git config prompt-story.viewer-url 'https://prompts.yourcompany.com/{owner}/{repo}/prompt/{note}'
-```
+Then update your AutoLink target URL to point to your hosted viewer.
 
 Public repos can use the hosted service at `https://prompt-story.quesma.com`.
 
-#### 3. Add CI check (optional)
+#### 4. Add CI check (optional)
 
 Add a GitHub Action to verify prompt notes are attached to PRs:
 
@@ -149,7 +157,7 @@ This action checks if commits have prompt notes attached and optionally posts a 
 │     ├── Save git note as blob {nid}                             │
 │     ├── Generate summary (tools used)                           |
 │     ├── Append to commit message:                               │
-│     │   "Prompt-Story: Used Claude Code | <url>"                │
+│     │   "Prompt-Story: Used Claude Code | prompt-story-{sha}"   │
 │     └── Save {nid} to .git/PENDING-PROMPT-STORY                 │
 │                    │                                            │
 │                    ▼                                            │
@@ -265,18 +273,11 @@ Config lives in `.git-prompt-story.json` or `~/.config/git-prompt-story.json`:
 
 ```json
 {
-  "viewer_url": "https://prompt-story.quesma.com/{owner}/{repo}/prompt/{note}",
   "auto_push_notes": false
 }
 ```
 
-### Viewer URL Templates
-
-Variables available:
-
-- `{owner}` - Repository owner (e.g., QuesmaOrg)
-- `{repo}` - Repository name (e.g., git-prompt-story)
-- `{note}` - Note blob SHA (short)
+Viewer URLs are handled via GitHub AutoLinks (see Repository Owner setup above).
 
 ## Viewer Integration
 
@@ -289,8 +290,8 @@ git notes show HEAD
 # Local pretty-print
 git-prompt-story show HEAD
 
-# Or use the hosted viewer
-# https://prompt-story.quesma.com/{owner}/{repo}/prompt/{note-sha}
+# Or use the hosted viewer via GitHub AutoLink
+# prompt-story-{sha} links are automatically converted to viewer URLs
 ```
 
 ## Privacy & Curation
