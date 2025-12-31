@@ -87,7 +87,24 @@
             data-in-work-period="{{.InWorkPeriod}}">
           <span class="prompt-time">{{formatTimeShort .Time}}</span>
           <span class="prompt-type">{{.Type}}</span>
+          {{if eq .Type "TOOL_USE"}}
+          <span class="tool-name">{{.ToolName}}</span>
+          {{if or .ToolInput .ToolOutput}}
+          <details class="tool-details">
+            <summary>Show details</summary>
+            {{if .ToolInput}}
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{{.ToolInput}}</div>
+            {{end}}
+            {{if .ToolOutput}}
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{{truncate .ToolOutput 2000}}</div>
+            {{end}}
+          </details>
+          {{end}}
+          {{else}}
           <span class="prompt-text{{if .Truncated}} truncated{{end}}">{{.Text}}</span>
+          {{end}}
         </li>
         {{end}}
       </ul>
