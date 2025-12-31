@@ -177,7 +177,7 @@ func DefaultRecognizers() []Recognizer {
 			Patterns: []Pattern{
 				{Regex: `/(Users|home)/[a-zA-Z0-9._-]+/`},
 			},
-			Replacement: "/Users/<REDACTED>/",
+			Replacement: "/<REDACTED>/",
 		},
 		{
 			Name:       "windows_user_path",
@@ -297,14 +297,34 @@ func DefaultRecognizers() []Recognizer {
 			Replacement: "Bearer <TOKEN>",
 		},
 
+		// Cookies
+		{
+			Name:       "cookie",
+			EntityType: "COOKIE",
+			Patterns: []Pattern{
+				{Regex: `(?i)((?:set-)?cookie:\s*)[^\r\n]+`},
+			},
+			Replacement: "${1}<COOKIE>",
+		},
+
 		// Private keys
 		{
 			Name:       "private_key",
 			EntityType: "PRIVATE_KEY",
 			Patterns: []Pattern{
-				{Regex: `(?s)-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----.*?-----END (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----`},
+				{Regex: `(?s)-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----.*?(?:-----END (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----|$)`},
 			},
 			Replacement: "<PRIVATE_KEY>",
+		},
+
+		// Environment variables with secrets (e.g. MYAPP_TOKEN=...)
+		{
+			Name:       "env_secret",
+			EntityType: "SECRET",
+			Patterns: []Pattern{
+				{Regex: `(?i)([A-Z0-9_]*(?:TOKEN|SECRET|API_KEY)[A-Z0-9_]*=)(?:["']?[a-zA-Z0-9_.\-]+["']?)`},
+			},
+			Replacement: "${1}<SECRET>",
 		},
 
 		// Generic API keys/tokens (after specific ones)

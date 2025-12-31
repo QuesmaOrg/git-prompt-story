@@ -6,7 +6,7 @@ Transcripts are automatically scrubbed of sensitive data before storage.
 
 | Type | Example | Replacement |
 |------|---------|-------------|
-| User paths | `/Users/jacek/code/` | `/Users/<REDACTED>/` |
+| User paths | `/Users/jacek/code/` | `/<REDACTED>/` |
 | Emails | `john@example.com` | `<EMAIL>` |
 | Credit cards | `4111111111111111` | `<CREDIT_CARD>` |
 | AWS keys | `AKIAIOSFODNN7EXAMPLE` | `<AWS_ACCESS_KEY>` |
@@ -17,8 +17,10 @@ Transcripts are automatically scrubbed of sensitive data before storage.
 | Google AI keys | `AIzaXXXX...` | `<GOOGLE_API_KEY>` |
 | Slack tokens | `xoxb-xxx-xxx` | `<SLACK_TOKEN>` |
 | Bearer tokens | `Bearer eyJ...` | `Bearer <TOKEN>` |
+| Cookies | `Cookie: session=abc...` | `Cookie: <COOKIE>` |
 | Passwords | `password="secret"` | `<PASSWORD>` |
-| Private keys | `-----BEGIN RSA PRIVATE KEY-----` | `<PRIVATE_KEY_HEADER>` |
+| Env secrets | `MYAPP_TOKEN=secret` | `MYAPP_TOKEN=<SECRET>` |
+| Private keys | `-----BEGIN RSA PRIVATE KEY-----` | `<PRIVATE_KEY>` |
 
 ## Disabling Scrubbing
 

@@ -42,7 +42,7 @@ func TestScrubUnixPath(t *testing.T) {
 	}{
 		{"/Users/jacek/projects/myapp", "/<REDACTED>/projects/myapp"},
 		{"/home/ubuntu/code/test.py", "/<REDACTED>/code/test.py"},
-		{"File at /Users/john.doe/Documents/secret.txt", "File at /Users/<REDACTED>/Documents/secret.txt"},
+		{"File at /Users/john.doe/Documents/secret.txt", "File at /<REDACTED>/Documents/secret.txt"},
 		{"/var/log/syslog", "/var/log/syslog"}, // Not a user directory
 	}
 
@@ -259,7 +259,7 @@ func TestScrubJSONL(t *testing.T) {
 		t.Error("User path was not scrubbed from JSONL")
 	}
 	// Note: JSON encoding escapes <> to unicode, so check for escaped form too
-	if !strings.Contains(string(result), "/Users/<REDACTED>/") && !strings.Contains(string(result), "/Users/\\u003cREDACTED\\u003e/") {
+	if !strings.Contains(string(result), "/<REDACTED>/") && !strings.Contains(string(result), "/\\u003cREDACTED\\u003e/") {
 		t.Error("Path replacement not found in JSONL")
 	}
 }
@@ -410,6 +410,29 @@ func TestGenericEnvironmentVariable(t *testing.T) {
 		{"MYAPP_TOKEN=\"1234567890-1234567890123-abcdefghijklmnop\"", "MYAPP_TOKEN=<SECRET>"},
 		{"MYAPP_SECRET=\"51234567890-1234567890123-abcdefghijklmnop\"", "MYAPP_SECRET=<SECRET>"},
 		{"MYAPP_API_KEY=\"71234567890-1234567890123-abcdefghijklmnop\"", "MYAPP_API_KEY=<SECRET>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubCookie(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"Cookie: session_id=1234567890; user=john.doe", "Cookie: <COOKIE>"},
+		{"Set-Cookie: session=abcdef; Path=/", "Set-Cookie: <COOKIE>"},
+		{"cookie: token=secret", "cookie: <COOKIE>"},
 	}
 
 	for _, tc := range tests {
