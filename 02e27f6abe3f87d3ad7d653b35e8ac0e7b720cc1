@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "start_work": "2025-12-31T10:10:31Z",
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "93d7b0e8-e5c2-4d45-9571-c1771560cf89",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/93d7b0e8-e5c2-4d45-9571-c1771560cf89.jsonl",
+      "created": "2025-12-31T09:57:29.745Z",
+      "modified": "2025-12-31T10:27:30.902Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "agent-a230701",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/agent-a230701.jsonl",
+      "created": "2025-12-31T10:12:53.47Z",
+      "modified": "2025-12-31T10:13:47.045Z"
+    }
+  ]
+}
