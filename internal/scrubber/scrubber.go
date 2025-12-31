@@ -302,9 +302,9 @@ func DefaultRecognizers() []Recognizer {
 			Name:       "private_key",
 			EntityType: "PRIVATE_KEY",
 			Patterns: []Pattern{
-				{Regex: `-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----`},
+				{Regex: `(?s)-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----.*?-----END (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----`},
 			},
-			Replacement: "<PRIVATE_KEY_HEADER>",
+			Replacement: "<PRIVATE_KEY>",
 		},
 
 		// Generic API keys/tokens (after specific ones)

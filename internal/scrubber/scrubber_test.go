@@ -40,8 +40,8 @@ func TestScrubUnixPath(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"/Users/jacek/projects/myapp", "/Users/<REDACTED>/projects/myapp"},
-		{"/home/ubuntu/code/test.py", "/Users/<REDACTED>/code/test.py"},
+		{"/Users/jacek/projects/myapp", "/<REDACTED>/projects/myapp"},
+		{"/home/ubuntu/code/test.py", "/<REDACTED>/code/test.py"},
 		{"File at /Users/john.doe/Documents/secret.txt", "File at /Users/<REDACTED>/Documents/secret.txt"},
 		{"/var/log/syslog", "/var/log/syslog"}, // Not a user directory
 	}
@@ -199,9 +199,10 @@ func TestScrubPrivateKey(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"-----BEGIN RSA PRIVATE KEY-----", "<PRIVATE_KEY_HEADER>"},
-		{"-----BEGIN PRIVATE KEY-----", "<PRIVATE_KEY_HEADER>"},
-		{"-----BEGIN OPENSSH PRIVATE KEY-----", "<PRIVATE_KEY_HEADER>"},
+		{"-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEA3Tz2mr7SZiAMfQyuvBjM9Oi...\n-----END RSA PRIVATE KEY-----", "<PRIVATE_KEY>"},
+		{"-----BEGIN PRIVATE KEY-----\nMIIBVgIBADANBgkqhkiG9w0BAQEFAASCNWAwgg...\n-----END PRIVATE KEY-----", "<PRIVATE_KEY>"},
+		{"-----BEGIN PRIVATE KEY-----\nMIIBVgIBADANBgkqhkiG9w0BAQEFAASCNWAwgg...\n", "<PRIVATE_KEY>"},
+		{"-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW\n-----END OPENSSH PRIVATE KEY-----", "<PRIVATE_KEY>"},
 		{"-----BEGIN PUBLIC KEY-----", "-----BEGIN PUBLIC KEY-----"}, // Not private
 	}
 
@@ -383,6 +384,32 @@ func TestScrubSlackToken(t *testing.T) {
 	}{
 		{"SLACK_TOKEN=xoxb-1234567890-1234567890123-abcdefghijklmnop", "SLACK_TOKEN=<SLACK_TOKEN>"},
 		{"xoxp-1234567890-1234567890123-xyz", "<SLACK_TOKEN>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestGenericEnvironmentVariable(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"MYAPP_TOKEN=1234567890-1234567890123-abcdefghijklmnop", "MYAPP_TOKEN=<SECRET>"},
+		{"MYAPP_SECRET=51234567890-1234567890123-abcdefghijklmnop", "MYAPP_SECRET=<SECRET>"},
+		{"MYAPP_API_KEY=71234567890-1234567890123-abcdefghijklmnop", "MYAPP_API_KEY=<SECRET>"},
+		{"MYAPP_TOKEN=\"1234567890-1234567890123-abcdefghijklmnop\"", "MYAPP_TOKEN=<SECRET>"},
+		{"MYAPP_SECRET=\"51234567890-1234567890123-abcdefghijklmnop\"", "MYAPP_SECRET=<SECRET>"},
+		{"MYAPP_API_KEY=\"71234567890-1234567890123-abcdefghijklmnop\"", "MYAPP_API_KEY=<SECRET>"},
 	}
 
 	for _, tc := range tests {
