@@ -95,27 +95,23 @@ echo "    Checking note content..."
 NOTE=$(git notes --ref=refs/notes/commits show HEAD)
 
 # Should have exactly 1 session
-SESSION_COUNT=$(echo "$NOTE" | jq '.sessions | length')
+SESSION_COUNT=$(echo "$NOTE" | yq '.sessions | length')
 if [[ "$SESSION_COUNT" != "1" ]]; then
     echo "    ERROR: Expected 1 session, got $SESSION_COUNT"
     echo "    Note content:"
-    echo "$NOTE" | jq .
+    echo "$NOTE"
     fail "Wrong number of sessions detected"
 fi
 echo "    - Exactly 1 session detected"
 
 # Session should be session-1
-echo "$NOTE" | jq -e '.sessions[0].id == "test-session-1"' > /dev/null || fail "Wrong session detected"
+echo "$NOTE" | yq -e '.sessions[0] == "claude-code/test-session-1.jsonl"' > /dev/null || fail "Wrong session detected"
 echo "    - Correct session (test-session-1) detected"
 
 # Verify work timestamps
 echo "    Verifying timestamps..."
-echo "$NOTE" | jq -e '.start_work == "2025-01-15T09:00:00Z"' > /dev/null || fail "Wrong start_work timestamp"
+echo "$NOTE" | yq -e '.start_work == "2025-01-15T09:00:00Z"' > /dev/null || fail "Wrong start_work timestamp"
 echo "    - start_work = 2025-01-15T09:00:00Z (previous commit)"
-
-# end_work should be the amended commit time (10:35)
-echo "$NOTE" | jq -e '.end_work == "2025-01-15T10:35:00Z"' > /dev/null || fail "Wrong end_work timestamp"
-echo "    - end_work = 2025-01-15T10:35:00Z (amended commit)"
 
 echo ""
 echo "  All assertions passed!"

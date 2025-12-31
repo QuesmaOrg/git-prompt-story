@@ -65,28 +65,18 @@ echo "    - Note is attached to HEAD"
 
 echo "    Checking note content..."
 NOTE=$(git notes --ref=refs/notes/commits show HEAD)
-echo "$NOTE" | jq -e '.v == 1' > /dev/null || fail "Invalid note version"
+echo "$NOTE" | yq -e '.v == 1' > /dev/null || fail "Invalid note version"
 echo "    - Note version is 1"
 
-echo "$NOTE" | jq -e '.sessions | length == 1' > /dev/null || fail "Expected exactly 1 session"
+echo "$NOTE" | yq -e '.sessions | length == 1' > /dev/null || fail "Expected exactly 1 session"
 echo "    - Note contains 1 session"
 
-echo "$NOTE" | jq -e '.sessions[0].id == "test-session-1"' > /dev/null || fail "Wrong session ID"
-echo "    - Session ID is correct"
+echo "$NOTE" | yq -e '.sessions[0] == "claude-code/test-session-1.jsonl"' > /dev/null || fail "Wrong session path"
+echo "    - Session path is correct"
 
-echo "    Verifying work timestamps match COMMIT times..."
-echo "$NOTE" | jq -e '.start_work == "2025-01-15T09:00:00Z"' > /dev/null || fail "start_work should be previous commit time (09:00)"
+echo "    Verifying start_work matches previous commit time..."
+echo "$NOTE" | yq -e '.start_work == "2025-01-15T09:00:00Z"' > /dev/null || fail "start_work should be previous commit time (09:00)"
 echo "    - start_work = 2025-01-15T09:00:00Z (previous commit)"
-
-echo "$NOTE" | jq -e '.end_work == "2025-01-15T10:30:00Z"' > /dev/null || fail "end_work should be current commit time (10:30)"
-echo "    - end_work = 2025-01-15T10:30:00Z (current commit)"
-
-echo "    Verifying session timestamps match JSONL times..."
-echo "$NOTE" | jq -e '.sessions[0].created == "2025-01-15T09:15:00Z"' > /dev/null || fail "Wrong session created timestamp"
-echo "    - session.created = 2025-01-15T09:15:00Z (from JSONL)"
-
-echo "$NOTE" | jq -e '.sessions[0].modified == "2025-01-15T10:25:00Z"' > /dev/null || fail "Wrong session modified timestamp"
-echo "    - session.modified = 2025-01-15T10:25:00Z (from JSONL)"
 
 echo "    Checking transcript storage..."
 git cat-file -e "refs/notes/prompt-story-transcripts:claude-code/test-session-1.jsonl" 2>/dev/null || fail "Transcript not stored in refs/notes/prompt-story-transcripts"

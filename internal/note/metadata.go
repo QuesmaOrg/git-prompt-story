@@ -1,64 +1,49 @@
 package note
 
 import (
-	"encoding/json"
 	"fmt"
+	"path"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+	"gopkg.in/yaml.v3"
 )
 
-// PromptStoryNote is the JSON structure stored as a git note on commits
-type PromptStoryNote struct {
-	Version   int            `json:"v"`
-	StartWork time.Time      `json:"start_work"`
-	EndWork   time.Time      `json:"end_work"`
-	Sessions  []SessionEntry `json:"sessions"`
-}
+// TranscriptsRefPrefix is the git ref prefix for transcripts
+const TranscriptsRefPrefix = "refs/notes/prompt-story-transcripts"
 
-// SessionEntry describes one LLM session referenced by the note
-type SessionEntry struct {
-	Tool     string    `json:"tool"`
-	ID       string    `json:"id"`
-	Path     string    `json:"path"`
-	Created  time.Time `json:"created"`
-	Modified time.Time `json:"modified"`
+// PromptStoryNote is the YAML structure stored as a git note on commits
+type PromptStoryNote struct {
+	Version   int       `yaml:"v"`
+	StartWork time.Time `yaml:"start_work"`
+	Sessions  []string  `yaml:"sessions"` // e.g. "claude-code/uuid.jsonl"
 }
 
 // NewPromptStoryNote creates a new note from discovered sessions
 // isAmend should be true when amending a commit (affects start_work calculation)
 func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool) *PromptStoryNote {
-	note := &PromptStoryNote{
+	n := &PromptStoryNote{
 		Version:  1,
-		Sessions: make([]SessionEntry, 0, len(sessions)),
+		Sessions: make([]string, 0, len(sessions)),
 	}
 
 	// Calculate work start time from git reflog
 	// This is the most recent of: previous commit time or branch switch time
-	note.StartWork, _ = git.CalculateWorkStartTime(isAmend)
-
-	// End work time is the commit timestamp (respects GIT_COMMITTER_DATE)
-	note.EndWork = git.GetCommitTime()
+	n.StartWork, _ = git.CalculateWorkStartTime(isAmend)
 
 	for _, s := range sessions {
-		note.Sessions = append(note.Sessions, SessionEntry{
-			Tool:     "claude-code",
-			ID:       s.ID,
-			Path:     GetTranscriptPath("claude-code", s.ID),
-			Created:  s.Created,
-			Modified: s.Modified,
-		})
+		n.Sessions = append(n.Sessions, GetSessionPath("claude-code", s.ID))
 	}
 
-	return note
+	return n
 }
 
-// ToJSON serializes the note to JSON
-func (n *PromptStoryNote) ToJSON() ([]byte, error) {
-	return json.MarshalIndent(n, "", "  ")
+// ToYAML serializes the note to YAML
+func (n *PromptStoryNote) ToYAML() ([]byte, error) {
+	return yaml.Marshal(n)
 }
 
 // GenerateSummary creates the commit message line
@@ -68,10 +53,13 @@ func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
 		return "Prompt-Story: none"
 	}
 
-	// Build tool list
+	// Build tool list from session paths (e.g. "claude-code/uuid.jsonl")
 	tools := make(map[string]bool)
-	for _, s := range n.Sessions {
-		tools[s.Tool] = true
+	for _, sessPath := range n.Sessions {
+		tool, _ := ParseSessionPath(sessPath)
+		if tool != "" {
+			tools[tool] = true
+		}
 	}
 
 	var toolNames []string
@@ -104,7 +92,21 @@ func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
 	return summary
 }
 
-// GetTranscriptPath returns the ref path for a transcript
-func GetTranscriptPath(tool, sessionID string) string {
-	return fmt.Sprintf("refs/notes/prompt-story-transcripts/%s/%s.jsonl", tool, sessionID)
+// GetSessionPath returns the relative path for a session (e.g. "claude-code/uuid.jsonl")
+func GetSessionPath(tool, sessionID string) string {
+	return fmt.Sprintf("%s/%s.jsonl", tool, sessionID)
+}
+
+// GetFullTranscriptPath returns the full ref path for a transcript
+func GetFullTranscriptPath(sessionPath string) string {
+	return TranscriptsRefPrefix + "/" + sessionPath
+}
+
+// ParseSessionPath extracts tool and session ID from a session path
+// e.g. "claude-code/uuid.jsonl" -> ("claude-code", "uuid")
+func ParseSessionPath(sessionPath string) (tool, sessionID string) {
+	dir, file := path.Split(sessionPath)
+	tool = strings.TrimSuffix(dir, "/")
+	sessionID = strings.TrimSuffix(file, ".jsonl")
+	return
 }

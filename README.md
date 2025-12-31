@@ -178,30 +178,14 @@ Git Prompt Story uses two storage locations:
 
 #### 1. Commit Metadata (`refs/notes/commits`)
 
-Standard git notes attached to commits (default notes ref). Contains a lightweight JSON manifest:
+Standard git notes attached to commits (default notes ref). Contains a lightweight YAML manifest:
 
-```json
-{
-  "v": 1,
-  "start_work": "2025-01-15T09:00:00Z",
-  "end_work": "2025-01-15T14:30:00Z",
-  "sessions": [
-    {
-      "tool": "claude-code",
-      "id": "113e0c55-64df-4b55-88f3-e06bcbc5b526",
-      "path": "refs/notes/prompt-story-transcripts/claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl",
-      "created": "2025-01-15T09:15:00Z",
-      "modified": "2025-01-15T14:22:00Z"
-    },
-    {
-      "tool": "cursor",
-      "id": "a1b2c3d4",
-      "path": "refs/notes/prompt-story-transcripts/cursor/a1b2c3d4.json",
-      "created": "2025-01-15T10:00:00Z",
-      "modified": "2025-01-15T12:45:00Z"
-    }
-  ]
-}
+```yaml
+v: 1
+start_work: 2025-01-15T09:00:00Z
+sessions:
+  - claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl
+  - cursor/a1b2c3d4.json
 ```
 
 #### 2. Transcripts (`refs/notes/prompt-story-transcripts`)

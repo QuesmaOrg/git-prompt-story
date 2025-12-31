@@ -71,21 +71,21 @@ echo "    Checking note content..."
 NOTE=$(git notes --ref=refs/notes/commits show HEAD)
 
 # Should have exactly 3 sessions
-SESSION_COUNT=$(echo "$NOTE" | jq '.sessions | length')
+SESSION_COUNT=$(echo "$NOTE" | yq '.sessions | length')
 if [[ "$SESSION_COUNT" != "3" ]]; then
     echo "    ERROR: Expected 3 sessions, got $SESSION_COUNT"
     echo "    Note content:"
-    echo "$NOTE" | jq .
+    echo "$NOTE"
     fail "Wrong number of sessions"
 fi
 echo "    - Note contains 3 sessions"
 
-# Verify all session IDs
-echo "$NOTE" | jq -e '.sessions[] | select(.id == "test-session-1")' > /dev/null || fail "Missing test-session-1"
+# Verify all session paths
+echo "$NOTE" | yq -e '.sessions[] | select(. == "claude-code/test-session-1.jsonl")' > /dev/null || fail "Missing test-session-1"
 echo "    - test-session-1 found"
-echo "$NOTE" | jq -e '.sessions[] | select(.id == "test-session-2")' > /dev/null || fail "Missing test-session-2"
+echo "$NOTE" | yq -e '.sessions[] | select(. == "claude-code/test-session-2.jsonl")' > /dev/null || fail "Missing test-session-2"
 echo "    - test-session-2 found"
-echo "$NOTE" | jq -e '.sessions[] | select(.id == "test-session-3")' > /dev/null || fail "Missing test-session-3"
+echo "$NOTE" | yq -e '.sessions[] | select(. == "claude-code/test-session-3.jsonl")' > /dev/null || fail "Missing test-session-3"
 echo "    - test-session-3 found"
 
 echo "    Checking transcript storage..."

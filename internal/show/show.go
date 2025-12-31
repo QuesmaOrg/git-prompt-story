@@ -1,7 +1,6 @@
 package show
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -9,9 +8,9 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+	"gopkg.in/yaml.v3"
 )
 
-const transcriptsRef = "refs/notes/prompt-story-transcripts"
 const notesRef = "refs/notes/commits"
 
 // ShowPrompts displays prompts for a given commit
@@ -28,17 +27,23 @@ func ShowPrompts(commitRef string, full bool) error {
 		return fmt.Errorf("no prompt-story note found for commit %s", sha[:7])
 	}
 
-	// Parse note JSON
+	// Parse note YAML
 	var psNote note.PromptStoryNote
-	if err := json.Unmarshal([]byte(noteContent), &psNote); err != nil {
+	if err := yaml.Unmarshal([]byte(noteContent), &psNote); err != nil {
 		return fmt.Errorf("failed to parse note: %w", err)
+	}
+
+	// Get end work time from commit timestamp
+	endWork, err := git.GetCommitTimestamp(sha)
+	if err != nil {
+		endWork = time.Now() // fallback
 	}
 
 	// Print header
 	fmt.Printf("Commit: %s\n", sha[:7])
 	fmt.Printf("Work period: %s - %s\n\n",
 		psNote.StartWork.Local().Format("2006-01-02 15:04"),
-		psNote.EndWork.Local().Format("2006-01-02 15:04"))
+		endWork.Local().Format("2006-01-02 15:04"))
 
 	if len(psNote.Sessions) == 0 {
 		fmt.Println("No sessions recorded")
@@ -47,10 +52,10 @@ func ShowPrompts(commitRef string, full bool) error {
 
 	// Process each session, filtering out empty ones
 	shownSessions := 0
-	for _, sess := range psNote.Sessions {
-		shown, err := showSession(sess, psNote.StartWork, psNote.EndWork, full)
+	for _, sessPath := range psNote.Sessions {
+		shown, err := showSession(sessPath, psNote.StartWork, endWork, full)
 		if err != nil {
-			fmt.Printf("Warning: could not load session %s: %v\n", sess.ID, err)
+			fmt.Printf("Warning: could not load session %s: %v\n", sessPath, err)
 			continue
 		}
 		if shown {
@@ -72,12 +77,9 @@ type displayEntry struct {
 	text     string
 }
 
-func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (bool, error) {
-	// Extract relative path from full ref path
-	relPath := strings.TrimPrefix(sess.Path, transcriptsRef+"/")
-
-	// Fetch transcript content
-	content, err := git.GetBlobContent(transcriptsRef, relPath)
+func showSession(sessPath string, startWork, endWork time.Time, full bool) (bool, error) {
+	// Fetch transcript content using session path (e.g. "claude-code/uuid.jsonl")
+	content, err := git.GetBlobContent(note.TranscriptsRefPrefix, sessPath)
 	if err != nil {
 		return false, fmt.Errorf("failed to fetch transcript: %w", err)
 	}
@@ -162,11 +164,9 @@ func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool
 		return false, nil
 	}
 
-	// Print session header
-	fmt.Printf("Session: %s/%s\n", sess.Tool, sess.ID)
-	fmt.Printf("Duration: %s - %s\n\n",
-		sess.Created.Local().Format("2006-01-02 15:04"),
-		sess.Modified.Local().Format("2006-01-02 15:04"))
+	// Print session header (extract tool/id from path)
+	tool, sessionID := note.ParseSessionPath(sessPath)
+	fmt.Printf("Session: %s/%s\n\n", tool, sessionID)
 
 	// Display entries
 	for _, de := range displayEntries {

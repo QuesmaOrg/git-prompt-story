@@ -69,38 +69,30 @@ echo "    Checking only session-1 is detected..."
 NOTE=$(git notes --ref=refs/notes/commits show HEAD)
 
 # Should have exactly 1 session
-SESSION_COUNT=$(echo "$NOTE" | jq '.sessions | length')
+SESSION_COUNT=$(echo "$NOTE" | yq '.sessions | length')
 if [[ "$SESSION_COUNT" != "1" ]]; then
     echo "    ERROR: Expected 1 session, got $SESSION_COUNT"
     echo "    Note content:"
-    echo "$NOTE" | jq .
+    echo "$NOTE"
     fail "Wrong number of sessions detected"
 fi
 echo "    - Exactly 1 session detected"
 
 # Session should be session-1
-echo "$NOTE" | jq -e '.sessions[0].id == "session-1"' > /dev/null || fail "Wrong session detected (expected session-1)"
+echo "$NOTE" | yq -e '.sessions[0] == "claude-code/session-1.jsonl"' > /dev/null || fail "Wrong session detected (expected session-1)"
 echo "    - Correct session (session-1) detected"
 
 # Verify session-2 is NOT in the note (different project)
-if echo "$NOTE" | jq -e '.sessions[] | select(.id == "session-2")' > /dev/null 2>&1; then
+if echo "$NOTE" | yq -e '.sessions[] | select(. == "claude-code/session-2.jsonl")' 2>/dev/null | grep -q .; then
     fail "session-2 (different project) should NOT be detected"
 fi
 echo "    - session-2 (different project) correctly NOT detected"
 
 # Verify session-3 is NOT in the note (before previous commit)
-if echo "$NOTE" | jq -e '.sessions[] | select(.id == "session-3")' > /dev/null 2>&1; then
+if echo "$NOTE" | yq -e '.sessions[] | select(. == "claude-code/session-3.jsonl")' 2>/dev/null | grep -q .; then
     fail "session-3 (old session) should NOT be detected"
 fi
 echo "    - session-3 (before previous commit) correctly NOT detected"
-
-# Verify timestamps
-echo "    Verifying timestamps..."
-echo "$NOTE" | jq -e '.sessions[0].created == "2025-01-15T09:15:00Z"' > /dev/null || fail "Wrong session created timestamp"
-echo "    - session.created = 2025-01-15T09:15:00Z"
-
-echo "$NOTE" | jq -e '.sessions[0].modified == "2025-01-15T10:25:00Z"' > /dev/null || fail "Wrong session modified timestamp"
-echo "    - session.modified = 2025-01-15T10:25:00Z"
 
 echo ""
 echo "  All assertions passed!"

@@ -48,6 +48,16 @@ func GetHead() (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
+// GetCommitTimestamp returns the committer timestamp for a specific commit
+func GetCommitTimestamp(sha string) (time.Time, error) {
+	cmd := exec.Command("git", "show", "-s", "--format=%cI", sha)
+	out, err := cmd.Output()
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Parse(time.RFC3339, strings.TrimSpace(string(out)))
+}
+
 // GetCommitTime returns the effective commit timestamp
 // Checks GIT_COMMITTER_DATE and GIT_AUTHOR_DATE env vars first (set by faketime or user)
 // Falls back to current time if not set

@@ -1,7 +1,7 @@
 FROM golang:1.24-alpine
 
 # Install dependencies including libfaketime for clock manipulation
-RUN apk add --no-cache git bash jq libfaketime
+RUN apk add --no-cache git bash jq yq libfaketime
 
 WORKDIR /build
 COPY . .

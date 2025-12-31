@@ -92,13 +92,13 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 
 		// Create PromptStoryNote
 		psNote := note.NewPromptStoryNote(sessions, isAmend)
-		noteJSON, err := psNote.ToJSON()
+		noteYAML, err := psNote.ToYAML()
 		if err != nil {
 			return fmt.Errorf("failed to serialize note: %w", err)
 		}
 
 		// Store note as blob
-		noteSHA, err := git.HashObject(noteJSON)
+		noteSHA, err := git.HashObject(noteYAML)
 		if err != nil {
 			return fmt.Errorf("failed to store note blob: %w", err)
 		}
