@@ -1,0 +1,41 @@
+{
+  "v": 1,
+  "start_work": "2025-12-31T12:35:40Z",
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "28e696c1-6f69-4700-ba6f-77c697b5321a",
+      "path": "claude-code/28e696c1-6f69-4700-ba6f-77c697b5321a.jsonl",
+      "created": "2025-12-31T13:57:15.11Z",
+      "modified": "2025-12-31T15:00:38.432Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "agent-a14b339",
+      "path": "claude-code/agent-a14b339.jsonl",
+      "created": "2025-12-31T13:57:27.586Z",
+      "modified": "2025-12-31T13:58:14.932Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "agent-ad97c75",
+      "path": "claude-code/agent-ad97c75.jsonl",
+      "created": "2025-12-31T13:55:50.025Z",
+      "modified": "2025-12-31T13:55:55.046Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "agent-ac50fa2",
+      "path": "claude-code/agent-ac50fa2.jsonl",
+      "created": "2025-12-31T13:55:50.022Z",
+      "modified": "2025-12-31T13:55:52.452Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "21c91950-1aea-416d-bf0d-052195f3a6ab",
+      "path": "claude-code/21c91950-1aea-416d-bf0d-052195f3a6ab.jsonl",
+      "created": "2025-12-31T09:14:10.863Z",
+      "modified": "2025-12-31T12:36:44.095Z"
+    }
+  ]
+}
