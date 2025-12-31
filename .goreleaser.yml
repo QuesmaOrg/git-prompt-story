@@ -1,0 +1,59 @@
+# GoReleaser configuration for git-prompt-story
+# Run: goreleaser release --clean
+# Or use GitHub Actions with goreleaser-action
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: git-prompt-story
+    main: .
+    binary: git-prompt-story
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE*
+      - README*
+      - VERSION
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: QuesmaOrg
+    name: git-prompt-story
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"

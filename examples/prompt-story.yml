@@ -1,0 +1,47 @@
+# Example GitHub Actions workflow for git-prompt-story
+#
+# This workflow analyzes LLM session data in your commits and:
+# 1. Posts a summary comment on pull requests
+# 2. Deploys full transcripts to GitHub Pages
+#
+# Prerequisites:
+# 1. Push your git notes to remote:
+#    git push origin 'refs/notes/*'
+#
+# 2. Enable GitHub Pages in your repo settings:
+#    Settings > Pages > Source: Deploy from a branch > gh-pages
+#
+# Copy this file to .github/workflows/prompt-story.yml in your repository
+
+name: Prompt Story
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Required permissions
+permissions:
+  contents: write       # For GitHub Pages deployment
+  pull-requests: write  # For PR comments
+
+jobs:
+  prompt-story:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout with full history (needed for commit range comparison)
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Run the prompt-story action
+      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment: true
+          deploy-pages: true
+
+      # Alternative: Minimal configuration (comment only, no Pages)
+      # - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@v1
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     deploy-pages: false

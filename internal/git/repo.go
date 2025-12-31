@@ -65,3 +65,13 @@ func GetCurrentBranch() (string, error) {
 	}
 	return strings.TrimSpace(string(out)), nil
 }
+
+// RunGit executes a git command and returns the output
+func RunGit(args ...string) (string, error) {
+	cmd := exec.Command("git", args...)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
+}
