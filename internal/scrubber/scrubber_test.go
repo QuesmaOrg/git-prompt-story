@@ -420,6 +420,164 @@ func TestGenericEnvironmentVariable(t *testing.T) {
 	}
 }
 
+func TestScrubDatabaseURL(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"postgres://user:password@localhost:5432/mydb", "postgres://<CREDENTIALS>@<HOST>"},
+		{"postgresql://admin:secret123@db.example.com/prod", "postgresql://<CREDENTIALS>@<HOST>"},
+		{"mysql://root:pass@127.0.0.1:3306/app", "mysql://<CREDENTIALS>@<HOST>"},
+		{"mongodb://user:pass@cluster.mongodb.net/db", "mongodb://<CREDENTIALS>@<HOST>"},
+		{"mongodb+srv://user:pass@cluster.mongodb.net/db", "mongodb+srv://<CREDENTIALS>@<HOST>"},
+		{"redis://:secretpass@redis.example.com:6379", "redis://<CREDENTIALS>@<HOST>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubURLCredentials(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"https://user:pass@example.com/path", "https://<CREDENTIALS>@example.com/path"},
+		{"http://admin:secret@internal.server.local:8080", "http://<CREDENTIALS>@internal.server.local:8080"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubStripeKey(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"STRIPE_KEY=sk_live_abcdefghijklmnopqrstuvwx", "STRIPE_KEY=<STRIPE_KEY>"},
+		{"pk_test_1234567890abcdefghijklmn", "<STRIPE_KEY>"},
+		{"sk_test_ABCDEFGHIJKLMNOPQRSTUVWXYZab", "<STRIPE_KEY>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubDiscordToken(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"MTk4NjIyNDgzNDcxOTI1MjQ4.Cl2FMQ.ZnCjm1XVW7vRze4b7Cq4se7kKWs", "<DISCORD_TOKEN>"},
+		{"NjE2MTk0NTI2NDMwODI3NTMx.XVtXKg.abcdefghijklmnopqrstuvwxyz1", "<DISCORD_TOKEN>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubNPMToken(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"npm_abcdefghijklmnopqrstuvwxyz1234567890", "<NPM_TOKEN>"},
+		{"NPM_TOKEN=npm_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", "NPM_TOKEN=<NPM_TOKEN>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubSendGridKey(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"SG.abcdefghijklmnopqrstuv.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq", "<SENDGRID_KEY>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubTwilioKey(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"TWILIO_API_KEY=SK1234567890abcdef1234567890abcdef", "TWILIO_API_KEY=<TWILIO_KEY>"},
+		{"SK0123456789abcdef0123456789abcdef", "<TWILIO_KEY>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
 func TestScrubCookie(t *testing.T) {
 	s, err := NewDefault()
 	if err != nil {

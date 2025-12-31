@@ -7,14 +7,21 @@ Transcripts are automatically scrubbed of sensitive data before storage.
 | Type | Example | Replacement |
 |------|---------|-------------|
 | User paths | `/Users/jacek/code/` | `/<REDACTED>/` |
+| Database URLs | `postgres://user:pass@host/db` | `postgres://<CREDENTIALS>@<HOST>` |
+| URLs with creds | `https://user:pass@host` | `https://<CREDENTIALS>@host` |
 | Emails | `john@example.com` | `<EMAIL>` |
 | Credit cards | `4111111111111111` | `<CREDIT_CARD>` |
 | AWS keys | `AKIAIOSFODNN7EXAMPLE` | `<AWS_ACCESS_KEY>` |
+| Stripe keys | `sk_live_xxxx...` | `<STRIPE_KEY>` |
 | GitHub tokens | `ghp_xxxx...` | `<GITHUB_TOKEN>` |
 | Anthropic keys | `sk-ant-xxxx...` | `<ANTHROPIC_API_KEY>` |
 | OpenAI keys | `sk-xxxx...` | `<OPENAI_API_KEY>` |
 | OpenRouter keys | `sk-or-xxxx...` | `<OPENROUTER_API_KEY>` |
 | Google AI keys | `AIzaXXXX...` | `<GOOGLE_API_KEY>` |
+| Discord tokens | `MTk4NjIy...` | `<DISCORD_TOKEN>` |
+| NPM tokens | `npm_xxxx...` | `<NPM_TOKEN>` |
+| SendGrid keys | `SG.xxxx...` | `<SENDGRID_KEY>` |
+| Twilio keys | `SKxxxx...` | `<TWILIO_KEY>` |
 | Slack tokens | `xoxb-xxx-xxx` | `<SLACK_TOKEN>` |
 | Bearer tokens | `Bearer eyJ...` | `Bearer <TOKEN>` |
 | Cookies | `Cookie: session=abc...` | `Cookie: <COOKIE>` |

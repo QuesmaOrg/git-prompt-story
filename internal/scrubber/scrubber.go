@@ -188,6 +188,27 @@ func DefaultRecognizers() []Recognizer {
 			Replacement: `C:\Users\<REDACTED>\`,
 		},
 
+		// Database connection URLs (must come BEFORE email to avoid partial matches)
+		{
+			Name:       "database_url",
+			EntityType: "DATABASE_URL",
+			Patterns: []Pattern{
+				// PostgreSQL, MySQL, MongoDB, Redis with credentials (allow empty username for redis)
+				{Regex: `(?i)((?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|mariadb)://)[^:]*:[^@]+@[^\s'"]+`},
+			},
+			Replacement: "${1}<CREDENTIALS>@<HOST>",
+		},
+
+		// URLs with embedded credentials (must come BEFORE email)
+		{
+			Name:       "url_credentials",
+			EntityType: "URL_CREDENTIALS",
+			Patterns: []Pattern{
+				{Regex: `(https?://)[^:]+:[^@]+@([^\s'"]+)`},
+			},
+			Replacement: "${1}<CREDENTIALS>@${2}",
+		},
+
 		// Email addresses
 		{
 			Name:       "email",
@@ -227,6 +248,16 @@ func DefaultRecognizers() []Recognizer {
 		},
 
 		// Specific API keys (must come before generic patterns)
+		// Stripe API keys
+		{
+			Name:       "stripe_api_key",
+			EntityType: "STRIPE_KEY",
+			Patterns: []Pattern{
+				{Regex: `(?:sk|pk)_(?:live|test)_[a-zA-Z0-9]{24,}`},
+			},
+			Replacement: "<STRIPE_KEY>",
+		},
+
 		// Anthropic API keys
 		{
 			Name:       "anthropic_api_key",
@@ -265,6 +296,46 @@ func DefaultRecognizers() []Recognizer {
 				{Regex: `AIza[0-9A-Za-z_-]{35}`},
 			},
 			Replacement: "<GOOGLE_API_KEY>",
+		},
+
+		// Discord bot tokens (base64-ish, typically 59+ chars with dots)
+		{
+			Name:       "discord_token",
+			EntityType: "DISCORD_TOKEN",
+			Patterns: []Pattern{
+				{Regex: `[MN][A-Za-z0-9]{23,}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,}`},
+			},
+			Replacement: "<DISCORD_TOKEN>",
+		},
+
+		// NPM tokens
+		{
+			Name:       "npm_token",
+			EntityType: "NPM_TOKEN",
+			Patterns: []Pattern{
+				{Regex: `npm_[A-Za-z0-9]{36,}`},
+			},
+			Replacement: "<NPM_TOKEN>",
+		},
+
+		// SendGrid API keys
+		{
+			Name:       "sendgrid_api_key",
+			EntityType: "SENDGRID_KEY",
+			Patterns: []Pattern{
+				{Regex: `SG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}`},
+			},
+			Replacement: "<SENDGRID_KEY>",
+		},
+
+		// Twilio API keys
+		{
+			Name:       "twilio_api_key",
+			EntityType: "TWILIO_KEY",
+			Patterns: []Pattern{
+				{Regex: `SK[a-f0-9]{32}`},
+			},
+			Replacement: "<TWILIO_KEY>",
 		},
 
 		// GitHub tokens
