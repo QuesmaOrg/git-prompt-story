@@ -3,7 +3,6 @@ package hooks
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -44,14 +43,9 @@ func PostCommit() error {
 		return fmt.Errorf("failed to get HEAD: %w", err)
 	}
 
-	// Read the note blob content
-	noteContent, err := readBlobContent(noteSHA)
-	if err != nil {
-		return fmt.Errorf("failed to read note blob: %w", err)
-	}
-
-	// Attach note to HEAD
-	if err := git.AddNote(notesRef, noteContent, headSHA); err != nil {
+	// Attach note to HEAD by reusing the existing blob SHA
+	// This ensures the note hash matches what's in the commit message trailer
+	if err := git.AddNoteFromBlob(notesRef, noteSHA, headSHA); err != nil {
 		return fmt.Errorf("failed to attach note: %w", err)
 	}
 
@@ -59,14 +53,4 @@ func PostCommit() error {
 	os.Remove(pendingFile)
 
 	return nil
-}
-
-// readBlobContent reads the content of a blob object
-func readBlobContent(sha string) (string, error) {
-	cmd := exec.Command("git", "cat-file", "-p", sha)
-	out, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-	return string(out), nil
 }

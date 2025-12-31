@@ -15,6 +15,15 @@ func AddNote(ref, message, object string) error {
 	return nil
 }
 
+// AddNoteFromBlob adds a note to an object by reusing an existing blob
+func AddNoteFromBlob(ref, blobSHA, object string) error {
+	cmd := exec.Command("git", "notes", "--ref="+ref, "add", "-f", "-C", blobSHA, object)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("git notes add -C: %w", err)
+	}
+	return nil
+}
+
 // GetNote retrieves a note for an object
 func GetNote(ref, object string) (string, error) {
 	cmd := exec.Command("git", "notes", "--ref="+ref, "show", object)

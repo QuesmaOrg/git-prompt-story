@@ -117,6 +117,17 @@ OUTPUT=$(git-prompt-story show "prompt-story-$SHORT_NOTE_HASH")
 echo "$OUTPUT" | grep -q "test-session-2" || fail "prompt-story prefix: Should show session-2"
 echo "    - prompt-story-{hash} prefix works"
 
+# Test 5b: Verify commit message trailer hash matches note hash
+echo ""
+echo "  Test 5b: Verify commit message hash matches note hash..."
+COMMIT_MSG=$(git log -1 --format=%B "$COMMIT2")
+TRAILER_HASH=$(echo "$COMMIT_MSG" | grep -o 'prompt-story-[a-f0-9]*' | sed 's/prompt-story-//')
+if [[ "$NOTE_HASH" != "$TRAILER_HASH"* ]]; then
+    echo "    ERROR: Trailer hash ($TRAILER_HASH) doesn't match note hash ($NOTE_HASH)"
+    fail "Commit message hash doesn't match note hash"
+fi
+echo "    - Commit message trailer hash matches note hash"
+
 # Test 6: Show range with three dots (symmetric difference)
 echo ""
 echo "  Test 6: Show range with symmetric difference..."
