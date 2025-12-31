@@ -68,6 +68,18 @@ func GenerateHTML(summary *Summary, outputDir string, prNumber int) error {
 		"add": func(a, b int) int {
 			return a + b
 		},
+		"entryCategory": func(entryType string) string {
+			switch entryType {
+			case "PROMPT", "COMMAND", "TOOL_REJECT":
+				return "user"
+			case "ASSISTANT":
+				return "assistant"
+			case "TOOL_USE", "TOOL_RESULT":
+				return "tool"
+			default:
+				return "other"
+			}
+		},
 	}
 
 	// Load and parse index template

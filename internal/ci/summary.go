@@ -16,10 +16,11 @@ const notesRef = "refs/notes/commits"
 
 // PromptEntry represents a single prompt or action in a session
 type PromptEntry struct {
-	Time      time.Time `json:"time"`
-	Type      string    `json:"type"` // PROMPT, TOOL_REJECT, COMMAND
-	Text      string    `json:"text"`
-	Truncated bool      `json:"truncated,omitempty"`
+	Time         time.Time `json:"time"`
+	Type         string    `json:"type"` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT
+	Text         string    `json:"text"`
+	Truncated    bool      `json:"truncated,omitempty"`
+	InWorkPeriod bool      `json:"in_work_period"` // true if within commit's work period
 }
 
 // SessionSummary represents a summarized session within a commit
@@ -152,7 +153,7 @@ func analyzeCommit(sha string, full bool) (*CommitSummary, error) {
 	return cs, nil
 }
 
-// analyzeSession extracts prompts from a session within the work period
+// analyzeSession extracts all entries from a session, marking which are in work period
 func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (*SessionSummary, error) {
 	// Extract relative path from full ref path
 	relPath := strings.TrimPrefix(sess.Path, transcriptsRef+"/")
@@ -184,10 +185,13 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 			ts = entry.Snapshot.Timestamp
 		}
 
-		// Skip entries outside work period or without timestamp
-		if ts.IsZero() || ts.Before(startWork) || ts.After(endWork) {
+		// Skip entries without timestamp
+		if ts.IsZero() {
 			continue
 		}
+
+		// Determine if in work period
+		inWorkPeriod := !ts.Before(startWork) && !ts.After(endWork)
 
 		// Determine entry type and text
 		var entryType, text string
@@ -207,6 +211,11 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 			}
 			if text == "" {
 				text = "User rejected tool call"
+			}
+		case "assistant":
+			if entry.Message != nil {
+				// Check if this is a tool use or text response
+				entryType, text = parseAssistantContent(entry.Message.RawContent)
 			}
 		}
 
@@ -232,9 +241,10 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 
 		if entryType != "" {
 			pe := PromptEntry{
-				Time: ts,
-				Type: entryType,
-				Text: text,
+				Time:         ts,
+				Type:         entryType,
+				Text:         text,
+				InWorkPeriod: inWorkPeriod,
 			}
 
 			// Truncate if not full mode
@@ -248,6 +258,59 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 	}
 
 	return ss, nil
+}
+
+// parseAssistantContent parses assistant message content to determine type and text
+func parseAssistantContent(rawContent json.RawMessage) (entryType, text string) {
+	if len(rawContent) == 0 {
+		return "", ""
+	}
+
+	// Try to parse as string first
+	var strContent string
+	if err := json.Unmarshal(rawContent, &strContent); err == nil {
+		if strContent != "" {
+			return "ASSISTANT", strContent
+		}
+		return "", ""
+	}
+
+	// Try to parse as array of content parts
+	var parts []struct {
+		Type  string `json:"type"`
+		Text  string `json:"text,omitempty"`
+		Name  string `json:"name,omitempty"`
+		Input any    `json:"input,omitempty"`
+	}
+	if err := json.Unmarshal(rawContent, &parts); err == nil {
+		var textParts []string
+		var toolNames []string
+
+		for _, part := range parts {
+			switch part.Type {
+			case "text":
+				if part.Text != "" {
+					textParts = append(textParts, part.Text)
+				}
+			case "tool_use":
+				if part.Name != "" {
+					toolNames = append(toolNames, part.Name)
+				}
+			}
+		}
+
+		// If there are tool uses, report them
+		if len(toolNames) > 0 {
+			return "TOOL_USE", strings.Join(toolNames, ", ")
+		}
+
+		// Otherwise return text content
+		if len(textParts) > 0 {
+			return "ASSISTANT", textParts[0]
+		}
+	}
+
+	return "", ""
 }
 
 // getCommitSubject gets the first line of a commit message
