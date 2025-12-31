@@ -7,7 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "0.1.0"
+var version = "dev"
+
+func SetVersion(v string) {
+	version = v
+	rootCmd.Version = v
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "git-prompt-story",
