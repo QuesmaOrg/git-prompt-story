@@ -77,6 +77,8 @@ func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
 		switch t {
 		case "claude-code":
 			name = "Claude Code"
+		case "claude-cloud":
+			name = "Claude Cloud"
 		case "cursor":
 			name = "Cursor"
 		case "codex":
