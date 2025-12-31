@@ -1,21 +1,33 @@
 package note
 
 import (
+	"fmt"
+
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
+	"github.com/QuesmaOrg/git-prompt-story/internal/scrubber"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
 const transcriptRef = "refs/notes/prompt-story-transcripts"
 
 // StoreTranscripts stores session transcripts in the transcript tree
+// If scrub is not nil, PII is scrubbed from content before storing
 // Returns map of session ID -> blob SHA
-func StoreTranscripts(sessions []session.ClaudeSession) (map[string]string, error) {
+func StoreTranscripts(sessions []session.ClaudeSession, scrub scrubber.Scrubber) (map[string]string, error) {
 	blobs := make(map[string]string)
 
 	for _, s := range sessions {
 		content, err := session.ReadSessionContent(s.Path)
 		if err != nil {
 			continue // Skip files we can't read
+		}
+
+		// Scrub PII before storing
+		if scrub != nil {
+			content, err = scrub.Scrub(content)
+			if err != nil {
+				return nil, fmt.Errorf("scrubbing session %s: %w", s.ID, err)
+			}
 		}
 
 		sha, err := git.HashObject(content)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
+	"github.com/QuesmaOrg/git-prompt-story/internal/scrubber"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
@@ -85,8 +86,17 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		// Clean up any stale pending file
 		os.Remove(pendingFile)
 	} else {
-		// Store transcripts as blobs
-		blobs, err := note.StoreTranscripts(sessions)
+		// Create PII scrubber (disabled via GIT_PROMPT_STORY_NO_SCRUB=1)
+		var piiScrubber scrubber.Scrubber
+		if os.Getenv("GIT_PROMPT_STORY_NO_SCRUB") != "1" {
+			piiScrubber, err = scrubber.NewDefault()
+			if err != nil {
+				return fmt.Errorf("failed to create scrubber: %w", err)
+			}
+		}
+
+		// Store transcripts as blobs (with optional PII scrubbing)
+		blobs, err := note.StoreTranscripts(sessions, piiScrubber)
 		if err != nil {
 			return fmt.Errorf("failed to store transcripts: %w", err)
 		}

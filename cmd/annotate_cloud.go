@@ -8,11 +8,13 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/cloud"
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
+	"github.com/QuesmaOrg/git-prompt-story/internal/scrubber"
 	"github.com/spf13/cobra"
 )
 
 var sessionIDFlag string
 var autoFlag bool
+var noScrubFlag bool
 
 var annotateCloudCmd = &cobra.Command{
 	Use:   "annotate-cloud [commit]",
@@ -38,7 +40,7 @@ Examples:
 			os.Exit(1)
 		}
 
-		if err := annotateCloudCommit(commit, sessionIDFlag, autoFlag); err != nil {
+		if err := annotateCloudCommit(commit, sessionIDFlag, autoFlag, noScrubFlag); err != nil {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
 			os.Exit(1)
 		}
@@ -48,10 +50,11 @@ Examples:
 func init() {
 	annotateCloudCmd.Flags().StringVar(&sessionIDFlag, "session-id", "", "Cloud session ID to attach")
 	annotateCloudCmd.Flags().BoolVar(&autoFlag, "auto", false, "Auto-detect session from branch name")
+	annotateCloudCmd.Flags().BoolVar(&noScrubFlag, "no-scrub", false, "Disable PII scrubbing")
 	rootCmd.AddCommand(annotateCloudCmd)
 }
 
-func annotateCloudCommit(commitRef, sessionID string, autoDetect bool) error {
+func annotateCloudCommit(commitRef, sessionID string, autoDetect, noScrub bool) error {
 	// Resolve commit
 	sha, err := git.ResolveCommit(commitRef)
 	if err != nil {
@@ -108,6 +111,18 @@ func annotateCloudCommit(commitRef, sessionID string, autoDetect bool) error {
 	jsonl, err := cloud.EventsToJSONL(events, sess)
 	if err != nil {
 		return fmt.Errorf("failed to convert events: %w", err)
+	}
+
+	// Scrub PII from transcript (unless --no-scrub)
+	if !noScrub {
+		piiScrubber, err := scrubber.NewDefault()
+		if err != nil {
+			return fmt.Errorf("failed to create scrubber: %w", err)
+		}
+		jsonl, err = piiScrubber.Scrub(jsonl)
+		if err != nil {
+			return fmt.Errorf("failed to scrub PII: %w", err)
+		}
 	}
 
 	// Store transcript as blob
