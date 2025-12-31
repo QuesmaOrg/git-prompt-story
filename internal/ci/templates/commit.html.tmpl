@@ -64,8 +64,8 @@
           {{if eq .Type "TOOL_USE"}}
           <span class="tool-name">{{.ToolName}}</span>
           {{if or .ToolInput .ToolOutput}}
-          <details class="tool-details">
-            <summary>Show details</summary>
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
             {{if .ToolInput}}
             <div class="tool-section-label">Input</div>
             <div class="tool-input">{{.ToolInput}}</div>

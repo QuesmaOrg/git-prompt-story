@@ -360,13 +360,13 @@ func extractToolResultContent(content any) string {
 		return ""
 	}
 
+	var result string
+
 	// Content could be a string
 	if s, ok := content.(string); ok {
-		return s
-	}
-
-	// Content could be an array of content blocks
-	if arr, ok := content.([]any); ok {
+		result = s
+	} else if arr, ok := content.([]any); ok {
+		// Content could be an array of content blocks
 		var texts []string
 		for _, item := range arr {
 			if m, ok := item.(map[string]any); ok {
@@ -377,10 +377,13 @@ func extractToolResultContent(content any) string {
 				}
 			}
 		}
-		return strings.Join(texts, "\n")
+		result = strings.Join(texts, "\n")
 	}
 
-	return ""
+	// Clean up arrow characters from cat -n output format
+	result = strings.ReplaceAll(result, "→", " ")
+
+	return result
 }
 
 // ToolUseInfo holds extracted information about a tool use
