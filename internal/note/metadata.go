@@ -102,7 +102,7 @@ func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
 	return summary
 }
 
-// GetTranscriptPath returns the ref path for a transcript
+// GetTranscriptPath returns the path within the transcript tree for a session
 func GetTranscriptPath(tool, sessionID string) string {
-	return fmt.Sprintf("refs/notes/prompt-story-transcripts/%s/%s.jsonl", tool, sessionID)
+	return fmt.Sprintf("%s/%s.jsonl", tool, sessionID)
 }
