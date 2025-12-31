@@ -275,3 +275,40 @@ cleanup_mock_cloud() {
     rm -f ~/.claude.json
     echo "  Mock cloud resources cleaned up"
 }
+
+# =============================================================================
+# PII Scrubbing Test Helpers
+# =============================================================================
+
+# Create mock session with various PII data for scrubbing tests
+# Usage: create_mock_session_with_pii <session_id> <start_time> <end_time>
+create_mock_session_with_pii() {
+    local session_id="$1"
+    local start_time="$2"
+    local end_time="$3"
+
+    local repo_path=$(pwd)
+    local encoded_path=$(echo "$repo_path" | tr '/' '-')
+    local session_dir="$HOME/.claude/projects/$encoded_path"
+
+    mkdir -p "$session_dir"
+
+    cat > "$session_dir/$session_id.jsonl" << 'EOF'
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:15:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"My email is john.doe@example.com"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:16:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"Working in /Users/jacek/projects/secret-app/"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:17:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"AWS key is AKIAIOSFODNN7EXAMPLE"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:18:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"OpenRouter key: sk-or-v1-abcdefghijklmnopqrstuvwxyz1234567890abcd"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:19:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"Anthropic key: sk-ant-api03-abcdefghijklmnopqrstuvwxyz1234567890abcdefgh"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:20:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"GitHub token: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:21:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"Credit card: 4111111111111111"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:22:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"password=supersecret123"}}
+{"type":"user","sessionId":"pii-test","timestamp":"2025-01-15T09:23:00Z","cwd":"/workspace/test-repo","gitBranch":"main","message":{"role":"user","content":"Google key: AIzaSyA1234567890abcdefghijklmnopqrstuv"}}
+{"type":"assistant","sessionId":"pii-test","timestamp":"2025-01-15T09:25:00Z","message":{"role":"assistant","content":[{"type":"text","text":"I'll help with that sensitive data"}]}}
+EOF
+
+    # Update timestamps in the file
+    sed -i "s/2025-01-15T09:15:00Z/$start_time/g" "$session_dir/$session_id.jsonl"
+    sed -i "s/2025-01-15T09:25:00Z/$end_time/g" "$session_dir/$session_id.jsonl"
+
+    echo "  Created mock session with PII: $session_dir/$session_id.jsonl"
+}

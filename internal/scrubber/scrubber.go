@@ -247,6 +247,26 @@ func DefaultRecognizers() []Recognizer {
 			Replacement: "<OPENAI_API_KEY>",
 		},
 
+		// OpenRouter API keys
+		{
+			Name:       "openrouter_api_key",
+			EntityType: "OPENROUTER_KEY",
+			Patterns: []Pattern{
+				{Regex: `sk-or-[a-zA-Z0-9_-]{40,}`},
+			},
+			Replacement: "<OPENROUTER_API_KEY>",
+		},
+
+		// Google AI / Gemini API keys
+		{
+			Name:       "google_api_key",
+			EntityType: "GOOGLE_KEY",
+			Patterns: []Pattern{
+				{Regex: `AIza[0-9A-Za-z_-]{35}`},
+			},
+			Replacement: "<GOOGLE_API_KEY>",
+		},
+
 		// GitHub tokens
 		{
 			Name:       "github_token",

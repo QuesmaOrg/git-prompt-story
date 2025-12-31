@@ -145,6 +145,50 @@ func TestScrubAnthropicKey(t *testing.T) {
 	}
 }
 
+func TestScrubOpenRouterKey(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"OPENROUTER_API_KEY=sk-or-v1-abcdefghijklmnopqrstuvwxyz1234567890abcd", "OPENROUTER_API_KEY=<OPENROUTER_API_KEY>"},
+		{"key: sk-or-abcdefghijklmnopqrstuvwxyz1234567890abcdef", "key: <OPENROUTER_API_KEY>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
+func TestScrubGoogleKey(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"GOOGLE_API_KEY=AIzaSyA1234567890abcdefghijklmnopqrstuv", "GOOGLE_API_KEY=<GOOGLE_API_KEY>"},
+		{"api_key: AIzaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "api_key: <GOOGLE_API_KEY>"},
+	}
+
+	for _, tc := range tests {
+		result := s.ScrubText(tc.input)
+		if result != tc.expected {
+			t.Errorf("ScrubText(%q) = %q, want %q", tc.input, result, tc.expected)
+		}
+	}
+}
+
 func TestScrubPrivateKey(t *testing.T) {
 	s, err := NewDefault()
 	if err != nil {
