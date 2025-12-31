@@ -34,11 +34,22 @@ func ShowPrompts(commitRef string, full bool) error {
 		return fmt.Errorf("failed to parse note: %w", err)
 	}
 
+	// Get commit timestamp from git (end of work period)
+	endWork, err := git.GetPreviousCommitTimestamp(sha)
+	if err != nil || endWork.IsZero() {
+		// Fallback to latest session modified time if commit time unavailable
+		for _, sess := range psNote.Sessions {
+			if sess.Modified.After(endWork) {
+				endWork = sess.Modified
+			}
+		}
+	}
+
 	// Print header
 	fmt.Printf("Commit: %s\n", sha[:7])
 	fmt.Printf("Work period: %s - %s\n\n",
 		psNote.StartWork.Local().Format("2006-01-02 15:04"),
-		psNote.EndWork.Local().Format("2006-01-02 15:04"))
+		endWork.Local().Format("2006-01-02 15:04"))
 
 	if len(psNote.Sessions) == 0 {
 		fmt.Println("No sessions recorded")
@@ -48,7 +59,7 @@ func ShowPrompts(commitRef string, full bool) error {
 	// Process each session, filtering out empty ones
 	shownSessions := 0
 	for _, sess := range psNote.Sessions {
-		shown, err := showSession(sess, psNote.StartWork, psNote.EndWork, full)
+		shown, err := showSession(sess, psNote.StartWork, endWork, full)
 		if err != nil {
 			fmt.Printf("Warning: could not load session %s: %v\n", sess.ID, err)
 			continue

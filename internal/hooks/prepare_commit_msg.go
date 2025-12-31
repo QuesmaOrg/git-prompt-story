@@ -59,8 +59,8 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 	// Filter sessions to only those overlapping with the work period
 	if len(sessions) > 0 {
 		startWork, _ := git.CalculateWorkStartTime(isAmend)
-		endWork := git.GetCommitTime()
-		debugLog.log("Work period: %s - %s", startWork.UTC().Format(time.RFC3339), endWork.UTC().Format(time.RFC3339))
+		endWork := time.Now().UTC()
+		debugLog.log("Work period: %s - %s (now)", startWork.UTC().Format(time.RFC3339), endWork.Format(time.RFC3339))
 
 		beforeFilter := len(sessions)
 		sessions = session.FilterSessionsByTime(sessions, startWork, endWork)

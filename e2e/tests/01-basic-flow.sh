@@ -74,12 +74,10 @@ echo "    - Note contains 1 session"
 echo "$NOTE" | jq -e '.sessions[0].id == "test-session-1"' > /dev/null || fail "Wrong session ID"
 echo "    - Session ID is correct"
 
-echo "    Verifying work timestamps match COMMIT times..."
+echo "    Verifying work timestamps..."
 echo "$NOTE" | jq -e '.start_work == "2025-01-15T09:00:00Z"' > /dev/null || fail "start_work should be previous commit time (09:00)"
 echo "    - start_work = 2025-01-15T09:00:00Z (previous commit)"
-
-echo "$NOTE" | jq -e '.end_work == "2025-01-15T10:30:00Z"' > /dev/null || fail "end_work should be current commit time (10:30)"
-echo "    - end_work = 2025-01-15T10:30:00Z (current commit)"
+# Note: end_work is no longer stored in the note - commit timestamp is retrieved from git when needed
 
 echo "    Verifying session timestamps match JSONL times..."
 echo "$NOTE" | jq -e '.sessions[0].created == "2025-01-15T09:15:00Z"' > /dev/null || fail "Wrong session created timestamp"

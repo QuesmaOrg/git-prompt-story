@@ -113,9 +113,7 @@ echo "    Verifying timestamps..."
 echo "$NOTE" | jq -e '.start_work == "2025-01-15T09:00:00Z"' > /dev/null || fail "Wrong start_work timestamp"
 echo "    - start_work = 2025-01-15T09:00:00Z (previous commit)"
 
-# end_work should be the amended commit time (10:35)
-echo "$NOTE" | jq -e '.end_work == "2025-01-15T10:35:00Z"' > /dev/null || fail "Wrong end_work timestamp"
-echo "    - end_work = 2025-01-15T10:35:00Z (amended commit)"
+# Note: end_work is no longer stored in the note - commit timestamp is retrieved from git when needed
 
 echo ""
 echo "  All assertions passed!"

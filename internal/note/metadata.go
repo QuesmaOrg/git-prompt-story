@@ -15,7 +15,6 @@ import (
 type PromptStoryNote struct {
 	Version   int            `json:"v"`
 	StartWork time.Time      `json:"start_work"`
-	EndWork   time.Time      `json:"end_work"`
 	Sessions  []SessionEntry `json:"sessions"`
 }
 
@@ -39,9 +38,6 @@ func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool) *PromptS
 	// Calculate work start time from git reflog
 	// This is the most recent of: previous commit time or branch switch time
 	note.StartWork, _ = git.CalculateWorkStartTime(isAmend)
-
-	// End work time is the commit timestamp (respects GIT_COMMITTER_DATE)
-	note.EndWork = git.GetCommitTime()
 
 	for _, s := range sessions {
 		note.Sessions = append(note.Sessions, SessionEntry{
