@@ -147,7 +147,9 @@ This action:
 
 **Prerequisites:**
 1. Push your git notes to remote: `git push origin 'refs/notes/*'`
-2. Enable GitHub Pages: Settings > Pages > Source: Deploy from a branch > `gh-pages`
+2. After the first workflow run, enable GitHub Pages:
+   - Settings → Pages → Source: Deploy from a branch
+   - Select `gh-pages` branch (created automatically by the action)
 
 ## How It Works
 
