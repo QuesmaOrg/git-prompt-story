@@ -124,7 +124,7 @@ func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool
 			if entry.Message != nil {
 				text = entry.Message.GetTextContent()
 				if text != "" {
-					entryType = "USER"
+					entryType = "PROMPT"
 				}
 			}
 		case "tool_reject":
@@ -195,24 +195,75 @@ func displayMessage(de displayEntry, full bool) {
 		// Full mode: show complete content
 		fmt.Printf("[%s] %s:\n%s\n\n", timeStr, de.entryType, de.text)
 	} else {
-		// Summary mode: truncate long content
-		summary := truncate(de.text, 100)
+		// Summary mode: show up to 3 lines of 80 chars each
+		lines, truncated := wrapAndTruncate(de.text, 80, 3)
 		charCount := len(de.text)
-		if charCount > 100 {
-			fmt.Printf("[%s] %s: %s (%d chars)\n", timeStr, de.entryType, summary, charCount)
-		} else {
-			fmt.Printf("[%s] %s: %s\n", timeStr, de.entryType, summary)
+		fmt.Printf("[%s] %s:\n", timeStr, de.entryType)
+		for _, line := range lines {
+			fmt.Printf("  %s\n", line)
+		}
+		if truncated {
+			fmt.Printf("  (%d chars total)\n", charCount)
 		}
 	}
 }
 
-func truncate(s string, maxLen int) string {
-	// Replace newlines with spaces for summary
-	s = strings.ReplaceAll(s, "\n", " ")
-	s = strings.Join(strings.Fields(s), " ") // Normalize whitespace
+// wrapAndTruncate wraps text to maxWidth chars per line and limits to maxLines.
+// Returns the lines and whether truncation occurred.
+func wrapAndTruncate(s string, maxWidth, maxLines int) ([]string, bool) {
+	// Normalize whitespace but preserve logical line breaks
+	s = strings.ReplaceAll(s, "\r\n", "\n")
+	s = strings.ReplaceAll(s, "\r", "\n")
 
-	if len(s) <= maxLen {
-		return s
+	var result []string
+	truncated := false
+
+	// Split by newlines first
+	paragraphs := strings.Split(s, "\n")
+
+	for _, para := range paragraphs {
+		if len(result) >= maxLines {
+			truncated = true
+			break
+		}
+
+		// Normalize whitespace within paragraph
+		para = strings.Join(strings.Fields(para), " ")
+		if para == "" {
+			continue
+		}
+
+		// Wrap the paragraph
+		for len(para) > 0 && len(result) < maxLines {
+			if len(para) <= maxWidth {
+				result = append(result, para)
+				break
+			}
+			// Find break point (prefer space)
+			breakAt := maxWidth
+			for i := maxWidth; i > 0; i-- {
+				if para[i] == ' ' {
+					breakAt = i
+					break
+				}
+			}
+			result = append(result, para[:breakAt])
+			para = strings.TrimLeft(para[breakAt:], " ")
+		}
+		if len(para) > 0 && len(result) >= maxLines {
+			truncated = true
+		}
 	}
-	return s[:maxLen] + "..."
+
+	// Mark last line as truncated if needed
+	if truncated && len(result) > 0 {
+		lastLine := result[len(result)-1]
+		if len(lastLine) > maxWidth-3 {
+			result[len(result)-1] = lastLine[:maxWidth-3] + "..."
+		} else {
+			result[len(result)-1] = lastLine + "..."
+		}
+	}
+
+	return result, truncated
 }
