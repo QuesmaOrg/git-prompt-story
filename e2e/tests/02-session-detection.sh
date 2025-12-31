@@ -62,11 +62,11 @@ git log -1 --format=%B | grep -q "Prompt-Story: Used Claude Code" || fail "Missi
 echo "    - Commit message contains Prompt-Story trailer"
 
 echo "    Checking note attachment..."
-git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1 || fail "No note attached to HEAD"
+git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1 || fail "No note attached to HEAD"
 echo "    - Note is attached to HEAD"
 
 echo "    Checking only session-1 is detected..."
-NOTE=$(git notes --ref=refs/notes/commits show HEAD)
+NOTE=$(git notes --ref=refs/notes/prompt-story show HEAD)
 
 # Should have exactly 1 session
 SESSION_COUNT=$(echo "$NOTE" | yq '.sessions | length')

@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const notesRef = "refs/notes/commits"
+const notesRef = "refs/notes/prompt-story"
 
 // ShowPrompts displays prompts for a given commit
 func ShowPrompts(commitRef string, full bool) error {

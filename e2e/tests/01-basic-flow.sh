@@ -60,11 +60,11 @@ echo "$COMMIT_MSG" | grep -q "Prompt-Story: Used Claude Code" || fail "Missing P
 echo "    - Commit message contains Prompt-Story trailer"
 
 echo "    Checking note attachment..."
-git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1 || fail "No note attached to HEAD"
+git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1 || fail "No note attached to HEAD"
 echo "    - Note is attached to HEAD"
 
 echo "    Checking note content..."
-NOTE=$(git notes --ref=refs/notes/commits show HEAD)
+NOTE=$(git notes --ref=refs/notes/prompt-story show HEAD)
 echo "$NOTE" | yq -e '.v == 1' > /dev/null || fail "Invalid note version"
 echo "    - Note version is 1"
 

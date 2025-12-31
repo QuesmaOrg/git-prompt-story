@@ -10,7 +10,7 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 )
 
-const notesRef = "refs/notes/commits"
+const notesRef = "refs/notes/prompt-story"
 
 // PostCommit implements the post-commit hook logic
 func PostCommit() error {

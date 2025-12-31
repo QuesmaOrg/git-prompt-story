@@ -44,7 +44,7 @@ go install github.com/QuesmaOrg/git-prompt-story@latest
 git-prompt-story install-hooks --global
 
 # 3. Enable automatic pushing of prompt notes
-git config --global --add remote.origin.push 'refs/notes/commits:refs/notes/commits'
+git config --global --add remote.origin.push 'refs/notes/prompt-story:refs/notes/prompt-story'
 git config --global --add remote.origin.push 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
 ```
 
@@ -69,7 +69,7 @@ go install github.com/QuesmaOrg/git-prompt-story@latest
 git-prompt-story install-hooks
 
 # Enable automatic pushing of prompt notes
-git config --add remote.origin.push 'refs/notes/commits:refs/notes/commits'
+git config --add remote.origin.push 'refs/notes/prompt-story:refs/notes/prompt-story'
 git config --add remote.origin.push 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
 
 echo "git-prompt-story configured for this repository"
@@ -130,7 +130,7 @@ jobs:
 
       - name: Fetch prompt notes
         run: |
-          git fetch origin 'refs/notes/commits:refs/notes/commits' || true
+          git fetch origin 'refs/notes/prompt-story:refs/notes/prompt-story' || true
           git fetch origin 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts' || true
 
       - name: Check for prompt notes
@@ -163,7 +163,7 @@ This action checks if commits have prompt notes attached and optionally posts a 
 │                    ▼                                            │
 │  3. post-commit hook                                            │
 │     ├── Read {nid} from .git/PENDING-PROMPT-STORY               │
-│     ├── Attach note to HEAD via refs/notes/commits              │
+│     ├── Attach note to HEAD via refs/notes/prompt-story         │
 │     └── Clean up .git/PENDING-PROMPT-STORY                      │
 │                                                                 │
 │  If no active sessions for this repo:                           │
@@ -176,9 +176,9 @@ This action checks if commits have prompt notes attached and optionally posts a 
 
 Git Prompt Story uses two storage locations:
 
-#### 1. Commit Metadata (`refs/notes/commits`)
+#### 1. Commit Metadata (`refs/notes/prompt-story`)
 
-Standard git notes attached to commits (default notes ref). Contains a lightweight YAML manifest:
+Custom git notes ref for prompt metadata. Contains a lightweight YAML manifest:
 
 ```yaml
 v: 1
@@ -231,7 +231,7 @@ The capture tool runs locally via git hooks. It:
 
 - Detects active LLM sessions
 - Extracts conversation data
-- Stores notes in `refs/notes/commits` (standard git notes)
+- Stores notes in `refs/notes/prompt-story`
 - Adds summary to commit messages
 
 Single binary, no runtime dependencies. Install once, works everywhere.
