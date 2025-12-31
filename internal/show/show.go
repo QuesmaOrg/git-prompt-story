@@ -14,13 +14,64 @@ import (
 const transcriptsRef = "refs/notes/prompt-story-transcripts"
 const notesRef = "refs/notes/commits"
 
-// ShowPrompts displays prompts for a given commit
+const promptStoryPrefix = "prompt-story-"
+
+// ShowPrompts displays prompts for a given commit, range, or prompt-story reference
 func ShowPrompts(commitRef string, full bool) error {
-	// Resolve commit to SHA
-	sha, err := git.ResolveCommit(commitRef)
+	// Determine the type of reference and get commit list
+	commits, err := resolveCommitSpec(commitRef)
 	if err != nil {
-		return fmt.Errorf("failed to resolve commit %s: %w", commitRef, err)
+		return err
 	}
+
+	// Show prompts for each commit
+	for i, sha := range commits {
+		if i > 0 {
+			fmt.Println("---")
+			fmt.Println()
+		}
+		if err := showCommitPrompts(sha, full); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// resolveCommitSpec resolves a commit specification to a list of commit SHAs
+// Supports: single ref, ranges (A..B), prompt-story-{hash}
+func resolveCommitSpec(spec string) ([]string, error) {
+	// Check for prompt-story-{hash} prefix
+	if strings.HasPrefix(spec, promptStoryPrefix) {
+		hashPrefix := strings.TrimPrefix(spec, promptStoryPrefix)
+		sha, err := git.FindCommitByNoteHash(notesRef, hashPrefix)
+		if err != nil {
+			return nil, err
+		}
+		return []string{sha}, nil
+	}
+
+	// Check for range (contains ..)
+	if strings.Contains(spec, "..") {
+		commits, err := git.RevList(spec)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resolve range %s: %w", spec, err)
+		}
+		if len(commits) == 0 {
+			return nil, fmt.Errorf("no commits in range %s", spec)
+		}
+		return commits, nil
+	}
+
+	// Single commit reference
+	sha, err := git.ResolveCommit(spec)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve commit %s: %w", spec, err)
+	}
+	return []string{sha}, nil
+}
+
+// showCommitPrompts displays prompts for a single commit
+func showCommitPrompts(sha string, full bool) error {
 
 	// Get note attached to commit
 	noteContent, err := git.GetNote(notesRef, sha)
