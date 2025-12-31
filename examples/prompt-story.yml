@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
 
       # Run the prompt-story action
-      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@v1
+      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment: true

@@ -108,39 +108,46 @@ Then update your AutoLink target URL to point to your hosted viewer.
 
 Public repos can use the hosted service at `https://prompt-story.quesma.com`.
 
-#### 4. Add CI check (optional)
+#### 4. Add GitHub Action (optional)
 
-Add a GitHub Action to verify prompt notes are attached to PRs:
+Add a GitHub Action to analyze LLM sessions and post summaries on PRs:
 
 ```yaml
 # .github/workflows/prompt-story.yml
-name: Prompt Story Check
+name: Prompt Story
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write       # For GitHub Pages deployment
+  pull-requests: write  # For PR comments
 
 jobs:
-  check-prompts:
+  prompt-story:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merge_commit_sha == null  # Skip merge commits
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Fetch prompt notes
-        run: |
-          git fetch origin 'refs/notes/commits:refs/notes/commits' || true
-          git fetch origin 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts' || true
-
-      - name: Check for prompt notes
-        uses: quesmaorg/prompt-story-action@v1
+      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@main
         with:
-          comment: true  # Post summary of LLM tools used
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment: true        # Post summary comment on PR
+          deploy-pages: true   # Deploy full transcripts to GitHub Pages
 ```
 
-This action checks if commits have prompt notes attached and optionally posts a comment summarizing which LLM tools were used.
+This action:
+- Fetches git notes from your repository
+- Generates a summary of LLM tools used in the PR
+- Posts an interactive HTML transcript to GitHub Pages
+- Adds a comment with links to the full transcript
+
+**Prerequisites:**
+1. Push your git notes to remote: `git push origin 'refs/notes/*'`
+2. Enable GitHub Pages: Settings > Pages > Source: Deploy from a branch > `gh-pages`
 
 ## How It Works
 
@@ -320,7 +327,8 @@ git push origin refs/notes/prompt-story-transcripts
 ## Roadmap
 
 - [x] Claude Code support
-- [ ] Local viewer (HTML export)
+- [x] Local viewer (HTML export via `ci-html` command)
+- [x] GitHub Action for PR summaries and transcript pages
 - [ ] Hosted viewer service
 - [ ] Cursor integration
 - [ ] Codex integration
