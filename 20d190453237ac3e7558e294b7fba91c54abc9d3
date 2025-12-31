@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "start_work": "2025-12-31T08:57:26Z",
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "37ac5fb8-a345-4a87-ba49-239a8060be2b",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/37ac5fb8-a345-4a87-ba49-239a8060be2b.jsonl",
+      "created": "2025-12-30T17:07:56.061Z",
+      "modified": "2025-12-31T09:14:36.157Z"
+    }
+  ]
+}
