@@ -1,7 +1,7 @@
 FROM golang:1.24-alpine
 
-# Install dependencies including libfaketime for clock manipulation
-RUN apk add --no-cache git bash jq libfaketime
+# Install dependencies including libfaketime for clock manipulation and socat for mock API
+RUN apk add --no-cache git bash jq libfaketime socat
 
 WORKDIR /build
 COPY . .
@@ -13,4 +13,4 @@ RUN git config --global user.email "test@test.com" && \
     git config --global init.defaultBranch main
 
 COPY e2e/ /e2e/
-ENTRYPOINT ["/e2e/run-tests.sh"]
+ENTRYPOINT ["/e2e/lib/runner.sh"]

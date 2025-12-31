@@ -92,3 +92,186 @@ init_test_repo() {
 
     echo "  Created test repo at: $repo_path"
 }
+
+# =============================================================================
+# Cloud API Mocking Helpers
+# =============================================================================
+
+# Setup fake security command and claude.json for cloud API tests
+setup_mock_credentials() {
+    # Create fake security command that returns mock credentials
+    cat > /usr/local/bin/security << 'SECEOF'
+#!/bin/bash
+if [[ "$*" == *"Claude Code-credentials"* && "$*" == *"-w"* ]]; then
+    echo '{"claudeAiOauth":{"accessToken":"test-token-abc123"}}'
+fi
+SECEOF
+    chmod +x /usr/local/bin/security
+
+    # Create fake ~/.claude.json
+    cat > ~/.claude.json << 'EOF'
+{"oauthAccount":{"organizationUuid":"test-org-uuid-123"}}
+EOF
+
+    echo "  Mock credentials configured"
+}
+
+# Create a mock cloud session with API responses
+# Usage: create_mock_cloud_session <session_id> <title> <branch> [created] [updated]
+create_mock_cloud_session() {
+    local session_id="$1"
+    local title="$2"
+    local branch="$3"
+    local created="${4:-2025-01-15T09:00:00Z}"
+    local updated="${5:-2025-01-15T10:00:00Z}"
+
+    mkdir -p /tmp/mock-api
+
+    # Session metadata response
+    cat > "/tmp/mock-api/session_${session_id}.json" << EOF
+{
+  "id": "${session_id}",
+  "title": "${title}",
+  "created_at": "${created}",
+  "updated_at": "${updated}",
+  "session_status": "idle",
+  "type": "internal_session",
+  "session_context": {
+    "model": "claude-opus-4",
+    "outcomes": [{
+      "type": "git_repository",
+      "git_info": {"type": "github", "branches": ["${branch}"]}
+    }]
+  }
+}
+EOF
+
+    # Events response
+    cat > "/tmp/mock-api/session_${session_id}_events.json" << EOF
+{
+  "data": [
+    {"type": "user", "uuid": "u1", "session_id": "${session_id}", "message": {"role": "user", "content": "Test prompt from mock"}},
+    {"type": "assistant", "uuid": "a1", "session_id": "${session_id}", "message": {"role": "assistant", "content": [{"type": "text", "text": "Test response from mock"}]}}
+  ],
+  "has_more": false,
+  "first_id": "u1",
+  "last_id": "a1"
+}
+EOF
+
+    # Sessions list response (for list-cloud)
+    cat > "/tmp/mock-api/sessions_list.json" << EOF
+{
+  "data": [{
+    "id": "${session_id}",
+    "title": "${title}",
+    "created_at": "${created}",
+    "updated_at": "${updated}",
+    "session_status": "idle",
+    "type": "internal_session",
+    "session_context": {
+      "model": "claude-opus-4",
+      "outcomes": [{
+        "type": "git_repository",
+        "git_info": {"type": "github", "branches": ["${branch}"]}
+      }]
+    }
+  }],
+  "has_more": false,
+  "first_id": "${session_id}",
+  "last_id": "${session_id}"
+}
+EOF
+
+    echo "  Created mock cloud session: ${session_id}"
+}
+
+# Start a mock API server that routes requests to mock files
+# Usage: start_mock_api [port]
+start_mock_api() {
+    local port="${1:-9999}"
+
+    # Create a handler script that processes one HTTP request via stdin/stdout
+    cat > /tmp/mock-api/handler.sh << 'HANDLEREOF'
+#!/bin/bash
+MOCK_DIR="/tmp/mock-api"
+
+# Read the request line
+read -r request_line
+
+# Extract path from request
+path=$(echo "$request_line" | awk '{print $2}')
+
+# Log for debugging
+echo "$(date): Request for $path" >> /tmp/mock-api/requests.log
+
+# Skip remaining headers (read until empty line)
+while IFS= read -r header; do
+    # Check for end of headers (empty line or just CR)
+    header=$(echo "$header" | tr -d '\r')
+    [[ -z "$header" ]] && break
+done
+
+# Route request to appropriate response file
+response_file=""
+if [[ "$path" == "/v1/sessions/"*"/events"* ]]; then
+    session_id=$(echo "$path" | sed -n 's|/v1/sessions/\([^/]*\)/events.*|\1|p')
+    response_file="$MOCK_DIR/session_${session_id}_events.json"
+elif [[ "$path" == "/v1/sessions?"* ]]; then
+    response_file="$MOCK_DIR/sessions_list.json"
+elif [[ "$path" == "/v1/sessions/"* ]]; then
+    session_id=$(echo "$path" | sed -n 's|/v1/sessions/\([^?]*\).*|\1|p')
+    response_file="$MOCK_DIR/session_${session_id}.json"
+fi
+
+# Send HTTP response
+if [[ -f "$response_file" ]]; then
+    content=$(cat "$response_file")
+    content_length=${#content}
+    printf "HTTP/1.1 200 OK\r\n"
+    printf "Content-Type: application/json\r\n"
+    printf "Connection: close\r\n"
+    printf "Content-Length: %d\r\n" "$content_length"
+    printf "\r\n"
+    printf "%s" "$content"
+else
+    echo "$(date): 404 for $path (tried $response_file)" >> /tmp/mock-api/requests.log
+    printf "HTTP/1.1 404 Not Found\r\n"
+    printf "Connection: close\r\n"
+    printf "Content-Length: 0\r\n"
+    printf "\r\n"
+fi
+HANDLEREOF
+    chmod +x /tmp/mock-api/handler.sh
+
+    # Use socat to run the handler for each connection
+    # socat forks for each connection and runs the handler script
+    socat TCP-LISTEN:$port,reuseaddr,fork EXEC:/tmp/mock-api/handler.sh &
+    echo $! > /tmp/mock-api.pid
+
+    export CLAUDE_API_URL="http://localhost:$port"
+    sleep 0.3
+    echo "  Mock API server started on port $port (PID: $(cat /tmp/mock-api.pid))"
+}
+
+# Stop the mock API server
+stop_mock_api() {
+    if [[ -f /tmp/mock-api.pid ]]; then
+        # Kill the socat server and all its children
+        local pid=$(cat /tmp/mock-api.pid)
+        pkill -P $pid 2>/dev/null || true
+        kill $pid 2>/dev/null || true
+        rm -f /tmp/mock-api.pid
+    fi
+    # Kill any stray socat processes
+    pkill -f "socat TCP-LISTEN:9999" 2>/dev/null || true
+    echo "  Mock API server stopped"
+}
+
+# Clean up mock cloud resources
+cleanup_mock_cloud() {
+    stop_mock_api
+    rm -rf /tmp/mock-api
+    rm -f ~/.claude.json
+    echo "  Mock cloud resources cleaned up"
+}

@@ -13,10 +13,18 @@ import (
 )
 
 const (
-	baseURL         = "https://api.anthropic.com"
+	defaultBaseURL   = "https://api.anthropic.com"
 	anthropicVersion = "2023-06-01"
-	keychainService = "Claude Code-credentials"
+	keychainService  = "Claude Code-credentials"
 )
+
+// getBaseURL returns the API base URL, allowing override via env var for testing
+func getBaseURL() string {
+	if url := os.Getenv("CLAUDE_API_URL"); url != "" {
+		return url
+	}
+	return defaultBaseURL
+}
 
 // Client is the Claude Code Cloud API client
 type Client struct {
@@ -114,7 +122,7 @@ func loadOrgUUIDFromConfig() (string, error) {
 
 // doRequest performs an authenticated API request
 func (c *Client) doRequest(method, path string) ([]byte, error) {
-	url := baseURL + path
+	url := getBaseURL() + path
 
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
