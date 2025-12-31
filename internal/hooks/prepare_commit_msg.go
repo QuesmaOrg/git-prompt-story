@@ -65,6 +65,12 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		beforeFilter := len(sessions)
 		sessions = session.FilterSessionsByTime(sessions, startWork, endWork)
 		debugLog.log("FilterSessionsByTime: %d -> %d sessions", beforeFilter, len(sessions))
+
+		// Filter to only sessions with actual user messages in work period
+		beforeMsgFilter := len(sessions)
+		sessions = session.FilterSessionsByUserMessages(sessions, startWork, endWork)
+		debugLog.log("FilterSessionsByUserMessages: %d -> %d sessions", beforeMsgFilter, len(sessions))
+
 		for _, s := range sessions {
 			debugLog.log("  - kept: %s", s.ID)
 		}

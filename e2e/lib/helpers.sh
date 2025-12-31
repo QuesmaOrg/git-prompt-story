@@ -51,6 +51,30 @@ EOF
     echo "  Created mock session for $project_path: $session_dir/$session_id.jsonl"
 }
 
+# Create mock session with user messages before work period, but file modified within
+# This simulates a session where Claude responded (updating modified time) but user sent no new prompts
+# Usage: create_stale_session <session_id> <user_msg_time> <assistant_time>
+create_stale_session() {
+    local session_id="$1"
+    local user_msg_time="$2"      # When user messages occurred (before work period)
+    local assistant_time="$3"      # When assistant responded (within work period)
+
+    local repo_path=$(pwd)
+    local encoded_path=$(echo "$repo_path" | tr '/' '-')
+    local session_dir="$HOME/.claude/projects/$encoded_path"
+
+    mkdir -p "$session_dir"
+
+    cat > "$session_dir/$session_id.jsonl" << EOF
+{"type":"user","sessionId":"$session_id","timestamp":"$user_msg_time","cwd":"$repo_path","gitBranch":"main","message":{"role":"user","content":"How do I implement feature X?"}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$assistant_time","message":{"role":"assistant","content":[{"type":"text","text":"Here's how to implement feature X..."}]}}
+EOF
+
+    echo "  Created stale session: $session_dir/$session_id.jsonl"
+    echo "    User message at: $user_msg_time (before work period)"
+    echo "    Assistant response at: $assistant_time (within work period)"
+}
+
 # Clean up all mock sessions
 cleanup_sessions() {
     rm -rf "$HOME/.claude/projects"

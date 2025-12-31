@@ -86,3 +86,39 @@ func FilterSessionsByTime(sessions []ClaudeSession, startWork, endWork time.Time
 	}
 	return filtered
 }
+
+// HasUserMessagesInRange checks if a session has any user messages within the time range
+func HasUserMessagesInRange(sessionPath string, startWork, endWork time.Time) (bool, error) {
+	content, err := ReadSessionContent(sessionPath)
+	if err != nil {
+		return false, err
+	}
+
+	entries, err := ParseMessages(content)
+	if err != nil {
+		return false, err
+	}
+
+	for _, entry := range entries {
+		if entry.Type != "user" {
+			continue
+		}
+		ts := entry.Timestamp
+		if !ts.IsZero() && !ts.Before(startWork) && !ts.After(endWork) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// FilterSessionsByUserMessages filters to only sessions with user messages in time range
+func FilterSessionsByUserMessages(sessions []ClaudeSession, startWork, endWork time.Time) []ClaudeSession {
+	var filtered []ClaudeSession
+	for _, s := range sessions {
+		hasMessages, err := HasUserMessagesInRange(s.Path, startWork, endWork)
+		if err == nil && hasMessages {
+			filtered = append(filtered, s)
+		}
+	}
+	return filtered
+}
