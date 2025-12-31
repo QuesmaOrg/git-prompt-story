@@ -16,6 +16,10 @@ const postCommitScript = `#!/bin/sh
 exec git-prompt-story post-commit
 `
 
+const postRewriteScript = `#!/bin/sh
+exec git-prompt-story post-rewrite "$@"
+`
+
 // InstallHooks installs the git hooks
 func InstallHooks(global bool) error {
 	hooksDir, err := getHooksDir(global)
@@ -35,6 +39,11 @@ func InstallHooks(global bool) error {
 
 	// Install post-commit hook
 	if err := writeHookScript(hooksDir, "post-commit", postCommitScript); err != nil {
+		return err
+	}
+
+	// Install post-rewrite hook (for squash/rebase note transfer)
+	if err := writeHookScript(hooksDir, "post-rewrite", postRewriteScript); err != nil {
 		return err
 	}
 
