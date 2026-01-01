@@ -1,0 +1,3648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bab2b29 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>bab2b29</code></h1>
+    <p class="meta">Improve PR comment format with nested collapsible sections</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">88</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>bab2b29f9ce8d0d1ed414868ab982a1974f298f7</code><br>
+    <strong>Work period:</strong> 2026-01-01 17:12 - 2026-01-01 17:25
+  </div>
+
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3>Session 1: Claude Code</h3>
+      <div class="commit-meta">
+        2026-01-01 13:35 - 2026-01-01 17:25 | <span class="session-count">88</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT outside-work-period"
+            data-entry-type="user"
+            data-in-work-period="false">
+          <span class="prompt-time">13:36</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">So I want to iterate on better comment format by GitHub actions.
+Ideally, we would like to have a test (maybe unit test or maybe eTwin test) for that. The format of that should not be like &#34;prompt store&#34; at the beginning and one commit. There should be just a list of commits, with commit tools or tools if more tools are used. Use a number of user prompts and number of total steps. That&#39;s like a different and current prompt which is like confusing.
+And then for each commit, there should be like two things that you could preview, both of them could collapse or open:
+1. Prompts (user actions)
+2. A full transcript that you could roll on/unroll
+And that would be the total format. Please implement that.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand the current GitHub Actions comment format and how it&#39;s generated.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the codebase to understand how GitHub Actions comments are generated. Look for:
+1. The cu...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Perfect! Now I have all the information I need. Let me compile a comprehensive report:
+
+## Summary: GitHub Actions Comment Generation in git-prompt-story
+
+I&#39;ve thoroughly explored the codebase to understand how GitHub Actions comments are generated. Here&#39;s what I found:
+
+### 1. CURRENT COMMENT FORMAT/TEMPLATE
+
+The markdown comment is generated by the **`RenderMarkdown()`** function in `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go` (lines 535-609). The current format includes:
+
+- **Header**: &#34;## Prompt Story&#34;
+- **Stats line**: Shows number of commits with LLM session data
+- **Summary table**: Lists commits with their short SHA, tools used, and prompt count
+- **Expandable details**: Each commit has a collapsible details section containing:
+  - Session header with tool name, time range, and entry count
+  - List of all prompts with timestamps, types, and text
+- **Link section**: Optional link to full HTML transcripts on GitHub Pages
+- **Footer**: Attribution to git-prompt-story
+
+**Example structure** (from lines 539-606):
+```markdown
+## Prompt Story
+
+**N commit(s)** with LLM session data
+
+| Commit | Tool | Prompts |
+|--------|------|--------|
+| ...
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;SHA&lt;/b&gt;: commit subject&lt;/summary&gt;
+
+**Session 1** (Tool Name) - HH:MM to HH:MM
+- [HH:MM] TYPE: text...
+&lt;/details&gt;
+```
+
+### 2. WHERE COMMENT HTML/MARKDOWN IS GENERATED
+
+The markdown is generated and posted in **two ways**:
+
+**A. Static Markdown Generation** (`internal/ci/summary.go`):
+- `RenderMarkdown(summary *Summary, pagesURL string) string` - lines 535-609
+- Called by `ci-summary` command with `--format=markdown` flag
+- Output: Saves to `./prompt-story-summary.md`
+
+**B. GitHub Actions Workflow** (`.github/actions/prompt-story/action.yml`):
+1. **Step: Analyze commits** (lines 79-88) - Runs `scripts/analyze.sh`
+   - Generates markdown: `./prompt-story ci-summary &#34;$COMMIT_RANGE&#34; --format=markdown`
+   - Saves to `./prompt-story-summary.md`
+
+2. **Step: Post PR comment** (lines 129-209) - Uses...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the codebase to understand:
+1. How commits are tracked and stored
+2. The structure of tra...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Perfect! I now have a comprehensive understanding of the codebase. Let me create a detailed report on all the requested topics.
+
+## Comprehensive Codebase Analysis: git-prompt-story
+
+### 1. How Commits Are Tracked and Stored
+
+**Git Notes System:**
+- Commits are tracked via **git notes** attached to commit objects using the ref `refs/notes/commits`
+- Each commit note contains a **PromptStoryNote** (JSON) that links the commit to LLM sessions
+- The note is stored as a blob via `git hash-object` and attached during the `post-commit` hook
+- The note SHA itself is stored in a temporary `PENDING-PROMPT-STORY` file during `prepare-commit-msg` and attached after commit creation
+
+**Key Files:**
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/metadata.go` - Defines `PromptStoryNote` structure
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/post_commit.go` - Attaches the note to HEAD after commit
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/notes.go` - Low-level git notes operations
+
+**Commit Timeline:**
+1. `prepare-commit-msg` hook fires: discovers sessions, creates blob for note, stores note SHA in `PENDING-PROMPT-STORY` file
+2. Commit is created by user
+3. `post-commit` hook fires: reads `PENDING-PROMPT-STORY`, attaches note blob to HEAD commit
+
+---
+
+### 2. Structure of Transcript Data
+
+**Session Transcript Format (JSONL):**
+Located at: `~/.claude/projects/{encoded-repo-path}/{session-id}.jsonl`
+
+Each line is a JSON object representing a message entry:
+
+```go
+type MessageEntry struct {
+    Type      string        // &#34;user&#34;, &#34;assistant&#34;, &#34;file-history-snapshot&#34;, &#34;tool_reject&#34;
+    SessionID string
+    Timestamp time.Time
+    CWD       string
+    GitBranch string
+    Snapshot  *Snapshot     // For snapshots: timestamp
+    Message   *Message      // For messages: role &#43; content
+}
+
+type Message struct {
+    Role       string          // &#34;user&#34;, &#34;assistant&#34;
+    RawContent json.RawMessage // Can be string or array of content parts
+}
+
+type ContentPart struct {
+    Type ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good, I have a solid understanding of the codebase. Let me now look at the actual current markdown format and e2e tests to understand exactly what we need to change.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   535 // RenderMarkdown generates markdown output for PR comment
+   536 func RenderMarkdown(summary *Summary, pagesURL string) string {
+   537 	var sb strings.Builder
+   538 
+   539 	sb.WriteString(&#34;## Prompt Story\n\n&#34;)
+   540 
+   541 	if summary.CommitsWithNotes == 0 {
+   542 		sb.WriteString(&#34;No prompt-story notes found in this PR.\n&#34;)
+   543 		return sb.String()
+   544 	}
+   545 
+   546 	// Stats line
+   547 	sb.WriteString(fmt.Sprintf(&#34;**%d commit(s)** with LLM session data\n\n&#34;, summary.CommitsWithNotes))
+   548 
+   549 	// Summary table
+   550 	sb.WriteString(&#34;| Commit | Tool | Prompts |\n&#34;)
+   551 	sb.WriteString(&#34;|--------|------|--------|\n&#34;)
+   552 
+   553 	for _, commit := range summary.Commits {
+   554 		tools := make(map[string]bool)
+   555 		promptCount := 0
+   556 		for _, sess := range commit.Sessions {
+   557 			tools[formatToolName(sess.Tool)] = true
+   558 			promptCount &#43;= len(sess.Prompts)
+   559 		}
+   560 		var toolNames []string
+   561 		for t := range tools {
+   562 			toolNames = append(toolNames, t)
+   563 		}
+   564 		sb.WriteString(fmt.Sprintf(&#34;| %s | %s | %d |\n&#34;,
+   565 			commit.ShortSHA, strings.Join(toolNames, &#34;, &#34;), promptCount))
+   566 	}
+   567 	sb.WriteString(&#34;\n&#34;)
+   568 
+   569 	// Expandable details for each commit
+   570 	for _, commit := range summary.Commits {
+   571 		subject := commit.Subject
+   572 		if len(subject) &gt; 50 {
+   573 			subject = subject[:47] &#43; &#34;...&#34;
+   574 		}
+   575 		sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;\n&lt;summary&gt;&lt;b&gt;%s&lt;/b&gt;: %s&lt;/summary&gt;\n\n&#34;,
+   576 			commit.ShortSHA, subject))
+   577 
+   578 		for i, sess := range commit.Sessions {
+   579 			if i &gt; 0 {
+   580 				sb.WriteString(&#34;\n&#34;)
+   581 			}
+   582 			sb.WriteString(fmt.Sprintf(&#34;**Session %d** (%s) - %s to %s\n\n&#34;,
+   583 				i&#43;1, formatToolName(sess.Tool),
+   584 				sess.Start.Local().Format(&#34;15:04&#34;),
+   585 				sess.End.Local().Format(&#34;15:04&#34;)))
+   586 
+   587 			for _, prompt := range sess.Prompts {
+   588 				text := prompt.Text
+   589 	...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/**/*</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/02-session-detection.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/04-multiple-sessions.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/05-no-sessions.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/01-basic-flow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/03-amend-flow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/06-no-user-messages.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/07-show-ranges.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/Dockerfile
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/runner.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/run-tests.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/08-cloud-integration.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/09-pii-scrubbing.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/11-squash-flow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;strings&#34;
+     7 	&#34;time&#34;
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    12 )
+    13 
+    14 const transcriptsRef = &#34;refs/notes/prompt-story-transcripts&#34;
+    15 const notesRef = &#34;refs/notes/commits&#34;
+    16 
+    17 // PromptEntry represents a single prompt or action in a session
+    18 type PromptEntry struct {
+    19 	Time         time.Time `json:&#34;time&#34;`
+    20 	Type         string    `json:&#34;type&#34;` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT
+    21 	Text         string    `json:&#34;text&#34;`
+    22 	Truncated    bool      `json:&#34;truncated,omitempty&#34;`
+    23 	InWorkPeriod bool      `json:&#34;in_work_period&#34;` // true if within commit&#39;s work period
+    24 	ToolID       string    `json:&#34;tool_id,omitempty&#34;`     // For TOOL_USE/TOOL_RESULT: links them together
+    25 	ToolName     string    `json:&#34;tool_name,omitempty&#34;`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
+    26 	ToolInput    string    `json:&#34;tool_input,omitempty&#34;`  // For TOOL_USE: the tool input/command
+    27 	ToolOutput   string    `json:&#34;tool_output,omitempty&#34;` // For TOOL_RESULT: the tool output
+    28 }
+    29 
+    30 // SessionSummary represents a summarized session within a commit
+    31 type SessionSummary struct {
+    32 	Tool     string        `json:&#34;tool&#34;`
+    33 	ID       string        `json:&#34;id&#34;`
+    34 	Start    time.Time     `json:&#34;start&#34;`
+    35 	End      time.Time     `json:&#34;end&#34;`
+    36 	Prompts  []PromptEntry `json:&#34;prompts&#34;`
+    37 }
+    38 
+    39 // CommitSummary represents prompts for a single commit
+    40 type CommitSummary struct {
+    41 	SHA       string           `json:&#34;sha&#34;`
+    42 	ShortSHA  string           `json:&#34;short_sha&#34;`
+    43 	Subject   string           `json:&#34;subject&#34;`
+    44 	Sessions  []SessionSummary `json:&#34;sess...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 #!/bin/bash
+     2 # E2E Test Helper Functions
+     3 
+     4 # Fail with error message and exit
+     5 fail() {
+     6     echo &#34;FAIL: $1&#34; &gt;&amp;2
+     7     exit 1
+     8 }
+     9 
+    10 # Create a mock Claude Code session with realistic JSONL format
+    11 # Usage: create_mock_session &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+    12 # Example: create_mock_session &#34;test-session-1&#34; &#34;2025-01-15T09:15:00Z&#34; &#34;2025-01-15T10:25:00Z&#34;
+    13 create_mock_session() {
+    14     local session_id=&#34;$1&#34;
+    15     local start_time=&#34;$2&#34;
+    16     local end_time=&#34;$3&#34;
+    17 
+    18     local repo_path=$(pwd)
+    19     local encoded_path=$(echo &#34;$repo_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+    20     local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+    21 
+    22     mkdir -p &#34;$session_dir&#34;
+    23 
+    24     cat &gt; &#34;$session_dir/$session_id.jsonl&#34; &lt;&lt; EOF
+    25 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;How do I implement feature X?&#34;}}
+    26 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;Here&#39;s how to implement feature X...&#34;}]}}
+    27 EOF
+    28 
+    29     echo &#34;  Created mock session: $session_dir/$session_id.jsonl&#34;
+    30 }
+    31 
+    32 # Create a mock Claude Code session for a specific project path
+    33 # Usage: create_mock_session_for_path &lt;project_path&gt; &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+    34 # Example: create_mock_session_for_path &#34;/workspace/other-repo&#34; &#34;session-2&#34; &#34;2025-01-15T09:15:00Z&#34; &#34;2025-01-15T10:25:00Z&#34;
+    35 create_mock_session_for_path() {
+    36     local project_path=&#34;$1&#34;
+    37     local session_id=&#34;$2&#34;
+    38     local start_time=&#34;$3&#34;
+    39     local end_time=&#34;$4&#34;
+    40 
+    41     local encoded_path=$(echo &#34;$project_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+    42     local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+    43 
+    44     mkdir -p &#34;$session_dir&#34;
+    45 
+    46     cat &gt; &#34;$s...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   100 	}
+   101 
+   102 	// Single commit reference
+   103 	sha, err := git.ResolveCommit(spec)
+   104 	if err != nil {
+   105 		return nil, fmt.Errorf(&#34;failed to resolve commit %s: %w&#34;, spec, err)
+   106 	}
+   107 	return []string{sha}, nil
+   108 }
+   109 
+   110 // analyzeCommit extracts prompt data for a single commit
+   111 func analyzeCommit(sha string, full bool) (*CommitSummary, error) {
+   112 	// Get note attached to commit
+   113 	noteContent, err := git.GetNote(notesRef, sha)
+   114 	if err != nil {
+   115 		return nil, fmt.Errorf(&#34;no prompt-story note found for commit %s&#34;, sha[:7])
+   116 	}
+   117 
+   118 	// Parse note JSON
+   119 	var psNote note.PromptStoryNote
+   120 	if err := json.Unmarshal([]byte(noteContent), &amp;psNote); err != nil {
+   121 		return nil, fmt.Errorf(&#34;failed to parse note: %w&#34;, err)
+   122 	}
+   123 
+   124 	// Get commit subject
+   125 	subject, _ := getCommitSubject(sha)
+   126 
+   127 	// Get commit timestamp (end of work period)
+   128 	endWork, _ := git.GetPreviousCommitTimestamp(sha)
+   129 	if endWork.IsZero() {
+   130 		for _, sess := range psNote.Sessions {
+   131 			if sess.Modified.After(endWork) {
+   132 				endWork = sess.Modified
+   133 			}
+   134 		}
+   135 	}
+   136 
+   137 	cs := &amp;CommitSummary{
+   138 		SHA:       sha,
+   139 		ShortSHA:  sha[:7],
+   140 		Subject:   subject,
+   141 		Sessions:  make([]SessionSummary, 0),
+   142 		StartWork: psNote.StartWork,
+   143 		EndWork:   endWork,
+   144 	}
+   145 
+   146 	// Process each session
+   147 	for _, sess := range psNote.Sessions {
+   148 		ss, err := analyzeSession(sess, psNote.StartWork, endWork, full)
+   149 		if err != nil {
+   150 			continue
+   151 		}
+   152 		if len(ss.Prompts) &gt; 0 {
+   153 			cs.Sessions = append(cs.Sessions, *ss)
+   154 		}
+   155 	}
+   156 
+   157 	return cs, nil
+   158 }
+   159 
+   160 // analyzeSession extracts all entries from a session, marking which are in work period
+   161 func analyzeSession(sess note.SessionEntry, startWo...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I have a good understanding of the codebase. Let me ask some clarifying questions before creating the implementation plan.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">AskUserQuestion</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;questions&#34;:[{&#34;header&#34;:&#34;Steps count&#34;,&#34;multiSelect&#34;:false,&#34;options&#34;:[{&#34;description&#34;:&#34;Count only TOOL_USE entries (Bash, Edit, Read, Glob, etc.)&#34;,&#34;label&#34;:&#34;Tool uses only&#34;},{&#34;description&#34;:&#34;Count tool...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has answered your questions: &#34;What should count as a &#39;step&#39; in &#39;number of total steps&#39;? Should it be tool uses only (Bash, Edit, Read, etc.) or all entries including assistant text responses?&#34;=&#34;Everything&#34;, &#34;For the collapsible &#39;Prompts (user actions)&#39; section, what should be included?&#34;=&#34;All user actions&#34;, &#34;Should the commit list header still say &#39;Prompt Story&#39; or something different?&#34;=&#34;No header&#34;. You can now continue with the user&#39;s answers in mind.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:39</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I have all the information needed. Let me launch a Plan agent to design the implementation approach.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:39</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Design an implementation plan for a new GitHub Actions PR comment format for git-prompt-story.
+
+#...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Now I have a comprehensive understanding of the codebase. Let me provide a detailed implementation plan:
+
+---
+
+# Implementation Plan: New GitHub Actions PR Comment Format for git-prompt-story
+
+## Overview
+
+This plan details the changes needed to implement a new markdown format for GitHub PR comments generated by `RenderMarkdown()` in `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go`.
+
+## 1. Analysis of Current State
+
+### Current Data Flow
+
+1. `GenerateSummary()` analyzes commits and creates a `Summary` struct
+2. For each commit, `analyzeCommit()` extracts session data
+3. `analyzeSession()` parses the JSONL transcript and creates `PromptEntry` items for various types:
+   - `PROMPT` - User prompts
+   - `COMMAND` - User slash commands
+   - `TOOL_REJECT` - User tool rejections
+   - `ASSISTANT` - Assistant text responses
+   - `TOOL_USE` - Tool invocations
+
+4. The `Summary.TotalPrompts` currently counts **ALL** entries in `sess.Prompts` (line 80), not just user prompts - this is a naming inconsistency
+
+### Current RenderMarkdown() Output (lines 535-609)
+
+```markdown
+## Prompt Story
+
+**N commit(s)** with LLM session data
+
+| Commit | Tool | Prompts |
+|--------|------|--------|
+| abc1234 | Claude Code | 5 |
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;abc1234&lt;/b&gt;: commit subject&lt;/summary&gt;
+**Session 1** (Claude Code) - 09:00 to 10:00
+- [09:15] PROMPT: user text...
+&lt;/details&gt;
+```
+
+### Entry Type Classification
+
+User actions (for &#34;Prompts&#34; section):
+- `PROMPT` - User typed prompts
+- `COMMAND` - Slash commands like `/commit`
+- `TOOL_REJECT` - User rejected tool calls
+
+All steps (for &#34;Full transcript&#34; section):
+- All of the above, plus:
+- `ASSISTANT` - Assistant responses
+- `TOOL_USE` - Tool invocations
+
+Note: `TOOL_RESULT` is not currently tracked as a separate entry in `ss.Prompts` - tool results are attached to the corresponding `TOOL_USE` entry via the `ToolOutput` field.
+
+---
+
+## 2. Required Data Structure Changes
+
+### Add Count Fields to `Summary` struct
+
+Current `Summary` struct (lin...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:42</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the `html.go` file for the `entryCategory()` pattern and then write the final plan.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/html.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    65 			}
+    66 			return s[:n-3] &#43; &#34;...&#34;
+    67 		},
+    68 		&#34;add&#34;: func(a, b int) int {
+    69 			return a &#43; b
+    70 		},
+    71 		&#34;entryCategory&#34;: func(entryType string) string {
+    72 			switch entryType {
+    73 			case &#34;PROMPT&#34;, &#34;COMMAND&#34;, &#34;TOOL_REJECT&#34;:
+    74 				return &#34;user&#34;
+    75 			case &#34;ASSISTANT&#34;:
+    76 				return &#34;assistant&#34;
+    77 			case &#34;TOOL_USE&#34;, &#34;TOOL_RESULT&#34;:
+    78 				return &#34;tool&#34;
+    79 			default:
+    80 				return &#34;other&#34;
+    81 			}
+    82 		},
+    83 	}
+    84 
+    85 	// Load and parse index template
+    86 	indexTmplBytes, err := templateFS.ReadFile(&#34;templates/index.html.tmpl&#34;)
+    87 	if err != nil {
+    88 		return fmt.Errorf(&#34;failed to load index template: %w&#34;, err)
+    89 	}
+    90 	indexTmpl, err := template.New(&#34;index&#34;).Funcs(funcMap).Parse(string(indexTmplBytes))
+    91 	if err != nil {
+    92 		return fmt.Errorf(&#34;failed to parse index template: %w&#34;, err)
+    93 	}
+    94 
+    95 	// Load and parse commit template
+    96 	commitTmplBytes, err := templateFS.ReadFile(&#34;templates/commit.html.tmpl&#34;)
+    97 	if err != nil {
+    98 		return fmt.Errorf(&#34;failed to load commit template: %w&#34;, err)
+    99 	}
+   100 	commitTmpl, err := template.New(&#34;commit&#34;).Funcs(funcMap).Parse(string(commitTmplBytes))
+   101 	if err != nil {
+   102 		return fmt.Errorf(&#34;failed to parse commit template: %w&#34;, err)
+   103 	}
+   104 
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:42</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I have all the information needed. Let me write the final plan.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:42</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ve written the implementation plan. Here&#39;s a summary of what it covers:
+
+**New Format:**
+- No header (removes &#34;## Prompt Story&#34;)
+- Commit table with: SHA, Subject, Tools, User Prompts count, Total Steps count
+- Per commit: collapsible &#34;Prompts&#34; section (user actions only) and nested collapsible &#34;Full Transcript&#34; (all entries)
+
+**Files to Modify:**
+1. `internal/ci/summary.go` - Add helpers, update struct, rewrite `RenderMarkdown()`
+2. `internal/ci/summary_test.go` (new) - Unit tests for the new format
+3. `e2e/lib/helpers.sh` - Add `create_mock_session_with_tools()` helper
+4. `e2e/tests/10-ci-commands.sh` - Update assertions for new format
+
+**Counting:**
+- **User Prompts**: PROMPT, COMMAND, TOOL_REJECT
+- **Total Steps**: All entries (PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE)</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: New GitHub Actions PR Comment Format\n\n## Summary\n\nUpdate `RenderMarkdown()` in `internal/ci/summary.go` to produce a new PR comment format:\n- Remove \&#34;## Prompt Story\&#34; header...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: New GitHub Actions PR Comment Format
+
+## Summary
+
+Update `RenderMarkdown()` in `internal/ci/summary.go` to produce a new PR comment format:
+- Remove &#34;## Prompt Story&#34; header
+- Show commits in table with: SHA, Subject, Tools, User Prompts count, Total Steps count
+- Two collapsible sections per commit: &#34;Prompts&#34; (user actions) and &#34;Full Transcript&#34; (all entries)
+
+## New Format Preview
+
+```markdown
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| abc1234 | Add feature X | Claude Code | 3 | 12 |
+| def5678 | Fix bug | tools (2) | 5 | 25 |
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;abc1234&lt;/b&gt;: Add feature X&lt;/summary&gt;
+
+### Prompts
+
+- [09:15] PROMPT: user text...
+- [09:20] COMMAND: /commit
+
+### Full Transcript
+
+&lt;details&gt;
+&lt;summary&gt;Show all steps&lt;/summary&gt;
+
+- [09:15] PROMPT: user text...
+- [09:16] ASSISTANT: I&#39;ll help you...
+- [09:17] TOOL_USE (Bash): ls -la
+- [09:20] COMMAND: /commit
+
+&lt;/details&gt;
+&lt;/details&gt;
+```
+
+## Files to Modify
+
+1. **`/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go`**
+   - Add `isUserAction()` helper (reuse pattern from `html.go:71-82`)
+   - Add `countUserPrompts()` helper
+   - Add `formatToolDisplay()` helper for &#34;tools (N)&#34; logic
+   - Update `Summary` struct with `TotalUserPrompts` and `TotalSteps` fields
+   - Update `GenerateSummary()` to populate new fields
+   - Rewrite `RenderMarkdown()` with new format
+
+2. **`/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh`**
+   - Add `create_mock_session_with_tools()` helper for richer test data
+
+3. **`/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh`**
+   - Update assertions: remove &#34;## Prompt Story&#34; check, add new format checks
+
+4. **`/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/su...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeFo...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;strings&#34;
+     7 	&#34;time&#34;
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    12 )
+    13 
+    14 const transcriptsRef = &#34;refs/notes/prompt-story-transcripts&#34;
+    15 const notesRef = &#34;refs/notes/commits&#34;
+    16 
+    17 // PromptEntry represents a single prompt or action in a session
+    18 type PromptEntry struct {
+    19 	Time         time.Time `json:&#34;time&#34;`
+    20 	Type         string    `json:&#34;type&#34;` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT
+    21 	Text         string    `json:&#34;text&#34;`
+    22 	Truncated    bool      `json:&#34;truncated,omitempty&#34;`
+    23 	InWorkPeriod bool      `json:&#34;in_work_period&#34;` // true if within commit&#39;s work period
+    24 	ToolID       string    `json:&#34;tool_id,omitempty&#34;`     // For TOOL_USE/TOOL_RESULT: links them together
+    25 	ToolName     string    `json:&#34;tool_name,omitempty&#34;`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
+    26 	ToolInput    string    `json:&#34;tool_input,omitempty&#34;`  // For TOOL_USE: the tool input/command
+    27 	ToolOutput   string    `json:&#34;tool_output,omitempty&#34;` // For TOOL_RESULT: the tool output
+    28 }
+    29 
+    30 // SessionSummary represents a summarized session within a commit
+    31 type SessionSummary struct {
+    32 	Tool     string        `json:&#34;tool&#34;`
+    33 	ID       string        `json:&#34;id&#34;`
+    34 	Start    time.Time     `json:&#34;start&#34;`
+    35 	End      time.Time     `json:&#34;end&#34;`
+    36 	Prompts  []PromptEntry `json:&#34;prompts&#34;`
+    37 }
+    38 
+    39 // CommitSummary represents prompts for a single commit
+    40 type CommitSummary struct {
+    41 	SHA       string           `json:&#34;sha&#34;`
+    42 	ShortSHA  string           `json:&#34;short_sha&#34;`
+    43 	Subject   string           `json:&#34;subject&#34;`
+    44 	Sessions  []SessionSummary `json:&#34;sess...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I&#39;ll implement the changes. Let me start by adding the helper functions and updating the Summary struct:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    45 	StartWork time.Time        `json:&#34;start_work&#34;`
+    46 	EndWork   time.Time        `json:&#34;end_work&#34;`
+    47 }
+    48 
+    49 // Summary represents the full analysis result
+    50 type Summary struct {
+    51 	Commits          []CommitSummary `json:&#34;commits&#34;`
+    52 	TotalPrompts     int             `json:&#34;total_prompts&#34;`      // Kept for backward compatibility (equals TotalSteps)
+    53 	TotalUserPrompts int             `json:&#34;total_user_prompts&#34;` // Count of user actions (PROMPT, COMMAND, TOOL_REJECT)
+    54 	TotalSteps       int             `json:&#34;total_steps&#34;`        // Count of all entries
+    55 	CommitsWithNotes int             `json:&#34;commits_with_notes&#34;`
+    56 	CommitsAnalyzed  int             `json:&#34;commits_analyzed&#34;`
+    57 }
+    58 
+    59 // GenerateSummary analyzes commits in a range and extracts prompt data
+    60 func GenerateSummary(commitRange string, full bool) (*Summary, error) {
+    61 	// Resolve commit range to list of SHAs</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeFo...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   614 func RenderJSON(summary *Summary) ([]byte, error) {
+   615 	return json.MarshalIndent(summary, &#34;&#34;, &#34;  &#34;)
+   616 }
+   617 
+   618 // formatToolName converts tool ID to display name
+   619 func formatToolName(tool string) string {
+   620 	switch tool {
+   621 	case &#34;claude-code&#34;:
+   622 		return &#34;Claude Code&#34;
+   623 	case &#34;claude-cloud&#34;:
+   624 		return &#34;Claude Cloud&#34;
+   625 	case &#34;cursor&#34;:
+   626 		return &#34;Cursor&#34;
+   627 	case &#34;codex&#34;:
+   628 		return &#34;Codex&#34;
+   629 	default:
+   630 		return tool
+   631 	}
+   632 }
+   633 
+   634 // isUserAction returns true if the entry type represents a user action
+   635 func isUserAction(entryType string) bool {
+   636 	switch entryType {
+   637 	case &#34;PROMPT&#34;, &#34;COMMAND&#34;, &#34;TOOL_REJECT&#34;:
+   638 		return true
+   639 	default:
+   640 		return false
+   641 	}
+   642 }
+   643 
+   644 // countUserPrompts counts user action entries in a slice
+   645 func countUserPrompts(prompts []PromptEntry) int {
+   646 	count := 0
+   647 	for _, p := range prompts {
+   648 		if isUserAction(p.Type) {
+   649 			count&#43;&#43;
+   650 		}
+   651 	}
+   652 	return count
+   653 }
+   654 
+   655 // formatToolDisplay formats tool names for display in the summary table
+   656 func formatToolDisplay(tools map[string]bool) string {
+   657 	if len(tools) == 1 {
+   658 		for t := range tools {
+   659 			return t
+   660 		}
+   661 	}
+   662 	return fmt.Sprintf(&#34;tools (%d)&#34;, len(tools))
+   663 }
+   664 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    68 		Commits:         make([]CommitSummary, 0),
+    69 		CommitsAnalyzed: len(commits),
+    70 	}
+    71 
+    72 	for _, sha := range commits {
+    73 		cs, err := analyzeCommit(sha, full)
+    74 		if err != nil {
+    75 			// Skip commits without notes
+    76 			continue
+    77 		}
+    78 		if len(cs.Sessions) &gt; 0 {
+    79 			summary.Commits = append(summary.Commits, *cs)
+    80 			summary.CommitsWithNotes&#43;&#43;
+    81 			for _, sess := range cs.Sessions {
+    82 				stepCount := len(sess.Prompts)
+    83 				userPromptCount := countUserPrompts(sess.Prompts)
+    84 				summary.TotalSteps &#43;= stepCount
+    85 				summary.TotalUserPrompts &#43;= userPromptCount
+    86 				summary.TotalPrompts &#43;= stepCount // Keep for backward compatibility
+    87 			}
+    88 		}
+    89 	}
+    90 
+    91 	return summary, nil
+    92 }
+    93 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   537 	}
+   538 	return strings.TrimSpace(out), nil
+   539 }
+   540 
+   541 // RenderMarkdown generates markdown output for PR comment
+   542 func RenderMarkdown(summary *Summary, pagesURL string) string {
+   543 	var sb strings.Builder
+   544 
+   545 	if summary.CommitsWithNotes == 0 {
+   546 		sb.WriteString(&#34;No prompt-story notes found in this PR.\n&#34;)
+   547 		return sb.String()
+   548 	}
+   549 
+   550 	// Summary table with new columns
+   551 	sb.WriteString(&#34;| Commit | Subject | Tool(s) | User Prompts | Steps |\n&#34;)
+   552 	sb.WriteString(&#34;|--------|---------|---------|--------------|-------|\n&#34;)
+   553 
+   554 	for _, commit := range summary.Commits {
+   555 		// Collect unique tools
+   556 		tools := make(map[string]bool)
+   557 		userPromptCount := 0
+   558 		totalSteps := 0
+   559 
+   560 		for _, sess := range commit.Sessions {
+   561 			tools[formatToolName(sess.Tool)] = true
+   562 			userPromptCount &#43;= countUserPrompts(sess.Prompts)
+   563 			totalSteps &#43;= len(sess.Prompts)
+   564 		}
+   565 
+   566 		// Format tool names
+   567 		toolDisplay := formatToolDisplay(tools)
+   568 
+   569 		// Truncate subject for table
+   570 		subject := commit.Subject
+   571 		if len(subject) &gt; 40 {
+   572 			subject = subject[:37] &#43; &#34;...&#34;
+   573 		}
+   574 
+   575 		sb.WriteString(fmt.Sprintf(&#34;| %s | %s | %s | %d | %d |\n&#34;,
+   576 			commit.ShortSHA, subject, toolDisplay, userPromptCount, totalSteps))
+   577 	}
+   578 	sb.WriteString(&#34;\n&#34;)
+   579 
+   580 	// Expandable details for each commit
+   581 	for _, commit := range summary.Commits {
+   582 		subject := commit.Subject
+   583 		if len(subject) &gt; 50 {
+   584 			subject = subject[:47] &#43; &#34;...&#34;
+   585 		}
+   586 		sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;\n&lt;summary&gt;&lt;b&gt;%s&lt;/b&gt;: %s&lt;/summary&gt;\n\n&#34;,
+   587 			commit.ShortSHA, subject))
+   588 
+   589 		// Collect all entr...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:46</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me verify the code compiles:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build ./...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/... -v</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestIsUserAction
+=== RUN   TestIsUserAction/PROMPT
+=== RUN   TestIsUserAction/COMMAND
+=== RUN   TestIsUserAction/TOOL_REJECT
+=== RUN   TestIsUserAction/ASSISTANT
+=== RUN   TestIsUserAction/TOOL_USE
+=== RUN   TestIsUserAction/TOOL_RESULT
+=== RUN   TestIsUserAction/OTHER
+=== RUN   TestIsUserAction/#00
+--- PASS: TestIsUserAction (0.00s)
+    --- PASS: TestIsUserAction/PROMPT (0.00s)
+    --- PASS: TestIsUserAction/COMMAND (0.00s)
+    --- PASS: TestIsUserAction/TOOL_REJECT (0.00s)
+    --- PASS: TestIsUserAction/ASSISTANT (0.00s)
+    --- PASS: TestIsUserAction/TOOL_USE (0.00s)
+    --- PASS: TestIsUserAction/TOOL_RESULT (0.00s)
+    --- PASS: TestIsUserAction/OTHER (0.00s)
+    --- PASS: TestIsUserAction/#00 (0.00s)
+=== RUN   TestCountUserPrompts
+=== RUN   TestCountUserPrompts/empty
+=== RUN   TestCountUserPrompts/only_user_actions
+=== RUN   TestCountUserPrompts/mixed_entries
+=== RUN   TestCountUserPrompts/no_user_actions
+--- PASS: TestCountUserPrompts (0.00s)
+    --- PASS: TestCountUserPrompts/empty (0.00s)
+    --- PASS: TestCountUserPrompts/only_user_actions (0.00s)
+    --- PASS: TestCountUserPrompts/mixed_entries (0.00s)
+    --- PASS: TestCountUserPrompts/no_user_actions (0.00s)
+=== RUN   TestFormatToolDisplay
+=== RUN   TestFormatToolDisplay/single_tool
+=== RUN   TestFormatToolDisplay/two_tools
+=== RUN   TestFormatToolDisplay/three_tools
+--- PASS: TestFormatToolDisplay (0.00s)
+    --- PASS: TestFormatToolDisplay/single_tool (0.00s)
+    --- PASS: TestFormatToolDisplay/two_tools (0.00s)
+    --- PASS: TestFormatToolDisplay/three_tools (0.00s)
+=== RUN   TestRenderMarkdown_NoCommits
+--- PASS: TestRenderMarkdown_NoCommits (0.00s)
+=== RUN   TestRenderMarkdown_Structure
+--- PASS: TestRenderMarkdown_Structure (0.00s)
+=== RUN   TestRenderMarkdown_MultipleTools
+--- PASS: TestRenderMarkdown_MultipleTools (0.00s)
+=== RUN   TestRenderMarkdown_PagesURL
+--- PASS: TestRenderMarkdown_PagesURL (0.00s)
+=== RUN   TestRenderMarkdown_NoUserPrompts
+--- PASS: TestRenderMarkdown_NoUserP...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    25 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;How do I implement feature X?&#34;}}
+    26 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;Here&#39;s how to implement feature X...&#34;}]}}
+    27 EOF
+    28 
+    29     echo &#34;  Created mock session: $session_dir/$session_id.jsonl&#34;
+    30 }
+    31 
+    32 # Create a mock Claude Code session for a specific project path
+    33 # Usage: create_mock_session_for_path &lt;project_path&gt; &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+    34 # Example: create_mock_session_for_path &#34;/workspace/other-repo&#34; &#34;session-2&#34; &#34;2025-01-15T09:15:00Z&#34; &#34;2025-01-15T10:25:00Z&#34;
+    35 create_mock_session_for_path() {
+    36     local project_path=&#34;$1&#34;
+    37     local session_id=&#34;$2&#34;
+    38     local start_time=&#34;$3&#34;
+    39     local end_time=&#34;$4&#34;
+    40 
+    41     local encoded_path=$(echo &#34;$project_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+    42     local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+    43 
+    44     mkdir -p &#34;$session_dir&#34;
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    25 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;How do I implement feature X?&#34;}}
+    26 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;Here&#39;s how to implement feature X...&#34;}]}}
+    27 EOF
+    28 
+    29     echo &#34;  Created mock session: $session_dir/$session_id.jsonl&#34;
+    30 }
+    31 
+    32 # Create a mock Claude Code session with tool uses for testing PR comment format
+    33 # Usage: create_mock_session_with_tools &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+    34 create_mock_session_with_tools() {
+    35     local session_id=&#34;$1&#34;
+    36     local start_time=&#34;$2&#34;
+    37     local end_time=&#34;$3&#34;
+    38 
+    39     local repo_path=$(pwd)
+    40     local encoded_path=$(echo &#34;$repo_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+    41     local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+    42 
+    43     mkdir -p &#34;$session_dir&#34;
+    44 
+    45     cat &gt; &#34;$session_dir/$session_id.jsonl&#34; &lt;&lt; EOF
+    46 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;Add a new function to utils.go&#34;}}
+    47 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;I&#39;ll help you add a new function.&#34;},{&#34;type&#34;:&#34;tool_use&#34;,&#34;id&#34;:&#34;tool1&#34;,&#34;name&#34;:&#34;Read&#34;,&#34;input&#34;:{&#34;file_path&#34;:&#34;/utils.go&#34;}}]}}
+    48 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;tool_result&#34;,&#34;tool_use_id&#34;:&#34;tool1&#34;,&#34;content&#34;:&#34;package utils\n\nfunc Existing() {}&#34;}]}}
+    49 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;t...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    62 # Verify first commit has sessions
+    63 echo &#34;$OUTPUT&#34; | jq -e &#39;.commits[0].sessions | length &gt; 0&#39; &gt; /dev/null || fail &#34;First commit should have sessions&#34;
+    64 echo &#34;    - First commit has sessions&#34;
+    65 
+    66 # Step 5: Test ci-summary with Markdown output
+    67 echo &#34;  Step 5: Testing ci-summary Markdown output...&#34;
+    68 MD_OUTPUT=$(git-prompt-story ci-summary &#34;${INITIAL_COMMIT}..HEAD&#34; --format=markdown)
+    69 
+    70 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;| Commit | Subject | Tool(s) | User Prompts | Steps |&#34; || fail &#34;Markdown should have new table header&#34;
+    71 echo &#34;    - Has new table header&#34;
+    72 
+    73 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;### Prompts&#34; || fail &#34;Markdown should have Prompts section&#34;
+    74 echo &#34;    - Has ### Prompts section&#34;
+    75 
+    76 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;### Full Transcript&#34; || fail &#34;Markdown should have Full Transcript section&#34;
+    77 echo &#34;    - Has ### Full Transcript section&#34;
+    78 
+    79 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;Claude Code&#34; || fail &#34;Markdown should mention Claude Code&#34;
+    80 echo &#34;    - Mentions Claude Code&#34;
+    81 
+    82 # Step 6: Test ci-summary with pages-url option
+    83 echo &#34;  Step 6: Testing ci-summary with pages-url...&#34;
+    84 PAGES_MD=$(git-prompt-story ci-summary &#34;${INITIAL_COMMIT}..HEAD&#34; --format=markdown --pages-url=&#34;https://example.github.io/repo/pr-42/&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me also update the JSON output test to check for the new fields:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    48 # Step 4: Test ci-summary with JSON output
+    49 echo &#34;  Step 4: Testing ci-summary JSON output...&#34;
+    50 OUTPUT=$(git-prompt-story ci-summary &#34;${INITIAL_COMMIT}..HEAD&#34; --format=json)
+    51 
+    52 # Verify JSON structure
+    53 echo &#34;$OUTPUT&#34; | jq -e &#39;.commits_analyzed == 2&#39; &gt; /dev/null || fail &#34;Expected 2 commits analyzed&#34;
+    54 echo &#34;    - commits_analyzed = 2&#34;
+    55 
+    56 echo &#34;$OUTPUT&#34; | jq -e &#39;.commits_with_notes == 2&#39; &gt; /dev/null || fail &#34;Expected 2 commits with notes&#34;
+    57 echo &#34;    - commits_with_notes = 2&#34;
+    58 
+    59 echo &#34;$OUTPUT&#34; | jq -e &#39;.commits | length == 2&#39; &gt; /dev/null || fail &#34;Expected 2 commits in output&#34;
+    60 echo &#34;    - commits array has 2 entries&#34;
+    61 
+    62 # Verify first commit has sessions
+    63 echo &#34;$OUTPUT&#34; | jq -e &#39;.commits[0].sessions | length &gt; 0&#39; &gt; /dev/null || fail &#34;First commit should have sessions&#34;
+    64 echo &#34;    - First commit has sessions&#34;
+    65 
+    66 # Step 5: Test ci-summary with Markdown output
+    67 echo &#34;  Step 5: Testing ci-summary Markdown output...&#34;
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    58 
+    59 echo &#34;$OUTPUT&#34; | jq -e &#39;.commits | length == 2&#39; &gt; /dev/null || fail &#34;Expected 2 commits in output&#34;
+    60 echo &#34;    - commits array has 2 entries&#34;
+    61 
+    62 # Verify first commit has sessions
+    63 echo &#34;$OUTPUT&#34; | jq -e &#39;.commits[0].sessions | length &gt; 0&#39; &gt; /dev/null || fail &#34;First commit should have sessions&#34;
+    64 echo &#34;    - First commit has sessions&#34;
+    65 
+    66 # Verify new count fields exist
+    67 echo &#34;$OUTPUT&#34; | jq -e &#39;.total_user_prompts &gt;= 0&#39; &gt; /dev/null || fail &#34;Should have total_user_prompts field&#34;
+    68 echo &#34;    - Has total_user_prompts field&#34;
+    69 
+    70 echo &#34;$OUTPUT&#34; | jq -e &#39;.total_steps &gt;= 0&#39; &gt; /dev/null || fail &#34;Should have total_steps field&#34;
+    71 echo &#34;    - Has total_steps field&#34;
+    72 
+    73 # Step 5: Test ci-summary with Markdown output
+    74 echo &#34;  Step 5: Testing ci-summary Markdown output...&#34;
+    75 MD_OUTPUT=$(git-prompt-story ci-summary &#34;${INITIAL_COMMIT}..HEAD&#34; --format=markdown)
+    76 
+    77 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;| Commit | Subject | Tool(s) | User Prompts | Steps |&#34; || fail &#34;Markdown should have new table header&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.182s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/note	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/session	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/show	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:49</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me verify the implementation by generating a sample markdown output with the ci-summary command on a test repo. First, let me build and install the tool:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build -o /tmp/git-prompt-story . &amp;&amp; /tmp/git-prompt-story version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+Error: unknown command &#34;version&#34; for &#34;git-prompt-story&#34;
+Run &#39;git-prompt-story --help&#39; for usage.
+unknown command &#34;version&#34; for &#34;git-prompt-story&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build -o /tmp/git-prompt-story . &amp;&amp; echo &#34;Build successful&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Build successful</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check if Docker is available for running e2e tests:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">docker --version 2&gt;/dev/null || echo &#34;Docker not available&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Docker version 28.5.1, build e180ab8</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+#0 building with &#34;default&#34; instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 509B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/golang:1.24-alpine
+#2 DONE 1.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae
+#4 resolve docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 10.99MB 0.2s done
+#5 DONE 0.2s
+
+#6 [2/8] RUN apk add --no-cache git bash jq libfaketime socat
+#6 CACHED
+
+#7 [3/8] WORKDIR /build
+#7 CACHED
+
+#8 [4/8] COPY . .
+#8 DONE 0.3s
+
+#9 [5/8] RUN go build -o /usr/local/bin/git-prompt-story .
+#9 0.140 go: downloading github.com/spf13/cobra v1.10.2
+#9 1.820 go: downloading github.com/spf13/pflag v1.0.9
+#9 DONE 8.7s
+
+#10 [6/8] WORKDIR /workspace
+#10 DONE 0.1s
+
+#11 [7/8] RUN git config --global user.email &#34;&lt;EMAIL&gt;&#34; &amp;&amp;     git config --global user.name &#34;Test User&#34; &amp;&amp;     git config --global init.defaultBranch main
+#11 DONE 0.1s
+
+#12 [8/8] COPY e2e/ /e2e/
+#12 DONE 0.0s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 2.8s done
+#13 exporting manifest sha256:d9b790d09f15ddab4e55a1a0a8375071572a64102bb6ac6429cee63d192e0f0b
+#13 exporting manifest sha256:d9b790d09f15ddab4e55a1a0a8375071572a64102bb6ac6429cee63d192e0f0b done
+#13 exporting config sha256:602e6e81c3ea624006983e7afcd3a974a9bce402a62b39718bcc6e663f50ea99 done
+#13 exporting attestation manifest sha256:535222fa775947538d6d36f392fca676b971a2ff592cb0ee2d73848479234548 done
+#13 exporting manifest list sha256:57d02712f775b93f6dfc729fc7cad13241a488b2bd9c23d77a1bbac3f250eaad done
+#13 naming to docker.io/library/git-prompt-story-e2e:latest done
+#13 unpacking to docker.io/library/git-prompt-story-e2e:latest
+#13 unpackin...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the failing assertion in the test:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   115 grep -q &#34;PR #42&#34; /tmp/html-test/index.html || fail &#34;index.html should contain PR number&#34;
+   116 echo &#34;    - index.html contains PR #42&#34;
+   117 
+   118 grep -q &#34;Prompt Story&#34; /tmp/html-test/index.html || fail &#34;index.html should contain title&#34;
+   119 echo &#34;    - index.html contains title&#34;
+   120 
+   121 # Step 8: Test ci-summary output to file
+   122 echo &#34;  Step 8: Testing ci-summary file output...&#34;
+   123 rm -f /tmp/summary.md
+   124 git-prompt-story ci-summary &#34;${INITIAL_COMMIT}..HEAD&#34; --format=markdown --output=/tmp/summary.md
+   125 
+   126 test -f /tmp/summary.md || fail &#34;Output file should be created&#34;
+   127 echo &#34;    - Output file created&#34;
+   128 
+   129 grep -q &#34;## Prompt Story&#34; /tmp/summary.md || fail &#34;Output file should have content&#34;
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I need to update the file output test assertion as well:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:51</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/10-ci-commands.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   125 
+   126 test -f /tmp/summary.md || fail &#34;Output file should be created&#34;
+   127 echo &#34;    - Output file created&#34;
+   128 
+   129 grep -q &#34;| Commit | Subject | Tool(s) | User Prompts | Steps |&#34; /tmp/summary.md || fail &#34;Output file should have content&#34;
+   130 echo &#34;    - Output file has content&#34;
+   131 
+   132 # Step 9: Test with no notes (should handle gracefully)
+   133 echo &#34;  Step 9: Testing with commit range with no notes...&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:51</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me run the e2e tests again:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:51</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== E2E Test Suite ===
+
+Running: 01-basic-flow
+[1/5] Basic Hook Flow
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Initial commit time: 2025-01-15 09:00:00 &#43;0000
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Hooks installed successfully
+  Step 4: Creating mock session (09:15 - 10:25)...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/test-session-1.jsonl
+  Step 5: Creating feature commit at 10:30...
+[main 1124ce6] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Feature commit time: 2025-01-15 10:30:00 &#43;0000
+  Step 6: Verifying results...
+    Checking commit message...
+    - Commit message contains Prompt-Story trailer
+    Checking note attachment...
+    - Note is attached to HEAD
+    Checking note content...
+    - Note version is 1
+    - Note contains 1 session
+    - Session ID is correct
+    Verifying work timestamps...
+    - start_work = 2025-01-15T09:00:00Z (previous commit)
+    Verifying session timestamps match JSONL times...
+    - session.created = 2025-01-15T09:15:00Z (from JSONL)
+    - session.modified = 2025-01-15T10:25:00Z (from JSONL)
+    Checking transcript storage...
+    - Transcript stored at refs/notes/prompt-story-transcripts:claude-code/test-session-1.jsonl
+
+  All assertions passed!
+
+Running: 02-session-detection
+[2/5] Session Detection
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Step 4: Creating mock sessions...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-1.jsonl
+  Created mock session for /workspace/other-repo: /root/.clau...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:51</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Let me update the todo list and provide a summary:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">13:51</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper functions to summary.go&#34;,&#34;content&#34;:&#34;Add helper functions to summary.go (isUserAction, countUserPrompts, formatToolDisplay)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">13:51</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Implementation complete. All tests pass (11/11 e2e tests &#43; unit tests).
+
+## Summary of Changes
+
+**New PR Comment Format:**
+
+```markdown
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| abc1234 | Add feature X | Claude Code | 3 | 12 |
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;abc1234&lt;/b&gt;: Add feature X&lt;/summary&gt;
+
+### Prompts
+
+- [09:15] PROMPT: user text...
+- [09:20] COMMAND: /commit
+
+### Full Transcript
+
+&lt;details&gt;
+&lt;summary&gt;Show all steps&lt;/summary&gt;
+
+- [09:15] PROMPT: user text...
+- [09:16] ASSISTANT: I&#39;ll help you...
+- [09:17] TOOL_USE (Bash): ls -la
+
+&lt;/details&gt;
+&lt;/details&gt;
+```
+
+**Files Modified:**
+1. `internal/ci/summary.go` - Added helpers, updated struct, rewrote `RenderMarkdown()`
+2. `internal/ci/summary_test.go` (new) - Unit tests for the new format
+3. `e2e/lib/helpers.sh` - Added `create_mock_session_with_tools()` helper
+4. `e2e/tests/10-ci-commands.sh` - Updated test assertions
+
+**Key Changes:**
+- Removed &#34;## Prompt Story&#34; header
+- Added table with Subject, User Prompts, Steps columns
+- Per-commit: collapsible &#34;Prompts&#34; (user actions) and nested &#34;Full Transcript&#34; (all entries)
+- Added `TotalUserPrompts` and `TotalSteps` to JSON output
+
+Would you like me to reinstall the global `git-prompt-story` and bump the version as mentioned in CLAUDE.md?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT outside-work-period"
+            data-entry-type="user"
+            data-in-work-period="false">
+          <span class="prompt-time">16:56</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Does nested details work?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">16:56</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good question. Let me check if GitHub actually renders nested `&lt;details&gt;` properly:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">16:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">WebSearch</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">GitHub markdown nested details tags support 2025</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Web search results for query: &#34;GitHub markdown nested details tags support 2025&#34;
+
+Links: [{&#34;title&#34;:&#34;Using &lt;details&gt; &lt;summary&gt; expandable content on GitHub with Markdown #details #summary #markdown #gfm #html&#34;,&#34;url&#34;:&#34;https://gist.github.com/scmx/eca72d44afee0113ceb0349dd54a84a2&#34;},{&#34;title&#34;:&#34;How to add a collapsible section in markdown. · GitHub&#34;,&#34;url&#34;:&#34;https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab&#34;},{&#34;title&#34;:&#34;HTML5 &lt;details&gt; in GitHub&#34;,&#34;url&#34;:&#34;https://gist.github.com/ericclemmons/b146fe5da72ca1f706b2ef72a20ac39d&#34;},{&#34;title&#34;:&#34;HTML Tags You Can Use on GitHub · GitHub&#34;,&#34;url&#34;:&#34;https://gist.github.com/seanh/13a93686bf4c2cb16e658b3cf96807f2&#34;},{&#34;title&#34;:&#34;Create Details HTML Tag for Markdown and Package Documentation • details&#34;,&#34;url&#34;:&#34;https://yonicd.github.io/details/&#34;},{&#34;title&#34;:&#34;Details tag template | Spinning Numbers&#34;,&#34;url&#34;:&#34;https://spinningnumbers.org/a/details.html&#34;},{&#34;title&#34;:&#34;Nested collapsible Markdown list · GitHub&#34;,&#34;url&#34;:&#34;https://gist.github.com/dotiful/0bd3516f42c6ca68479e64ad2942ac90&#34;},{&#34;title&#34;:&#34;Organizing information with collapsed sections - GitHub Docs&#34;,&#34;url&#34;:&#34;https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections&#34;},{&#34;title&#34;:&#34;GitHub - SZinedine/DeepTags: DeepTags is a markdown notes manager with support for nested tags&#34;,&#34;url&#34;:&#34;https://github.com/SZinedine/DeepTags&#34;},{&#34;title&#34;:&#34;collapsible markdown · GitHub&#34;,&#34;url&#34;:&#34;https://gist.github.com/joyrexus/16041f2426450e73f5df9391f7f7ae5f&#34;}]
+
+Based on the search results, here&#39;s what I found about GitHub markdown nested `&lt;details&gt;` tags support:
+
+## GitHub Markdown Nested `&lt;details&gt;` Tags Support
+
+### Basic Support
+You can streamline your Markdown by creating a collapsed section with the `&lt;details&gt;` tag. Markdown can be used in the GitHub web interface. You can temporarily obscure sections of your Markdown by creating a collapsed section that the reader can choose to expand.
+
+### Nested Details Tags Work
+Nested ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">16:56</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Yes, nested `&lt;details&gt;` tags work on GitHub, but there are some caveats. Let me verify my implementation follows the requirements:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">16:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run . ci-summary HEAD~1..HEAD --format=markdown 2&gt;/dev/null || echo &#34;No notes on current commits, showing sample output&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| 7654e12 | Test commit to trigger GitHub Action | Claude Code | 29 | 350 |
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;7654e12&lt;/b&gt;: Test commit to trigger GitHub Action&lt;/summary&gt;
+
+### Prompts
+
+- [19:42] PROMPT: I want to have GitHub Action job, that would generate two items out of prompt story if present: 1...
+- [20:33] PROMPT: Please bump version, commit and reinstall binary.
+- [20:35] PROMPT: Ok, please generate markdown and full file between HEAD and origin/main locally
+- [22:49] PROMPT: Amazing progress please commit
+- [22:50] PROMPT: I would like in transcript have two toggles: 1. Show all commands (not just user prompts but all ...
+- [23:02] PROMPT: Please commit.
+- [23:02] PROMPT: Please group tool use and show exact command and output.
+- [23:04] PROMPT: This session is being continued from a previous conversation that ran out of context. The convers...
+- [23:09] PROMPT: Please show me test html file in /tmp/
+- [23:10] PROMPT: Please commit. 
+- [23:12] PROMPT: Please then: 1. Expand details in tool use by default. 2. A lot of tool use output got arrow: The...
+- [23:15] PROMPT: Please rebase on origin/main 
+- [23:16] PROMPT: Run e2e and unit tests, bump version, install global command and commit.
+- [23:17] PROMPT: push to origin/main
+- [23:21] PROMPT: Tell me how to install it on GitHub Action, update Readme.md if needed.
+- [23:25] PROMPT: I don&#39;t see branch gh-pages
+- [23:29] PROMPT: create sample commit and push to new branch so I can create PR?
+- [23:31] PROMPT: create workflow file prompt-story and push it to main
+- [23:33] PROMPT: Rebase test-github-action and do force push
+- [23:34] PROMPT: GitHub action Prompt-Story failed with:[27;2;13~Run QuesmaOrg/git-prompt-story/.github/actions/pr...
+- [23:35] PROMPT: [Request interrupted by user for tool use]
+- [23:35] PROMPT: Please tell me how to build and release.
+- [23:40] PROMPT: Release was successful, but still it fai...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">16:57</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Based on my research, **yes, nested `&lt;details&gt;` tags work on GitHub**, but with some requirements that my implementation follows:
+
+1. **Blank lines before/after markdown** - My implementation has blank lines around the `### Prompts` and `### Full Transcript` headers
+2. **`&lt;summary&gt;` contains simple content** - I use `&lt;b&gt;` tags which work fine
+
+Looking at the actual output above, the structure is:
+```markdown
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;7654e12&lt;/b&gt;: Test commit...&lt;/summary&gt;
+
+### Prompts
+- [user entries...]
+
+### Full Transcript
+
+&lt;details&gt;
+&lt;summary&gt;Show all steps&lt;/summary&gt;
+
+- [all entries...]
+
+&lt;/details&gt;
+&lt;/details&gt;
+```
+
+The outer details collapses the commit, and the inner details collapses the full transcript. This should render correctly on GitHub.
+
+Would you like me to push this branch and create a test PR so you can verify the rendering?
+
+Sources:
+- [Organizing information with collapsed sections - GitHub Docs](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections)
+- [Nested collapsible Markdown list · GitHub Gist](https://gist.github.com/dotiful/0bd3516f42c6ca68479e64ad2942ac90)</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT outside-work-period"
+            data-entry-type="user"
+            data-in-work-period="false">
+          <span class="prompt-time">16:59</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Yes, put some comment on test PR which would use two level of details. One for prompt list, and another inside for dealing with very long messages. Make them foldable.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">16:59</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">This is a simple test task, not a planning task. Let me update the plan file briefly and exit to post the test comment:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">16:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Test Nested Details on GitHub PR
+     2 
+     3 ## Task
+     4 Post a test comment on the test-github-action PR to verify nested `&lt;details&gt;` tags render correctly.
+     5 
+     6 ## Comment Structure
+     7 ```markdown
+     8 | Commit | Subject | Tool(s) | User Prompts | Steps |
+     9 |--------|---------|---------|--------------|-------|
+    10 | abc1234 | Test commit | Claude Code | 2 | 5 |
+    11 
+    12 &lt;details&gt;
+    13 &lt;summary&gt;&lt;b&gt;abc1234&lt;/b&gt;: Test commit&lt;/summary&gt;
+    14 
+    15 ### Prompts
+    16 
+    17 &lt;details&gt;
+    18 &lt;summary&gt;Show 2 user prompts&lt;/summary&gt;
+    19 
+    20 - [09:15] PROMPT: This is a short prompt
+    21 - [09:20] PROMPT: This is a very long prompt that demonstrates how we handle lengthy user messages. When users type extensive prompts with lots of detail, we need to make sure the formatting doesn&#39;t break and remains readable...
+    22 
+    23 &lt;/details&gt;
+    24 
+    25 ### Full Transcript
+    26 
+    27 &lt;details&gt;
+    28 &lt;summary&gt;Show all 5 steps&lt;/summary&gt;
+    29 
+    30 - [09:15] PROMPT: This is a short prompt
+    31 - [09:16] ASSISTANT: I&#39;ll help you with that...
+    32 - [09:17] TOOL_USE (Bash): ls -la
+    33 - [09:18] TOOL_USE (Read): /path/to/file.go
+    34 - [09:20] PROMPT: This is a very long prompt...
+    35 
+    36 &lt;/details&gt;
+    37 
+    38 &lt;/details&gt;
+    39 ```
+    40 
+    41 ## Action
+    42 Use `gh` CLI to post comment on test-github-action PR.
+    43 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">16:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Test Nested Details on GitHub PR\n\n## Task\nPost a test comment on the test-github-action PR to verify nested `\u003cdetails\u003e` tags render correctly.\n\n## Comment Structure\...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Test Nested Details on GitHub PR
+
+## Task
+Post a test comment on the test-github-action PR to verify nested `&lt;details&gt;` tags render correctly.
+
+## Comment Structure
+```markdown
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| abc1234 | Test commit | Claude Code | 2 | 5 |
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;abc1234&lt;/b&gt;: Test commit&lt;/summary&gt;
+
+### Prompts
+
+&lt;details&gt;
+&lt;summary&gt;Show 2 user prompts&lt;/summary&gt;
+
+- [09:15] PROMPT: This is a short prompt
+- [09:20] PROMPT: This is a very long prompt that demonstrates how we handle lengthy user messages. When users type extensive prompts with lots of detail, we need to make sure the formatting doesn&#39;t break and remains readable...
+
+&lt;/details&gt;
+
+### Full Transcript
+
+&lt;details&gt;
+&lt;summary&gt;Show all 5 steps&lt;/summary&gt;
+
+- [09:15] PROMPT: This is a short prompt
+- [09:16] ASSISTANT: I&#39;ll help you with that...
+- [09:17] TOOL_USE (Bash): ls -la
+- [09:18] TOOL_USE (Read): /path/to/file.go
+- [09:20] PROMPT: This is a very long prompt...
+
+&lt;/details&gt;
+
+&lt;/details&gt;
+```
+
+## Action
+Use `gh` CLI to post comment on test-github-action PR.
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">16:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">gh pr list --repo QuesmaOrg/git-prompt-story --head test-github-action --json number,title</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 127
+(eval):1: command not found: gh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE outside-work-period"
+            data-entry-type="tool"
+            data-in-work-period="false">
+          <span class="prompt-time">16:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">curl -s &#34;https://api.github.com/repos/QuesmaOrg/git-prompt-story/pulls?head=QuesmaOrg:test-github-action&amp;state=open&#34; | head -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{
+  &#34;message&#34;: &#34;Not Found&#34;,
+  &#34;documentation_url&#34;: &#34;https://docs.github.com/rest/pulls/pulls#list-pull-requests&#34;,
+  &#34;status&#34;: &#34;404&#34;
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT outside-work-period"
+            data-entry-type="assistant"
+            data-in-work-period="false">
+          <span class="prompt-time">17:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The repo appears to be private and I don&#39;t have GitHub CLI or token access from this environment. 
+
+You can manually post this test comment on your PR to verify nested details work:
+
+```markdown
+## Test: Nested Details Rendering
+
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| abc1234 | Test commit | Claude Code | 2 | 5 |
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;abc1234&lt;/b&gt;: Test commit&lt;/summary&gt;
+
+### Prompts
+
+&lt;details&gt;
+&lt;summary&gt;Show 2 user prompts&lt;/summary&gt;
+
+- [09:15] PROMPT: This is a short prompt
+- [09:20] PROMPT: This is a very long prompt that demonstrates how we handle lengthy user messages. When users type extensive prompts with lots of detail, we need to make sure the formatting doesn&#39;t break and remains readable. This tests that long content displays correctly within nested collapsible sections.
+
+&lt;/details&gt;
+
+### Full Transcript
+
+&lt;details&gt;
+&lt;summary&gt;Show all 5 steps&lt;/summary&gt;
+
+- [09:15] PROMPT: This is a short prompt
+- [09:16] ASSISTANT: I&#39;ll help you with that...
+- [09:17] TOOL_USE (Bash): ls -la
+- [09:18] TOOL_USE (Read): /path/to/file.go
+- [09:20] PROMPT: This is a very long prompt...
+
+&lt;/details&gt;
+
+&lt;/details&gt;
+
+---
+*Test comment for nested details verification*
+```
+
+Copy this to your PR comment and check if:
+1. The outer `&lt;details&gt;` (commit) collapses/expands
+2. The inner `&lt;details&gt;` (Prompts and Full Transcript) collapse/expand independently
+3. The markdown headers (`### Prompts`, `### Full Transcript`) render correctly inside</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:17</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I lost track, where are we? Which branch got your change to those transcripts, I don&#39;t see that on main or do I need to rebuild binary in the job?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:17</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the current state of branches and commits:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -5 main &amp;&amp; echo &#34;---&#34; &amp;&amp; git log --oneline -5 origin/main &amp;&amp; echo &#34;---&#34; &amp;&amp; git branch -v</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">060a5b6 Bump version to 0.6.0
+fcf1500 Merge pull request #3 from QuesmaOrg/cloud-integration
+7ed8d0d Use force push for prompt-story-transcripts ref
+ee169dd Add pages:read permission for GitHub Pages URL lookup
+f73de7c Fix GitHub Pages URL to use API instead of hardcoded pattern
+---
+67dbeea Merge pull request #4 from QuesmaOrg/ci-testing
+060a5b6 Bump version to 0.6.0
+1d17ce8 Add CI workflow for unit tests and E2E tests
+fcf1500 Merge pull request #3 from QuesmaOrg/cloud-integration
+7ed8d0d Use force push for prompt-story-transcripts ref
+---
+  ci-testing                        20f1fa4 [ahead 1, behind 2] Add repair command to recreate missing notes from local sessions
+  claude/simplify-note-format-5N8Bh 57c4bd9 [ahead 1] Add Claude Code Cloud session integration
+  e2e-tests                         a9ccc02 Make run-tests.sh a host-executable wrapper
+  main                              060a5b6 [behind 2] Bump version to 0.6.0
+&#43; repair-command                    b76f168 Add repair command to recreate missing notes from local sessions
+* test-github-action                7654e12 Test commit to trigger GitHub Action</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status &amp;&amp; echo &#34;---&#34; &amp;&amp; git diff --stat HEAD</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch test-github-action
+Your branch is up to date with &#39;origin/test-github-action&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   e2e/lib/helpers.sh
+	modified:   e2e/tests/10-ci-commands.sh
+	modified:   internal/ci/summary.go
+
+Untracked files:
+  (use &#34;git add &lt;file&gt;...&#34; to include in what will be committed)
+	internal/ci/summary_test.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)
+---
+ e2e/lib/helpers.sh          |  25 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ e2e/tests/10-ci-commands.sh |  20 &#43;&#43;&#43;&#43;--
+ internal/ci/summary.go      | 152 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-----------
+ 3 files changed, 155 insertions(&#43;), 42 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:17</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">**Your changes are NOT committed yet!** They&#39;re local modifications on the `test-github-action` branch:
+
+- `internal/ci/summary.go` - New markdown format (modified)
+- `internal/ci/summary_test.go` - Unit tests (new, untracked)
+- `e2e/lib/helpers.sh` - New test helper (modified)
+- `e2e/tests/10-ci-commands.sh` - Updated assertions (modified)
+
+**To get these changes working in the GitHub Action, you need to:**
+1. Commit these changes
+2. Push to a branch (either `main` or `test-github-action`)
+3. The GitHub Action builds from source, so it will pick up the new code
+
+Want me to commit these changes, push to main, and then rebase/force-push `test-github-action`?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Commit and Deploy New Comment Format
+     2 
+     3 ## Status
+     4 Changes are implemented but **NOT committed**. Currently on `test-github-action` branch.
+     5 
+     6 ## Uncommitted Changes
+     7 - `internal/ci/summary.go` - New markdown format with nested details
+     8 - `internal/ci/summary_test.go` - Unit tests (new file)
+     9 - `e2e/lib/helpers.sh` - `create_mock_session_with_tools()` helper
+    10 - `e2e/tests/10-ci-commands.sh` - Updated assertions for new format
+    11 
+    12 ## Steps to Deploy
+    13 1. Commit all changes with descriptive message
+    14 2. Push to `main` branch
+    15 3. Rebase `test-github-action` on main and force push
+    16 4. The GitHub Action will rebuild from source and use new format
+    17 
+    18 ## New Format Preview
+    19 ```markdown
+    20 | Commit | Subject | Tool(s) | User Prompts | Steps |
+    21 |--------|---------|---------|--------------|-------|
+    22 
+    23 &lt;details&gt;
+    24 &lt;summary&gt;&lt;b&gt;SHA&lt;/b&gt;: Subject&lt;/summary&gt;
+    25 
+    26 ### Prompts
+    27 - [time] PROMPT: ...
+    28 
+    29 ### Full Transcript
+    30 &lt;details&gt;
+    31 &lt;summary&gt;Show all steps&lt;/summary&gt;
+    32 - [time] PROMPT: ...
+    33 - [time] ASSISTANT: ...
+    34 - [time] TOOL_USE (Bash): ...
+    35 &lt;/details&gt;
+    36 
+    37 &lt;/details&gt;
+    38 ```
+    39 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Commit and Deploy New Comment Format\n\n## Status\nChanges are implemented but **NOT committed**. Currently on `test-github-action` branch.\n\n## Uncommitted Changes\n- `internal/c...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+Create new branch for that feature development out of origin/main</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     8 - `internal/ci/summary_test.go` - Unit tests (new file)
+     9 - `e2e/lib/helpers.sh` - `create_mock_session_with_tools()` helper
+    10 - `e2e/tests/10-ci-commands.sh` - Updated assertions for new format
+    11 
+    12 ## Steps to Deploy
+    13 1. Create new feature branch from `origin/main`
+    14 2. Commit all changes with descriptive message
+    15 3. Push feature branch
+    16 4. Create PR for review
+    17 5. After merge, rebase `test-github-action` to test the new format
+    18 
+    19 ## New Format Preview
+    20 ```markdown
+    21 | Commit | Subject | Tool(s) | User Prompts | Steps |</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Commit and Deploy New Comment Format\n\n## Status\nChanges are implemented but **NOT committed**. Currently on `test-github-action` branch.\n\n## Uncommitted Changes\n- `internal/c...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/zesty-pondering-eagle.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Commit and Deploy New Comment Format
+
+## Status
+Changes are implemented but **NOT committed**. Currently on `test-github-action` branch.
+
+## Uncommitted Changes
+- `internal/ci/summary.go` - New markdown format with nested details
+- `internal/ci/summary_test.go` - Unit tests (new file)
+- `e2e/lib/helpers.sh` - `create_mock_session_with_tools()` helper
+- `e2e/tests/10-ci-commands.sh` - Updated assertions for new format
+
+## Steps to Deploy
+1. Create new feature branch from `origin/main`
+2. Commit all changes with descriptive message
+3. Push feature branch
+4. Create PR for review
+5. After merge, rebase `test-github-action` to test the new format
+
+## New Format Preview
+```markdown
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+
+&lt;details&gt;
+&lt;summary&gt;&lt;b&gt;SHA&lt;/b&gt;: Subject&lt;/summary&gt;
+
+### Prompts
+- [time] PROMPT: ...
+
+### Full Transcript
+&lt;details&gt;
+&lt;summary&gt;Show all steps&lt;/summary&gt;
+- [time] PROMPT: ...
+- [time] ASSISTANT: ...
+- [time] TOOL_USE (Bash): ...
+&lt;/details&gt;
+
+&lt;/details&gt;
+```
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git stash &amp;&amp; git fetch origin &amp;&amp; git checkout -b new-pr-comment-format origin/main</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Saved working directory and index state WIP on test-github-action: 7654e12 Test commit to trigger GitHub Action
+branch &#39;new-pr-comment-format&#39; set up to track &#39;origin/main&#39;.
+Switched to a new branch &#39;new-pr-comment-format&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git stash pop</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Auto-merging internal/ci/summary.go
+On branch new-pr-comment-format
+Your branch is up to date with &#39;origin/main&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   e2e/lib/helpers.sh
+	modified:   e2e/tests/10-ci-commands.sh
+	modified:   internal/ci/summary.go
+
+Untracked files:
+  (use &#34;git add &lt;file&gt;...&#34; to include in what will be committed)
+	internal/ci/summary_test.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)
+Dropped refs/stash@{0} (bbbea03f52051c5a4d05b7955c7d9fea1f16ebae)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; go test ./internal/ci/...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.463s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch new-pr-comment-format
+Your branch is up to date with &#39;origin/main&#39;.
+
+Changes to be committed:
+  (use &#34;git restore --staged &lt;file&gt;...&#34; to unstage)
+	modified:   e2e/lib/helpers.sh
+	modified:   e2e/tests/10-ci-commands.sh
+	modified:   internal/ci/summary.go
+	new file:   internal/ci/summary_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Improve PR comment format with nested collapsible sections
+
+New format changes:
+- Remove &#34;## Prompt Story&#34; header, start directly with commit table
+- Add Subject, User Prompts, and Steps columns to summary table
+- Show &#34;tools (N)&#34; when multiple tools used
+- Add two collapsible sections per commit:
+  - &#34;### Prompts&#34; - shows only user actions (PROMPT, COMMAND, TOOL_REJECT)
+  - &#34;### Full Transcript&#34; - nested details with all entries
+
+New helpers:
+- isUserAction() - classify entry types as user actions
+- countUserPrompts() - count user action entries
+- formatToolDisplay() - format tool names for table
+- formatMarkdownEntry() - format individual entries for markdown
+
+Updates Summary struct with TotalUserPrompts and TotalSteps fields
+for better statistics in JSON output.
+
+Includes unit tests for all new functions and updated e2e test
+assertions.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      let count = 0;
+
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
