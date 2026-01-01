@@ -63,15 +63,25 @@ echo "    - commits array has 2 entries"
 echo "$OUTPUT" | jq -e '.commits[0].sessions | length > 0' > /dev/null || fail "First commit should have sessions"
 echo "    - First commit has sessions"
 
+# Verify new count fields exist
+echo "$OUTPUT" | jq -e '.total_user_prompts >= 0' > /dev/null || fail "Should have total_user_prompts field"
+echo "    - Has total_user_prompts field"
+
+echo "$OUTPUT" | jq -e '.total_steps >= 0' > /dev/null || fail "Should have total_steps field"
+echo "    - Has total_steps field"
+
 # Step 5: Test ci-summary with Markdown output
 echo "  Step 5: Testing ci-summary Markdown output..."
 MD_OUTPUT=$(git-prompt-story ci-summary "${INITIAL_COMMIT}..HEAD" --format=markdown)
 
-echo "$MD_OUTPUT" | grep -q "## Prompt Story" || fail "Markdown should have header"
-echo "    - Has ## Prompt Story header"
+echo "$MD_OUTPUT" | grep -q "| Commit | Subject | Tool(s) | User Prompts | Steps |" || fail "Markdown should have new table header"
+echo "    - Has new table header"
 
-echo "$MD_OUTPUT" | grep -q "2 commit(s)" || fail "Markdown should mention 2 commits"
-echo "    - Mentions 2 commits"
+echo "$MD_OUTPUT" | grep -q "### Prompts" || fail "Markdown should have Prompts section"
+echo "    - Has ### Prompts section"
+
+echo "$MD_OUTPUT" | grep -q "### Full Transcript" || fail "Markdown should have Full Transcript section"
+echo "    - Has ### Full Transcript section"
 
 echo "$MD_OUTPUT" | grep -q "Claude Code" || fail "Markdown should mention Claude Code"
 echo "    - Mentions Claude Code"
@@ -116,7 +126,7 @@ git-prompt-story ci-summary "${INITIAL_COMMIT}..HEAD" --format=markdown --output
 test -f /tmp/summary.md || fail "Output file should be created"
 echo "    - Output file created"
 
-grep -q "## Prompt Story" /tmp/summary.md || fail "Output file should have content"
+grep -q "| Commit | Subject | Tool(s) | User Prompts | Steps |" /tmp/summary.md || fail "Output file should have content"
 echo "    - Output file has content"
 
 # Step 9: Test with no notes (should handle gracefully)
