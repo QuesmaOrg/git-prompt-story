@@ -562,11 +562,17 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		return sb.String()
 	}
 
+	// Reverse commits to show oldest first (chronological order)
+	commits := make([]CommitSummary, len(summary.Commits))
+	for i, c := range summary.Commits {
+		commits[len(summary.Commits)-1-i] = c
+	}
+
 	// Summary table with new columns
 	sb.WriteString("| Commit | Subject | Tool(s) | User Prompts | Steps |\n")
 	sb.WriteString("|--------|---------|---------|--------------|-------|\n")
 
-	for _, commit := range summary.Commits {
+	for _, commit := range commits {
 		// Collect unique tools
 		tools := make(map[string]bool)
 		userPromptCount := 0
@@ -596,7 +602,7 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 	var userTimeline []TimelineEntry
 	var fullTimeline []TimelineEntry
 
-	for i, commit := range summary.Commits {
+	for i, commit := range commits {
 		for _, sess := range commit.Sessions {
 			for _, p := range sess.Prompts {
 				te := TimelineEntry{
@@ -644,8 +650,8 @@ func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPr
 	lastCommitIndex := -1
 
 	for _, te := range entries {
-		// Insert commit marker when we cross to a new commit
-		if te.CommitIndex != lastCommitIndex && lastCommitIndex != -1 {
+		// Insert commit marker when we cross to a new commit (including the first one)
+		if te.CommitIndex != lastCommitIndex {
 			subject := te.CommitSubj
 			if len(subject) > 40 {
 				subject = subject[:37] + "..."
@@ -692,8 +698,8 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
 	text := entry.Text
 
-	// If text is short (fits on one line ~100 chars), render normally
-	if len(text) <= 100 {
+	// If text is short enough, render normally
+	if len(text) <= 250 {
 		displayText := strings.ReplaceAll(text, "\n", " ")
 		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, displayText)
 	}
