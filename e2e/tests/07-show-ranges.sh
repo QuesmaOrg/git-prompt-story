@@ -110,7 +110,7 @@ echo "    - HEAD~N syntax works"
 echo ""
 echo "  Test 5: Show by prompt-story-{hash} prefix..."
 # Get the note hash for COMMIT2
-NOTE_HASH=$(git notes --ref=refs/notes/commits list "$COMMIT2" | awk '{print $1}')
+NOTE_HASH=$(git notes --ref=refs/notes/prompt-story list "$COMMIT2" | awk '{print $1}')
 SHORT_NOTE_HASH="${NOTE_HASH:0:7}"
 echo "    Note hash for COMMIT2: $NOTE_HASH (short: $SHORT_NOTE_HASH)"
 OUTPUT=$(git-prompt-story show "prompt-story-$SHORT_NOTE_HASH")

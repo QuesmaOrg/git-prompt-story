@@ -64,11 +64,11 @@ echo "$COMMIT_MSG" | grep -q "Prompt-Story: Used Claude Code" || fail "Missing '
 echo "    - Marker says 'Used Claude Code'"
 
 echo "    Checking note attachment..."
-git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1 || fail "No note attached to HEAD"
+git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1 || fail "No note attached to HEAD"
 echo "    - Note is attached to HEAD"
 
 echo "    Checking note content..."
-NOTE=$(git notes --ref=refs/notes/commits show HEAD)
+NOTE=$(git notes --ref=refs/notes/prompt-story show HEAD)
 
 # Should have exactly 3 sessions
 SESSION_COUNT=$(echo "$NOTE" | jq '.sessions | length')

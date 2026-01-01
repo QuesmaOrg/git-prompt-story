@@ -59,7 +59,7 @@ func processRewrittenCommit(newSHA string, oldSHAs []string) error {
 	var notes []*note.PromptStoryNote
 
 	for _, oldSHA := range oldSHAs {
-		noteData, err := git.GetNote(notesRef, oldSHA)
+		noteData, err := note.GetNoteWithFallback(oldSHA)
 		if err != nil {
 			// No note on this commit, skip
 			continue
@@ -92,7 +92,7 @@ func processRewrittenCommit(newSHA string, oldSHAs []string) error {
 	}
 
 	// Add note to new commit
-	if err := git.AddNote(notesRef, string(jsonData), newSHA); err != nil {
+	if err := git.AddNote(note.NotesRef, string(jsonData), newSHA); err != nil {
 		return fmt.Errorf("adding note to %s: %w", newSHA, err)
 	}
 

@@ -50,7 +50,7 @@ echo "$COMMIT_MSG" | grep -q "Prompt-Story: none" || fail "Expected 'Prompt-Stor
 echo "      - Commit message says 'Prompt-Story: none'"
 
 # No note should be attached when there are no sessions
-if git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1; then
+if git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1; then
     fail "Note should not be attached when no sessions"
 fi
 echo "      - No note attached (expected)"
@@ -110,7 +110,7 @@ echo "$COMMIT_MSG" | grep -q "Prompt-Story: none" || fail "Expected 'Prompt-Stor
 echo "      - Commit message says 'Prompt-Story: none'"
 
 # No note should be attached
-if git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1; then
+if git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1; then
     fail "Note should not be attached when session is outside window"
 fi
 echo "      - No note attached (expected)"

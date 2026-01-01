@@ -11,9 +11,6 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
-const transcriptsRef = "refs/notes/prompt-story-transcripts"
-const notesRef = "refs/notes/commits"
-
 const promptStoryPrefix = "prompt-story-"
 
 // ShowPrompts displays prompts for a given commit, range, or prompt-story reference
@@ -43,7 +40,7 @@ func resolveCommitSpec(spec string) ([]string, error) {
 	// Check for prompt-story-{hash} prefix
 	if strings.HasPrefix(spec, promptStoryPrefix) {
 		hashPrefix := strings.TrimPrefix(spec, promptStoryPrefix)
-		sha, err := git.FindCommitByNoteHash(notesRef, hashPrefix)
+		sha, err := note.FindCommitByNoteHashWithFallback(hashPrefix)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +71,7 @@ func resolveCommitSpec(spec string) ([]string, error) {
 func showCommitPrompts(sha string, full bool) error {
 
 	// Get note attached to commit
-	noteContent, err := git.GetNote(notesRef, sha)
+	noteContent, err := note.GetNoteWithFallback(sha)
 	if err != nil {
 		return fmt.Errorf("no prompt-story note found for commit %s", sha[:7])
 	}
@@ -136,10 +133,10 @@ type displayEntry struct {
 
 func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (bool, error) {
 	// Extract relative path from full ref path
-	relPath := strings.TrimPrefix(sess.Path, transcriptsRef+"/")
+	relPath := strings.TrimPrefix(sess.Path, note.TranscriptsRef+"/")
 
 	// Fetch transcript content
-	content, err := git.GetBlobContent(transcriptsRef, relPath)
+	content, err := git.GetBlobContent(note.TranscriptsRef, relPath)
 	if err != nil {
 		return false, fmt.Errorf("failed to fetch transcript: %w", err)
 	}

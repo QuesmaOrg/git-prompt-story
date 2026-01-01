@@ -8,8 +8,6 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
-const transcriptRef = "refs/notes/prompt-story-transcripts"
-
 // StoreTranscripts stores session transcripts in the transcript tree
 // If scrub is not nil, PII is scrubbed from content before storing
 // Returns map of session ID -> blob SHA
@@ -54,7 +52,7 @@ func UpdateTranscriptTree(blobs map[string]string) error {
 	}
 
 	// Check if we already have a transcript tree to merge with
-	existingTreeSHA, _ := git.GetRef(transcriptRef)
+	existingTreeSHA, _ := git.GetRef(TranscriptsRef)
 	if existingTreeSHA != "" {
 		// Read existing tree
 		rootEntries, err := git.ReadTree(existingTreeSHA)
@@ -101,5 +99,5 @@ func UpdateTranscriptTree(blobs map[string]string) error {
 	}
 
 	// Update the ref
-	return git.UpdateRef(transcriptRef, rootTreeSHA)
+	return git.UpdateRef(TranscriptsRef, rootTreeSHA)
 }

@@ -69,7 +69,7 @@ else
 fi
 
 echo "    Checking no note attached..."
-if git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1; then
+if git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1; then
     echo "    - FAIL: Note should NOT be attached when no user messages"
     fail "Note attached when it should not be"
 else
