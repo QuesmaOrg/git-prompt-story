@@ -113,15 +113,18 @@ runs:
     - name: Set pages URL
       if: inputs.deploy-pages == 'true' && steps.analyze.outputs.commits-with-notes != '0'
       id: pages-url
-      shell: bash
+      uses: actions/github-script@v7
       env:
         PR_NUMBER: ${{ github.event.pull_request.number }}
-      run: |
-        # Construct GitHub Pages URL
-        REPO_OWNER="${GITHUB_REPOSITORY_OWNER}"
-        REPO_NAME="${GITHUB_REPOSITORY#*/}"
-        PAGES_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}/pr-${PR_NUMBER}/"
-        echo "pages-url=${PAGES_URL}" >> $GITHUB_OUTPUT
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const { data: pages } = await github.rest.repos.getPages({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          const pagesUrl = pages.html_url + 'pr-' + process.env.PR_NUMBER + '/';
+          core.setOutput('pages-url', pagesUrl);
 
     - name: Post PR comment
       id: comment
