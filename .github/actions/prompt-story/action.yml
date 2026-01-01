@@ -167,7 +167,7 @@ runs:
               '**Did you forget to push your notes?**',
               '',
               '```bash',
-              "git push origin 'refs/notes/commits:refs/notes/commits'",
+              "git push origin 'refs/notes/prompt-story:refs/notes/prompt-story'",
               "git push origin 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'",
               '```',
               '',

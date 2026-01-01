@@ -102,6 +102,28 @@ func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
 	return summary
 }
 
+// NewPromptStoryNoteWithTime creates a new note with an explicit start time
+// Used by repair command when recreating notes for past commits
+func NewPromptStoryNoteWithTime(sessions []session.ClaudeSession, startWork time.Time) *PromptStoryNote {
+	note := &PromptStoryNote{
+		Version:   1,
+		StartWork: startWork,
+		Sessions:  make([]SessionEntry, 0, len(sessions)),
+	}
+
+	for _, s := range sessions {
+		note.Sessions = append(note.Sessions, SessionEntry{
+			Tool:     "claude-code",
+			ID:       s.ID,
+			Path:     GetTranscriptPath("claude-code", s.ID),
+			Created:  s.Created,
+			Modified: s.Modified,
+		})
+	}
+
+	return note
+}
+
 // GetTranscriptPath returns the path within the transcript tree for a session
 func GetTranscriptPath(tool, sessionID string) string {
 	return fmt.Sprintf("%s/%s.jsonl", tool, sessionID)
