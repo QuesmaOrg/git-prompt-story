@@ -7,9 +7,8 @@ import (
 	"strings"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
+	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 )
-
-const notesRef = "refs/notes/commits"
 
 // PostCommit implements the post-commit hook logic
 func PostCommit() error {
@@ -45,7 +44,7 @@ func PostCommit() error {
 
 	// Attach note to HEAD by reusing the existing blob SHA
 	// This ensures the note hash matches what's in the commit message trailer
-	if err := git.AddNoteFromBlob(notesRef, noteSHA, headSHA); err != nil {
+	if err := git.AddNoteFromBlob(note.NotesRef, noteSHA, headSHA); err != nil {
 		return fmt.Errorf("failed to attach note: %w", err)
 	}
 

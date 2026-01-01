@@ -53,8 +53,8 @@ unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 # Verify commit 1 has note
 echo "  Step 4b: Verifying commit 1 has note..."
 COMMIT1_SHA=$(git rev-parse HEAD)
-git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1 || fail "Commit 1 should have a note"
-NOTE1=$(git notes --ref=refs/notes/commits show HEAD)
+git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1 || fail "Commit 1 should have a note"
+NOTE1=$(git notes --ref=refs/notes/prompt-story show HEAD)
 echo "$NOTE1" | jq -e '.sessions[0].id == "session-A"' > /dev/null || fail "Commit 1 should reference session-A"
 echo "    - Commit 1 has note with session-A"
 
@@ -78,8 +78,8 @@ unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 # Verify commit 2 has note
 echo "  Step 5b: Verifying commit 2 has note..."
 COMMIT2_SHA=$(git rev-parse HEAD)
-git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1 || fail "Commit 2 should have a note"
-NOTE2=$(git notes --ref=refs/notes/commits show HEAD)
+git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1 || fail "Commit 2 should have a note"
+NOTE2=$(git notes --ref=refs/notes/prompt-story show HEAD)
 echo "$NOTE2" | jq -e '.sessions[0].id == "session-B"' > /dev/null || fail "Commit 2 should reference session-B"
 echo "    - Commit 2 has note with session-B"
 
@@ -130,13 +130,13 @@ echo "    Squashed commit: $SQUASHED_SHA"
 echo "    Original commits: $COMMIT1_SHA, $COMMIT2_SHA"
 
 # Check that squashed commit has a note
-if ! git notes --ref=refs/notes/commits show HEAD > /dev/null 2>&1; then
+if ! git notes --ref=refs/notes/prompt-story show HEAD > /dev/null 2>&1; then
     echo "    ERROR: Squashed commit has no note attached"
     echo "    This is expected to fail until post-rewrite hook is implemented"
     fail "Squashed commit should have a merged note"
 fi
 
-MERGED_NOTE=$(git notes --ref=refs/notes/commits show HEAD)
+MERGED_NOTE=$(git notes --ref=refs/notes/prompt-story show HEAD)
 echo "    Merged note content:"
 echo "$MERGED_NOTE" | jq .
 

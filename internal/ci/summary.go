@@ -11,9 +11,6 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
-const transcriptsRef = "refs/notes/prompt-story-transcripts"
-const notesRef = "refs/notes/commits"
-
 // PromptEntry represents a single prompt or action in a session
 type PromptEntry struct {
 	Time         time.Time `json:"time"`
@@ -110,7 +107,7 @@ func resolveCommitRange(spec string) ([]string, error) {
 // analyzeCommit extracts prompt data for a single commit
 func analyzeCommit(sha string, full bool) (*CommitSummary, error) {
 	// Get note attached to commit
-	noteContent, err := git.GetNote(notesRef, sha)
+	noteContent, err := note.GetNoteWithFallback(sha)
 	if err != nil {
 		return nil, fmt.Errorf("no prompt-story note found for commit %s", sha[:7])
 	}
@@ -160,10 +157,10 @@ func analyzeCommit(sha string, full bool) (*CommitSummary, error) {
 // analyzeSession extracts all entries from a session, marking which are in work period
 func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (*SessionSummary, error) {
 	// Extract relative path from full ref path
-	relPath := strings.TrimPrefix(sess.Path, transcriptsRef+"/")
+	relPath := strings.TrimPrefix(sess.Path, note.TranscriptsRef+"/")
 
 	// Fetch transcript content
-	content, err := git.GetBlobContent(transcriptsRef, relPath)
+	content, err := git.GetBlobContent(note.TranscriptsRef, relPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch transcript: %w", err)
 	}

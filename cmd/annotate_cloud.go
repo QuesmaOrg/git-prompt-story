@@ -154,7 +154,7 @@ func annotateCloudCommit(commitRef, sessionID string, autoDetect, noScrub bool) 
 	}
 
 	// Attach note to commit
-	if err := git.AddNote("refs/notes/prompt-story", string(noteJSON), sha); err != nil {
+	if err := git.AddNote(note.NotesRef, string(noteJSON), sha); err != nil {
 		return fmt.Errorf("failed to attach note: %w", err)
 	}
 
@@ -164,8 +164,6 @@ func annotateCloudCommit(commitRef, sessionID string, autoDetect, noScrub bool) 
 
 // updateCloudTranscriptTree adds a cloud session transcript to the tree
 func updateCloudTranscriptTree(sessionID, blobSHA string) error {
-	transcriptRef := "refs/notes/prompt-story-transcripts"
-
 	// Build entry for this session
 	newEntry := git.TreeEntry{
 		Mode: "100644",
@@ -176,7 +174,7 @@ func updateCloudTranscriptTree(sessionID, blobSHA string) error {
 
 	// Get existing cloud entries
 	var cloudEntries []git.TreeEntry
-	existingTreeSHA, _ := git.GetRef(transcriptRef)
+	existingTreeSHA, _ := git.GetRef(note.TranscriptsRef)
 	if existingTreeSHA != "" {
 		rootEntries, err := git.ReadTree(existingTreeSHA)
 		if err == nil {
@@ -226,7 +224,7 @@ func updateCloudTranscriptTree(sessionID, blobSHA string) error {
 		return err
 	}
 
-	return git.UpdateRef(transcriptRef, rootTreeSHA)
+	return git.UpdateRef(note.TranscriptsRef, rootTreeSHA)
 }
 
 // listCloudSessionsCmd lists available cloud sessions
