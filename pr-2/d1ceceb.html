@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prompt Story - PR #2</title>
+  <title>d1ceceb - Prompt Story</title>
   <style>:root {
   --bg-primary: #ffffff;
   --bg-secondary: #f6f8fa;
@@ -429,52 +429,14 @@ pre {
 </style>
 </head>
 <body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
   <div class="header">
-    <h1>Prompt Story</h1>
-    <p class="meta">PR #2 | 1 commit(s) with LLM sessions</p>
+    <h1><code>d1ceceb</code></h1>
+    <p class="meta">Test commit to trigger GitHub Action</p>
   </div>
-
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-value">1</div>
-      <div class="stat-label">Commits Analyzed</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">1</div>
-      <div class="stat-label">With Sessions</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="visible-count">322</div>
-      <div class="stat-label">Entries</div>
-    </div>
-  </div>
-
-  
-  <h2>Commits</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Commit</th>
-        <th>Subject</th>
-        <th>Tool</th>
-        <th>Entries</th>
-        <th>Details</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      <tr>
-        <td><code>d1ceceb</code></td>
-        <td>Test commit to trigger GitHub Action</td>
-        <td>Claude Code</td>
-        <td>322</td>
-        <td><a href="d1ceceb.html">View transcript</a></td>
-      </tr>
-      
-    </tbody>
-  </table>
-
-  <h2>Session Details</h2>
 
   <div class="filter-controls">
     <label class="toggle-label">
@@ -489,19 +451,31 @@ pre {
     </label>
   </div>
 
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">322</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>d1ceceb0978262d575125aecd8732541e30215b1</code><br>
+    <strong>Work period:</strong> 2026-01-01 13:11 - 2025-12-31 21:29
+  </div>
+
   
   <div class="commit-card">
     <div class="commit-header">
-      <h3><code>d1ceceb</code> Test commit to trigger GitHub Action</h3>
+      <h3>Session 1: Claude Code</h3>
       <div class="commit-meta">
-        Work period: 2026-01-01 13:11 - 2025-12-31 21:29
+        2025-12-31 17:41 - 2026-01-01 13:13 | <span class="session-count">322</span> entries
       </div>
     </div>
-    
     <div class="session">
-      <div class="session-header">
-        Claude Code | 2025-12-31 17:41 - 2026-01-01 13:13 | <span class="session-count">322</span> entries
-      </div>
       <ul class="prompt-list">
         
         <li class="prompt-item PROMPT outside-work-period"
@@ -11745,9 +11719,7 @@ To github.com:QuesmaOrg/git-prompt-story.git
         
       </ul>
     </div>
-    
   </div>
-  
   
 
   <div class="footer">
@@ -11759,8 +11731,6 @@ To github.com:QuesmaOrg/git-prompt-story.git
     const toggleAllEntries = document.getElementById('toggle-all-entries');
     const toggleWholeSession = document.getElementById('toggle-whole-session');
     const visibleCount = document.getElementById('visible-count');
-
-    if (!toggleAllEntries || !toggleWholeSession) return;
 
     function updateFilters() {
       const showAll = toggleAllEntries.checked;
@@ -11785,9 +11755,9 @@ To github.com:QuesmaOrg/git-prompt-story.git
       visibleCount.textContent = count;
 
       
-      document.querySelectorAll('.session').forEach(session => {
-        const visible = session.querySelectorAll('.prompt-item:not(.hidden)').length;
-        const countEl = session.querySelector('.session-count');
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
         if (countEl) countEl.textContent = visible;
       });
     }
