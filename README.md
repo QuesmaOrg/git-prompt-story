@@ -46,7 +46,7 @@ git-prompt-story install-hooks --global
 
 # 3. Enable automatic pushing of prompt notes
 git config --global --add remote.origin.push 'refs/notes/prompt-story:refs/notes/prompt-story'
-git config --global --add remote.origin.push 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
+git config --global --add remote.origin.push '+refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
 ```
 
 That's it. Future commits will automatically capture active LLM sessions.
@@ -71,7 +71,7 @@ git-prompt-story install-hooks
 
 # Enable automatic pushing of prompt notes
 git config --add remote.origin.push 'refs/notes/prompt-story:refs/notes/prompt-story'
-git config --add remote.origin.push 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
+git config --add remote.origin.push '+refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
 
 echo "git-prompt-story configured for this repository"
 ```
@@ -323,7 +323,7 @@ Notes live in separate refs and must be explicitly pushed:
 
 ```bash
 git push origin refs/notes/prompt-story
-git push origin refs/notes/prompt-story-transcripts
+git push origin +refs/notes/prompt-story-transcripts
 ```
 
 ## Upgrading
