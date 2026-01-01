@@ -175,9 +175,14 @@ func TestRenderMarkdown_Structure(t *testing.T) {
 		t.Error("Missing '### Full Transcript' section")
 	}
 
-	// Verify nested details for transcript
-	if !strings.Contains(result, "<summary>Show all steps</summary>") {
-		t.Error("Missing collapsible 'Show all steps' for Full Transcript")
+	// Verify nested details for transcript with count
+	if !strings.Contains(result, "Show all 5 steps") {
+		t.Error("Missing collapsible 'Show all N steps' for Full Transcript")
+	}
+
+	// Verify prompts section is collapsible with count
+	if !strings.Contains(result, "Show 2 user prompts") {
+		t.Error("Missing collapsible 'Show N user prompts' for Prompts section")
 	}
 
 	// Verify commit SHA in table
@@ -281,7 +286,7 @@ func TestRenderMarkdown_NoUserPrompts(t *testing.T) {
 	result := RenderMarkdown(summary, "")
 
 	// Should show message when no user prompts
-	if !strings.Contains(result, "*No user prompts in this commit*") {
+	if !strings.Contains(result, "*No user prompts in this PR*") {
 		t.Error("Should show 'No user prompts' message when there are no user actions")
 	}
 }
