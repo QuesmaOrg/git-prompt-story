@@ -6,6 +6,10 @@ echo "Analyzing commits..."
 COMMIT_RANGE="${BASE_SHA}..${HEAD_SHA}"
 echo "  Range: $COMMIT_RANGE"
 
+# Check if any commits have prompt-story markers in their messages
+COMMITS_WITH_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "prompt-story-" || echo "0")
+echo "  Commits with markers: $COMMITS_WITH_MARKERS"
+
 # Determine flags
 FULL_FLAG=""
 if [ "$SUMMARY_MODE" = "full" ]; then
@@ -25,6 +29,7 @@ echo "  Commits with notes: $COMMITS_WITH_NOTES"
 # Set outputs
 echo "commits-analyzed=$COMMITS_ANALYZED" >> $GITHUB_OUTPUT
 echo "commits-with-notes=$COMMITS_WITH_NOTES" >> $GITHUB_OUTPUT
+echo "commits-with-markers=$COMMITS_WITH_MARKERS" >> $GITHUB_OUTPUT
 
 # Check if we should fail
 if [ "$FAIL_IF_NO_NOTES" = "true" ] && [ "$COMMITS_WITH_NOTES" = "0" ]; then
