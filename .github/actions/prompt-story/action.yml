@@ -69,6 +69,7 @@ runs:
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: ${{ github.action_path }}/scripts/download-binary.sh
 
     - name: Analyze commits
