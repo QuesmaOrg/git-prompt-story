@@ -44,16 +44,34 @@ esac
 echo "  Platform: ${OS}_${ARCH}"
 
 # Download and extract
-DOWNLOAD_URL="https://github.com/QuesmaOrg/git-prompt-story/releases/download/${VERSION}/git-prompt-story_${OS}_${ARCH}.tar.gz"
-echo "  URL: $DOWNLOAD_URL"
+ASSET_NAME="git-prompt-story_${OS}_${ARCH}.tar.gz"
 
 if [ -n "$AUTH_HEADER" ]; then
-  if ! curl -sL -H "$AUTH_HEADER" "$DOWNLOAD_URL" | tar xz; then
+  # For private repos, use API to get asset URL and download with octet-stream
+  echo "  Fetching release assets..."
+  RELEASE_DATA=$(curl -sL -H "$AUTH_HEADER" \
+    "https://api.github.com/repos/QuesmaOrg/git-prompt-story/releases/tags/${VERSION}")
+
+  # Extract asset URL for our platform
+  ASSET_URL=$(echo "$RELEASE_DATA" | grep -B3 "\"name\": \"${ASSET_NAME}\"" | grep '"url"' | head -1 | sed -E 's/.*"url": "([^"]+)".*/\1/')
+
+  if [ -z "$ASSET_URL" ]; then
+    echo "Error: Could not find asset ${ASSET_NAME} in release ${VERSION}"
+    exit 1
+  fi
+
+  echo "  Asset URL: $ASSET_URL"
+
+  if ! curl -sL -H "$AUTH_HEADER" -H "Accept: application/octet-stream" "$ASSET_URL" | tar xz; then
     echo "Error: Failed to download git-prompt-story"
     echo "The release may not exist yet. Please ensure releases are published."
     exit 1
   fi
 else
+  # For public repos, direct download works
+  DOWNLOAD_URL="https://github.com/QuesmaOrg/git-prompt-story/releases/download/${VERSION}/${ASSET_NAME}"
+  echo "  URL: $DOWNLOAD_URL"
+
   if ! curl -sL "$DOWNLOAD_URL" | tar xz; then
     echo "Error: Failed to download git-prompt-story"
     echo "The release may not exist yet. Please ensure releases are published."
