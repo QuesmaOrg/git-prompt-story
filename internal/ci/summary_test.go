@@ -327,3 +327,97 @@ func TestFormatMarkdownEntry(t *testing.T) {
 		})
 	}
 }
+
+func TestRenderMarkdown_MultipleCommitsDifferentEntries(t *testing.T) {
+	// This test verifies that when multiple commits are rendered:
+	// 1. Each commit shows its own counts (not duplicated from first commit)
+	// 2. Timeline entries are not duplicated
+	// 3. Commit markers appear between commits
+
+	// Commit 1: 4 entries (2 prompts) at 09:15-09:30
+	time1 := time.Date(2025, 1, 15, 9, 15, 0, 0, time.Local)
+	time2 := time.Date(2025, 1, 15, 9, 20, 0, 0, time.Local)
+	time3 := time.Date(2025, 1, 15, 9, 25, 0, 0, time.Local)
+	time4 := time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local)
+
+	// Commit 2: 3 entries (2 prompts) at 10:15-10:25
+	time5 := time.Date(2025, 1, 15, 10, 15, 0, 0, time.Local)
+	time6 := time.Date(2025, 1, 15, 10, 20, 0, 0, time.Local)
+	time7 := time.Date(2025, 1, 15, 10, 25, 0, 0, time.Local)
+
+	summary := &Summary{
+		CommitsWithNotes: 2,
+		TotalUserPrompts: 4, // 2 + 2
+		TotalSteps:       7, // 4 + 3
+		Commits: []CommitSummary{
+			{
+				ShortSHA: "abc1234",
+				Subject:  "First commit",
+				Sessions: []SessionSummary{
+					{
+						Tool: "claude-code",
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "First prompt", Time: time1},
+							{Type: "ASSISTANT", Text: "Response 1", Time: time2},
+							{Type: "TOOL_USE", Text: "Bash", ToolName: "Bash", ToolInput: "ls", Time: time3},
+							{Type: "PROMPT", Text: "Second prompt", Time: time4},
+						},
+					},
+				},
+			},
+			{
+				ShortSHA: "def5678",
+				Subject:  "Second commit",
+				Sessions: []SessionSummary{
+					{
+						Tool: "claude-code",
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "Third prompt", Time: time5},
+							{Type: "ASSISTANT", Text: "Response 2", Time: time6},
+							{Type: "PROMPT", Text: "Fourth prompt", Time: time7},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	result := RenderMarkdown(summary, "")
+
+	// Verify table has two rows with different counts
+	// Commit 1: 2 user prompts, 4 steps
+	if !strings.Contains(result, "| abc1234 | First commit | Claude Code | 2 | 4 |") {
+		t.Error("First commit row should show 2 user prompts and 4 steps")
+	}
+
+	// Commit 2: 2 user prompts, 3 steps
+	if !strings.Contains(result, "| def5678 | Second commit | Claude Code | 2 | 3 |") {
+		t.Error("Second commit row should show 2 user prompts and 3 steps")
+	}
+
+	// Verify commit marker exists between commits
+	if !strings.Contains(result, "--- Commit def5678: Second commit ---") {
+		t.Error("Should have commit marker for second commit")
+	}
+
+	// Verify total steps count in transcript summary
+	if !strings.Contains(result, "Show all 7 steps") {
+		t.Error("Should show total of 7 steps in transcript")
+	}
+
+	// Verify total user prompts count
+	if !strings.Contains(result, "Show 4 user prompts") {
+		t.Error("Should show total of 4 user prompts")
+	}
+
+	// Verify no duplicates - count occurrences of unique prompts
+	firstPromptCount := strings.Count(result, "First prompt")
+	if firstPromptCount != 2 { // Once in Prompts section, once in Full Transcript
+		t.Errorf("'First prompt' should appear exactly 2 times (got %d)", firstPromptCount)
+	}
+
+	thirdPromptCount := strings.Count(result, "Third prompt")
+	if thirdPromptCount != 2 { // Once in Prompts section, once in Full Transcript
+		t.Errorf("'Third prompt' should appear exactly 2 times (got %d)", thirdPromptCount)
+	}
+}

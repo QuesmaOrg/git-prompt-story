@@ -221,7 +221,9 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 							Text:         "/" + cmdName,
 							InWorkPeriod: inWorkPeriod,
 						}
-						ss.Prompts = append(ss.Prompts, pe)
+						if inWorkPeriod {
+							ss.Prompts = append(ss.Prompts, pe)
+						}
 						continue
 					}
 				}
@@ -255,7 +257,9 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						pe.Text = pe.Text[:200]
 						pe.Truncated = true
 					}
-					ss.Prompts = append(ss.Prompts, pe)
+					if inWorkPeriod {
+						ss.Prompts = append(ss.Prompts, pe)
+					}
 				}
 			}
 
@@ -272,7 +276,9 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 				Text:         text,
 				InWorkPeriod: inWorkPeriod,
 			}
-			ss.Prompts = append(ss.Prompts, pe)
+			if inWorkPeriod {
+				ss.Prompts = append(ss.Prompts, pe)
+			}
 
 		case "assistant":
 			if entry.Message != nil {
@@ -294,9 +300,11 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 							pe.ToolInput = pe.ToolInput[:500]
 							pe.Truncated = true
 						}
-						ss.Prompts = append(ss.Prompts, pe)
-						// Track for linking with results
-						toolUseEntries[tool.ID] = &ss.Prompts[len(ss.Prompts)-1]
+						if inWorkPeriod {
+							ss.Prompts = append(ss.Prompts, pe)
+							// Track for linking with results
+							toolUseEntries[tool.ID] = &ss.Prompts[len(ss.Prompts)-1]
+						}
 					}
 				} else if entryType == "ASSISTANT" && text != "" {
 					pe := PromptEntry{
@@ -309,7 +317,9 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						pe.Text = pe.Text[:200]
 						pe.Truncated = true
 					}
-					ss.Prompts = append(ss.Prompts, pe)
+					if inWorkPeriod {
+						ss.Prompts = append(ss.Prompts, pe)
+					}
 				}
 			}
 		}
