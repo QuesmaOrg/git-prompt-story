@@ -696,20 +696,20 @@ func formatMarkdownEntry(entry PromptEntry) string {
 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
-	text := entry.Text
+	text := strings.ReplaceAll(entry.Text, "\n", " ")
 
-	// If text is short enough, render normally
+	// Short prompts (≤250 chars): <details open> (expanded by default)
 	if len(text) <= 250 {
-		displayText := strings.ReplaceAll(text, "\n", " ")
-		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, displayText)
+		return fmt.Sprintf("<details open><summary>[%s] %s: %s</summary></details>\n",
+			timeStr, entry.Type, text)
 	}
 
-	// For long text: show first 250 chars, then collapsible continuation
-	firstPart := strings.ReplaceAll(text[:250], "\n", " ")
-	continuation := text[250:]
+	// Long prompts: <details> (collapsed) with truncated summary
+	summary := text[:247] + "..."
+	continuation := entry.Text[247:] // Use original with newlines preserved
 
-	return fmt.Sprintf("- [%s] %s: %s...<details><summary>...</summary>\n\n...%s\n\n</details>\n",
-		timeStr, entry.Type, firstPart, continuation)
+	return fmt.Sprintf("<details><summary>[%s] %s: %s</summary>\n\n...%s\n\n</details>\n",
+		timeStr, entry.Type, summary, continuation)
 }
 
 // RenderJSON generates JSON output
