@@ -45,10 +45,12 @@ type CommitSummary struct {
 
 // Summary represents the full analysis result
 type Summary struct {
-	Commits           []CommitSummary `json:"commits"`
-	TotalPrompts      int             `json:"total_prompts"`
-	CommitsWithNotes  int             `json:"commits_with_notes"`
-	CommitsAnalyzed   int             `json:"commits_analyzed"`
+	Commits          []CommitSummary `json:"commits"`
+	TotalPrompts     int             `json:"total_prompts"`      // Kept for backward compatibility (equals TotalSteps)
+	TotalUserPrompts int             `json:"total_user_prompts"` // Count of user actions (PROMPT, COMMAND, TOOL_REJECT)
+	TotalSteps       int             `json:"total_steps"`        // Count of all entries
+	CommitsWithNotes int             `json:"commits_with_notes"`
+	CommitsAnalyzed  int             `json:"commits_analyzed"`
 }
 
 // GenerateSummary analyzes commits in a range and extracts prompt data
@@ -74,7 +76,11 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 			summary.Commits = append(summary.Commits, *cs)
 			summary.CommitsWithNotes++
 			for _, sess := range cs.Sessions {
-				summary.TotalPrompts += len(sess.Prompts)
+				stepCount := len(sess.Prompts)
+				userPromptCount := countUserPrompts(sess.Prompts)
+				summary.TotalSteps += stepCount
+				summary.TotalUserPrompts += userPromptCount
+				summary.TotalPrompts += stepCount // Keep for backward compatibility
 			}
 		}
 	}
@@ -533,33 +539,38 @@ func getCommitSubject(sha string) (string, error) {
 func RenderMarkdown(summary *Summary, pagesURL string) string {
 	var sb strings.Builder
 
-	sb.WriteString("## Prompt Story\n\n")
-
 	if summary.CommitsWithNotes == 0 {
 		sb.WriteString("No prompt-story notes found in this PR.\n")
 		return sb.String()
 	}
 
-	// Stats line
-	sb.WriteString(fmt.Sprintf("**%d commit(s)** with LLM session data\n\n", summary.CommitsWithNotes))
-
-	// Summary table
-	sb.WriteString("| Commit | Tool | Prompts |\n")
-	sb.WriteString("|--------|------|--------|\n")
+	// Summary table with new columns
+	sb.WriteString("| Commit | Subject | Tool(s) | User Prompts | Steps |\n")
+	sb.WriteString("|--------|---------|---------|--------------|-------|\n")
 
 	for _, commit := range summary.Commits {
+		// Collect unique tools
 		tools := make(map[string]bool)
-		promptCount := 0
+		userPromptCount := 0
+		totalSteps := 0
+
 		for _, sess := range commit.Sessions {
 			tools[formatToolName(sess.Tool)] = true
-			promptCount += len(sess.Prompts)
+			userPromptCount += countUserPrompts(sess.Prompts)
+			totalSteps += len(sess.Prompts)
 		}
-		var toolNames []string
-		for t := range tools {
-			toolNames = append(toolNames, t)
+
+		// Format tool names
+		toolDisplay := formatToolDisplay(tools)
+
+		// Truncate subject for table
+		subject := commit.Subject
+		if len(subject) > 40 {
+			subject = subject[:37] + "..."
 		}
-		sb.WriteString(fmt.Sprintf("| %s | %s | %d |\n",
-			commit.ShortSHA, strings.Join(toolNames, ", "), promptCount))
+
+		sb.WriteString(fmt.Sprintf("| %s | %s | %s | %d | %d |\n",
+			commit.ShortSHA, subject, toolDisplay, userPromptCount, totalSteps))
 	}
 	sb.WriteString("\n")
 
@@ -572,27 +583,39 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		sb.WriteString(fmt.Sprintf("<details>\n<summary><b>%s</b>: %s</summary>\n\n",
 			commit.ShortSHA, subject))
 
-		for i, sess := range commit.Sessions {
-			if i > 0 {
-				sb.WriteString("\n")
-			}
-			sb.WriteString(fmt.Sprintf("**Session %d** (%s) - %s to %s\n\n",
-				i+1, formatToolName(sess.Tool),
-				sess.Start.Local().Format("15:04"),
-				sess.End.Local().Format("15:04")))
+		// Collect all entries across sessions
+		var userActions []PromptEntry
+		var allEntries []PromptEntry
 
-			for _, prompt := range sess.Prompts {
-				text := prompt.Text
-				// Escape markdown special chars in text
-				text = strings.ReplaceAll(text, "\n", " ")
-				if len(text) > 100 {
-					text = text[:97] + "..."
+		for _, sess := range commit.Sessions {
+			for _, p := range sess.Prompts {
+				allEntries = append(allEntries, p)
+				if isUserAction(p.Type) {
+					userActions = append(userActions, p)
 				}
-				sb.WriteString(fmt.Sprintf("- [%s] %s: %s\n",
-					prompt.Time.Local().Format("15:04"), prompt.Type, text))
 			}
 		}
+
+		// Prompts section (user actions only)
+		sb.WriteString("### Prompts\n\n")
+		if len(userActions) == 0 {
+			sb.WriteString("*No user prompts in this commit*\n\n")
+		} else {
+			for _, entry := range userActions {
+				sb.WriteString(formatMarkdownEntry(entry))
+			}
+			sb.WriteString("\n")
+		}
+
+		// Full transcript section (nested details)
+		sb.WriteString("### Full Transcript\n\n")
+		sb.WriteString("<details>\n<summary>Show all steps</summary>\n\n")
+		for _, entry := range allEntries {
+			sb.WriteString(formatMarkdownEntry(entry))
+		}
 		sb.WriteString("\n</details>\n\n")
+
+		sb.WriteString("</details>\n\n")
 	}
 
 	// Link to full transcripts
@@ -603,6 +626,30 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 	sb.WriteString("---\n*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*\n")
 
 	return sb.String()
+}
+
+// formatMarkdownEntry formats a single entry for markdown display
+func formatMarkdownEntry(entry PromptEntry) string {
+	timeStr := entry.Time.Local().Format("15:04")
+	text := strings.ReplaceAll(entry.Text, "\n", " ")
+	if len(text) > 100 {
+		text = text[:97] + "..."
+	}
+
+	switch entry.Type {
+	case "TOOL_USE":
+		if entry.ToolName != "" {
+			input := entry.ToolInput
+			if len(input) > 60 {
+				input = input[:57] + "..."
+			}
+			input = strings.ReplaceAll(input, "\n", " ")
+			return fmt.Sprintf("- [%s] %s (%s): %s\n", timeStr, entry.Type, entry.ToolName, input)
+		}
+		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, text)
+	default:
+		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, text)
+	}
 }
 
 // RenderJSON generates JSON output
@@ -624,4 +671,35 @@ func formatToolName(tool string) string {
 	default:
 		return tool
 	}
+}
+
+// isUserAction returns true if the entry type represents a user action
+func isUserAction(entryType string) bool {
+	switch entryType {
+	case "PROMPT", "COMMAND", "TOOL_REJECT":
+		return true
+	default:
+		return false
+	}
+}
+
+// countUserPrompts counts user action entries in a slice
+func countUserPrompts(prompts []PromptEntry) int {
+	count := 0
+	for _, p := range prompts {
+		if isUserAction(p.Type) {
+			count++
+		}
+	}
+	return count
+}
+
+// formatToolDisplay formats tool names for display in the summary table
+func formatToolDisplay(tools map[string]bool) string {
+	if len(tools) == 1 {
+		for t := range tools {
+			return t
+		}
+	}
+	return fmt.Sprintf("tools (%d)", len(tools))
 }

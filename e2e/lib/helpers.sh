@@ -29,6 +29,31 @@ EOF
     echo "  Created mock session: $session_dir/$session_id.jsonl"
 }
 
+# Create a mock Claude Code session with tool uses for testing PR comment format
+# Usage: create_mock_session_with_tools <session_id> <start_time> <end_time>
+create_mock_session_with_tools() {
+    local session_id="$1"
+    local start_time="$2"
+    local end_time="$3"
+
+    local repo_path=$(pwd)
+    local encoded_path=$(echo "$repo_path" | tr '/' '-')
+    local session_dir="$HOME/.claude/projects/$encoded_path"
+
+    mkdir -p "$session_dir"
+
+    cat > "$session_dir/$session_id.jsonl" << EOF
+{"type":"user","sessionId":"$session_id","timestamp":"$start_time","cwd":"$repo_path","gitBranch":"main","message":{"role":"user","content":"Add a new function to utils.go"}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$start_time","message":{"role":"assistant","content":[{"type":"text","text":"I'll help you add a new function."},{"type":"tool_use","id":"tool1","name":"Read","input":{"file_path":"/utils.go"}}]}}
+{"type":"user","sessionId":"$session_id","timestamp":"$start_time","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"tool1","content":"package utils\n\nfunc Existing() {}"}]}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$start_time","message":{"role":"assistant","content":[{"type":"tool_use","id":"tool2","name":"Edit","input":{"file_path":"/utils.go"}}]}}
+{"type":"user","sessionId":"$session_id","timestamp":"$end_time","message":{"role":"user","content":"<command-name>/commit</command-name>"}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$end_time","message":{"role":"assistant","content":[{"type":"text","text":"Changes committed."}]}}
+EOF
+
+    echo "  Created mock session with tools: $session_dir/$session_id.jsonl"
+}
+
 # Create a mock Claude Code session for a specific project path
 # Usage: create_mock_session_for_path <project_path> <session_id> <start_time> <end_time>
 # Example: create_mock_session_for_path "/workspace/other-repo" "session-2" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
