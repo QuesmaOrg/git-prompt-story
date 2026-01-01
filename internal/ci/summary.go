@@ -253,8 +253,8 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						Text:         msgText,
 						InWorkPeriod: inWorkPeriod,
 					}
-					if !full && len(pe.Text) > 200 {
-						pe.Text = pe.Text[:200]
+					if !full && len(pe.Text) > 2000 {
+						pe.Text = pe.Text[:2000]
 						pe.Truncated = true
 					}
 					if inWorkPeriod {
@@ -313,8 +313,8 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						Text:         text,
 						InWorkPeriod: inWorkPeriod,
 					}
-					if !full && len(pe.Text) > 200 {
-						pe.Text = pe.Text[:200]
+					if !full && len(pe.Text) > 2000 {
+						pe.Text = pe.Text[:2000]
 						pe.Truncated = true
 					}
 					if inWorkPeriod {
@@ -704,18 +704,12 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, displayText)
 	}
 
-	// For long text, make it collapsible
-	// Create a short preview for the summary
-	preview := strings.ReplaceAll(text, "\n", " ")
-	if len(preview) > 80 {
-		preview = preview[:77] + "..."
-	}
+	// For long text: show first 250 chars, then collapsible continuation
+	firstPart := strings.ReplaceAll(text[:250], "\n", " ")
+	continuation := text[250:]
 
-	// Full text with newlines preserved but escaped for markdown
-	fullText := text
-
-	return fmt.Sprintf("<details>\n<summary>- [%s] %s: %s</summary>\n\n%s\n\n</details>\n",
-		timeStr, entry.Type, preview, fullText)
+	return fmt.Sprintf("- [%s] %s: %s...<details><summary>...</summary>\n\n...%s\n\n</details>\n",
+		timeStr, entry.Type, firstPart, continuation)
 }
 
 // RenderJSON generates JSON output

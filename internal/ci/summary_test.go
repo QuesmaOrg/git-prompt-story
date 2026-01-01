@@ -421,3 +421,42 @@ func TestRenderMarkdown_MultipleCommitsDifferentEntries(t *testing.T) {
 		t.Errorf("'Third prompt' should appear exactly 2 times (got %d)", thirdPromptCount)
 	}
 }
+
+func TestFormatMarkdownEntryCollapsible_LongText(t *testing.T) {
+	// Create entry with 300+ char text where CONTINUATION is past 250 chars
+	// 260 'a's + "CONTINUATION" + 50 'b's = 322 chars total
+	longText := strings.Repeat("a", 260) + "CONTINUATION" + strings.Repeat("b", 50)
+	entry := PromptEntry{
+		Type: "PROMPT",
+		Text: longText,
+		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+	}
+
+	result := formatMarkdownEntryCollapsible(entry)
+
+	// Should contain first 250 chars visible
+	if !strings.Contains(result, strings.Repeat("a", 100)) {
+		t.Error("Should contain beginning of text")
+	}
+
+	// Should have <details> with continuation
+	if !strings.Contains(result, "<details>") {
+		t.Error("Should have <details> for expansion")
+	}
+
+	// The summary should be just "..."
+	if !strings.Contains(result, "<summary>...</summary>") {
+		t.Error("Summary should be '...'")
+	}
+
+	// Continuation inside details should have the rest of the text (including CONTINUATION marker)
+	if !strings.Contains(result, "CONTINUATION") {
+		t.Error("Should contain rest of text in details")
+	}
+
+	// The continuation should start with "..." followed by remaining 'a's then CONTINUATION
+	// After 250 chars, we have: 10 'a's + "CONTINUATION" + 50 'b's
+	if !strings.Contains(result, "...aaaaaaaaaa") {
+		t.Error("Continuation should start with '...' followed by remaining text")
+	}
+}
