@@ -9,14 +9,26 @@ import (
 )
 
 const prepareCommitMsgScript = `#!/bin/sh
+# Chain to original hook if it exists
+if [ -x "$(dirname "$0")/prepare-commit-msg.orig" ]; then
+    "$(dirname "$0")/prepare-commit-msg.orig" "$@" || exit $?
+fi
 exec git-prompt-story prepare-commit-msg "$@"
 `
 
 const postCommitScript = `#!/bin/sh
+# Chain to original hook if it exists
+if [ -x "$(dirname "$0")/post-commit.orig" ]; then
+    "$(dirname "$0")/post-commit.orig" "$@" || exit $?
+fi
 exec git-prompt-story post-commit
 `
 
 const postRewriteScript = `#!/bin/sh
+# Chain to original hook if it exists
+if [ -x "$(dirname "$0")/post-rewrite.orig" ]; then
+    "$(dirname "$0")/post-rewrite.orig" "$@" || exit $?
+fi
 exec git-prompt-story post-rewrite "$@"
 `
 
@@ -107,11 +119,11 @@ func writeHookScript(hooksDir, hookName, content string) error {
 			return nil
 		}
 		// Backup existing hook
-		backupPath := hookPath + ".backup"
+		backupPath := hookPath + ".orig"
 		if err := os.WriteFile(backupPath, existing, 0755); err != nil {
 			return fmt.Errorf("failed to backup existing hook: %w", err)
 		}
-		fmt.Printf("Backed up existing %s to %s.backup\n", hookName, hookName)
+		fmt.Printf("Backed up existing %s to %s.orig\n", hookName, hookName)
 	}
 
 	if err := os.WriteFile(hookPath, []byte(content), 0755); err != nil {
