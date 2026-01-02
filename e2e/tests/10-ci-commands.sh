@@ -77,11 +77,11 @@ MD_OUTPUT=$(git-prompt-story ci-summary "${INITIAL_COMMIT}..HEAD" --format=markd
 echo "$MD_OUTPUT" | grep -q "| Commit | Subject | Tool(s) | User Prompts | Steps |" || fail "Markdown should have new table header"
 echo "    - Has new table header"
 
-echo "$MD_OUTPUT" | grep -q "### Prompts" || fail "Markdown should have Prompts section"
-echo "    - Has ### Prompts section"
+echo "$MD_OUTPUT" | grep -q "user prompts</strong>" || fail "Markdown should have user prompts section"
+echo "    - Has user prompts section"
 
-echo "$MD_OUTPUT" | grep -q "### Full Transcript" || fail "Markdown should have Full Transcript section"
-echo "    - Has ### Full Transcript section"
+echo "$MD_OUTPUT" | grep -q "All.*steps</strong>" || fail "Markdown should have All steps section"
+echo "    - Has All steps section"
 
 echo "$MD_OUTPUT" | grep -q "Claude Code" || fail "Markdown should mention Claude Code"
 echo "    - Mentions Claude Code"

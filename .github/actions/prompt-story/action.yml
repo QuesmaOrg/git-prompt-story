@@ -168,7 +168,7 @@ runs:
               '',
               '```bash',
               "git push origin 'refs/notes/prompt-story:refs/notes/prompt-story'",
-              "git push origin 'refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'",
+              "git push origin '+refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'",
               '```',
               '',
               '---',

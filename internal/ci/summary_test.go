@@ -165,24 +165,19 @@ func TestRenderMarkdown_Structure(t *testing.T) {
 		t.Error("Missing new table header")
 	}
 
-	// Verify Prompts section exists
-	if !strings.Contains(result, "### Prompts") {
-		t.Error("Missing '### Prompts' section")
+	// Verify Prompts section exists (new format: merged with details)
+	if !strings.Contains(result, "user prompts</strong>") {
+		t.Error("Missing user prompts section")
 	}
 
-	// Verify Full Transcript section exists
-	if !strings.Contains(result, "### Full Transcript") {
-		t.Error("Missing '### Full Transcript' section")
-	}
-
-	// Verify nested details for transcript with count
-	if !strings.Contains(result, "Show all 5 steps") {
-		t.Error("Missing collapsible 'Show all N steps' for Full Transcript")
+	// Verify All Steps section exists (renamed from Full Transcript)
+	if !strings.Contains(result, "All 5 steps</strong>") {
+		t.Error("Missing 'All N steps' section")
 	}
 
 	// Verify prompts section is collapsible with count
-	if !strings.Contains(result, "Show 2 user prompts") {
-		t.Error("Missing collapsible 'Show N user prompts' for Prompts section")
+	if !strings.Contains(result, "2 user prompts</strong>") {
+		t.Error("Missing collapsible user prompts section")
 	}
 
 	// Verify commit SHA in table
@@ -400,13 +395,13 @@ func TestRenderMarkdown_MultipleCommitsDifferentEntries(t *testing.T) {
 		t.Error("Should have commit marker for second commit")
 	}
 
-	// Verify total steps count in transcript summary
-	if !strings.Contains(result, "Show all 7 steps") {
-		t.Error("Should show total of 7 steps in transcript")
+	// Verify total steps count in All Steps section
+	if !strings.Contains(result, "All 7 steps</strong>") {
+		t.Error("Should show total of 7 steps in All Steps section")
 	}
 
 	// Verify total user prompts count
-	if !strings.Contains(result, "Show 4 user prompts") {
+	if !strings.Contains(result, "4 user prompts</strong>") {
 		t.Error("Should show total of 4 user prompts")
 	}
 
@@ -472,5 +467,52 @@ func TestFormatMarkdownEntryCollapsible_LongText(t *testing.T) {
 	// The continuation should start with "..."
 	if !strings.Contains(result, "\n\n...") {
 		t.Error("Continuation should start with '...'")
+	}
+}
+
+func TestFormatMarkdownEntryCollapsible_EscapesHTML(t *testing.T) {
+	// Prompt text containing HTML tags that should be escaped
+	entry := PromptEntry{
+		Type: "PROMPT",
+		Text: "Use <details> and <summary> tags for collapsible content",
+		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+	}
+
+	result := formatMarkdownEntryCollapsible(entry)
+
+	// The literal <details> in the prompt should be escaped to &lt;details&gt;
+	// Otherwise it would break the outer <details> structure
+	if strings.Contains(result, "Use <details>") {
+		t.Error("HTML tags in prompt text should be escaped, but found unescaped <details>")
+	}
+
+	// Should contain escaped version
+	if !strings.Contains(result, "&lt;details&gt;") {
+		t.Error("Should contain escaped HTML: &lt;details&gt;")
+	}
+
+	if !strings.Contains(result, "&lt;summary&gt;") {
+		t.Error("Should contain escaped HTML: &lt;summary&gt;")
+	}
+}
+
+func TestFormatMarkdownEntry_EscapesHTML(t *testing.T) {
+	// Test that the non-collapsible format also escapes HTML
+	entry := PromptEntry{
+		Type: "ASSISTANT",
+		Text: "Here is some <script>alert('xss')</script> content",
+		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+	}
+
+	result := formatMarkdownEntry(entry)
+
+	// Should not contain unescaped script tag
+	if strings.Contains(result, "<script>") {
+		t.Error("HTML tags should be escaped")
+	}
+
+	// Should contain escaped version
+	if !strings.Contains(result, "&lt;script&gt;") {
+		t.Error("Should contain escaped HTML")
 	}
 }
