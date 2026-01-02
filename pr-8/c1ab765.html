@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>c1ab765 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>c1ab765</code></h1>
+    <p class="meta">Escape HTML in commit subjects</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">26</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>c1ab765d5bac0aac51beb1173970d504b3cea1cb</code><br>
+    <strong>Work period:</strong> 2026-01-02 17:34 - 2026-01-02 17:46
+  </div>
+
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3>Session 1: Claude Code</h3>
+      <div class="commit-meta">
+        2026-01-02 17:02 - 2026-01-02 17:45 | <span class="session-count">26</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Version 0.7.1 installed globally.
+
+**Summary of commits:**
+- `067557b` - Restructure PR comment format (table at bottom, merged titles with details)
+- `7ef17cd` - Escape HTML tags in prompt content
+- `df48356` - Bump version to 0.7.1</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please do same ci-summary as before 1d17ce8..526e6e3 do pbcopy of that</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary 1d17ce8..526e6e3 --format=markdown | pbcopy &amp;&amp; echo &#34;Copied to clipboard&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Copied to clipboard</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary 1d17ce8..526e6e3 --format=markdown | head -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;14 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit bab2b29: Improve PR comment format with nested... ---
+
+&lt;details open&gt;&lt;summary&gt;[19:17] PROMPT: I lost track, where are we? Which branch got your change to those transcripts, I don&#39;t see that on main or do I need to rebuild binary in the job?&lt;/summary&gt;&lt;/details&gt;
+
+--- Commit 6118991: Refactor to timeline-based PR comment... ---
+
+&lt;details open&gt;&lt;summary&gt;[19:27] PROMPT: Can you run it locally and put new markdown is file for new-pr-... branch?&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:28] PROMPT: How to copy that file content to clickpboard on MAc?&lt;/summary&gt;&lt;/details&gt;
+&lt;details&gt;&lt;summary&gt;[19:30] PROMPT: Amazing job so far.Few more things: - I don&#39;t want to have a per-commit prompt on the full transcript. I want them for the whole PR. - So don&#39;t make a detailed section out of individual commits. Make just a whole prompt, and then have a commit in ...&lt;/summary&gt;
+
+...between when the commits were made between that timeline.
+- Also make prompts foldable if there are more of them.
+- Also, that any time you cut the prompt which is too long (longer than one line), please also make it foldable.
+
+&lt;/details&gt;
+
+--- Commit eebd842: Fix duplicate entries bug in multi-co... ---
+
+&lt;details&gt;&lt;summary&gt;[19:38] PROMPT: This session is being continued from a previous conversation that ran out of context. The conversation is summarized below: Analysis: Let me analyze the conversation chronologically to capture all key details:  1. **Initial Request**: User wanted ...&lt;/summary&gt;
+
+...to improve the GitHub Actions PR comment format for git-prompt-story. They specified:
+   - Should have a test (unit or e2e)
+   - Format should NOT be &#34;prompt store&#34; at beginning with one commit
+   - Should be a list of commits with tools used
+   - Show number of user prompts and total steps
+   - For each commit: two collapsible sections (Prompts and Full Transcript)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! The ci-summary for `1d17ce8..526e6e3` is in your clipboard. The HTML escaping is now working - any `&lt;details&gt;` or other HTML tags in prompt text will be escaped as `&amp;lt;details&amp;gt;`.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">IT completely failed for me:
+But it was longer, please use &lt;details&gt; before truncating add ... and in the details start from ... where you left it.
+&lt;details is unescaped&gt;</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check what&#39;s happening with the escaping:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary 1d17ce8..526e6e3 --format=markdown | grep -A2 &#34;please use&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">But it was longer, please use &lt;details&gt; before truncating add ... and in the details start from ... where you left it.
+
+Start by having unit test that fails and then fix it.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">df48356 Bump version to 0.7.1
+7ef17cd Escape HTML tags in prompt content to prevent breaking markdown
+067557b Restructure PR comment format: move table to bottom, merge titles with details
+202816c Merge pull request #6 from QuesmaOrg/new-pr-comment-format
+aeae58a Merge branch &#39;main&#39; into new-pr-comment-format</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; ./git-prompt-story ci-summary 1d17ce8..526e6e3 --format=markdown | grep &#34;please use&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">But it was longer, please use &amp;lt;details&amp;gt; before truncating add ... and in the details start from ... where you left it.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:41</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The local build is working. Let me check the installed version:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:41</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story ci-summary 1d17ce8..526e6e3 --format=markdown | grep &#34;please use&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">But it was longer, please use &amp;lt;details&amp;gt; before truncating add ... and in the details start from ... where you left it.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:41</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Both versions are now showing `&amp;lt;details&amp;gt;` (escaped). The issue was that when I did `pbcopy` earlier, I used an older binary. Let me recopy with the correct version:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:41</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; ./git-prompt-story ci-summary 1d17ce8..526e6e3 --format=markdown | pbcopy &amp;&amp; echo &#34;Copied with correct escaping&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Copied with correct escaping</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:41</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! The `&lt;details&gt;` is now properly escaped as `&amp;lt;details&amp;gt;` in the clipboard.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please also sanitize commit messages, such characters could also appear there.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good point. Let me find where commit subjects are rendered and add escaping there:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">commit\.Subject</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">582:					CommitSubj:  commit.Subject,
+637:		subject := commit.Subject</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   630 			totalSteps &#43;= len(sess.Prompts)
+   631 		}
+   632 
+   633 		// Format tool names
+   634 		toolDisplay := formatToolDisplay(tools)
+   635 
+   636 		// Truncate subject for table
+   637 		subject := commit.Subject
+   638 		if len(subject) &gt; 40 {
+   639 			subject = subject[:37] &#43; &#34;...&#34;
+   640 		}
+   641 
+   642 		sb.WriteString(fmt.Sprintf(&#34;| %s | %s | %s | %d | %d |\n&#34;,
+   643 			commit.ShortSHA, subject, toolDisplay, userPromptCount, totalSteps))
+   644 	}
+   645 	sb.WriteString(&#34;\n&#34;)
+   646 
+   647 	sb.WriteString(&#34;---\n*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*\n&#34;)
+   648 
+   649 	return sb.String()
+   650 }
+   651 
+   652 // renderTimeline renders a list of timeline entries with commit markers
+   653 func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPrompts bool) {
+   654 	lastCommitIndex := -1
+   655 
+   656 	for _, te := range entries {
+   657 		// Insert commit marker when we cross to a new commit (including the first one)
+   658 		if te.CommitIndex != lastCommitIndex {
+   659 			subject := te.CommitSubj
+   660 			if len(subject) &gt; 40 {
+   661 				subject = subject[:37] &#43; &#34;...&#34;
+   662 			}
+   663 			sb.WriteString(fmt.Sprintf(&#34;\n--- Commit %s: %s ---\n\n&#34;, te.CommitSHA, subject))
+   664 		}
+   665 		lastCommitIndex = te.CommitIndex
+   666 
+   667 		// Format the entry
+   668 		if collapseLongPrompts &amp;&amp; isUserAction(te.Entry.Type) {
+   669 			sb.WriteString(formatMarkdownEntryCollapsible(te.Entry))
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see - commit subjects are used in two places:
+1. Summary table (line 642)
+2. Commit markers in timeline (line 663)
+
+Let me update the plan and implement:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/recursive-forging-orbit.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/recursive-forging-orbit.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Escape HTML in commit subjects
+     2 
+     3 ## Summary
+     4 Escape HTML in commit subject lines to prevent breaking markdown when commits contain `&lt;` or `&gt;` characters.
+     5 
+     6 ## File to Modify
+     7 - `internal/ci/summary.go`
+     8 
+     9 ## Changes
+    10 1. Line ~640: Escape `subject` before writing to summary table
+    11 2. Line ~662: Escape `subject` before writing to commit marker in timeline
+    12 
+    13 Both just need `subject = html.EscapeString(subject)` after truncation.
+    14 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Escape HTML in commit subjects\n\n## Summary\nEscape HTML in commit subject lines to prevent breaking markdown when commits contain `\u003c` or `\u003e` characters.\n\n## File to M...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/recursive-forging-orbit.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Escape HTML in commit subjects
+
+## Summary
+Escape HTML in commit subject lines to prevent breaking markdown when commits contain `&lt;` or `&gt;` characters.
+
+## File to Modify
+- `internal/ci/summary.go`
+
+## Changes
+1. Line ~640: Escape `subject` before writing to summary table
+2. Line ~662: Escape `subject` before writing to commit marker in timeline
+
+Both just need `subject = html.EscapeString(subject)` after truncation.
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   632 
+   633 		// Format tool names
+   634 		toolDisplay := formatToolDisplay(tools)
+   635 
+   636 		// Truncate subject for table
+   637 		subject := commit.Subject
+   638 		if len(subject) &gt; 40 {
+   639 			subject = subject[:37] &#43; &#34;...&#34;
+   640 		}
+   641 		subject = html.EscapeString(subject)
+   642 
+   643 		sb.WriteString(fmt.Sprintf(&#34;| %s | %s | %s | %d | %d |\n&#34;,
+   644 			commit.ShortSHA, subject, toolDisplay, userPromptCount, totalSteps))
+   645 	}
+   646 	sb.WriteString(&#34;\n&#34;)
+   647 
+   648 	sb.WriteString(&#34;---\n*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*\n&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   653 // renderTimeline renders a list of timeline entries with commit markers
+   654 func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPrompts bool) {
+   655 	lastCommitIndex := -1
+   656 
+   657 	for _, te := range entries {
+   658 		// Insert commit marker when we cross to a new commit (including the first one)
+   659 		if te.CommitIndex != lastCommitIndex {
+   660 			subject := te.CommitSubj
+   661 			if len(subject) &gt; 40 {
+   662 				subject = subject[:37] &#43; &#34;...&#34;
+   663 			}
+   664 			subject = html.EscapeString(subject)
+   665 			sb.WriteString(fmt.Sprintf(&#34;\n--- Commit %s: %s ---\n\n&#34;, te.CommitSHA, subject))
+   666 		}
+   667 		lastCommitIndex = te.CommitIndex
+   668 
+   669 		// Format the entry
+   670 		if collapseLongPrompts &amp;&amp; isUserAction(te.Entry.Type) {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/... &amp;&amp; e2e/run-tests.sh 2&gt;&amp;1 | tail -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.318s
+    - start_work: 2025-01-15T09:00:00Z
+
+  All squash flow assertions passed!
+
+=== 11/11 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Escape HTML in commit subjects
+
+- Escape HTML in summary table commit subjects
+- Escape HTML in timeline commit markers
+- Prevents breaking markdown when commit messages contain &lt; or &gt; characters
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[main c1ab765] Escape HTML in commit subjects
+ 1 file changed, 2 insertions(&#43;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      let count = 0;
+
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>

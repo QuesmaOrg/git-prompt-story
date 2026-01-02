@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7ef17cd - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>7ef17cd</code></h1>
+    <p class="meta">Escape HTML tags in prompt content to prevent breaking markdown</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">20</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>7ef17cd8300feb71f7a84977db85c7a19a8b58be</code><br>
+    <strong>Work period:</strong> 2026-01-02 17:27 - 2026-01-02 17:32
+  </div>
+
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3>Session 1: Claude Code</h3>
+      <div class="commit-meta">
+        2026-01-02 17:02 - 2026-01-02 17:32 | <span class="session-count">20</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:27</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed as `067557b`. 
+
+The plan for the HTML escaping bug is ready. Should I proceed with implementing it?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Escape HTML tags in prompt content\n\n## Summary\nEscape `\u003cdetails\u003e`, `\u003csummary\u003e`, and other HTML tags that appear in user prompt text content to prevent breaki...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+Please add failing unit test to reproduce that.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   420 func TestFormatMarkdownEntryCollapsible_ShortText(t *testing.T) {
+   421 	entry := PromptEntry{
+   422 		Type: &#34;PROMPT&#34;,
+   423 		Text: &#34;Short prompt text&#34;,
+   424 		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+   425 	}
+   426 
+   427 	result := formatMarkdownEntryCollapsible(entry)
+   428 
+   429 	// Short prompts should use &lt;details open&gt;
+   430 	if !strings.Contains(result, &#34;&lt;details open&gt;&#34;) {
+   431 		t.Error(&#34;Short prompts should use &lt;details open&gt;&#34;)
+   432 	}
+   433 
+   434 	// Should contain the full text in summary
+   435 	if !strings.Contains(result, &#34;Short prompt text&#34;) {
+   436 		t.Error(&#34;Should contain full text&#34;)
+   437 	}
+   438 }
+   439 
+   440 func TestFormatMarkdownEntryCollapsible_LongText(t *testing.T) {
+   441 	// Create entry with 300&#43; char text where CONTINUATION is past 247 chars
+   442 	// 260 &#39;a&#39;s &#43; &#34;CONTINUATION&#34; &#43; 50 &#39;b&#39;s = 322 chars total
+   443 	longText := strings.Repeat(&#34;a&#34;, 260) &#43; &#34;CONTINUATION&#34; &#43; strings.Repeat(&#34;b&#34;, 50)
+   444 	entry := PromptEntry{
+   445 		Type: &#34;PROMPT&#34;,
+   446 		Text: longText,
+   447 		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+   448 	}
+   449 
+   450 	result := formatMarkdownEntryCollapsible(entry)
+   451 
+   452 	// Long prompts should use &lt;details&gt; (not open)
+   453 	if !strings.Contains(result, &#34;&lt;details&gt;&lt;summary&gt;&#34;) {
+   454 		t.Error(&#34;Long prompts should use &lt;details&gt; (collapsed)&#34;)
+   455 	}
+   456 
+   457 	// Summary should end with &#34;...&#34;
+   458 	if !strings.Contains(result, &#34;...&#34;) {
+   459 		t.Error(&#34;Summary should be truncated with ...&#34;)
+   460 	}
+   461 
+   462 	// Continuation inside details should have the rest of the text
+   463 	if !strings.Contains(result, &#34;CONTINUATION&#34;) {
+   464 		t.Error(&#34;Should contain rest of text in details&#34;)
+   465 	}
+   466 
+   467 	// The continuation should start with &#34;...&#34;
+   468 	if !strings.Contains(result, &#34;\n\n...&#34;) {
+   469 		t.Error(&#34;Continuation should start with &#39;...&#39;&#34;)
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should cons...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   465 	}
+   466 
+   467 	// The continuation should start with &#34;...&#34;
+   468 	if !strings.Contains(result, &#34;\n\n...&#34;) {
+   469 		t.Error(&#34;Continuation should start with &#39;...&#39;&#34;)
+   470 	}
+   471 }
+   472 
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   463 	if !strings.Contains(result, &#34;CONTINUATION&#34;) {
+   464 		t.Error(&#34;Should contain rest of text in details&#34;)
+   465 	}
+   466 
+   467 	// The continuation should start with &#34;...&#34;
+   468 	if !strings.Contains(result, &#34;\n\n...&#34;) {
+   469 		t.Error(&#34;Continuation should start with &#39;...&#39;&#34;)
+   470 	}
+   471 }
+   472 
+   473 func TestFormatMarkdownEntryCollapsible_EscapesHTML(t *testing.T) {
+   474 	// Prompt text containing HTML tags that should be escaped
+   475 	entry := PromptEntry{
+   476 		Type: &#34;PROMPT&#34;,
+   477 		Text: &#34;Use &lt;details&gt; and &lt;summary&gt; tags for collapsible content&#34;,
+   478 		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+   479 	}
+   480 
+   481 	result := formatMarkdownEntryCollapsible(entry)
+   482 
+   483 	// The literal &lt;details&gt; in the prompt should be escaped to &amp;lt;details&amp;gt;
+   484 	// Otherwise it would break the outer &lt;details&gt; structure
+   485 	if strings.Contains(result, &#34;Use &lt;details&gt;&#34;) {
+   486 		t.Error(&#34;HTML tags in prompt text should be escaped, but found unescaped &lt;details&gt;&#34;)
+   487 	}
+   488 
+   489 	// Should contain escaped version
+   490 	if !strings.Contains(result, &#34;&amp;lt;details&amp;gt;&#34;) {
+   491 		t.Error(&#34;Should contain escaped HTML: &amp;lt;details&amp;gt;&#34;)
+   492 	}
+   493 
+   494 	if !strings.Contains(result, &#34;&amp;lt;summary&amp;gt;&#34;) {
+   495 		t.Error(&#34;Should contain escaped HTML: &amp;lt;summary&amp;gt;&#34;)
+   496 	}
+   497 }
+   498 
+   499 func TestFormatMarkdownEntry_EscapesHTML(t *testing.T) {
+   500 	// Test that the non-collapsible format also escapes HTML
+   501 	entry := PromptEntry{
+   502 		Type: &#34;ASSISTANT&#34;,
+   503 		Text: &#34;Here is some &lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt; content&#34;,
+   504 		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+   505 	}
+   506 
+   507 	result := formatMarkdownEntry(entry)
+   508 
+   509 	// Should not contain unescaped script tag
+   510 	i...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/... -run &#34;EscapesHTML&#34; -v</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+=== RUN   TestFormatMarkdownEntryCollapsible_EscapesHTML
+    summary_test.go:486: HTML tags in prompt text should be escaped, but found unescaped &lt;details&gt;
+    summary_test.go:491: Should contain escaped HTML: &amp;lt;details&amp;gt;
+    summary_test.go:495: Should contain escaped HTML: &amp;lt;summary&amp;gt;
+--- FAIL: TestFormatMarkdownEntryCollapsible_EscapesHTML (0.00s)
+=== RUN   TestFormatMarkdownEntry_EscapesHTML
+    summary_test.go:511: HTML tags should be escaped
+    summary_test.go:516: Should contain escaped HTML
+--- FAIL: TestFormatMarkdownEntry_EscapesHTML (0.00s)
+FAIL
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.423s
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Tests fail as expected, confirming the bug:
+
+```
+=== RUN   TestFormatMarkdownEntryCollapsible_EscapesHTML
+    summary_test.go:486: HTML tags in prompt text should be escaped, but found unescaped &lt;details&gt;
+--- FAIL
+
+=== RUN   TestFormatMarkdownEntry_EscapesHTML  
+    summary_test.go:511: HTML tags should be escaped
+--- FAIL
+```
+
+Ready to implement the fix - need to escape HTML in both `formatMarkdownEntry()` and `formatMarkdownEntryCollapsible()`.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Escape HTML tags in prompt content\n\n## Summary\nEscape `\u003cdetails\u003e`, `\u003csummary\u003e`, and other HTML tags that appear in user prompt text content to prevent breaki...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/recursive-forging-orbit.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Escape HTML tags in prompt content
+
+## Summary
+Escape `&lt;details&gt;`, `&lt;summary&gt;`, and other HTML tags that appear in user prompt text content to prevent breaking the markdown rendering.
+
+## Problem
+When user prompts contain literal `&lt;details&gt;` or other HTML tags, they get rendered as actual HTML elements instead of being displayed as text, breaking the collapsible sections.
+
+## File to Modify
+- `internal/ci/summary.go` - escape HTML in prompt text before rendering
+
+## Implementation
+1. Create a helper function to escape HTML special characters (`&lt;`, `&gt;`, `&amp;`) in text content
+2. Apply escaping in `formatMarkdownEntry()` and `formatMarkdownEntryCollapsible()` to the text content before rendering
+
+## After Implementation
+- Run tests
+- Bump version and install globally
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding HTML escaping to format functions&#34;,&#34;content&#34;:&#34;Add HTML escaping to formatMarkdownEntry and formatMarkdownEntryCollapsible&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Run...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;strings&#34;
+     7 	&#34;time&#34;
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    12 )
+    13 
+    14 // PromptEntry represents a single prompt or action in a session
+    15 type PromptEntry struct {
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;html&#34;
+     7 	&#34;strings&#34;
+     8 	&#34;time&#34;
+     9 
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    12 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    13 )
+    14 
+    15 // PromptEntry represents a single prompt or action in a session
+    16 type PromptEntry struct {
+    17 	Time         time.Time `json:&#34;time&#34;`</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   670 		} else {
+   671 			sb.WriteString(formatMarkdownEntry(te.Entry))
+   672 		}
+   673 	}
+   674 }
+   675 
+   676 // formatMarkdownEntry formats a single entry for markdown display
+   677 func formatMarkdownEntry(entry PromptEntry) string {
+   678 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)
+   679 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+   680 	if len(text) &gt; 100 {
+   681 		text = text[:97] &#43; &#34;...&#34;
+   682 	}
+   683 
+   684 	switch entry.Type {
+   685 	case &#34;TOOL_USE&#34;:
+   686 		if entry.ToolName != &#34;&#34; {
+   687 			input := entry.ToolInput
+   688 			if len(input) &gt; 60 {
+   689 				input = input[:57] &#43; &#34;...&#34;
+   690 			}
+   691 			input = strings.ReplaceAll(input, &#34;\n&#34;, &#34; &#34;)
+   692 			return fmt.Sprintf(&#34;- [%s] %s (%s): %s\n&#34;, timeStr, entry.Type, entry.ToolName, input)
+   693 		}
+   694 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   695 	default:
+   696 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   697 	}
+   698 }
+   699 
+   700 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
+   701 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
+   702 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)
+   703 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+   704 
+   705 	// Short prompts (≤250 chars): &lt;details open&gt; (expanded by default)
+   706 	if len(text) &lt;= 250 {
+   707 		return fmt.Sprintf(&#34;&lt;details open&gt;&lt;summary&gt;[%s] %s: %s&lt;/summary&gt;&lt;/details&gt;\n&#34;,
+   708 			timeStr, entry.Type, text)
+   709 	}
+   710 
+   711 	// Long prompts: &lt;details&gt; (collapsed) with truncated summary
+   712 	summary := text[:247] &#43; &#34;...&#34;
+   713 	continuation := entry.Text[247:] // Use original with newlines preserved
+   714 
+   715 	return fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;[%s] %s: %s&lt;/summary&gt;\n\n...%s\n\n&lt;/details&gt;\n&#34;,
+   716 		timeStr, entry.Type, summary, continuation)
+   717 }
+   718 
+   719 // RenderJSON generates JSON output
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   672 		}
+   673 	}
+   674 }
+   675 
+   676 // formatMarkdownEntry formats a single entry for markdown display
+   677 func formatMarkdownEntry(entry PromptEntry) string {
+   678 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)
+   679 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+   680 	if len(text) &gt; 100 {
+   681 		text = text[:97] &#43; &#34;...&#34;
+   682 	}
+   683 	// Escape HTML to prevent breaking markdown structure
+   684 	text = html.EscapeString(text)
+   685 
+   686 	switch entry.Type {
+   687 	case &#34;TOOL_USE&#34;:
+   688 		if entry.ToolName != &#34;&#34; {
+   689 			input := entry.ToolInput
+   690 			if len(input) &gt; 60 {
+   691 				input = input[:57] &#43; &#34;...&#34;
+   692 			}
+   693 			input = strings.ReplaceAll(input, &#34;\n&#34;, &#34; &#34;)
+   694 			input = html.EscapeString(input)
+   695 			return fmt.Sprintf(&#34;- [%s] %s (%s): %s\n&#34;, timeStr, entry.Type, entry.ToolName, input)
+   696 		}
+   697 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   698 	default:
+   699 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   700 	}
+   701 }
+   702 
+   703 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
+   704 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
+   705 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   699 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   700 	}
+   701 }
+   702 
+   703 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
+   704 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
+   705 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)
+   706 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+   707 
+   708 	// Short prompts (≤250 chars): &lt;details open&gt; (expanded by default)
+   709 	if len(text) &lt;= 250 {
+   710 		// Escape HTML to prevent breaking markdown structure
+   711 		text = html.EscapeString(text)
+   712 		return fmt.Sprintf(&#34;&lt;details open&gt;&lt;summary&gt;[%s] %s: %s&lt;/summary&gt;&lt;/details&gt;\n&#34;,
+   713 			timeStr, entry.Type, text)
+   714 	}
+   715 
+   716 	// Long prompts: &lt;details&gt; (collapsed) with truncated summary
+   717 	summary := text[:247] &#43; &#34;...&#34;
+   718 	continuation := entry.Text[247:] // Use original with newlines preserved
+   719 
+   720 	// Escape HTML in both summary and continuation
+   721 	summary = html.EscapeString(summary)
+   722 	continuation = html.EscapeString(continuation)
+   723 
+   724 	return fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;[%s] %s: %s&lt;/summary&gt;\n\n...%s\n\n&lt;/details&gt;\n&#34;,
+   725 		timeStr, entry.Type, summary, continuation)
+   726 }
+   727 
+   728 // RenderJSON generates JSON output
+   729 func RenderJSON(summary *Summary) ([]byte, error) {
+   730 	return json.MarshalIndent(summary, &#34;&#34;, &#34;  &#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding HTML escaping to format functions&#34;,&#34;content&#34;:&#34;Add HTML escaping to formatMarkdownEntry and formatMarkdownEntryCollapsible&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Runni...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/... -v 2&gt;&amp;1 | tail -25</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">--- PASS: TestRenderMarkdown_MultipleTools (0.00s)
+=== RUN   TestRenderMarkdown_PagesURL
+--- PASS: TestRenderMarkdown_PagesURL (0.00s)
+=== RUN   TestRenderMarkdown_NoUserPrompts
+--- PASS: TestRenderMarkdown_NoUserPrompts (0.00s)
+=== RUN   TestFormatMarkdownEntry
+=== RUN   TestFormatMarkdownEntry/prompt_entry
+=== RUN   TestFormatMarkdownEntry/tool_use_with_name
+=== RUN   TestFormatMarkdownEntry/long_text_truncation
+--- PASS: TestFormatMarkdownEntry (0.00s)
+    --- PASS: TestFormatMarkdownEntry/prompt_entry (0.00s)
+    --- PASS: TestFormatMarkdownEntry/tool_use_with_name (0.00s)
+    --- PASS: TestFormatMarkdownEntry/long_text_truncation (0.00s)
+=== RUN   TestRenderMarkdown_MultipleCommitsDifferentEntries
+--- PASS: TestRenderMarkdown_MultipleCommitsDifferentEntries (0.00s)
+=== RUN   TestFormatMarkdownEntryCollapsible_ShortText
+--- PASS: TestFormatMarkdownEntryCollapsible_ShortText (0.00s)
+=== RUN   TestFormatMarkdownEntryCollapsible_LongText
+--- PASS: TestFormatMarkdownEntryCollapsible_LongText (0.00s)
+=== RUN   TestFormatMarkdownEntryCollapsible_EscapesHTML
+--- PASS: TestFormatMarkdownEntryCollapsible_EscapesHTML (0.00s)
+=== RUN   TestFormatMarkdownEntry_EscapesHTML
+--- PASS: TestFormatMarkdownEntry_EscapesHTML (0.00s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.362s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    - start_work: 2025-01-15T09:00:00Z
+
+  All squash flow assertions passed!
+
+=== 11/11 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding HTML escaping to format functions&#34;,&#34;content&#34;:&#34;Add HTML escaping to formatMarkdownEntry and formatMarkdownEntryCollapsible&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Runni...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:32</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Let me commit:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Escape HTML tags in prompt content to prevent breaking markdown
+
+- Add html.EscapeString() to formatMarkdownEntry() and formatMarkdownEntryCollapsible()
+- Escapes &lt;, &gt;, &amp; characters in prompt text and tool input
+- Prevents literal &lt;details&gt;, &lt;script&gt;, etc. in prompts from breaking the collapsible structure
+- Add unit tests for HTML escaping
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[main 7ef17cd] Escape HTML tags in prompt content to prevent breaking markdown
+ 2 files changed, 57 insertions(&#43;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      let count = 0;
+
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
