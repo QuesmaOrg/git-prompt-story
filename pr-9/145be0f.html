@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>145be0f - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>145be0f</code></h1>
+    <p class="meta">Add multi-tool architecture design document</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">25</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>145be0fd28e224113d3bb52c344044ae4b0482e2</code><br>
+    <strong>Work period:</strong> 2026-01-02 17:32 - 2026-01-02 17:36
+  </div>
+
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3>Session 1: Claude Code</h3>
+      <div class="commit-meta">
+        2026-01-02 17:03 - 2026-01-02 17:36 | <span class="session-count">7</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:32</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Created and committed `docs/CURSOR_SUPPORT.md` on branch `cursor-support`:
+
+```
+[cursor-support ee7c0c8] Add Cursor IDE support documentation
+ 1 file changed, 125 insertions(&#43;)
+ create mode 100644 docs/CURSOR_SUPPORT.md
+```</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Ok, can you think through architecture, how we will be adding new tools such it is managable? We both have to focus on write path and read path. We try to do more heavy lifting on read than write. The goal is to have design doc in markdown for that.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me first understand the current architecture better, then design a pluggable system.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the git-prompt-story codebase to understand the current architecture for:
+
+1. **Write pat...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Perfect! Now let me create a comprehensive summary of the architecture. Let me provide you with a detailed overview of the git-prompt-story codebase architecture:
+
+## Summary: git-prompt-story Architecture
+
+### Overview
+
+git-prompt-story captures Claude Code sessions during development and stores them as git notes and transcripts, creating a searchable record of AI-assisted development work. The system has two main paths: **Write** (capture during commit) and **Read** (display/analyze).
+
+---
+
+## WRITE PATH - Session Discovery &amp; Storage
+
+### 1. Entry Point: `prepare-commit-msg` Hook
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/prepare_commit_msg.go`
+
+**Flow**:
+1. Hook triggered during `git commit`
+2. Detects if it&#39;s an amend operation
+3. Calls `session.FindSessions()` to discover Claude Code sessions
+4. Filters sessions by work period (since last commit or branch switch)
+5. Stores transcripts and creates notes
+
+**Key Functions**:
+- `PrepareCommitMsg(msgFile, source, sha string)` - Main hook handler
+- `appendToCommitMessage(msgFile, summary string)` - Adds summary line to commit message
+
+### 2. Session Discovery
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go`
+
+**Discovery Process**:
+```
+Repository Path (e.g., /&lt;REDACTED&gt;/git/myapp)
+    ↓
+Encode path: /&lt;REDACTED&gt;/git/myapp   -Users-jacek-git-myapp
+    ↓
+~/.claude/projects/-Users-jacek-git-myapp/
+    ↓
+Find all *.jsonl files (Claude Code sessions)
+    ↓
+Parse metadata (timestamps, branch) from each file
+    ↓
+Sort by modified time (most recent first)
+```
+
+**Key Functions**:
+- `FindSessions(repoPath string) []ClaudeSession` - Discovers all sessions for a repo
+- `getClaudeSessionDir(repoPath string)` - Resolves session directory path
+- `encodePathForClaude(repoPath string)` - Converts path to Claude directory encoding
+- `FilterSessionsByTime(sessions, startWork, endWork)` - Keeps sessions overlapping work period
+- `FilterSessionsByUserMessages(sessions, s...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I have a clear picture. Let me design a pluggable architecture and create the design doc.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/docs/MULTI_TOOL_ARCHITECTURE.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story-tests/docs/MULTI_TOOL_ARCHITECTURE.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add docs/MULTI_TOOL_ARCHITECTURE.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add multi-tool architecture design document
+
+Design a pluggable architecture for supporting multiple AI coding tools:
+- Provider interface for write path (discovery &#43; raw storage)
+- Parser interface for read path (native format → unified entries)
+- Heavy lifting on read, minimal transformation on write
+- Native format storage per tool in separate subtrees
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3>Session 2: Claude Code</h3>
+      <div class="commit-meta">
+        2026-01-02 17:34 - 2026-01-02 17:35 | <span class="session-count">18</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Explore the git-prompt-story codebase to understand the current architecture for:
+
+1. **Write path** - How sessions are discovered, filtered, and stored during commit
+   - Look at internal/hooks/prepare_commit_msg.go
+   - Look at internal/session/discovery.go
+   - Look at internal/note/transcript.go and metadata.go
+
+2. **Read path** - How sessions are retrieved and displayed
+   - Look at internal/show/show.go
+   - Look at internal/ci/summary.go
+
+3. **Data types** - Session structures, note format
+   - Look at internal/session/types.go
+   - Look at internal/note/types.go
+
+Provide a summary of the current flow for both write and read paths, including key functions and data structures.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand the architecture for session discovery, storage, and retrieval. Let me start by examining the key files you&#39;ve mentioned.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/types.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/prepare_commit_msg.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package hooks
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;os&#34;
+     6 	&#34;path/filepath&#34;
+     7 	&#34;strings&#34;
+     8 	&#34;time&#34;
+     9 
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    12 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/scrubber&#34;
+    13 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    14 )
+    15 
+    16 // PrepareCommitMsg implements the prepare-commit-msg hook logic
+    17 func PrepareCommitMsg(msgFile, source, sha string) error {
+    18 	// Get repo root
+    19 	repoRoot, err := git.GetRepoRoot()
+    20 	if err != nil {
+    21 		return fmt.Errorf(&#34;not in a git repository: %w&#34;, err)
+    22 	}
+    23 
+    24 	// Get git directory for debug log
+    25 	gitDir, err := git.GetGitDir()
+    26 	if err != nil {
+    27 		return err
+    28 	}
+    29 	debugLog := newDebugLogger(filepath.Join(gitDir, &#34;prompt-story-debug.log&#34;))
+    30 	debugLog.log(&#34;=== prepare-commit-msg started at %s ===&#34;, time.Now().UTC().Format(time.RFC3339))
+    31 	debugLog.log(&#34;repoRoot: %s&#34;, repoRoot)
+    32 	debugLog.log(&#34;msgFile: %s, source: %q, sha: %q&#34;, msgFile, source, sha)
+    33 
+    34 	// Read current commit message to detect if this is an amend
+    35 	msgContent, err := os.ReadFile(msgFile)
+    36 	if err != nil {
+    37 		return fmt.Errorf(&#34;failed to read commit message: %w&#34;, err)
+    38 	}
+    39 
+    40 	// Detect amend: if message already has our marker, or source is &#34;commit&#34; with SHA
+    41 	// Note: git passes source=&#34;message&#34; when using -m flag, even with --amend
+    42 	// So we also check for existing marker as a reliable amend indicator
+    43 	hasMarker := strings.Contains(string(msgContent), &#34;Prompt-Story:&#34;)
+    44 	isAmend := (source == &#34;commit&#34; &amp;&amp; sha != &#34;&#34;) || hasMarker
+    45 	debugLog.log(&#34;isAmend: %v (source=commit&amp;&amp;sha: %v, hasMarker: %v)&#34;, isAmend, source == &#34;commit&#34; &amp;&amp; sha != &#34;&#34;, hasMarker)
+    46 
+    47 	// Find Claude Code sessions for this repo
+    48 	ses...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package session
+     2 
+     3 import (
+     4 	&#34;os&#34;
+     5 	&#34;path/filepath&#34;
+     6 	&#34;sort&#34;
+     7 	&#34;strings&#34;
+     8 	&#34;time&#34;
+     9 )
+    10 
+    11 // FindSessions discovers Claude Code sessions for a given repo path
+    12 // Returns sessions sorted by modified time (most recent first)
+    13 func FindSessions(repoPath string) ([]ClaudeSession, error) {
+    14 	absPath, err := filepath.Abs(repoPath)
+    15 	if err != nil {
+    16 		return nil, err
+    17 	}
+    18 
+    19 	claudeDir, err := getClaudeSessionDir(absPath)
+    20 	if err != nil {
+    21 		return nil, err
+    22 	}
+    23 
+    24 	// Check if directory exists
+    25 	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
+    26 		return nil, nil // No sessions directory = no sessions
+    27 	}
+    28 
+    29 	files, err := filepath.Glob(filepath.Join(claudeDir, &#34;*.jsonl&#34;))
+    30 	if err != nil {
+    31 		return nil, err
+    32 	}
+    33 
+    34 	var sessions []ClaudeSession
+    35 	for _, f := range files {
+    36 		id := strings.TrimSuffix(filepath.Base(f), &#34;.jsonl&#34;)
+    37 		created, modified, branch, err := ParseSessionMetadata(f)
+    38 		if err != nil {
+    39 			// Skip files we can&#39;t parse
+    40 			continue
+    41 		}
+    42 		sessions = append(sessions, ClaudeSession{
+    43 			ID:       id,
+    44 			Path:     f,
+    45 			Created:  created,
+    46 			Modified: modified,
+    47 			Branch:   branch,
+    48 		})
+    49 	}
+    50 
+    51 	// Sort by modified time (most recent first)
+    52 	sort.Slice(sessions, func(i, j int) bool {
+    53 		return sessions[i].Modified.After(sessions[j].Modified)
+    54 	})
+    55 
+    56 	return sessions, nil
+    57 }
+    58 
+    59 // getClaudeSessionDir returns the Claude Code sessions directory for a repo
+    60 // Path encoding: /&lt;REDACTED&gt;/git/myapp -&gt; -Users-jacek-git-myapp
+    61 func getClaudeSessionDir(repoPath string) (string, error) {
+    62 	homeDir, err := os.UserHomeDir()
+    63 	if err != nil {
+    64 		return &#34;&#34;, err
+    65 	}
+    66 
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me read the note-related files and other key components:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/transcript.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/metadata.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package note
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;sort&#34;
+     7 	&#34;strings&#34;
+     8 	&#34;time&#34;
+     9 
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    12 )
+    13 
+    14 // PromptStoryNote is the JSON structure stored as a git note on commits
+    15 type PromptStoryNote struct {
+    16 	Version   int            `json:&#34;v&#34;`
+    17 	StartWork time.Time      `json:&#34;start_work&#34;`
+    18 	Sessions  []SessionEntry `json:&#34;sessions&#34;`
+    19 }
+    20 
+    21 // SessionEntry describes one LLM session referenced by the note
+    22 type SessionEntry struct {
+    23 	Tool     string    `json:&#34;tool&#34;`
+    24 	ID       string    `json:&#34;id&#34;`
+    25 	Path     string    `json:&#34;path&#34;`
+    26 	Created  time.Time `json:&#34;created&#34;`
+    27 	Modified time.Time `json:&#34;modified&#34;`
+    28 }
+    29 
+    30 // NewPromptStoryNote creates a new note from discovered sessions
+    31 // isAmend should be true when amending a commit (affects start_work calculation)
+    32 func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool) *PromptStoryNote {
+    33 	note := &amp;PromptStoryNote{
+    34 		Version:  1,
+    35 		Sessions: make([]SessionEntry, 0, len(sessions)),
+    36 	}
+    37 
+    38 	// Calculate work start time from git reflog
+    39 	// This is the most recent of: previous commit time or branch switch time
+    40 	note.StartWork, _ = git.CalculateWorkStartTime(isAmend)
+    41 
+    42 	for _, s := range sessions {
+    43 		note.Sessions = append(note.Sessions, SessionEntry{
+    44 			Tool:     &#34;claude-code&#34;,
+    45 			ID:       s.ID,
+    46 			Path:     GetTranscriptPath(&#34;claude-code&#34;, s.ID),
+    47 			Created:  s.Created,
+    48 			Modified: s.Modified,
+    49 		})
+    50 	}
+    51 
+    52 	return note
+    53 }
+    54 
+    55 // ToJSON serializes the note to JSON
+    56 func (n *PromptStoryNote) ToJSON() ([]byte, error) {
+    57 	return json.MarshalIndent(n, &#34;&#34;, &#34;  &#34;)
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package show
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;strings&#34;
+     7 	&#34;time&#34;
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    12 )
+    13 
+    14 const promptStoryPrefix = &#34;prompt-story-&#34;
+    15 
+    16 // ShowPrompts displays prompts for a given commit, range, or prompt-story reference
+    17 func ShowPrompts(commitRef string, full bool) error {
+    18 	// Determine the type of reference and get commit list
+    19 	commits, err := resolveCommitSpec(commitRef)
+    20 	if err != nil {
+    21 		return err
+    22 	}
+    23 
+    24 	// Show prompts for each commit
+    25 	for i, sha := range commits {
+    26 		if i &gt; 0 {
+    27 			fmt.Println(&#34;---&#34;)
+    28 			fmt.Println()
+    29 		}
+    30 		if err := showCommitPrompts(sha, full); err != nil {
+    31 			return err
+    32 		}
+    33 	}
+    34 	return nil
+    35 }
+    36 
+    37 // resolveCommitSpec resolves a commit specification to a list of commit SHAs
+    38 // Supports: single ref, ranges (A..B), prompt-story-{hash}
+    39 func resolveCommitSpec(spec string) ([]string, error) {
+    40 	// Check for prompt-story-{hash} prefix
+    41 	if strings.HasPrefix(spec, promptStoryPrefix) {
+    42 		hashPrefix := strings.TrimPrefix(spec, promptStoryPrefix)
+    43 		sha, err := note.FindCommitByNoteHashWithFallback(hashPrefix)
+    44 		if err != nil {
+    45 			return nil, err
+    46 		}
+    47 		return []string{sha}, nil
+    48 	}
+    49 
+    50 	// Check for range (contains ..)
+    51 	if strings.Contains(spec, &#34;..&#34;) {
+    52 		commits, err := git.RevList(spec)
+    53 		if err != nil {
+    54 			return nil, fmt.Errorf(&#34;failed to resolve range %s: %w&#34;, spec, err)
+    55 		}
+    56 		if len(commits) == 0 {
+    57 			return nil, fmt.Errorf(&#34;no commits in range %s&#34;, spec)
+    58 		}
+    59 		return commits, nil
+    60 	}
+    61 
+    62 	// S...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;strings&#34;
+     7 	&#34;time&#34;
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    12 )
+    13 
+    14 // PromptEntry represents a single prompt or action in a session
+    15 type PromptEntry struct {
+    16 	Time         time.Time `json:&#34;time&#34;`
+    17 	Type         string    `json:&#34;type&#34;` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT
+    18 	Text         string    `json:&#34;text&#34;`
+    19 	Truncated    bool      `json:&#34;truncated,omitempty&#34;`
+    20 	InWorkPeriod bool      `json:&#34;in_work_period&#34;` // true if within commit&#39;s work period
+    21 	ToolID       string    `json:&#34;tool_id,omitempty&#34;`     // For TOOL_USE/TOOL_RESULT: links them together
+    22 	ToolName     string    `json:&#34;tool_name,omitempty&#34;`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
+    23 	ToolInput    string    `json:&#34;tool_input,omitempty&#34;`  // For TOOL_USE: the tool input/command
+    24 	ToolOutput   string    `json:&#34;tool_output,omitempty&#34;` // For TOOL_RESULT: the tool output
+    25 }
+    26 
+    27 // SessionSummary represents a summarized session within a commit
+    28 type SessionSummary struct {
+    29 	Tool     string        `json:&#34;tool&#34;`
+    30 	ID       string        `json:&#34;id&#34;`
+    31 	Start    time.Time     `json:&#34;start&#34;`
+    32 	End      time.Time     `json:&#34;end&#34;`
+    33 	Prompts  []PromptEntry `json:&#34;prompts&#34;`
+    34 }
+    35 
+    36 // CommitSummary represents prompts for a single commit
+    37 type CommitSummary struct {
+    38 	SHA       string           `json:&#34;sha&#34;`
+    39 	ShortSHA  string           `json:&#34;short_sha&#34;`
+    40 	Subject   string           `json:&#34;subject&#34;`
+    41 	Sessions  []SessionSummary `json:&#34;sessions&#34;`
+    42 	StartWork time.Time        `json:&#34;start_work&#34;`
+    43 	EndWork   time.Time        `json:&#34;end_work&#34;`
+    44...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me look at additional supporting files to complete the picture:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/internal/session/*.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/parser.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/internal/note/*.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/transcript.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/metadata.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me read the remaining key files to complete the picture:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/parser.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package session
+     2 
+     3 import (
+     4 	&#34;bufio&#34;
+     5 	&#34;encoding/json&#34;
+     6 	&#34;os&#34;
+     7 	&#34;strings&#34;
+     8 	&#34;time&#34;
+     9 )
+    10 
+    11 // ParseSessionMetadata extracts first/last timestamps and branch from JSONL
+    12 func ParseSessionMetadata(sessionPath string) (created, modified time.Time, branch string, err error) {
+    13 	file, err := os.Open(sessionPath)
+    14 	if err != nil {
+    15 		return time.Time{}, time.Time{}, &#34;&#34;, err
+    16 	}
+    17 	defer file.Close()
+    18 
+    19 	scanner := bufio.NewScanner(file)
+    20 	// Increase buffer size for large lines (Claude responses can be big)
+    21 	buf := make([]byte, 0, 64*1024)
+    22 	scanner.Buffer(buf, 1024*1024)
+    23 
+    24 	var first, last time.Time
+    25 	var lastBranch string
+    26 
+    27 	for scanner.Scan() {
+    28 		var entry MessageEntry
+    29 		if err := json.Unmarshal(scanner.Bytes(), &amp;entry); err != nil {
+    30 			continue // Skip malformed lines
+    31 		}
+    32 
+    33 		// Get timestamp from appropriate location
+    34 		ts := entry.Timestamp
+    35 		if ts.IsZero() &amp;&amp; entry.Snapshot != nil {
+    36 			ts = entry.Snapshot.Timestamp
+    37 		}
+    38 
+    39 		if !ts.IsZero() {
+    40 			if first.IsZero() {
+    41 				first = ts
+    42 			}
+    43 			last = ts
+    44 		}
+    45 
+    46 		if entry.GitBranch != &#34;&#34; {
+    47 			lastBranch = entry.GitBranch
+    48 		}
+    49 	}
+    50 
+    51 	if err := scanner.Err(); err != nil {
+    52 		return time.Time{}, time.Time{}, &#34;&#34;, err
+    53 	}
+    54 
+    55 	return first, last, lastBranch, nil
+    56 }
+    57 
+    58 // ReadSessionContent reads the entire session file for storage
+    59 func ReadSessionContent(sessionPath string) ([]byte, error) {
+    60 	return os.ReadFile(sessionPath)
+    61 }
+    62 
+    63 // ParseMessages parses JSONL content and returns all message entries
+    64 func ParseMessages(content []byte) ([]MessageEntry, error) {
+    65 	var entries []MessageEntry
+    66 
+    67 	scanner := bufio.NewS...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/refs.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">     1 package note
+     2 
+     3 import (
+     4 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+     5 )
+     6 
+     7 // Note refs for prompt-story data
+     8 const (
+     9 	// NotesRef is the primary ref for commit metadata notes
+    10 	NotesRef = &#34;refs/notes/prompt-story&#34;
+    11 
+    12 	// LegacyNotesRef is the old ref location for backward compatibility
+    13 	LegacyNotesRef = &#34;refs/notes/commits&#34;
+    14 
+    15 	// TranscriptsRef is the ref for transcript tree storage
+    16 	TranscriptsRef = &#34;refs/notes/prompt-story-transcripts&#34;
+    17 )
+    18 
+    19 // GetNoteWithFallback tries to get a note from the primary ref,
+    20 // falling back to the legacy ref for backward compatibility
+    21 func GetNoteWithFallback(sha string) (string, error) {
+    22 	// Try primary ref first
+    23 	note, err := git.GetNote(NotesRef, sha)
+    24 	if err == nil {
+    25 		return note, nil
+    26 	}
+    27 
+    28 	// Fall back to legacy ref
+    29 	return git.GetNote(LegacyNotesRef, sha)
+    30 }
+    31 
+    32 // FindCommitByNoteHashWithFallback tries to find a commit by note hash,
+    33 // checking both primary and legacy refs
+    34 func FindCommitByNoteHashWithFallback(hashPrefix string) (string, error) {
+    35 	// Try primary ref first
+    36 	sha, err := git.FindCommitByNoteHash(NotesRef, hashPrefix)
+    37 	if err == nil {
+    38 		return sha, nil
+    39 	}
+    40 
+    41 	// Fall back to legacy ref
+    42 	return git.FindCommitByNoteHash(LegacyNotesRef, hashPrefix)
+    43 }
+    44 
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now let me create a comprehensive summary of the architecture. Let me provide you with a detailed overview of the git-prompt-story codebase architecture:
+
+## Summary: git-prompt-story Architecture
+
+### Overview
+
+git-prompt-story captures Claude Code sessions during development and stores them as git notes and transcripts, creating a searchable record of AI-assisted development work. The system has two main paths: **Write** (capture during commit) and **Read** (display/analyze).
+
+---
+
+## WRITE PATH - Session Discovery &amp; Storage
+
+### 1. Entry Point: `prepare-commit-msg` Hook
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/prepare_commit_msg.go`
+
+**Flow**:
+1. Hook triggered during `git commit`
+2. Detects if it&#39;s an amend operation
+3. Calls `session.FindSessions()` to discover Claude Code sessions
+4. Filters sessions by work period (since last commit or branch switch)
+5. Stores transcripts and creates notes
+
+**Key Functions**:
+- `PrepareCommitMsg(msgFile, source, sha string)` - Main hook handler
+- `appendToCommitMessage(msgFile, summary string)` - Adds summary line to commit message
+
+### 2. Session Discovery
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go`
+
+**Discovery Process**:
+```
+Repository Path (e.g., /&lt;REDACTED&gt;/git/myapp)
+    ↓
+Encode path: /&lt;REDACTED&gt;/git/myapp → -Users-jacek-git-myapp
+    ↓
+~/.claude/projects/-Users-jacek-git-myapp/
+    ↓
+Find all *.jsonl files (Claude Code sessions)
+    ↓
+Parse metadata (timestamps, branch) from each file
+    ↓
+Sort by modified time (most recent first)
+```
+
+**Key Functions**:
+- `FindSessions(repoPath string) []ClaudeSession` - Discovers all sessions for a repo
+- `getClaudeSessionDir(repoPath string)` - Resolves session directory path
+- `encodePathForClaude(repoPath string)` - Converts path to Claude directory encoding
+- `FilterSessionsByTime(sessions, startWork, endWork)` - Keeps sessions overlapping work period
+- `FilterSessionsByUserMessages(sessions, startWork, endWork)` - Keeps only sessions with user input
+
+### 3. Session Data Structures
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go`
+
+**Primary Structures**:
+
+```go
+ClaudeSession {
+    ID       string    // Session UUID from filename
+    Path     string    // Full path to JSONL file
+    Created  time.Time // First timestamp
+    Modified time.Time // Last timestamp
+    Branch   string    // Git branch from session
+}
+
+MessageEntry {
+    Type      string           // &#34;user&#34;, &#34;assistant&#34;, &#34;file-history-snapshot&#34;
+    SessionID string
+    Timestamp time.Time
+    CWD       string
+    GitBranch string
+    Snapshot  *Snapshot        // For file-history-snapshot entries
+    Message   *Message         // Content with role and RawContent
+}
+
+Message {
+    Role       string          // &#34;user&#34;, &#34;assistant&#34;
+    RawContent json.RawMessage // Flexible content (string or array)
+}
+```
+
+**Parsing**:
+- `ParseSessionMetadata(sessionPath)` - Extracts first/last timestamps and branch
+- `ParseMessages(content []byte) []MessageEntry` - Parses JSONL content
+- `ReadSessionContent(sessionPath)` - Reads raw session file
+
+### 4. Transcript &amp; Note Storage
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/transcript.go`
+
+**Storage Process**:
+
+```
+Sessions discovered
+    ↓
+StoreTranscripts() {
+    For each session:
+        - Read session JSONL content
+        - Optionally scrub PII
+        - Hash as git blob
+        - Return map[sessionID] → blobSHA
+}
+    ↓
+UpdateTranscriptTree() {
+    Build tree structure:
+        refs/notes/prompt-story-transcripts
+        └── claude-code/
+            ├── {sessionID1}.jsonl (blob SHA)
+            ├── {sessionID2}.jsonl (blob SHA)
+            └── ...
+    
+    Merge with existing tree (preserve old sessions)
+}
+```
+
+**Key Functions**:
+- `StoreTranscripts(sessions, scrubber)` - Hash and store session content
+- `UpdateTranscriptTree(blobs)` - Create/update transcript tree reference
+
+### 5. Note Creation
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/metadata.go`
+
+**Note Structure**:
+
+```go
+PromptStoryNote {
+    Version   int            // v=1
+    StartWork time.Time      // Work period start
+    Sessions  []SessionEntry // References to discovered sessions
+}
+
+SessionEntry {
+    Tool     string    // &#34;claude-code&#34;
+    ID       string    // Session ID
+    Path     string    // Path in transcript tree
+    Created  time.Time
+    Modified time.Time
+}
+```
+
+**Note Creation**:
+- `NewPromptStoryNote(sessions, isAmend)` - Creates note with auto-calculated work start time
+- `ToJSON()` - Serializes to JSON
+- `GenerateSummary(noteSHA)` - Creates commit message line:
+  - `&#34;Prompt-Story: Used Claude Code | prompt-story-{shortSHA}&#34;` (if sessions found)
+  - `&#34;Prompt-Story: none&#34;` (if no sessions)
+
+**Storage**:
+- Note JSON stored as git blob
+- SHA reference written to `.git/PENDING-PROMPT-STORY` file
+- Summary appended to commit message
+
+---
+
+## READ PATH - Retrieval &amp; Display
+
+### 1. Session Display
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go`
+
+**Display Flow**:
+
+```
+Input: Commit SHA or commit range or prompt-story-{hash}
+    ↓
+Resolve commit spec → list of commit SHAs
+    ↓
+For each commit:
+    - Get note from refs/notes/prompt-story
+    - Parse note JSON (PromptStoryNote)
+    - Get commit timestamp (work period end)
+    ↓
+For each session in note:
+    - Fetch transcript from refs/notes/prompt-story-transcripts
+    - Parse JSONL entries
+    - Filter by work period (startWork ≤ timestamp ≤ endWork)
+    - Extract display entries:
+        * PROMPT: user messages with content
+        * COMMAND: user commands (XML-wrapped)
+        * TOOL_REJECT: tool rejections
+    ↓
+Display formatted output (summary or full mode)
+```
+
+**Key Functions**:
+- `ShowPrompts(commitRef, full)` - Main display function
+- `resolveCommitSpec(spec)` - Parses commit references (ranges, single refs, prompt-story-hash)
+- `showCommitPrompts(sha, full)` - Gets and displays note for single commit
+- `showSession(sess, startWork, endWork, full)` - Fetches and displays single session
+- `displayMessage(entry, full)` - Formats output (summary wraps to 80 chars × 3 lines, full mode shows complete content)
+
+**Note Refs** (Fallback Support):
+- Primary: `refs/notes/prompt-story`
+- Legacy: `refs/notes/commits` (backward compatibility)
+
+### 2. CI Summary Generation
+
+**File**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go`
+
+**Summary Flow**:
+
+```
+Input: Commit range
+    ↓
+GenerateSummary(commitRange) {
+    Resolve range → list of commits
+    For each commit:
+        - Fetch note
+        - Get commit subject
+        - Analyze each session in note
+}
+    ↓
+analyzeCommit(sha) {
+    - Get note
+    - Get commit timestamps
+    - Create CommitSummary with SessionSummary list
+}
+    ↓
+analyzeSession(sess) {
+    - Fetch transcript
+    - Parse entries
+    - Build PromptEntry list with details:
+        * timestamp, type, text
+        * for TOOL_USE: tool name, input, ID
+        * for TOOL_RESULT: linked output via toolUseID
+        * inWorkPeriod flag
+}
+    ↓
+RenderMarkdown() or RenderJSON()
+```
+
+**Summary Data Structures**:
+
+```go
+Summary {
+    Commits          []CommitSummary // One per analyzed commit
+    TotalPrompts     int              // Total entries
+    TotalUserPrompts int              // User action count (PROMPT, COMMAND, TOOL_REJECT)
+    TotalSteps       int              // Total entries
+    CommitsWithNotes int              // Analyzed commits that had notes
+    CommitsAnalyzed  int              // Total commits analyzed
+}
+
+CommitSummary {
+    SHA      string           // Full commit SHA
+    ShortSHA string           // First 7 chars
+    Subject  string           // Commit message subject
+    Sessions []SessionSummary
+    StartWork time.Time       // From note
+    EndWork   time.Time       // From commit timestamp
+}
+
+SessionSummary {
+    Tool     string        // &#34;claude-code&#34;
+    ID       string
+    Start    time.Time     // Session start
+    End      time.Time     // Session end
+    Prompts  []PromptEntry // Filtered to work period
+}
+
+PromptEntry {
+    Time         time.Time // Entry timestamp
+    Type         string    // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT
+    Text         string    // Display text
+    Truncated    bool      // If truncated in summary mode
+    InWorkPeriod bool      // Work period flag
+    ToolID       string    // For TOOL_USE/TOOL_RESULT linking
+    ToolName     string    // For TOOL_USE: &#34;Bash&#34;, &#34;Read&#34;, &#34;Edit&#34;, etc.
+    ToolInput    string    // For TOOL_USE: command/path
+    ToolOutput   string    // For TOOL_RESULT: output
+}
+```
+
+**Output Formats**:
+- **Markdown**: Summary table &#43; user prompts (collapsible details) &#43; full transcript (collapsible)
+- **JSON**: Structured data dump for programmatic use
+
+---
+
+## Data Storage Overview
+
+### Git References Used
+
+1. **`refs/notes/prompt-story`** - Main note ref
+   - Contains JSON PromptStoryNote objects
+   - Attached to each commit with AI assistance
+   - Primary storage location
+
+2. **`refs/notes/commits`** - Legacy ref
+   - Backward compatibility fallback
+   - Read operations check this if primary missing
+
+3. **`refs/notes/prompt-story-transcripts`** - Transcript tree ref
+   - Tree structure with claude-code/ subtree
+   - Each session stored as `{sessionID}.jsonl` blob
+   - Merged/updated with each commit to preserve history
+
+### Session JSONL Format
+
+Sessions stored in Claude Code directory (`~/.claude/projects/{encoded-path}/`):
+
+```jsonl
+{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;...&#34;,&#34;timestamp&#34;:&#34;...&#34;,&#34;cwd&#34;:&#34;...&#34;,&#34;gitBranch&#34;:&#34;...&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;...&#34;}}
+{&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;...&#34;,&#34;timestamp&#34;:&#34;...&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[...]}}
+{&#34;type&#34;:&#34;file-history-snapshot&#34;,&#34;sessionId&#34;:&#34;...&#34;,&#34;snapshot&#34;:{&#34;timestamp&#34;:&#34;...&#34;}}
+...
+```
+
+---
+
+## Key Design Patterns
+
+1. **Lazy Discovery**: Sessions discovered at commit time, not stored separately
+2. **Time-based Filtering**: Work periods calculated from git history to isolate relevant sessions
+3. **User Intent Filtering**: Message filtering ensures only sessions with user input are captured
+4. **PII Scrubbing**: Optional scrubbing of sensitive data before storage (via environment variable)
+5. **Git Native Storage**: Uses git notes and tree objects as immutable storage
+6. **Backward Compatibility**: Fallback refs support migration from old format
+7. **Tree Merging**: Transcript trees merge with existing history to preserve all sessions
+8. **Flexible Message Parsing**: Handles both string and array-based message content formats
+
+---
+
+## File Manifest
+
+**Core Files Used**:
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/prepare_commit_msg.go` - Write entry point
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go` - Session discovery logic
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go` - Data structures
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/parser.go` - JSONL parsing
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/transcript.go` - Transcript storage
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/metadata.go` - Note creation
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/refs.go` - Reference management
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go` - Display logic
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go` - CI/analysis generation</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      let count = 0;
+
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
