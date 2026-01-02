@@ -469,3 +469,50 @@ func TestFormatMarkdownEntryCollapsible_LongText(t *testing.T) {
 		t.Error("Continuation should start with '...'")
 	}
 }
+
+func TestFormatMarkdownEntryCollapsible_EscapesHTML(t *testing.T) {
+	// Prompt text containing HTML tags that should be escaped
+	entry := PromptEntry{
+		Type: "PROMPT",
+		Text: "Use <details> and <summary> tags for collapsible content",
+		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+	}
+
+	result := formatMarkdownEntryCollapsible(entry)
+
+	// The literal <details> in the prompt should be escaped to &lt;details&gt;
+	// Otherwise it would break the outer <details> structure
+	if strings.Contains(result, "Use <details>") {
+		t.Error("HTML tags in prompt text should be escaped, but found unescaped <details>")
+	}
+
+	// Should contain escaped version
+	if !strings.Contains(result, "&lt;details&gt;") {
+		t.Error("Should contain escaped HTML: &lt;details&gt;")
+	}
+
+	if !strings.Contains(result, "&lt;summary&gt;") {
+		t.Error("Should contain escaped HTML: &lt;summary&gt;")
+	}
+}
+
+func TestFormatMarkdownEntry_EscapesHTML(t *testing.T) {
+	// Test that the non-collapsible format also escapes HTML
+	entry := PromptEntry{
+		Type: "ASSISTANT",
+		Text: "Here is some <script>alert('xss')</script> content",
+		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+	}
+
+	result := formatMarkdownEntry(entry)
+
+	// Should not contain unescaped script tag
+	if strings.Contains(result, "<script>") {
+		t.Error("HTML tags should be escaped")
+	}
+
+	// Should contain escaped version
+	if !strings.Contains(result, "&lt;script&gt;") {
+		t.Error("Should contain escaped HTML")
+	}
+}

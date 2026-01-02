@@ -3,6 +3,7 @@ package ci
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"strings"
 	"time"
 
@@ -679,6 +680,8 @@ func formatMarkdownEntry(entry PromptEntry) string {
 	if len(text) > 100 {
 		text = text[:97] + "..."
 	}
+	// Escape HTML to prevent breaking markdown structure
+	text = html.EscapeString(text)
 
 	switch entry.Type {
 	case "TOOL_USE":
@@ -688,6 +691,7 @@ func formatMarkdownEntry(entry PromptEntry) string {
 				input = input[:57] + "..."
 			}
 			input = strings.ReplaceAll(input, "\n", " ")
+			input = html.EscapeString(input)
 			return fmt.Sprintf("- [%s] %s (%s): %s\n", timeStr, entry.Type, entry.ToolName, input)
 		}
 		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, text)
@@ -703,6 +707,8 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 
 	// Short prompts (≤250 chars): <details open> (expanded by default)
 	if len(text) <= 250 {
+		// Escape HTML to prevent breaking markdown structure
+		text = html.EscapeString(text)
 		return fmt.Sprintf("<details open><summary>[%s] %s: %s</summary></details>\n",
 			timeStr, entry.Type, text)
 	}
@@ -710,6 +716,10 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	// Long prompts: <details> (collapsed) with truncated summary
 	summary := text[:247] + "..."
 	continuation := entry.Text[247:] // Use original with newlines preserved
+
+	// Escape HTML in both summary and continuation
+	summary = html.EscapeString(summary)
+	continuation = html.EscapeString(continuation)
 
 	return fmt.Sprintf("<details><summary>[%s] %s: %s</summary>\n\n...%s\n\n</details>\n",
 		timeStr, entry.Type, summary, continuation)
