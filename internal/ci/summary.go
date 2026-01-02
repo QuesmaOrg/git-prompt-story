@@ -638,6 +638,7 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		if len(subject) > 40 {
 			subject = subject[:37] + "..."
 		}
+		subject = html.EscapeString(subject)
 
 		sb.WriteString(fmt.Sprintf("| %s | %s | %s | %d | %d |\n",
 			commit.ShortSHA, subject, toolDisplay, userPromptCount, totalSteps))
@@ -660,6 +661,7 @@ func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPr
 			if len(subject) > 40 {
 				subject = subject[:37] + "..."
 			}
+			subject = html.EscapeString(subject)
 			sb.WriteString(fmt.Sprintf("\n--- Commit %s: %s ---\n\n", te.CommitSHA, subject))
 		}
 		lastCommitIndex = te.CommitIndex
