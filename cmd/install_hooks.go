@@ -8,7 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var globalFlag bool
+var (
+	globalFlag   bool
+	autoPushFlag bool
+)
 
 var installHooksCmd = &cobra.Command{
 	Use:   "install-hooks",
@@ -16,9 +19,14 @@ var installHooksCmd = &cobra.Command{
 	Long: `Install git hooks to automatically capture LLM sessions on commit.
 
 By default, installs hooks in the current repository.
-Use --global to install hooks globally for all repositories.`,
+Use --global to install hooks globally for all repositories.
+Use --auto-push to also install a pre-push hook that syncs notes.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := hooks.InstallHooks(globalFlag); err != nil {
+		opts := hooks.InstallOptions{
+			Global:   globalFlag,
+			AutoPush: autoPushFlag,
+		}
+		if err := hooks.InstallHooks(opts); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -27,5 +35,6 @@ Use --global to install hooks globally for all repositories.`,
 
 func init() {
 	installHooksCmd.Flags().BoolVar(&globalFlag, "global", false, "Install hooks globally")
+	installHooksCmd.Flags().BoolVar(&autoPushFlag, "auto-push", false, "Install pre-push hook to auto-sync notes")
 	rootCmd.AddCommand(installHooksCmd)
 }

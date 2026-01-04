@@ -130,8 +130,7 @@ The notes are still attached and accessible via commit SHA.`,
 
 		if repaired > 0 && !opts.DryRun {
 			fmt.Println("\nRemember to push your notes:")
-			fmt.Println("  git push origin refs/notes/prompt-story")
-			fmt.Println("  git push origin +refs/notes/prompt-story-transcripts")
+			fmt.Println("  git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts")
 		}
 	},
 }

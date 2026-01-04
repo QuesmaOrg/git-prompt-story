@@ -32,9 +32,25 @@ fi
 exec git-prompt-story post-rewrite "$@"
 `
 
+const prePushScript = `#!/bin/sh
+# Chain to original hook if it exists
+if [ -x "$(dirname "$0")/pre-push.orig" ]; then
+    "$(dirname "$0")/pre-push.orig" "$@" || exit $?
+fi
+# Pass remote name and URL to git-prompt-story
+# stdin contains ref info, pass it through
+exec git-prompt-story pre-push "$@"
+`
+
+// InstallOptions configures hook installation
+type InstallOptions struct {
+	Global   bool
+	AutoPush bool
+}
+
 // InstallHooks installs the git hooks
-func InstallHooks(global bool) error {
-	hooksDir, err := getHooksDir(global)
+func InstallHooks(opts InstallOptions) error {
+	hooksDir, err := getHooksDir(opts.Global)
 	if err != nil {
 		return err
 	}
@@ -59,7 +75,15 @@ func InstallHooks(global bool) error {
 		return err
 	}
 
-	if global {
+	// Optionally install pre-push hook for auto-syncing notes
+	if opts.AutoPush {
+		if err := writeHookScript(hooksDir, "pre-push", prePushScript); err != nil {
+			return err
+		}
+		fmt.Println("Pre-push hook installed (notes will auto-sync on push)")
+	}
+
+	if opts.Global {
 		fmt.Printf("Hooks installed globally to %s\n", hooksDir)
 	} else {
 		fmt.Printf("Hooks installed to %s\n", hooksDir)
