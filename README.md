@@ -43,7 +43,8 @@ go install github.com/QuesmaOrg/git-prompt-story@latest
 
 # 2. Install git hooks globally
 # Add --auto-push to install pre-push hook that syncs notes automatically
-# Without --auto-push, push notes manually with: git push origin 'refs/notes/*'
+# Without --auto-push, push notes manually with:
+#   git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
 git-prompt-story install-hooks --global --auto-push
 ```
 
@@ -66,7 +67,8 @@ go install github.com/QuesmaOrg/git-prompt-story@latest
 
 # Install hooks for this repo
 # Add --auto-push to install pre-push hook that syncs notes automatically
-# Without --auto-push, push notes manually with: git push origin 'refs/notes/*'
+# Without --auto-push, push notes manually with:
+#   git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
 git-prompt-story install-hooks --auto-push
 
 echo "git-prompt-story configured for this repository"
