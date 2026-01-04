@@ -212,7 +212,7 @@ export GIT_COMMITTER_DATE="2025-01-15T10:00:00Z"
 # Include marker in commit message to simulate lost note scenario
 faketime '2025-01-15 10:00:00' git commit -m "Add feature
 
-Prompt-Story: Used Claude Code | prompt-story-abc1234"
+Prompt-Story: Used Claude Code (1 prompts)"
 unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 
 # Verify no actual note exists

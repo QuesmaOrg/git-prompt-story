@@ -124,7 +124,12 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 			return fmt.Errorf("failed to write pending file: %w", err)
 		}
 
-		summary = psNote.GenerateSummary(noteSHA)
+		// Count user prompts for the summary
+		startWork, _ := git.CalculateWorkStartTime(isAmend)
+		endWork := time.Now().UTC()
+		promptCount := session.CountUserMessagesInRange(sessions, startWork, endWork)
+
+		summary = psNote.GenerateSummary(promptCount)
 	}
 
 	debugLog.log("Final summary: %s", summary)

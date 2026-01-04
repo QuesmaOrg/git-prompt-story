@@ -31,15 +31,11 @@ Examples:
   # Repair a range of commits
   git-prompt-story repair HEAD~5..HEAD
 
-  # Scan and repair all commits with markers but no notes
+  # Scan and repair all commits with Prompt-Story markers but no notes
   git-prompt-story repair --scan
 
   # Preview what would be repaired
-  git-prompt-story repair --dry-run HEAD
-
-WARNING: Recreated notes will have different SHA hashes than originals.
-Any prompt-story-{hash} markers in commit messages will become stale.
-The notes are still attached and accessible via commit SHA.`,
+  git-prompt-story repair --dry-run HEAD`,
 	Run: func(cmd *cobra.Command, args []string) {
 		opts := repair.Options{
 			DryRun:  repairDryRun,
@@ -81,9 +77,6 @@ The notes are still attached and accessible via commit SHA.`,
 			commits = []string{args[0]}
 		}
 
-		// Print warning banner
-		printWarningBanner()
-
 		// Process each commit
 		var repaired, skipped, failed int
 		for _, sha := range commits {
@@ -113,10 +106,6 @@ The notes are still attached and accessible via commit SHA.`,
 					result.ShortSHA, result.SessionsFound, result.NoteSHA[:7])
 			}
 
-			if result.StaleMarker != "" {
-				fmt.Printf("         stale marker in commit message: %s\n", result.StaleMarker)
-			}
-
 			repaired++
 		}
 
@@ -133,19 +122,6 @@ The notes are still attached and accessible via commit SHA.`,
 			fmt.Println("  git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts")
 		}
 	},
-}
-
-func printWarningBanner() {
-	fmt.Println()
-	fmt.Println("WARNING: Note markers may become stale")
-	fmt.Println()
-	fmt.Println("Recreated notes have different SHA hashes than originals.")
-	fmt.Println("Any 'prompt-story-{hash}' references in commit messages will NOT")
-	fmt.Println("match the new notes. The notes are still attached and accessible")
-	fmt.Println("via commit SHA.")
-	fmt.Println()
-	fmt.Println("To fix stale markers: git-prompt-story rewrite-markers (future)")
-	fmt.Println()
 }
 
 func parseCommitRange(rangeSpec string) ([]string, error) {

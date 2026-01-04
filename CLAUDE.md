@@ -17,3 +17,7 @@ After making progress on the codebase, offer to reinstall the global `git-prompt
 ```bash
 go install .
 ```
+
+## Git Workflow
+
+Don't push to main, use feature branches instead.

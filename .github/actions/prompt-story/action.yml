@@ -162,7 +162,7 @@ runs:
               '',
               '⚠️ **Notes not found**',
               '',
-              'This PR has commits with `prompt-story-{hash}` markers, but the notes could not be fetched.',
+              'This PR has commits with `Prompt-Story:` markers, but the notes could not be fetched.',
               '',
               '**Did you forget to push your notes?**',
               '',

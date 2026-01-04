@@ -116,25 +116,3 @@ func RevList(rangeSpec string) ([]string, error) {
 	return commits, nil
 }
 
-// FindCommitByNoteHash finds the commit SHA that has a note with the given hash prefix
-func FindCommitByNoteHash(notesRef, hashPrefix string) (string, error) {
-	// List all notes: output is "note-sha commit-sha"
-	cmd := exec.Command("git", "notes", "--ref="+notesRef, "list")
-	out, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("git notes list: %w", err)
-	}
-
-	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
-	for _, line := range lines {
-		parts := strings.Fields(line)
-		if len(parts) != 2 {
-			continue
-		}
-		noteSHA, commitSHA := parts[0], parts[1]
-		if strings.HasPrefix(noteSHA, hashPrefix) {
-			return commitSHA, nil
-		}
-	}
-	return "", fmt.Errorf("no commit found with note hash prefix %s", hashPrefix)
-}
