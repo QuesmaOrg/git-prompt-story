@@ -663,11 +663,8 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		}
 		subject = html.EscapeString(subject)
 
-		// Format user prompts with optional agent count
+		// Format user prompts (main session only)
 		promptDisplay := fmt.Sprintf("%d", userPromptCount)
-		if agentPromptCount > 0 {
-			promptDisplay = fmt.Sprintf("%d (+%d agent)", userPromptCount, agentPromptCount)
-		}
 
 		sb.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %d |\n",
 			commit.ShortSHA, subject, toolDisplay, promptDisplay, totalSteps))

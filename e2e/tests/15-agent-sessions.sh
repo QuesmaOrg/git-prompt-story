@@ -169,18 +169,25 @@ if ! grep -q 'data-is-agent="false"' "$COMMIT_PAGE"; then
 fi
 echo "    - Found data-is-agent='false' attribute"
 
-# Step 9: Verify markdown output shows agent count
+# Step 9: Verify markdown output shows only main session prompts
 echo "  Step 9: Verifying markdown output..."
 
 MARKDOWN=$(git-prompt-story ci-summary HEAD~1..HEAD --format=markdown)
 echo "$MARKDOWN"
 
-# Should show main prompts with agent count in parentheses
-if ! echo "$MARKDOWN" | grep -q "(+[0-9]* agent)"; then
-    echo "    ERROR: Markdown should show '(+N agent)' format"
-    fail "ci-summary markdown should indicate agent prompts"
+# Should show only main session prompt count (no agent indicator)
+if echo "$MARKDOWN" | grep -q "(+[0-9]* agent)"; then
+    echo "    ERROR: Markdown should NOT show agent count in User Prompts"
+    fail "ci-summary markdown should not indicate agent prompts"
 fi
-echo "    - Found '(+N agent)' format in markdown"
+echo "    - User Prompts shows main session only (no agent indicator)"
+
+# Verify user prompts header shows 1 (main session only)
+if ! echo "$MARKDOWN" | grep -q "1 user prompts"; then
+    echo "    ERROR: Should show '1 user prompts' (main session only)"
+    fail "ci-summary should show only main session prompts in header"
+fi
+echo "    - Header shows '1 user prompts' (main session only)"
 
 # Step 10: Verify IsAgent field in session summary
 echo "  Step 10: Verifying session IsAgent fields..."

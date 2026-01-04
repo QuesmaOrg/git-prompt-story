@@ -591,9 +591,9 @@ func TestRenderMarkdown_AgentSessionCounts(t *testing.T) {
 
 	result := RenderMarkdown(summary, "")
 
-	// Should show main session prompts with agent count in parentheses
-	if !strings.Contains(result, "2 (+3 agent)") {
-		t.Errorf("Should show '2 (+3 agent)' for mixed sessions, got:\n%s", result)
+	// Should show main session prompts only (no agent count)
+	if !strings.Contains(result, "| 2 |") {
+		t.Errorf("Should show '| 2 |' for main session prompts only, got:\n%s", result)
 	}
 }
 
