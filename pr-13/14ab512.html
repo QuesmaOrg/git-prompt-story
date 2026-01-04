@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>14ab512 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>14ab512</code></h1>
+    <p class="meta">Remove agent count from User Prompts column in ci-summary</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">30</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>14ab5120d9262dbc1f9d8f98b90c3d3d38ad0e86</code><br>
+    <strong>Work period:</strong> 2026-01-04 15:42 - 2026-01-04 15:49
+  </div>
+
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3>Session 1: Claude Code</h3>
+      <div class="commit-meta">
+        2026-01-04 14:11 - 2026-01-04 15:48 | <span class="session-count">30</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:42</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Committed as `94d0ac8`:
+
+```
+Add agent session detection and separate counting
+
+- Detect agent sessions by `agent-*` ID prefix convention
+- Display sessions with badges (Main/Agent) in HTML output
+- Count user prompts separately: main session only in summary header
+- Show agent prompts as &#34;(&#43;N agent)&#34; in table column
+- Add toggle to show/hide agent sessions in HTML viewer
+- Add unit tests for IsAgentSession and markdown rendering
+- Add e2e test 15-agent-sessions.sh for full workflow
+```</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:43</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please generate for same hash ci html page and open in browser</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:43</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">mkdir -p /tmp/ci-html-output &amp;&amp; /tmp/git-prompt-story-local ci-html 5f7ce56148e236f12e55e5e4dd042644ed1d5b5a~1..5f7ce56148e236f12e55e5e4dd042644ed1d5b5a --output-dir=/tmp/ci-html-output &amp;&amp; open /tmp/ci-html-output/index.html</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Generated HTML pages in /tmp/ci-html-output
+  - index.html
+  - 5f7ce56.html</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:43</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Opened `/tmp/ci-html-output/index.html` in your browser. You should see:
+- Main sessions with blue &#34;Main&#34; badges
+- Agent sessions with orange &#34;Agent&#34; badges  
+- Toggle to show/hide agent sessions
+- User prompts counted separately from agent prompts</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:44</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I don&#39;t see those badges there, looks like previously, why?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check what&#39;s in the generated HTML:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">grep -E &#34;(badge|is-agent)&#34; /tmp/ci-html-output/5f7ce56.html | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">.badge {
+.badge.main {
+.badge.agent {
+  .badge.main {
+  .badge.agent {
+  &lt;div class=&#34;commit-card&#34; data-is-agent=&#34;false&#34;&gt;
+        &lt;span class=&#34;badge main&#34;&gt;Main&lt;/span&gt;
+  &lt;div class=&#34;commit-card agent-session&#34; data-is-agent=&#34;true&#34;&gt;
+        &lt;span class=&#34;badge agent&#34;&gt;Agent&lt;/span&gt;
+  &lt;div class=&#34;commit-card agent-session&#34; data-is-agent=&#34;true&#34;&gt;
+        &lt;span class=&#34;badge agent&#34;&gt;Agent&lt;/span&gt;
+  &lt;div class=&#34;commit-card agent-session&#34; data-is-agent=&#34;true&#34;&gt;
+        &lt;span class=&#34;badge agent&#34;&gt;Agent&lt;/span&gt;
+  &lt;div class=&#34;commit-card agent-session&#34; data-is-agent=&#34;true&#34;&gt;
+        &lt;span class=&#34;badge agent&#34;&gt;Agent&lt;/span&gt;
+  &lt;div class=&#34;commit-card agent-session&#34; data-is-agent=&#34;true&#34;&gt;
+        &lt;span class=&#34;badge agent&#34;&gt;Agent&lt;/span&gt;
+  &lt;div class=&#34;commit-card&#34; data-is-agent=&#34;false&#34;&gt;
+        &lt;span class=&#34;badge main&#34;&gt;Main&lt;/span&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:45</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The badges are in the HTML. You might be looking at the index page. Let me open the commit detail page directly:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">open /tmp/ci-html-output/5f7ce56.html</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:45</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The badges are on the **commit detail page** (`5f7ce56.html`), not the index. You should now see:
+- Blue &#34;Main&#34; badges on the 2 main sessions
+- Orange &#34;Agent&#34; badges on the 5 agent sessions
+- The toggle at the top to show/hide agent sessions</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:46</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please commit</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch test-improvements
+Your branch is ahead of &#39;origin/test-improvements&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:46</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Already committed - working tree is clean. The branch is 1 commit ahead of origin. Would you like me to push?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please now remove agent mentions from User Prompts in ci-summary text</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">grep -n &#34;agent)&#34; /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">669:			promptDisplay = fmt.Sprintf(&#34;%d (&#43;%d agent)&#34;, userPromptCount, agentPromptCount)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   663 		}
+   664 		subject = html.EscapeString(subject)
+   665 
+   666 		// Format user prompts with optional agent count
+   667 		promptDisplay := fmt.Sprintf(&#34;%d&#34;, userPromptCount)
+   668 		if agentPromptCount &gt; 0 {
+   669 			promptDisplay = fmt.Sprintf(&#34;%d (&#43;%d agent)&#34;, userPromptCount, agentPromptCount)
+   670 		}
+   671 
+   672 		sb.WriteString(fmt.Sprintf(&#34;| %s | %s | %s | %s | %d |\n&#34;,
+   673 			commit.ShortSHA, subject, toolDisplay, promptDisplay, totalSteps))
+   674 	}
+   675 	sb.WriteString(&#34;\n&#34;)
+   676 
+   677 	sb.WriteString(&#34;---\n*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*\n&#34;)
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   662 			subject = subject[:37] &#43; &#34;...&#34;
+   663 		}
+   664 		subject = html.EscapeString(subject)
+   665 
+   666 		// Format user prompts (main session only)
+   667 		promptDisplay := fmt.Sprintf(&#34;%d&#34;, userPromptCount)
+   668 
+   669 		sb.WriteString(fmt.Sprintf(&#34;| %s | %s | %s | %s | %d |\n&#34;,
+   670 			commit.ShortSHA, subject, toolDisplay, promptDisplay, totalSteps))
+   671 	}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to update the test that was checking for the agent format:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">grep -n &#34;agent)&#34; /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">595:	if !strings.Contains(result, &#34;2 (&#43;3 agent)&#34;) {
+596:		t.Errorf(&#34;Should show &#39;2 (&#43;3 agent)&#39; for mixed sessions, got:\n%s&#34;, result)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   590 	}
+   591 
+   592 	result := RenderMarkdown(summary, &#34;&#34;)
+   593 
+   594 	// Should show main session prompts with agent count in parentheses
+   595 	if !strings.Contains(result, &#34;2 (&#43;3 agent)&#34;) {
+   596 		t.Errorf(&#34;Should show &#39;2 (&#43;3 agent)&#39; for mixed sessions, got:\n%s&#34;, result)
+   597 	}
+   598 }
+   599 
+   600 func TestRenderMarkdown_NoAgentSessions(t *testing.T) {
+   601 	now := time.Now()
+   602 	summary := &amp;Summary{
+   603 		CommitsWithNotes:  1,
+   604 		TotalUserPrompts:  2,
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   590 	}
+   591 
+   592 	result := RenderMarkdown(summary, &#34;&#34;)
+   593 
+   594 	// Should show main session prompts only (no agent count)
+   595 	if !strings.Contains(result, &#34;| 2 |&#34;) {
+   596 		t.Errorf(&#34;Should show &#39;| 2 |&#39; for main session prompts only, got:\n%s&#34;, result)
+   597 	}
+   598 }
+   599 
+   600 func TestRenderMarkdown_NoAgentSessions(t *testing.T) {
+   601 	now := time.Now()</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now update the e2e test:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">grep -n &#34;agent)&#34; /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/15-agent-sessions.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">179:if ! echo &#34;$MARKDOWN&#34; | grep -q &#34;(&#43;[0-9]* agent)&#34;; then
+180:    echo &#34;    ERROR: Markdown should show &#39;(&#43;N agent)&#39; format&#34;
+183:echo &#34;    - Found &#39;(&#43;N agent)&#39; format in markdown&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/15-agent-sessions.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">   172 # Step 9: Verify markdown output shows agent count
+   173 echo &#34;  Step 9: Verifying markdown output...&#34;
+   174 
+   175 MARKDOWN=$(git-prompt-story ci-summary HEAD~1..HEAD --format=markdown)
+   176 echo &#34;$MARKDOWN&#34;
+   177 
+   178 # Should show main prompts with agent count in parentheses
+   179 if ! echo &#34;$MARKDOWN&#34; | grep -q &#34;(&#43;[0-9]* agent)&#34;; then
+   180     echo &#34;    ERROR: Markdown should show &#39;(&#43;N agent)&#39; format&#34;
+   181     fail &#34;ci-summary markdown should indicate agent prompts&#34;
+   182 fi
+   183 echo &#34;    - Found &#39;(&#43;N agent)&#39; format in markdown&#34;
+   184 
+   185 # Step 10: Verify IsAgent field in session summary
+   186 echo &#34;  Step 10: Verifying session IsAgent fields...&#34;
+   187 
+   188 # Check commits[0].sessions[*].is_agent
+   189 MAIN_SESSION_IS_AGENT=$(echo &#34;$SUMMARY&#34; | jq &#39;.commits[0].sessions[] | select(.id == &#34;fb813892-a738-4fc4-bcf8-b6f175a27a93&#34;) | .is_agent&#39;)
+   190 if [[ &#34;$MAIN_SESSION_IS_AGENT&#34; != &#34;false&#34; ]]; then
+   191     echo &#34;    ERROR: Main session should have is_agent=false, got $MAIN_SESSION_IS_AGENT&#34;
+
+&lt;system-reminder&gt;
+Whenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.
+&lt;/system-reminder&gt;
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/15-agent-sessions.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/15-agent-sessions.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   168     fail &#34;HTML should have data-is-agent attribute for main sessions&#34;
+   169 fi
+   170 echo &#34;    - Found data-is-agent=&#39;false&#39; attribute&#34;
+   171 
+   172 # Step 9: Verify markdown output shows only main session prompts
+   173 echo &#34;  Step 9: Verifying markdown output...&#34;
+   174 
+   175 MARKDOWN=$(git-prompt-story ci-summary HEAD~1..HEAD --format=markdown)
+   176 echo &#34;$MARKDOWN&#34;
+   177 
+   178 # Should show only main session prompt count (no agent indicator)
+   179 if echo &#34;$MARKDOWN&#34; | grep -q &#34;(&#43;[0-9]* agent)&#34;; then
+   180     echo &#34;    ERROR: Markdown should NOT show agent count in User Prompts&#34;
+   181     fail &#34;ci-summary markdown should not indicate agent prompts&#34;
+   182 fi
+   183 echo &#34;    - User Prompts shows main session only (no agent indicator)&#34;
+   184 
+   185 # Verify user prompts header shows 1 (main session only)
+   186 if ! echo &#34;$MARKDOWN&#34; | grep -q &#34;1 user prompts&#34;; then
+   187     echo &#34;    ERROR: Should show &#39;1 user prompts&#39; (main session only)&#34;
+   188     fail &#34;ci-summary should show only main session prompts in header&#34;
+   189 fi
+   190 echo &#34;    - Header shows &#39;1 user prompts&#39; (main session only)&#34;
+   191 
+   192 # Step 10: Verify IsAgent field in session summary
+   193 echo &#34;  Step 10: Verifying session IsAgent fields...&#34;
+   194 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me run the tests:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/... -run &#34;Agent&#34; -v 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestIsAgentSession
+=== RUN   TestIsAgentSession/agent-aa5fd63
+=== RUN   TestIsAgentSession/agent-123abc
+=== RUN   TestIsAgentSession/agent-
+=== RUN   TestIsAgentSession/fb813892-a738-4fc4-bcf8-b6f175a27a93
+=== RUN   TestIsAgentSession/7b383e66-9fd6-4c9e-b17e-839042a6cd81
+=== RUN   TestIsAgentSession/main-session
+=== RUN   TestIsAgentSession/#00
+=== RUN   TestIsAgentSession/AGENT-uppercase
+--- PASS: TestIsAgentSession (0.00s)
+    --- PASS: TestIsAgentSession/agent-aa5fd63 (0.00s)
+    --- PASS: TestIsAgentSession/agent-123abc (0.00s)
+    --- PASS: TestIsAgentSession/agent- (0.00s)
+    --- PASS: TestIsAgentSession/fb813892-a738-4fc4-bcf8-b6f175a27a93 (0.00s)
+    --- PASS: TestIsAgentSession/7b383e66-9fd6-4c9e-b17e-839042a6cd81 (0.00s)
+    --- PASS: TestIsAgentSession/main-session (0.00s)
+    --- PASS: TestIsAgentSession/#00 (0.00s)
+    --- PASS: TestIsAgentSession/AGENT-uppercase (0.00s)
+=== RUN   TestRenderMarkdown_AgentSessionCounts
+--- PASS: TestRenderMarkdown_AgentSessionCounts (0.00s)
+=== RUN   TestRenderMarkdown_NoAgentSessions
+--- PASS: TestRenderMarkdown_NoAgentSessions (0.00s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.516s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -40</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    - Found data-is-agent=&#39;false&#39; attribute
+  Step 9: Verifying markdown output...
+&lt;details open&gt;&lt;summary&gt;&lt;strong&gt;1 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit 3f563af: Add feature with agent assistance ---
+
+&lt;details open&gt;&lt;summary&gt;[09:20] PROMPT: How do I implement feature X?&lt;/summary&gt;&lt;/details&gt;
+&lt;/details&gt;
+
+&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All 6 steps&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit 3f563af: Add feature with agent assistance ---
+
+- [09:24] PROMPT: [Agent task] Explore the codebase for pattern X
+- [09:25] ASSISTANT: Found pattern X in the following files...
+- [09:20] PROMPT: How do I implement feature X?
+- [09:25] ASSISTANT: Here&amp;#39;s how to implement feature X...
+- [09:22] PROMPT: [Agent task] Explore the codebase for pattern X
+- [09:23] ASSISTANT: Found pattern X in the following files...
+&lt;/details&gt;
+
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| 3f563af | Add feature with agent assistance | Claude Code | 1 | 6 |
+
+---
+*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*
+    - User Prompts shows main session only (no agent indicator)
+    - Header shows &#39;1 user prompts&#39; (main session only)
+  Step 10: Verifying session IsAgent fields...
+    - Main session is_agent: false
+    - Agent session 1 is_agent: true
+    - Agent session 2 is_agent: true
+  Step 11: Cleanup...
+
+  All agent session handling assertions passed!
+
+=== 16/16 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All 16/16 tests pass. Now it shows:
+- Header: &#34;1 user prompts&#34; (main only)
+- Table: just &#34;1&#34; (no agent indicator)</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Remove agent count from User Prompts column in ci-summary
+
+User Prompts now shows only main session count without &#34;(&#43;N agent)&#34; suffix.
+Agent session data is still tracked in JSON output for other uses.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      let count = 0;
+
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
