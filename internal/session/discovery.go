@@ -34,7 +34,7 @@ func FindSessions(repoPath string) ([]ClaudeSession, error) {
 	var sessions []ClaudeSession
 	for _, f := range files {
 		id := strings.TrimSuffix(filepath.Base(f), ".jsonl")
-		created, modified, branch, err := ParseSessionMetadata(f)
+		created, modified, _, err := ParseSessionMetadata(f)
 		if err != nil {
 			// Skip files we can't parse
 			continue
@@ -44,7 +44,6 @@ func FindSessions(repoPath string) ([]ClaudeSession, error) {
 			Path:     f,
 			Created:  created,
 			Modified: modified,
-			Branch:   branch,
 		})
 	}
 

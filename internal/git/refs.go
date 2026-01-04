@@ -26,8 +26,3 @@ func GetRef(ref string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// RefExists checks if a ref exists
-func RefExists(ref string) bool {
-	sha, _ := GetRef(ref)
-	return sha != ""
-}

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/repair"
@@ -65,16 +64,13 @@ Examples:
 		} else if len(args) == 0 {
 			fmt.Fprintln(os.Stderr, "error: specify a commit, range, or use --scan")
 			os.Exit(1)
-		} else if strings.Contains(args[0], "..") {
-			// Range mode
-			commits, err = parseCommitRange(args[0])
+		} else {
+			// Single commit or range - use shared resolver
+			commits, err = git.ResolveCommitSpec(args[0])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
 				os.Exit(1)
 			}
-		} else {
-			// Single commit
-			commits = []string{args[0]}
 		}
 
 		// Process each commit
@@ -122,17 +118,6 @@ Examples:
 			fmt.Println("  git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts")
 		}
 	},
-}
-
-func parseCommitRange(rangeSpec string) ([]string, error) {
-	output, err := git.RunGit("rev-list", rangeSpec)
-	if err != nil {
-		return nil, fmt.Errorf("invalid range %s: %w", rangeSpec, err)
-	}
-	if output == "" {
-		return nil, fmt.Errorf("no commits in range %s", rangeSpec)
-	}
-	return strings.Split(strings.TrimSpace(output), "\n"), nil
 }
 
 func init() {

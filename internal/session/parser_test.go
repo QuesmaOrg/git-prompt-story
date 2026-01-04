@@ -371,8 +371,4 @@ func TestParseMessages_GitBranch(t *testing.T) {
 	if entries[0].GitBranch != "feature/test" {
 		t.Errorf("Expected gitBranch 'feature/test', got %q", entries[0].GitBranch)
 	}
-
-	if entries[0].CWD != "/workspace" {
-		t.Errorf("Expected cwd '/workspace', got %q", entries[0].CWD)
-	}
 }

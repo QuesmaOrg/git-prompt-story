@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 )
 
 //go:embed templates/*.css templates/*.tmpl
@@ -58,7 +60,7 @@ func GenerateHTML(summary *Summary, outputDir string, prNumber int) error {
 		"formatTimeShort": func(t time.Time) string {
 			return t.Local().Format("15:04")
 		},
-		"formatToolName": formatToolName,
+		"formatToolName": note.FormatToolName,
 		"truncate": func(s string, n int) string {
 			if len(s) <= n {
 				return s
@@ -118,7 +120,7 @@ func GenerateHTML(summary *Summary, outputDir string, prNumber int) error {
 		// Calculate tool names and prompt count
 		tools := make(map[string]bool)
 		for _, sess := range cs.Sessions {
-			tools[formatToolName(sess.Tool)] = true
+			tools[note.FormatToolName(sess.Tool)] = true
 			cvd.PromptCount += len(sess.Prompts)
 		}
 		var toolNames []string

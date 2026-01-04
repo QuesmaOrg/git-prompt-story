@@ -106,7 +106,7 @@ func RepairCommit(sha string, opts Options) (*RepairResult, error) {
 	}
 
 	// Create note with explicit start time (not using CalculateWorkStartTime)
-	psNote := note.NewPromptStoryNoteWithTime(sessions, startWork)
+	psNote := note.NewPromptStoryNote(sessions, false, startWork)
 	noteJSON, err := psNote.ToJSON()
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize note: %w", err)

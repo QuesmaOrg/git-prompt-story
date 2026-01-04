@@ -66,7 +66,7 @@ type Summary struct {
 // GenerateSummary analyzes commits in a range and extracts prompt data
 func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 	// Resolve commit range to list of SHAs
-	commits, err := resolveCommitRange(commitRange)
+	commits, err := git.ResolveCommitSpec(commitRange)
 	if err != nil {
 		return nil, err
 	}
@@ -103,28 +103,6 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 	}
 
 	return summary, nil
-}
-
-// resolveCommitRange parses a commit range and returns the list of SHAs
-func resolveCommitRange(spec string) ([]string, error) {
-	// Check for range (contains ..)
-	if strings.Contains(spec, "..") {
-		commits, err := git.RevList(spec)
-		if err != nil {
-			return nil, fmt.Errorf("failed to resolve range %s: %w", spec, err)
-		}
-		if len(commits) == 0 {
-			return nil, fmt.Errorf("no commits in range %s", spec)
-		}
-		return commits, nil
-	}
-
-	// Single commit reference
-	sha, err := git.ResolveCommit(spec)
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve commit %s: %w", spec, err)
-	}
-	return []string{sha}, nil
 }
 
 // analyzeCommit extracts prompt data for a single commit
@@ -643,7 +621,7 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		totalSteps := 0
 
 		for _, sess := range commit.Sessions {
-			tools[formatToolName(sess.Tool)] = true
+			tools[note.FormatToolName(sess.Tool)] = true
 			prompts := countUserPrompts(sess.Prompts)
 			if sess.IsAgent {
 				agentPromptCount += prompts
@@ -756,22 +734,6 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 // RenderJSON generates JSON output
 func RenderJSON(summary *Summary) ([]byte, error) {
 	return json.MarshalIndent(summary, "", "  ")
-}
-
-// formatToolName converts tool ID to display name
-func formatToolName(tool string) string {
-	switch tool {
-	case "claude-code":
-		return "Claude Code"
-	case "claude-cloud":
-		return "Claude Cloud"
-	case "cursor":
-		return "Cursor"
-	case "codex":
-		return "Codex"
-	default:
-		return tool
-	}
 }
 
 // isUserAction returns true if the entry type represents a user action
