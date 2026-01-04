@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>18424ad - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>18424ad</code></h1>
+    <p class="meta">Fix PR comment detection to look for git-prompt-story</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">35</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>18424adb49a6c90988600551ecb34e21e745f304</code><br>
+    <strong>Work period:</strong> 2026-01-04 18:04 - 2026-01-04 18:13
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">4c3de467-d985-4f25-9912-9a8cd007fdfa</code> |
+        2026-01-04 17:41 - 2026-01-04 18:13 | <span class="session-count">35</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push -u origin update-readme --force-with-lease</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+branch &#39;update-readme&#39; set up to track &#39;origin/update-readme&#39;.
+remote: 
+remote: Create a pull request for &#39;update-readme&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/update-readme        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      update-readme -&gt; update-readme</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">gh pr create --title &#34;Update README and bump version to 0.10.0&#34; --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
+## Summary
+
+- Replace `git config` push commands with `--auto-push` flag on `install-hooks`
+- Remove `end_work` from JSON example (retrieved from git when needed)
+- Fix `git notes` command to use `--ref=prompt-story`
+- Clean up GitHub Action section as primary integration method
+- Remove outdated Configuration and Upgrading sections
+- Update roadmap with `ci-html` and `ci-summary` commands
+- Bump version to 0.10.0
+
+## Test plan
+
+- [x] Verified `git-prompt-story --version` shows 0.10.0
+- [ ] Review README changes for accuracy
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 127
+(eval):1: command not found: gh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">which gh || echo &#34;gh not installed&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">gh not found
+gh not installed</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:05</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! The `gh` CLI isn&#39;t installed, but you can create the PR here:
+
+https://github.com/QuesmaOrg/git-prompt-story/pull/new/update-readme
+
+**Summary of changes:**
+- Replaced `git config` push commands with `--auto-push` flag
+- Removed `end_work` from JSON example
+- Fixed `git notes` to use `--ref=prompt-story`
+- Cleaned up GitHub Action section
+- Removed outdated Configuration/Upgrading sections
+- Bumped version to 0.10.0
+- Installed locally (`git-prompt-story version 0.10.0`)</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Modify one more thing in Readme.md, instead of asking to git push origin &#39;ref/notes/*&#39; please tell them too git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">refs/notes/\*</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">46:# Without --auto-push, push notes manually with: git push origin &#39;refs/notes/*&#39;
+69:# Without --auto-push, push notes manually with: git push origin &#39;refs/notes/*&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. All occurrences of &#39;# Without --auto-push, push notes manually with: git push origin &#39;refs/notes/*&#39;&#39; were successfully replaced with &#39;# Without --auto-push, push notes manually with:
+#   git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add README.md &amp;&amp; git commit --amend --no-edit</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[update-readme 1e332ff] Bump version to 0.10.0
+ Date: Sun Jan 4 20:04:29 2026 &#43;0200
+ 2 files changed, 5 insertions(&#43;), 3 deletions(-)
+Transferred prompt-story note to 1e332ff (1 sessions)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">1e332ff Bump version to 0.10.0
+bb4cfe1 Update README: use --auto-push flag instead of git config
+23d76f6 Merge pull request #19 from QuesmaOrg/add-decision-entries</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push --force-with-lease</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+To github.com:QuesmaOrg/git-prompt-story.git
+ ! [rejected]        refs/notes/prompt-story -&gt; refs/notes/prompt-story (stale info)
+ ! [remote rejected] refs/notes/prompt-story-transcripts -&gt; refs/notes/prompt-story-transcripts (cannot lock ref &#39;refs/notes/prompt-story-transcripts&#39;: is at ce249792271b6f76487977160dcee9ea75e961f4 but expected e8d09eeecf9b024e52f936e8b655108f39c1937d)
+error: failed to push some refs to &#39;github.com:QuesmaOrg/git-prompt-story.git&#39;
+
+git-prompt-story: pushed notes to origin</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch update-readme
+Your branch and &#39;origin/update-readme&#39; have diverged,
+and have 1 and 1 different commits each, respectively.
+  (use &#34;git pull&#34; to merge the remote branch into yours)
+
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push --force-with-lease origin update-readme</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+ &#43; 54d566c...1e332ff update-readme -&gt; update-readme (forced update)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Updated both occurrences and pushed to the PR:
+
+https://github.com/QuesmaOrg/git-prompt-story/pull/new/update-readme</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please remove refs/notes/prompt-story from git push config</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --get-all remote.origin.push</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts
+refs/notes/prompt-story:refs/notes/prompt-story</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --unset remote.origin.push &#39;refs/notes/prompt-story:refs/notes/prompt-story&#39;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 5</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --global --get-all remote.origin.push</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts
+refs/notes/prompt-story:refs/notes/prompt-story</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --global --unset remote.origin.push &#39;refs/notes/prompt-story:refs/notes/prompt-story&#39;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --global --get-all remote.origin.push</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:09</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Removed `refs/notes/prompt-story:refs/notes/prompt-story` from global git config. Only `&#43;refs/notes/prompt-story-transcripts` remains.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:09</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">remove transcripts too</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --global --unset remote.origin.push &#39;&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts&#39;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 6
+error: invalid pattern: &#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --global --unset-all remote.origin.push</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git config --global --get-all remote.origin.push || echo &#34;No push configs&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No push configs</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. All `remote.origin.push` configs removed.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Why after force push I see two prompt-story comments in PR?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*prompt-story*.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/examples/prompt-story.yml
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/workflows/prompt-story.yml</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">.github/actions/**/*.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/action.yml</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/action.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:11</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The action already has logic to find and update existing comments (lines 178-207), but the issue is likely in the bot detection:
+
+```javascript
+const botComment = comments.find(c =&gt;
+  c.user.type === &#39;Bot&#39; &amp;&amp;
+  c.body.includes(&#39;## Prompt Story&#39;)
+);
+```
+
+The problem: `c.user.type === &#39;Bot&#39;` may not match. GitHub Actions comments often have `user.login === &#39;github-actions[bot]&#39;` but `user.type` might be different.
+
+**Possible causes:**
+1. **Race condition** - Two workflow runs started before the first comment was posted
+2. **User type check failing** - `github-actions[bot]` might not have `type === &#39;Bot&#39;`
+
+**Fix suggestion** - Change the detection to check login instead:
+
+```javascript
+const botComment = comments.find(c =&gt;
+  c.user.login === &#39;github-actions[bot]&#39; &amp;&amp;
+  c.body.includes(&#39;## Prompt Story&#39;)
+);
+```
+
+Want me to make this fix?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">No, the problem is different it looks for &#34;## Prompt Story&#34;, but it should look for git-prompt-story instead</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/action.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/action.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   181             repo: context.repo.repo,
+   182             issue_number: context.issue.number,
+   183           });
+   184 
+   185           const botComment = comments.find(c =&gt;
+   186             c.user.type === &#39;Bot&#39; &amp;&amp;
+   187             c.body.includes(&#39;git-prompt-story&#39;)
+   188           );
+   189 
+   190           if (botComment) {
+   191             // Update existing comment
+   192             const { data: updated } = await github.rest.issues.updateComment({</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add .github/actions/prompt-story/action.yml &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix PR comment detection to look for git-prompt-story
+
+The previous pattern &#39;## Prompt Story&#39; didn&#39;t match existing comments,
+causing duplicate comments on force push.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
