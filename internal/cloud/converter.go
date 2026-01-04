@@ -89,20 +89,11 @@ func EventsToMessageEntries(events []Event, sess *Session) []session.MessageEntr
 
 // ToClaudeSession converts a cloud Session to the local ClaudeSession format
 func ToClaudeSession(sess *Session) session.ClaudeSession {
-	branch := ""
-	for _, outcome := range sess.SessionContext.Outcomes {
-		if outcome.Type == "git_repository" && len(outcome.GitInfo.Branches) > 0 {
-			branch = outcome.GitInfo.Branches[0]
-			break
-		}
-	}
-
 	return session.ClaudeSession{
 		ID:       sess.ID,
 		Path:     "", // Cloud sessions don't have local paths
 		Created:  sess.CreatedAt,
 		Modified: sess.UpdatedAt,
-		Branch:   branch,
 	}
 }
 

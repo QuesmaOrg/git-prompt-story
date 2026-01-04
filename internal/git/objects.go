@@ -116,3 +116,27 @@ func RevList(rangeSpec string) ([]string, error) {
 	return commits, nil
 }
 
+// ResolveCommitSpec resolves a commit specification to a list of commit SHAs.
+// Supports: single ref (HEAD, abc123), ranges (A..B)
+// Returns commits in reverse chronological order (newest first)
+func ResolveCommitSpec(spec string) ([]string, error) {
+	// Check for range (contains ..)
+	if strings.Contains(spec, "..") {
+		commits, err := RevList(spec)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resolve range %s: %w", spec, err)
+		}
+		if len(commits) == 0 {
+			return nil, fmt.Errorf("no commits in range %s", spec)
+		}
+		return commits, nil
+	}
+
+	// Single commit reference
+	sha, err := ResolveCommit(spec)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve commit %s: %w", spec, err)
+	}
+	return []string{sha}, nil
+}
+
