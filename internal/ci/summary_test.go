@@ -516,3 +516,121 @@ func TestFormatMarkdownEntry_EscapesHTML(t *testing.T) {
 		t.Error("Should contain escaped HTML")
 	}
 }
+
+func TestIsAgentSession(t *testing.T) {
+	tests := []struct {
+		sessionID string
+		expected  bool
+	}{
+		{"agent-aa5fd63", true},
+		{"agent-123abc", true},
+		{"agent-", true},
+		{"fb813892-a738-4fc4-bcf8-b6f175a27a93", false},
+		{"7b383e66-9fd6-4c9e-b17e-839042a6cd81", false},
+		{"main-session", false},
+		{"", false},
+		{"AGENT-uppercase", false}, // Case sensitive
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.sessionID, func(t *testing.T) {
+			result := IsAgentSession(tt.sessionID)
+			if result != tt.expected {
+				t.Errorf("IsAgentSession(%q) = %v, want %v", tt.sessionID, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestRenderMarkdown_AgentSessionCounts(t *testing.T) {
+	now := time.Now()
+	summary := &Summary{
+		CommitsWithNotes:   1,
+		TotalUserPrompts:   2, // Main session only
+		TotalAgentPrompts:  3, // Agent sessions
+		TotalAgentSessions: 2,
+		TotalSteps:         10,
+		Commits: []CommitSummary{
+			{
+				ShortSHA: "abc1234",
+				Subject:  "Test commit with agents",
+				Sessions: []SessionSummary{
+					{
+						Tool:    "claude-code",
+						ID:      "main-session-uuid",
+						IsAgent: false,
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "User prompt 1", Time: now},
+							{Type: "ASSISTANT", Text: "Response", Time: now},
+							{Type: "PROMPT", Text: "User prompt 2", Time: now},
+						},
+					},
+					{
+						Tool:    "claude-code",
+						ID:      "agent-explore1",
+						IsAgent: true,
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "Agent prompt 1", Time: now},
+							{Type: "ASSISTANT", Text: "Agent response", Time: now},
+							{Type: "PROMPT", Text: "Agent prompt 2", Time: now},
+						},
+					},
+					{
+						Tool:    "claude-code",
+						ID:      "agent-explore2",
+						IsAgent: true,
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "Agent prompt 3", Time: now},
+							{Type: "TOOL_USE", Text: "Bash", Time: now},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	result := RenderMarkdown(summary, "")
+
+	// Should show main session prompts with agent count in parentheses
+	if !strings.Contains(result, "2 (+3 agent)") {
+		t.Errorf("Should show '2 (+3 agent)' for mixed sessions, got:\n%s", result)
+	}
+}
+
+func TestRenderMarkdown_NoAgentSessions(t *testing.T) {
+	now := time.Now()
+	summary := &Summary{
+		CommitsWithNotes:  1,
+		TotalUserPrompts:  2,
+		TotalAgentPrompts: 0,
+		Commits: []CommitSummary{
+			{
+				ShortSHA: "abc1234",
+				Subject:  "Test commit no agents",
+				Sessions: []SessionSummary{
+					{
+						Tool:    "claude-code",
+						ID:      "main-session-uuid",
+						IsAgent: false,
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "User prompt 1", Time: now},
+							{Type: "PROMPT", Text: "User prompt 2", Time: now},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	result := RenderMarkdown(summary, "")
+
+	// Should NOT show agent count when there are no agents
+	if strings.Contains(result, "(+") {
+		t.Errorf("Should not show agent count when there are no agents, got:\n%s", result)
+	}
+
+	// Should show just the number
+	if !strings.Contains(result, "| 2 |") {
+		t.Error("Should show '| 2 |' for user prompts when no agents")
+	}
+}

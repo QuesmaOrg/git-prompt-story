@@ -29,9 +29,16 @@ type PromptEntry struct {
 type SessionSummary struct {
 	Tool     string        `json:"tool"`
 	ID       string        `json:"id"`
+	IsAgent  bool          `json:"is_agent"`  // True if this is an agent/subagent session
 	Start    time.Time     `json:"start"`
 	End      time.Time     `json:"end"`
 	Prompts  []PromptEntry `json:"prompts"`
+}
+
+// IsAgentSession returns true if the session ID indicates an agent session
+// Agent sessions have IDs prefixed with "agent-"
+func IsAgentSession(sessionID string) bool {
+	return strings.HasPrefix(sessionID, "agent-")
 }
 
 // CommitSummary represents prompts for a single commit
@@ -47,9 +54,11 @@ type CommitSummary struct {
 // Summary represents the full analysis result
 type Summary struct {
 	Commits          []CommitSummary `json:"commits"`
-	TotalPrompts     int             `json:"total_prompts"`      // Kept for backward compatibility (equals TotalSteps)
-	TotalUserPrompts int             `json:"total_user_prompts"` // Count of user actions (PROMPT, COMMAND, TOOL_REJECT)
-	TotalSteps       int             `json:"total_steps"`        // Count of all entries
+	TotalPrompts     int             `json:"total_prompts"`       // Kept for backward compatibility (equals TotalSteps)
+	TotalUserPrompts int             `json:"total_user_prompts"`  // Count of user actions in main sessions only
+	TotalAgentPrompts int            `json:"total_agent_prompts"` // Count of user actions in agent sessions
+	TotalSteps       int             `json:"total_steps"`         // Count of all entries
+	TotalAgentSessions int           `json:"total_agent_sessions"` // Count of agent sessions
 	CommitsWithNotes int             `json:"commits_with_notes"`
 	CommitsAnalyzed  int             `json:"commits_analyzed"`
 }
@@ -80,8 +89,15 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 				stepCount := len(sess.Prompts)
 				userPromptCount := countUserPrompts(sess.Prompts)
 				summary.TotalSteps += stepCount
-				summary.TotalUserPrompts += userPromptCount
 				summary.TotalPrompts += stepCount // Keep for backward compatibility
+
+				// Separate counts for main vs agent sessions
+				if sess.IsAgent {
+					summary.TotalAgentPrompts += userPromptCount
+					summary.TotalAgentSessions++
+				} else {
+					summary.TotalUserPrompts += userPromptCount
+				}
 			}
 		}
 	}
@@ -181,6 +197,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 	ss := &SessionSummary{
 		Tool:    sess.Tool,
 		ID:      sess.ID,
+		IsAgent: IsAgentSession(sess.ID),
 		Start:   sess.Created,
 		End:     sess.Modified,
 		Prompts: make([]PromptEntry, 0),
@@ -583,7 +600,7 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 					CommitIndex: i,
 				}
 				fullTimeline = append(fullTimeline, te)
-				if isUserAction(p.Type) {
+				if isUserAction(p.Type) && !sess.IsAgent {
 					userTimeline = append(userTimeline, te)
 				}
 			}
@@ -622,11 +639,17 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		// Collect unique tools
 		tools := make(map[string]bool)
 		userPromptCount := 0
+		agentPromptCount := 0
 		totalSteps := 0
 
 		for _, sess := range commit.Sessions {
 			tools[formatToolName(sess.Tool)] = true
-			userPromptCount += countUserPrompts(sess.Prompts)
+			prompts := countUserPrompts(sess.Prompts)
+			if sess.IsAgent {
+				agentPromptCount += prompts
+			} else {
+				userPromptCount += prompts
+			}
 			totalSteps += len(sess.Prompts)
 		}
 
@@ -640,8 +663,14 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		}
 		subject = html.EscapeString(subject)
 
-		sb.WriteString(fmt.Sprintf("| %s | %s | %s | %d | %d |\n",
-			commit.ShortSHA, subject, toolDisplay, userPromptCount, totalSteps))
+		// Format user prompts with optional agent count
+		promptDisplay := fmt.Sprintf("%d", userPromptCount)
+		if agentPromptCount > 0 {
+			promptDisplay = fmt.Sprintf("%d (+%d agent)", userPromptCount, agentPromptCount)
+		}
+
+		sb.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %d |\n",
+			commit.ShortSHA, subject, toolDisplay, promptDisplay, totalSteps))
 	}
 	sb.WriteString("\n")
 

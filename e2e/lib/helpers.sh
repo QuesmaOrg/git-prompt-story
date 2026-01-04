@@ -337,3 +337,27 @@ EOF
 
     echo "  Created mock session with PII: $session_dir/$session_id.jsonl"
 }
+
+# Create a mock agent session (with "agent-" prefix in session ID)
+# Usage: create_mock_agent_session <agent_suffix> <start_time> <end_time>
+# Example: create_mock_agent_session "explore1" "2025-01-15T09:15:00Z" "2025-01-15T09:20:00Z"
+# Results in session ID: agent-explore1
+create_mock_agent_session() {
+    local agent_suffix="$1"
+    local start_time="$2"
+    local end_time="$3"
+    local session_id="agent-${agent_suffix}"
+
+    local repo_path=$(pwd)
+    local encoded_path=$(echo "$repo_path" | tr '/' '-')
+    local session_dir="$HOME/.claude/projects/$encoded_path"
+
+    mkdir -p "$session_dir"
+
+    cat > "$session_dir/$session_id.jsonl" << EOF
+{"type":"user","sessionId":"$session_id","timestamp":"$start_time","cwd":"$repo_path","gitBranch":"main","message":{"role":"user","content":"[Agent task] Explore the codebase for pattern X"}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$end_time","message":{"role":"assistant","content":[{"type":"text","text":"Found pattern X in the following files..."}]}}
+EOF
+
+    echo "  Created mock agent session: $session_dir/$session_id.jsonl"
+}
