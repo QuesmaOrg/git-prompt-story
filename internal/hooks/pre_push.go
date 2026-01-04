@@ -60,15 +60,19 @@ func PrePush(remoteName, remoteURL string, stdin io.Reader) error {
 	cmd := exec.Command("git", args...)
 	cmd.Env = append(os.Environ(), prePushEnvVar+"=1")
 	output, err := cmd.CombinedOutput()
+	outputStr := string(output)
+
+	// Check if nothing was pushed (already up to date)
+	if strings.Contains(outputStr, "Everything up-to-date") ||
+		strings.Contains(outputStr, "up to date") {
+		return nil
+	}
+
 	if err != nil {
-		outputStr := string(output)
-		if strings.Contains(outputStr, "Everything up-to-date") ||
-			strings.Contains(outputStr, "up to date") {
-			return nil
-		}
 		return fmt.Errorf("pushing notes: %s", strings.TrimSpace(outputStr))
 	}
 
+	// Only print if something was actually pushed
 	fmt.Printf("git-prompt-story: pushed notes to %s\n", remoteName)
 	return nil
 }
