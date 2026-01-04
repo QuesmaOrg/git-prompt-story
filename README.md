@@ -42,11 +42,10 @@ Set up git-prompt-story on your machine to capture LLM sessions in all your repo
 go install github.com/QuesmaOrg/git-prompt-story@latest
 
 # 2. Install git hooks globally
-git-prompt-story install-hooks --global
-
-# 3. Enable automatic pushing of prompt notes
-git config --global --add remote.origin.push 'refs/notes/prompt-story:refs/notes/prompt-story'
-git config --global --add remote.origin.push '+refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
+# Add --auto-push to install pre-push hook that syncs notes automatically
+# Without --auto-push, push notes manually with:
+#   git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
+git-prompt-story install-hooks --global --auto-push
 ```
 
 That's it. Future commits will automatically capture active LLM sessions.
@@ -67,18 +66,17 @@ set -e
 go install github.com/QuesmaOrg/git-prompt-story@latest
 
 # Install hooks for this repo
-git-prompt-story install-hooks
-
-# Enable automatic pushing of prompt notes
-git config --add remote.origin.push 'refs/notes/prompt-story:refs/notes/prompt-story'
-git config --add remote.origin.push '+refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts'
+# Add --auto-push to install pre-push hook that syncs notes automatically
+# Without --auto-push, push notes manually with:
+#   git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
+git-prompt-story install-hooks --auto-push
 
 echo "git-prompt-story configured for this repository"
 ```
 
 Contributors run `./setup-prompt-story.sh` after cloning.
 
-#### 2. Add GitHub Action (optional)
+#### 2. Add GitHub Action
 
 Add a GitHub Action to analyze LLM sessions and post summaries on PRs:
 
@@ -91,8 +89,8 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write       # For GitHub Pages deployment
-  pull-requests: write  # For PR comments
+  contents: write # For GitHub Pages deployment
+  pull-requests: write # For PR comments
 
 jobs:
   prompt-story:
@@ -105,21 +103,21 @@ jobs:
       - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment: true        # Post summary comment on PR
-          deploy-pages: true   # Deploy full transcripts to GitHub Pages
+          comment: true # Post summary comment on PR
+          deploy-pages: true # Deploy full transcripts to GitHub Pages
 ```
 
 This action:
+
 - Fetches git notes from your repository
 - Generates a summary of LLM tools used in the PR
 - Posts an interactive HTML transcript to GitHub Pages
 - Adds a comment with links to the full transcript
 
-**Prerequisites:**
-1. Push your git notes to remote: `git push origin 'refs/notes/*'`
-2. After the first workflow run, enable GitHub Pages:
-   - Settings → Pages → Source: Deploy from a branch
-   - Select `gh-pages` branch (created automatically by the action)
+**Enabling GitHub Pages:** If you have not done it already, after the first workflow run, enable GitHub Pages:
+
+- Settings → Pages → Source: Deploy from a branch
+- Select `gh-pages` branch (created automatically by the action)
 
 ## How It Works
 
@@ -164,7 +162,6 @@ Git notes attached to commits in a dedicated namespace. Contains a lightweight J
 {
   "v": 1,
   "start_work": "2025-01-15T09:00:00Z",
-  "end_work": "2025-01-15T14:30:00Z",
   "sessions": [
     {
       "tool": "claude-code",
@@ -221,7 +218,7 @@ git-prompt-story finds active sessions by checking:
 
 Git Prompt Story has two components:
 
-### `git-prompt-story` (CLI) - Go
+### Local `git-prompt-story` (CLI) - Go
 
 The capture tool runs locally via git hooks. It:
 
@@ -232,30 +229,11 @@ The capture tool runs locally via git hooks. It:
 
 Single binary, no runtime dependencies. Install once, works everywhere.
 
-### `git-prompt-story-server` (Viewer) - separate
+### GitHub Action
 
-Renders stored notes for the web. Options:
-
-- **Self-hosted**: Run your own instance
-- **Hosted service**: Use our hosted viewer (planned)
-- **GitHub Action**: Auto-publish notes as PR comments (planned)
-
-For local viewing without the server:
-
-- **Raw**: `git notes --ref=llm-prompts show HEAD`
-- **CLI**: `git-prompt-story show` (built into capture tool)
-
-The CLI is essential. The server is optional.
-
-## Configuration
-
-Config lives in `.git-prompt-story.json` or `~/.config/git-prompt-story.json`:
-
-```json
-{
-  "auto_push_notes": false
-}
-```
+- Run on Pull Requests
+- Adds message with markdown summary of prompts
+- Creates more detailed HTML transcript and saves it as GitHub Pages
 
 ## Viewer Integration
 
@@ -263,7 +241,7 @@ Notes are JSON - view them anywhere:
 
 ```bash
 # Raw JSON
-git notes show HEAD
+git notes --ref=prompt-story show HEAD
 
 # Local pretty-print
 git-prompt-story show HEAD
@@ -284,42 +262,17 @@ git-prompt-story remove <commit>
 git-prompt-story edit <commit>
 ```
 
-Notes live in separate refs and must be explicitly pushed:
+Notes live in separate refs and can be explicitly pushed (unless you use `--auto-push`):
 
 ```bash
 git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
 ```
 
-## Upgrading
-
-### From versions before 0.6.0
-
-Notes storage location changed from `refs/notes/commits` to `refs/notes/prompt-story` to avoid conflicts with other tools using the default git notes ref.
-
-**Reading**: The new version automatically reads from both locations for backward compatibility.
-
-**Writing**: New notes are written to `refs/notes/prompt-story`.
-
-**Migration** (optional): To migrate existing notes to the new location:
-
-```bash
-# Fetch existing notes
-git fetch origin refs/notes/commits:refs/notes/commits
-
-# Copy to new location
-git push origin refs/notes/commits:refs/notes/prompt-story
-
-# Update your push config
-git config --unset-all remote.origin.push 'refs/notes/commits:refs/notes/commits'
-git config --add remote.origin.push 'refs/notes/prompt-story:refs/notes/prompt-story'
-```
-
 ## Roadmap
 
 - [x] Claude Code support
-- [x] Local viewer (HTML export via `ci-html` command)
+- [x] Viewer (HTML export via `ci-html` and `ci-summary` commands)
 - [x] GitHub Action for PR summaries and transcript pages
-- [ ] Hosted viewer service
 - [ ] Cursor integration
 - [ ] Codex integration
 - [ ] Gemini CLI integration

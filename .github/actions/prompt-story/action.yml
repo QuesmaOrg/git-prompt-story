@@ -184,7 +184,7 @@ runs:
 
           const botComment = comments.find(c =>
             c.user.type === 'Bot' &&
-            c.body.includes('## Prompt Story')
+            c.body.includes('git-prompt-story')
           );
 
           if (botComment) {
