@@ -26,6 +26,23 @@ type Pattern struct {
 	Regex string `yaml:"regex"`
 }
 
+// ToolOutputRedactor configures redaction of specific tool outputs
+// This allows redacting the output content of specific Claude Code tools
+type ToolOutputRedactor struct {
+	Name        string `yaml:"name"`
+	ToolName    string `yaml:"tool_name"`   // Tool to redact (e.g., "Read", "Bash")
+	Replacement string `yaml:"replacement"` // Replacement text (e.g., "<REDACTED>")
+	Comment     string `yaml:"comment"`     // Explanation of why this redaction exists
+}
+
+// NodeRemover configures removal of entire JSON nodes from session entries
+// This allows removing duplicate or unnecessary fields to save space
+type NodeRemover struct {
+	Name    string `yaml:"name"`
+	Path    string `yaml:"path"`    // JSON field path to remove (e.g., "toolUseResult")
+	Comment string `yaml:"comment"` // Explanation of why this removal exists
+}
+
 // CompiledRecognizer is a recognizer with compiled regex patterns
 type CompiledRecognizer struct {
 	Name        string
@@ -42,11 +59,13 @@ type Config struct {
 
 // PIIScrubber implements the Scrubber interface
 type PIIScrubber struct {
-	recognizers []CompiledRecognizer
+	recognizers   []CompiledRecognizer
+	toolRedactors []ToolOutputRedactor
+	nodeRemovers  []NodeRemover
 }
 
-// New creates a new PIIScrubber with the given recognizers
-func New(recognizers []Recognizer) (*PIIScrubber, error) {
+// New creates a new PIIScrubber with the given recognizers, tool redactors, and node removers
+func New(recognizers []Recognizer, toolRedactors []ToolOutputRedactor, nodeRemovers []NodeRemover) (*PIIScrubber, error) {
 	compiled := make([]CompiledRecognizer, 0, len(recognizers))
 
 	for _, r := range recognizers {
@@ -68,16 +87,24 @@ func New(recognizers []Recognizer) (*PIIScrubber, error) {
 		compiled = append(compiled, cr)
 	}
 
-	return &PIIScrubber{recognizers: compiled}, nil
+	return &PIIScrubber{
+		recognizers:   compiled,
+		toolRedactors: toolRedactors,
+		nodeRemovers:  nodeRemovers,
+	}, nil
 }
 
 // NewDefault creates a PIIScrubber with built-in patterns
 func NewDefault() (*PIIScrubber, error) {
-	return New(DefaultRecognizers())
+	return New(DefaultRecognizers(), DefaultToolRedactors(), DefaultNodeRemovers())
 }
 
 // Scrub implements the Scrubber interface for JSONL content
 func (s *PIIScrubber) Scrub(content []byte) ([]byte, error) {
+	// First pass: build set of tool_use IDs to redact
+	toolRedactSet := s.buildToolRedactSet(content)
+
+	// Second pass: process and scrub content
 	var result bytes.Buffer
 	scanner := bufio.NewScanner(bytes.NewReader(content))
 
@@ -103,7 +130,13 @@ func (s *PIIScrubber) Scrub(content []byte) ([]byte, error) {
 			continue
 		}
 
-		// Scrub JSON values recursively
+		// 1. Remove configured nodes (e.g., toolUseResult)
+		s.removeNodes(obj)
+
+		// 2. Redact configured tool outputs (e.g., Read tool)
+		s.redactToolResults(obj, toolRedactSet)
+
+		// 3. Apply PII patterns recursively
 		s.scrubValue(obj)
 
 		// Re-serialize
@@ -150,6 +183,113 @@ func (s *PIIScrubber) scrubValue(v interface{}) {
 			} else {
 				s.scrubValue(inner)
 			}
+		}
+	}
+}
+
+// removeNodes removes configured JSON fields from the object
+func (s *PIIScrubber) removeNodes(obj map[string]interface{}) {
+	for _, nr := range s.nodeRemovers {
+		delete(obj, nr.Path)
+	}
+}
+
+// buildToolRedactSet scans JSONL content and returns a set of tool_use IDs
+// that should have their outputs redacted
+func (s *PIIScrubber) buildToolRedactSet(content []byte) map[string]string {
+	redactSet := make(map[string]string) // tool_use_id -> replacement
+
+	if len(s.toolRedactors) == 0 {
+		return redactSet
+	}
+
+	// Build map of tool names to redact
+	toolsToRedact := make(map[string]string) // tool_name -> replacement
+	for _, tr := range s.toolRedactors {
+		toolsToRedact[tr.ToolName] = tr.Replacement
+	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(content))
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024)
+
+	for scanner.Scan() {
+		var obj map[string]interface{}
+		if err := json.Unmarshal(scanner.Bytes(), &obj); err != nil {
+			continue
+		}
+
+		// Look for assistant messages with tool_use content
+		if obj["type"] != "assistant" {
+			continue
+		}
+
+		msg, ok := obj["message"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		content, ok := msg["content"].([]interface{})
+		if !ok {
+			continue
+		}
+
+		for _, part := range content {
+			partMap, ok := part.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			if partMap["type"] != "tool_use" {
+				continue
+			}
+
+			toolName, _ := partMap["name"].(string)
+			toolID, _ := partMap["id"].(string)
+
+			if replacement, shouldRedact := toolsToRedact[toolName]; shouldRedact && toolID != "" {
+				redactSet[toolID] = replacement
+			}
+		}
+	}
+
+	return redactSet
+}
+
+// redactToolResults redacts tool_result content for IDs in the redact set
+func (s *PIIScrubber) redactToolResults(obj map[string]interface{}, redactSet map[string]string) {
+	if len(redactSet) == 0 {
+		return
+	}
+
+	// Only process user messages (tool results come in user messages)
+	if obj["type"] != "user" {
+		return
+	}
+
+	msg, ok := obj["message"].(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	content, ok := msg["content"].([]interface{})
+	if !ok {
+		return
+	}
+
+	for _, part := range content {
+		partMap, ok := part.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		if partMap["type"] != "tool_result" {
+			continue
+		}
+
+		toolUseID, _ := partMap["tool_use_id"].(string)
+		if replacement, shouldRedact := redactSet[toolUseID]; shouldRedact {
+			partMap["content"] = replacement
 		}
 	}
 }
@@ -418,6 +558,36 @@ func DefaultRecognizers() []Recognizer {
 				{Regex: `(?i)(?:password|passwd|pwd)['":\s=]+[^\s'"]{8,}`},
 			},
 			Replacement: "<PASSWORD>",
+		},
+	}
+}
+
+// DefaultToolRedactors returns the built-in tool output redactors
+func DefaultToolRedactors() []ToolOutputRedactor {
+	return []ToolOutputRedactor{
+		{
+			Name:        "read_tool_output",
+			ToolName:    "Read",
+			Replacement: "<REDACTED>",
+			// Read tool outputs contain full file contents which are already
+			// available in git. Redacting saves ~8% storage and removes
+			// potentially sensitive data that shouldn't be stored in transcripts.
+			Comment: "Read tool outputs contain full file contents. Redacting saves ~8% storage and removes potentially sensitive data.",
+		},
+	}
+}
+
+// DefaultNodeRemovers returns the built-in node removers
+func DefaultNodeRemovers() []NodeRemover {
+	return []NodeRemover{
+		{
+			Name: "toolUseResult_duplicate",
+			Path: "toolUseResult",
+			// toolUseResult is a Claude Code-specific field that duplicates data
+			// from message.content in a different format. The CI HTML rendering
+			// only uses message.content, so this field is redundant.
+			// Removing saves ~37% storage.
+			Comment: "toolUseResult duplicates message.content data. CI HTML only uses message.content. Removing saves ~37% storage.",
 		},
 	}
 }

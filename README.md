@@ -28,6 +28,7 @@ git-prompt-story captures LLM sessions in your git history - making prompts revi
 
 - **Automatic capture** - Hooks detect active LLM sessions on commit
 - **PII scrubbing** - Sensitive data (emails, API keys, passwords) automatically redacted ([configurable](docs/PII_SCRUBBING.md))
+- **Tool output redaction** - Read tool outputs redacted by default (file contents already in git)
 - **Review before push** - Curate or redact notes before sharing
 - **Prompt tracking** - Commit messages show which tools and how many prompts were used
 

@@ -600,3 +600,148 @@ func TestScrubCookie(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveToolUseResult(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	// JSONL with toolUseResult field (should be removed)
+	input := `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_123","content":"file contents"}]},"toolUseResult":{"type":"text","file":{"filePath":"/path/to/file.go","content":"package main"}}}`
+
+	result, err := s.Scrub([]byte(input))
+	if err != nil {
+		t.Fatalf("Scrub() error: %v", err)
+	}
+
+	// Verify toolUseResult was removed
+	if strings.Contains(string(result), "toolUseResult") {
+		t.Error("toolUseResult field was not removed")
+	}
+
+	// Verify the entry is still valid JSON
+	var obj map[string]interface{}
+	if err := json.Unmarshal(result, &obj); err != nil {
+		t.Fatalf("Result is not valid JSON: %v", err)
+	}
+
+	// Verify other fields are preserved
+	if obj["type"] != "user" {
+		t.Error("type field was not preserved")
+	}
+}
+
+func TestRedactReadToolOutput(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	// Two JSONL lines: assistant with tool_use (Read), then user with tool_result
+	input := `{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_read_123","name":"Read","input":{"file_path":"/path/to/file.go"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_read_123","content":"package main\n\nfunc main() {\n\tfmt.Println(\"Hello\")\n}"}]}}`
+
+	result, err := s.Scrub([]byte(input))
+	if err != nil {
+		t.Fatalf("Scrub() error: %v", err)
+	}
+
+	// Verify the file content was redacted
+	if strings.Contains(string(result), "package main") {
+		t.Error("Read tool output was not redacted")
+	}
+	if strings.Contains(string(result), "fmt.Println") {
+		t.Error("Read tool output was not redacted")
+	}
+
+	// Verify REDACTED placeholder is present (may be unicode-escaped)
+	if !strings.Contains(string(result), "<REDACTED>") && !strings.Contains(string(result), "\\u003cREDACTED\\u003e") {
+		t.Error("REDACTED placeholder not found")
+	}
+
+	// Verify each line is still valid JSON
+	lines := strings.Split(string(result), "\n")
+	for i, line := range lines {
+		var obj map[string]interface{}
+		if err := json.Unmarshal([]byte(line), &obj); err != nil {
+			t.Errorf("Line %d is not valid JSON: %v", i, err)
+		}
+	}
+}
+
+func TestNonReadToolOutputNotRedacted(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	// Two JSONL lines: assistant with tool_use (Bash, not Read), then user with tool_result
+	input := `{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_bash_123","name":"Bash","input":{"command":"ls -la"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_bash_123","content":"total 8\ndrwxr-xr-x  2 user group 4096 Jan 1 12:00 .\ndrwxr-xr-x 10 user group 4096 Jan 1 12:00 .."}]}}`
+
+	result, err := s.Scrub([]byte(input))
+	if err != nil {
+		t.Fatalf("Scrub() error: %v", err)
+	}
+
+	// Verify the Bash output was NOT redacted (Bash is not in the default redactors)
+	if !strings.Contains(string(result), "drwxr-xr-x") {
+		t.Error("Bash tool output was incorrectly redacted")
+	}
+
+	// Verify REDACTED placeholder is NOT present
+	if strings.Contains(string(result), "<REDACTED>") || strings.Contains(string(result), "\\u003cREDACTED\\u003e") {
+		t.Error("REDACTED placeholder found for non-Read tool")
+	}
+}
+
+func TestMultipleReadToolOutputsRedacted(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	// Multiple Read tool uses and results
+	input := `{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_1","name":"Read","input":{"file_path":"/file1.go"}},{"type":"tool_use","id":"toolu_2","name":"Read","input":{"file_path":"/file2.go"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"file1 content"},{"type":"tool_result","tool_use_id":"toolu_2","content":"file2 content"}]}}`
+
+	result, err := s.Scrub([]byte(input))
+	if err != nil {
+		t.Fatalf("Scrub() error: %v", err)
+	}
+
+	// Verify both contents were redacted
+	if strings.Contains(string(result), "file1 content") {
+		t.Error("First Read tool output was not redacted")
+	}
+	if strings.Contains(string(result), "file2 content") {
+		t.Error("Second Read tool output was not redacted")
+	}
+}
+
+func TestMixedToolOutputs(t *testing.T) {
+	s, err := NewDefault()
+	if err != nil {
+		t.Fatalf("NewDefault() error: %v", err)
+	}
+
+	// Read should be redacted, Bash should not
+	input := `{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_read","name":"Read","input":{"file_path":"/file.go"}},{"type":"tool_use","id":"toolu_bash","name":"Bash","input":{"command":"echo hello"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_read","content":"SECRET FILE CONTENT"},{"type":"tool_result","tool_use_id":"toolu_bash","content":"hello"}]}}`
+
+	result, err := s.Scrub([]byte(input))
+	if err != nil {
+		t.Fatalf("Scrub() error: %v", err)
+	}
+
+	// Read content should be redacted
+	if strings.Contains(string(result), "SECRET FILE CONTENT") {
+		t.Error("Read tool output was not redacted")
+	}
+
+	// Bash content should be preserved
+	if !strings.Contains(string(result), "hello") {
+		t.Error("Bash tool output was incorrectly redacted")
+	}
+}
