@@ -27,6 +27,11 @@
       <span class="toggle-switch"></span>
       <span>Show whole session</span>
     </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
   </div>
 
   <div class="stats">
@@ -46,10 +51,14 @@
   </div>
 
   {{range $i, $sess := .Sessions}}
-  <div class="commit-card">
+  <div class="commit-card{{if .IsAgent}} agent-session{{end}}" data-is-agent="{{.IsAgent}}">
     <div class="commit-header">
-      <h3>Session {{add $i 1}}: {{formatToolName .Tool}}</h3>
+      <h3>
+        {{if .IsAgent}}<span class="badge agent">Agent</span>{{else}}<span class="badge main">Main</span>{{end}}
+        Session {{add $i 1}}: {{formatToolName .Tool}}
+      </h3>
       <div class="commit-meta">
+        <code class="session-id">{{.ID}}</code> |
         {{formatTime .Start}} - {{formatTime .End}} | <span class="session-count">{{len .Prompts}}</span> entries
       </div>
     </div>
@@ -94,14 +103,33 @@
   (function() {
     const toggleAllEntries = document.getElementById('toggle-all-entries');
     const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
     const visibleCount = document.getElementById('visible-count');
 
     function updateFilters() {
       const showAll = toggleAllEntries.checked;
       const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
       let count = 0;
 
+      // First, handle agent session visibility
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      // Then handle individual entry visibility
       document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
         const isUser = el.dataset.entryType === 'user';
         const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
 
@@ -119,7 +147,7 @@
       visibleCount.textContent = count;
 
       // Update session counts
-      document.querySelectorAll('.commit-card').forEach(card => {
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
         const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
         const countEl = card.querySelector('.session-count');
         if (countEl) countEl.textContent = visible;
@@ -128,6 +156,7 @@
 
     toggleAllEntries.addEventListener('change', updateFilters);
     toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
 
     // Initial update
     updateFilters();
