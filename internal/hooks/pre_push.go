@@ -40,39 +40,36 @@ func PrePush(remoteName, remoteURL string, stdin io.Reader) error {
 		return fmt.Errorf("reading stdin: %w", err)
 	}
 
-	// Check if we have any notes to push
-	hasNotes := hasNotesRef(note.NotesRef)
-	hasTranscripts := hasNotesRef(note.TranscriptsRef)
+	// Build refspecs for existing note refs
+	var refspecs []string
+	if hasNotesRef(note.NotesRef) {
+		refspecs = append(refspecs, note.NotesRef+":"+note.NotesRef)
+	}
+	if hasNotesRef(note.TranscriptsRef) {
+		// Force push for transcripts (they can be amended)
+		refspecs = append(refspecs, "+"+note.TranscriptsRef+":"+note.TranscriptsRef)
+	}
 
-	if !hasNotes && !hasTranscripts {
+	if len(refspecs) == 0 {
 		// No notes refs exist, nothing to push
 		return nil
 	}
 
-	var errors []string
-
-	// Push main notes ref (non-force, fast-forward only)
-	if hasNotes {
-		if err := pushNotesRef(remoteName, note.NotesRef, false); err != nil {
-			errors = append(errors, fmt.Sprintf("prompt-story notes: %v", err))
-		} else {
-			fmt.Printf("git-prompt-story: pushed %s to %s\n", note.NotesRef, remoteName)
+	// Single push with all refspecs
+	args := append([]string{"push", remoteName}, refspecs...)
+	cmd := exec.Command("git", args...)
+	cmd.Env = append(os.Environ(), prePushEnvVar+"=1")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		outputStr := string(output)
+		if strings.Contains(outputStr, "Everything up-to-date") ||
+			strings.Contains(outputStr, "up to date") {
+			return nil
 		}
+		return fmt.Errorf("pushing notes: %s", strings.TrimSpace(outputStr))
 	}
 
-	// Push transcripts ref (force push - transcripts can be amended)
-	if hasTranscripts {
-		if err := pushNotesRef(remoteName, note.TranscriptsRef, true); err != nil {
-			errors = append(errors, fmt.Sprintf("transcripts: %v", err))
-		} else {
-			fmt.Printf("git-prompt-story: pushed %s to %s\n", note.TranscriptsRef, remoteName)
-		}
-	}
-
-	if len(errors) > 0 {
-		return fmt.Errorf("failed to push some notes: %s", strings.Join(errors, "; "))
-	}
-
+	fmt.Printf("git-prompt-story: pushed notes to %s\n", remoteName)
 	return nil
 }
 
@@ -80,27 +77,4 @@ func PrePush(remoteName, remoteURL string, stdin io.Reader) error {
 func hasNotesRef(ref string) bool {
 	cmd := exec.Command("git", "rev-parse", "--verify", ref)
 	return cmd.Run() == nil
-}
-
-// pushNotesRef pushes a notes ref to the remote
-func pushNotesRef(remote, ref string, force bool) error {
-	refspec := ref + ":" + ref
-	if force {
-		refspec = "+" + refspec
-	}
-
-	cmd := exec.Command("git", "push", remote, refspec)
-	// Set environment variable to prevent recursive hook invocation
-	cmd.Env = append(os.Environ(), prePushEnvVar+"=1")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		// Check if the error is just "already up to date" or "no updates"
-		outputStr := string(output)
-		if strings.Contains(outputStr, "Everything up-to-date") ||
-			strings.Contains(outputStr, "up to date") {
-			return nil
-		}
-		return fmt.Errorf("%s: %s", err, strings.TrimSpace(outputStr))
-	}
-	return nil
 }
