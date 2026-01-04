@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bb4cfe1 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>bb4cfe1</code></h1>
+    <p class="meta">Update README: use --auto-push flag instead of git config</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">56</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>bb4cfe1b801b85a70f6d4244e9996f303a2d4407</code><br>
+    <strong>Work period:</strong> 2026-01-04 17:22 - 2026-01-04 18:03
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">4c3de467-d985-4f25-9912-9a8cd007fdfa</code> |
+        2026-01-04 17:41 - 2026-01-04 18:03 | <span class="session-count">51</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:41</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</span>
+          
+        </li>
+        
+        <li class="prompt-item COMMAND"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:41</span>
+          <span class="prompt-type">COMMAND</span>
+          
+          <span class="prompt-text">/clear</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please update Readme.md, please remove suggestions to add:
+git config --global --add remote.origin.push &#39;refs/notes/prompt-story:refs/notes/prompt-story&#39;
+git config --global --add remote.origin.push &#39;&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts&#39;
+
+Please instead recommend flag to hooks with &#34;pre-push&#34;, explain in comments that this can be skipped.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll start by reading the current README.md to understand what needs to be changed.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check what the `install-hooks` command supports to understand the available flags.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story install-hooks --help 2&gt;&amp;1 || go run . install-hooks --help 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Install git hooks to automatically capture LLM sessions on commit.
+
+By default, installs hooks in the current repository.
+Use --global to install hooks globally for all repositories.
+
+Usage:
+  git-prompt-story install-hooks [flags]
+
+Flags:
+      --global   Install hooks globally
+  -h, --help     help for install-hooks</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the hooks implementation to understand the current hook types.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">pre-push|hookTypes|hook.*install</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/hooks/installer.go:37:if [ -x &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; ]; then
+internal/hooks/installer.go:38:    &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; &#34;$@&#34; || exit $?
+internal/hooks/installer.go:42:exec git-prompt-story pre-push &#34;$@&#34;
+internal/hooks/installer.go:45:// InstallOptions configures hook installation
+internal/hooks/installer.go:78:	// Optionally install pre-push hook for auto-syncing notes
+internal/hooks/installer.go:80:		if err := writeHookScript(hooksDir, &#34;pre-push&#34;, prePushScript); err != nil {
+internal/hooks/installer.go:83:		fmt.Println(&#34;Pre-push hook installed (notes will auto-sync on push)&#34;)
+internal/hooks/pre_push.go:17:// PrePush implements the pre-push hook logic.
+internal/hooks/pre_push.go:20:// Git pre-push hook receives:
+cmd/pre_push.go:12:	Use:    &#34;pre-push &lt;remote-name&gt; &lt;remote-url&gt;&#34;,
+cmd/install_hooks.go:23:Use --auto-push to also install a pre-push hook that syncs notes.`,
+cmd/install_hooks.go:38:	installHooksCmd.Flags().BoolVar(&amp;autoPushFlag, &#34;auto-push&#34;, false, &#34;Install pre-push hook to auto-sync notes&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I now understand the task. There&#39;s already an `--auto-push` flag for `install-hooks` that installs a pre-push hook to auto-sync notes. The changes are straightforward:
+
+1. Remove the `git config --add remote.origin.push` lines in both the Individual Developer and Repository Owner sections
+2. Replace with the `--auto-push` flag on the `install-hooks` command
+3. Add a comment explaining this step is optional
+
+Let me write the plan file:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/immutable-soaring-rivest.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/.claude/plans/immutable-soaring-rivest.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The plan is ready. This is a simple README update that:
+1. Removes the `git config` commands for pushing notes
+2. Replaces them with `--auto-push` flag on `install-hooks` 
+3. Adds comments explaining this step is optional and shows how to manually push instead</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:43</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Update README.md to use --auto-push flag\n\n## Summary\nReplace git config commands for pushing notes with the `--auto-push` flag on `install-hooks`.\n\n## Changes to README.md\n\n...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/immutable-soaring-rivest.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Update README.md to use --auto-push flag
+
+## Summary
+Replace git config commands for pushing notes with the `--auto-push` flag on `install-hooks`.
+
+## Changes to README.md
+
+### 1. Individual Developer section (lines 47-52)
+
+**Current:**
+```bash
+# 3. Enable automatic pushing of prompt notes
+git config --global --add remote.origin.push &#39;refs/notes/prompt-story:refs/notes/prompt-story&#39;
+git config --global --add remote.origin.push &#39;&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts&#39;
+```
+
+**Replace with:**
+```bash
+# 3. (Optional) Install pre-push hook to auto-sync notes on push
+# Skip this if you prefer to manually push notes with: git push origin &#39;refs/notes/*&#39;
+git-prompt-story install-hooks --global --auto-push
+```
+
+### 2. Repository Owner setup script (lines 72-74)
+
+**Current:**
+```bash
+# Enable automatic pushing of prompt notes
+git config --add remote.origin.push &#39;refs/notes/prompt-story:refs/notes/prompt-story&#39;
+git config --add remote.origin.push &#39;&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts&#39;
+```
+
+**Replace with:**
+```bash
+# (Optional) Install pre-push hook to auto-sync notes on push
+# Skip this if you prefer to manually push notes with: git push origin &#39;refs/notes/*&#39;
+git-prompt-story install-hooks --auto-push
+```
+
+## Files to modify
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md`
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll now make the changes to the README.md file.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    43 
+    44 # 2. Install git hooks globally
+    45 git-prompt-story install-hooks --global
+    46 
+    47 # 3. (Optional) Install pre-push hook to auto-sync notes on push
+    48 # Skip this if you prefer to manually push notes with: git push origin &#39;refs/notes/*&#39;
+    49 git-prompt-story install-hooks --global --auto-push
+    50 ```
+    51 
+    52 That&#39;s it. Future commits will automatically capture active LLM sessions.
+    53 
+    54 ### Repository Owner
+    55 
+    56 Set up git-prompt-story for your team by adding a setup script.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    65 
+    66 # Install git-prompt-story
+    67 go install github.com/QuesmaOrg/git-prompt-story@latest
+    68 
+    69 # Install hooks for this repo
+    70 git-prompt-story install-hooks
+    71 
+    72 # (Optional) Install pre-push hook to auto-sync notes on push
+    73 # Skip this if you prefer to manually push notes with: git push origin &#39;refs/notes/*&#39;
+    74 git-prompt-story install-hooks --auto-push
+    75 
+    76 echo &#34;git-prompt-story configured for this repository&#34;
+    77 ```
+    78 
+    79 Contributors run `./setup-prompt-story.sh` after cloning.
+    80 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I notice the current structure has two separate `install-hooks` calls which is redundant. Let me simplify by combining them into one step with the optional flag mentioned:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    40 ```bash
+    41 # 1. Install
+    42 go install github.com/QuesmaOrg/git-prompt-story@latest
+    43 
+    44 # 2. Install git hooks globally
+    45 # Add --auto-push to install pre-push hook that syncs notes automatically
+    46 # Without --auto-push, push notes manually with: git push origin &#39;refs/notes/*&#39;
+    47 git-prompt-story install-hooks --global --auto-push
+    48 ```
+    49 
+    50 That&#39;s it. Future commits will automatically capture active LLM sessions.
+    51 
+    52 ### Repository Owner
+    53 
+    54 Set up git-prompt-story for your team by adding a setup script.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    63 
+    64 # Install git-prompt-story
+    65 go install github.com/QuesmaOrg/git-prompt-story@latest
+    66 
+    67 # Install hooks for this repo
+    68 # Add --auto-push to install pre-push hook that syncs notes automatically
+    69 # Without --auto-push, push notes manually with: git push origin &#39;refs/notes/*&#39;
+    70 git-prompt-story install-hooks --auto-push
+    71 
+    72 echo &#34;git-prompt-story configured for this repository&#34;
+    73 ```
+    74 
+    75 Contributors run `./setup-prompt-story.sh` after cloning.
+    76 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:45</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. The README.md has been updated. Here&#39;s a summary of the changes:
+
+**Individual Developer section:**
+- Removed the two `git config` lines
+- Combined into one `install-hooks --global --auto-push` command
+- Added comments explaining the `--auto-push` flag and manual alternative
+
+**Repository Owner section:**
+- Removed the two `git config` lines  
+- Updated to use `install-hooks --auto-push`
+- Added same explanatory comments
+
+Would you like me to reinstall `git-prompt-story` globally, bump the version, and run `go install .`?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:47</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Do we still use end_work? If not please remove mention from Readme.md</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">end_work</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">e2e/tests/01-basic-flow.sh:80:# Note: end_work is no longer stored in the note - commit timestamp is retrieved from git when needed
+e2e/tests/03-amend-flow.sh:116:# Note: end_work is no longer stored in the note - commit timestamp is retrieved from git when needed
+README.md:163:  &#34;end_work&#34;: &#34;2025-01-15T14:30:00Z&#34;,
+internal/ci/summary.go:51:	EndWork   time.Time        `json:&#34;end_work&#34;`</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The tests confirm `end_work` is no longer stored - the commit timestamp is retrieved from git when needed. Let me remove it from the README example:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">start_work</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">e2e/tests/11-squash-flow.sh:159:# Verify start_work is from the earlier commit
+e2e/tests/11-squash-flow.sh:160:START_WORK=$(echo &#34;$MERGED_NOTE&#34; | jq -r &#39;.start_work&#39;)
+e2e/tests/11-squash-flow.sh:161:echo &#34;    - start_work: $START_WORK&#34;
+e2e/tests/14-rebase-flow.sh:209:# Verify start_work is from the earlier commit
+e2e/tests/14-rebase-flow.sh:210:START_WORK=$(echo &#34;$MERGED_NOTE&#34; | jq -r &#39;.start_work&#39;)
+e2e/tests/14-rebase-flow.sh:211:echo &#34;    - start_work: $START_WORK&#34;
+e2e/tests/01-basic-flow.sh:78:echo &#34;$NOTE&#34; | jq -e &#39;.start_work == &#34;2025-01-15T09:00:00Z&#34;&#39; &gt; /dev/null || fail &#34;start_work should be previous commit time (09:00)&#34;
+e2e/tests/01-basic-flow.sh:79:echo &#34;    - start_work = 2025-01-15T09:00:00Z (previous commit)&#34;
+e2e/tests/03-amend-flow.sh:113:echo &#34;$NOTE&#34; | jq -e &#39;.start_work == &#34;2025-01-15T09:00:00Z&#34;&#39; &gt; /dev/null || fail &#34;Wrong start_work timestamp&#34;
+e2e/tests/03-amend-flow.sh:114:echo &#34;    - start_work = 2025-01-15T09:00:00Z (previous commit)&#34;
+README.md:162:  &#34;start_work&#34;: &#34;2025-01-15T09:00:00Z&#34;,
+internal/ci/summary.go:50:	StartWork time.Time        `json:&#34;start_work&#34;`
+internal/note/merge_test.go:313:		&#34;start_work&#34;: &#34;2025-01-15T09:00:00Z&#34;,
+internal/note/merge_test.go:418:	if _, ok := raw[&#34;start_work&#34;]; !ok {
+internal/note/merge_test.go:419:		t.Error(&#34;Expected &#39;start_work&#39; field in JSON&#34;)
+internal/note/metadata.go:17:	StartWork time.Time      `json:&#34;start_work&#34;`
+internal/note/metadata.go:31:// isAmend should be true when amending a commit (affects start_work calculation)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">`start_work` is still used, only `end_work` was removed. Let me update the README:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   156 
+   157 Git notes attached to commits in a dedicated namespace. Contains a lightweight JSON manifest:
+   158 
+   159 ```json
+   160 {
+   161   &#34;v&#34;: 1,
+   162   &#34;start_work&#34;: &#34;2025-01-15T09:00:00Z&#34;,
+   163   &#34;sessions&#34;: [
+   164     {
+   165       &#34;tool&#34;: &#34;claude-code&#34;,
+   166       &#34;id&#34;: &#34;113e0c55-64df-4b55-88f3-e06bcbc5b526&#34;,
+   167       &#34;path&#34;: &#34;refs/notes/prompt-story-transcripts/claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl&#34;,</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Removed `end_work` from the JSON example - the commit timestamp is retrieved from git when needed.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:55</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please read Readme.md and udpate git note to use proper ref</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see the issue. Line 242 uses `git notes show HEAD` without specifying the ref. It should use `--ref=prompt-story`:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   237 
+   238 Notes are JSON - view them anywhere:
+   239 
+   240 ```bash
+   241 # Raw JSON
+   242 git notes --ref=prompt-story show HEAD
+   243 
+   244 # Local pretty-print
+   245 git-prompt-story show HEAD
+   246 ```</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Updated `git notes show HEAD` to `git notes --ref=prompt-story show HEAD`.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:57</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please review Readme.md and give me more suggestions.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:58</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Here are my suggestions:
+
+**Issues to fix:**
+
+1. **Line 115** - Orphaned &#34;2.&#34; in text:
+   ```
+   **Enabling GitHub pages:** 2. If you have not done it already...
+   ```
+   Should be:
+   ```
+   **Enabling GitHub Pages:** If you have not done it already...
+   ```
+
+2. **Line 263** - Typo &#34;explicietely&#34; → &#34;explicitly&#34;
+
+3. **Line 77** - GitHub Action section says &#34;#### 2. Add GitHub Action&#34; but the original &#34;(optional)&#34; label was removed. Consider adding it back or renumbering.
+
+**Questions about removed content:**
+
+4. **Configuration section** - The section about `.git-prompt-story.json` config file was removed. Was this intentional?
+
+5. **Upgrading section** - Migration instructions for versions before 0.6.0 were removed. Keep for users on older versions?
+
+**Minor suggestions:**
+
+6. **Line 230** - Section title &#34;GitHub Action `git-prompt-story` hook&#34; reads awkwardly. Consider just &#34;GitHub Action&#34; or &#34;GitHub Action Integration&#34;
+
+7. **Line 272** - Roadmap mentions &#34;ci-html&#34; command - is this still the correct command name?
+
+8. **Roadmap** - Previously had &#34;Hosted viewer service&#34; as planned. Remove or keep?
+
+Would you like me to fix the definite issues (1-2) now?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:59</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please implement that, GitHub action is main way, mention ci-summary and ci-html commands. Configuration was never implemented, so it is intentional, removed upgrading too. Hosted viewer service is not needed. </span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/immutable-soaring-rivest.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/immutable-soaring-rivest.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: README.md fixes
+     2 
+     3 ## Changes to make
+     4 
+     5 ### 1. Fix orphaned &#34;2.&#34; on line 115
+     6 **Current:**
+     7 ```
+     8 **Enabling GitHub pages:** 2. If you have not done it already...
+     9 ```
+    10 **Replace with:**
+    11 ```
+    12 **Enabling GitHub Pages:** If you have not done it already...
+    13 ```
+    14 
+    15 ### 2. Fix typo on line 263
+    16 **Current:** &#34;explicietely&#34;
+    17 **Replace with:** &#34;explicitly&#34;
+    18 
+    19 ### 3. Clean up Architecture section title (line 230)
+    20 **Current:** `### GitHub Action \`git-prompt-story\` hook`
+    21 **Replace with:** `### GitHub Action`
+    22 
+    23 ### 4. Update Roadmap to mention ci-summary and ci-html commands (line 272)
+    24 **Current:**
+    25 ```
+    26 - [x] Local viewer (HTML export via `ci-html` command)
+    27 ```
+    28 **Replace with:**
+    29 ```
+    30 - [x] Local viewer (HTML export via `ci-html` and `ci-summary` commands)
+    31 ```
+    32 
+    33 ## Files to modify
+    34 - `/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md`
+    35 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: README.md fixes\n\n## Changes to make\n\n### 1. Fix orphaned \&#34;2.\&#34; on line 115\n**Current:**\n```\n**Enabling GitHub pages:** 2. If you have not done it already...\n```\n**Replace...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/immutable-soaring-rivest.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: README.md fixes
+
+## Changes to make
+
+### 1. Fix orphaned &#34;2.&#34; on line 115
+**Current:**
+```
+**Enabling GitHub pages:** 2. If you have not done it already...
+```
+**Replace with:**
+```
+**Enabling GitHub Pages:** If you have not done it already...
+```
+
+### 2. Fix typo on line 263
+**Current:** &#34;explicietely&#34;
+**Replace with:** &#34;explicitly&#34;
+
+### 3. Clean up Architecture section title (line 230)
+**Current:** `### GitHub Action \`git-prompt-story\` hook`
+**Replace with:** `### GitHub Action`
+
+### 4. Update Roadmap to mention ci-summary and ci-html commands (line 272)
+**Current:**
+```
+- [x] Local viewer (HTML export via `ci-html` command)
+```
+**Replace with:**
+```
+- [x] Local viewer (HTML export via `ci-html` and `ci-summary` commands)
+```
+
+## Files to modify
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md`
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   111 - Generates a summary of LLM tools used in the PR
+   112 - Posts an interactive HTML transcript to GitHub Pages
+   113 - Adds a comment with links to the full transcript
+   114 
+   115 **Enabling GitHub Pages:** If you have not done it already, after the first workflow run, enable GitHub Pages:
+   116 
+   117 - Settings   Pages   Source: Deploy from a branch
+   118 - Select `gh-pages` branch (created automatically by the action)
+   119 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   259 # Edit to redact content
+   260 git-prompt-story edit &lt;commit&gt;
+   261 ```
+   262 
+   263 Notes live in separate refs and can be explicitly pushed (unless you use `--auto-push`):
+   264 
+   265 ```bash
+   266 git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts
+   267 ```</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   226 - Adds summary to commit messages
+   227 
+   228 Single binary, no runtime dependencies. Install once, works everywhere.
+   229 
+   230 ### GitHub Action
+   231 
+   232 - Run on Pull Requests
+   233 - Adds message with summary of prompts
+   234 - Creates more detailed transcript and saves it as GitHub Pages</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   268 
+   269 ## Roadmap
+   270 
+   271 - [x] Claude Code support
+   272 - [x] Local viewer (HTML export via `ci-html` and `ci-summary` commands)
+   273 - [x] GitHub Action for PR summaries and transcript pages
+   274 - [ ] Cursor integration
+   275 - [ ] Codex integration
+   276 - [ ] Gemini CLI integration</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. All 4 fixes applied:
+
+1. Fixed orphaned &#34;2.&#34; and capitalized &#34;Pages&#34; (line 115)
+2. Fixed typo &#34;explicietely&#34; → &#34;explicitly&#34; (line 263)
+3. Simplified section title to &#34;GitHub Action&#34; (line 230)
+4. Added `ci-summary` to roadmap (line 272)</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:02</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please commit, than rebase on origin/main than cut new version, install locally, push as PR to be merged.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch update-readme
+Your branch is up to date with &#39;origin/main&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   README.md
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">e827c86 Merge pull request #18 from QuesmaOrg/merge-privacy-bullets
+2acc5da Merge PII and tool output redaction into single feature bullet
+b7a8114 Merge pull request #17 from QuesmaOrg/bump-version-0.9.0
+a4455c8 Bump version to 0.9.0
+8e361ee Merge pull request #16 from QuesmaOrg/test-improvements</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">diff --git a/README.md b/README.md
+index ac2cc47..5c2b119 100644
+--- a/README.md
+&#43;&#43;&#43; b/README.md
+@@ -42,11 &#43;42,9 @@ Set up git-prompt-story on your machine to capture LLM sessions in all your repo
+ go install github.com/QuesmaOrg/git-prompt-story@latest
+ 
+ # 2. Install git hooks globally
+-git-prompt-story install-hooks --global
+-
+-# 3. Enable automatic pushing of prompt notes
+-git config --global --add remote.origin.push &#39;refs/notes/prompt-story:refs/notes/prompt-story&#39;
+-git config --global --add remote.origin.push &#39;&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts&#39;
+&#43;# Add --auto-push to install pre-push hook that syncs notes automatically
+&#43;# Without --auto-push, push notes manually with: git push origin &#39;refs/notes/*&#39;
+&#43;git-prompt-story install-hooks --global --auto-push
+ ```
+ 
+ That&#39;s it. Future commits will automatically capture active LLM sessions.
+@@ -67,18 &#43;65,16 @@ set -e
+ go install github.com/QuesmaOrg/git-prompt-story@latest
+ 
+ # Install hooks for this repo
+-git-prompt-story install-hooks
+-
+-# Enable automatic pushing of prompt notes
+-git config --add remote.origin.push &#39;refs/notes/prompt-story:refs/notes/prompt-story&#39;
+-git config --add remote.origin.push &#39;&#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts&#39;
+&#43;# Add --auto-push to install pre-push hook that syncs notes automatically
+&#43;# Without --auto-push, push notes manually with: git push origin &#39;refs/notes/*&#39;
+&#43;git-prompt-story install-hooks --auto-push
+ 
+ echo &#34;git-prompt-story configured for this repository&#34;
+ ```
+ 
+ Contributors run `./setup-prompt-story.sh` after cloning.
+ 
+-#### 2. Add GitHub Action (optional)
+&#43;#### 2. Add GitHub Action
+ 
+ Add a GitHub Action to analyze LLM sessions and post summaries on PRs:
+ 
+@@ -91,8 &#43;87,8 @@ on:
+     types: [opened, synchronize, reopened]
+ 
+ permissions:
+-  contents: write       # For GitHub Pages deployment
+-  pull-requests: write  # For PR comments
+&#43;  contents: write # For GitHub Pages deployment
+&#43;  pull-requests: wr...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat VERSION</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">0.9.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">From github.com:QuesmaOrg/git-prompt-story
+   e827c86..23d76f6  main       -&gt; origin/main
+   f4442df..0d35655  gh-pages   -&gt; origin/gh-pages</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add README.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Update README: use --auto-push flag instead of git config
+
+- Replace git config push commands with --auto-push flag on install-hooks
+- Remove end_work from JSON example (retrieved from git when needed)
+- Fix git notes command to use --ref=prompt-story
+- Clean up GitHub Action section as primary integration method
+- Remove outdated Configuration and Upgrading sections
+- Update roadmap with ci-html and ci-summary commands
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[update-readme 8e3d8d6] Update README: use --auto-push flag instead of git config
+ 1 file changed, 24 insertions(&#43;), 73 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">6a7b05a4-7ced-46b4-8257-da8686e610fe</code> |
+        2026-01-04 16:04 - 2026-01-04 17:40 | <span class="session-count">5</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:40</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please start new branch update-readme out of origin</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:40</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin &amp;&amp; git checkout -b update-readme origin/main</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">branch &#39;update-readme&#39; set up to track &#39;origin/main&#39;.
+From github.com:QuesmaOrg/git-prompt-story
+   2b407f3..f4442df  gh-pages   -&gt; origin/gh-pages
+   b7a8114..e827c86  main       -&gt; origin/main
+Switched to a new branch &#39;update-readme&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:40</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Now on branch `update-readme` based on `origin/main`.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:40</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">e827c86 Merge pull request #18 from QuesmaOrg/merge-privacy-bullets
+2acc5da Merge PII and tool output redaction into single feature bullet
+b7a8114 Merge pull request #17 from QuesmaOrg/bump-version-0.9.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:40</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Branch `update-readme` created from `origin/main` (includes the merged privacy scrubbing PR).
+
+What would you like to change?</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
