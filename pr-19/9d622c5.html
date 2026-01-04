@@ -1,0 +1,3823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>9d622c5 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>9d622c5</code></h1>
+    <p class="meta">Add DECISION entries to surface Claude&#39;s questions in ci-summary</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">102</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>9d622c5b8b14347ae1957d5878fb83acf34c1c46</code><br>
+    <strong>Work period:</strong> 2026-01-04 16:59 - 2026-01-04 17:34
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">93c68bd4-42b2-4afa-9d5c-467ea0b21080</code> |
+        2026-01-04 16:52 - 2026-01-04 17:34 | <span class="session-count">102</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Got it! Much simpler - keep decisions inline in the &#34;User prompts&#34; section, displayed like user-typed prompts. Let me update the plan:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Feature: Surface Claude&#39;s Questions in User Prompts Section
+     2 
+     3 ## Problem
+     4 When Claude asks the user questions via `AskUserQuestion` tool (like &#34;Should this be a major version bump?&#34;), these interactions are buried in &#34;All steps&#34;. Users want to see these decisions alongside their typed prompts.
+     5 
+     6 ## Current Behavior
+     7 ```markdown
+     8 &lt;details open&gt;&lt;summary&gt;&lt;strong&gt;3 user prompts&lt;/strong&gt;&lt;/summary&gt;
+     9 - [18:46] PROMPT: Please start from fetch origin/main...
+    10 &lt;/details&gt;
+    11 
+    12 &lt;details&gt;&lt;summary&gt;&lt;strong&gt;All 24 steps&lt;/strong&gt;&lt;/summary&gt;
+    13 ...
+    14 - [18:47] TOOL_USE (AskUserQuestion): {&#34;questions&#34;:[...  &lt;-- buried here
+    15 ...
+    16 &lt;/details&gt;
+    17 ```
+    18 
+    19 ## Desired Behavior
+    20 Include decisions inline with user prompts:
+    21 
+    22 ```markdown
+    23 &lt;details open&gt;&lt;summary&gt;&lt;strong&gt;4 user prompts&lt;/strong&gt;&lt;/summary&gt;
+    24 - [18:46] PROMPT: Please start from fetch origin/main...
+    25 - [18:47] DECISION (Version): Should this be a major version bump?   Minor (0.9.0)
+    26 &lt;/details&gt;
+    27 ```
+    28 
+    29 ## Implementation Plan
+    30 
+    31 ### 1. Detect AskUserQuestion in `analyzeSession()` (internal/ci/summary.go)
+    32 - When `toolName == &#34;AskUserQuestion&#34;`:
+    33   - Parse `input.questions` JSON to extract question headers and text
+    34   - Create entry with `Type: &#34;DECISION&#34;`
+    35   - Store `ToolID` to match with answer later
+    36 
+    37 ### 2. Capture user&#39;s answer from tool result
+    38 - When processing tool results, if the corresponding tool use was `AskUserQuestion`:
+    39   - Parse the answer from the result content
+    40   - Attach answer to the DECISION entry
+    41 
+    42 ### 3. Update `isUserAction()` helper
+    43 - Add `&#34;DECISION&#34;` to the list of user action types
+    44 - This ensures dec...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Updated plan - decisions appear inline with user prompts:
+
+```
+&lt;details open&gt;&lt;summary&gt;&lt;strong&gt;4 user prompts&lt;/strong&gt;&lt;/summary&gt;
+- [18:46] PROMPT: Please start from fetch origin/main...
+- [18:47] DECISION (Version): Should this be a major version bump? → Minor (0.9.0)
+&lt;/details&gt;
+```
+
+Key change: Add `&#34;DECISION&#34;` to `isUserAction()` so it counts as a user prompt and appears in the same section.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Feature: Surface Claude&#39;s Questions in User Prompts Section\n\n## Problem\nWhen Claude asks the user questions via `AskUserQuestion` tool (like \&#34;Should this be a major version bump?\&#34;),...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Feature: Surface Claude&#39;s Questions in User Prompts Section
+
+## Problem
+When Claude asks the user questions via `AskUserQuestion` tool (like &#34;Should this be a major version bump?&#34;), these interactions are buried in &#34;All steps&#34;. Users want to see these decisions alongside their typed prompts.
+
+## Current Behavior
+```markdown
+&lt;details open&gt;&lt;summary&gt;&lt;strong&gt;3 user prompts&lt;/strong&gt;&lt;/summary&gt;
+- [18:46] PROMPT: Please start from fetch origin/main...
+&lt;/details&gt;
+
+&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All 24 steps&lt;/strong&gt;&lt;/summary&gt;
+...
+- [18:47] TOOL_USE (AskUserQuestion): {&#34;questions&#34;:[...  &lt;-- buried here
+...
+&lt;/details&gt;
+```
+
+## Desired Behavior
+Include decisions inline with user prompts:
+
+```markdown
+&lt;details open&gt;&lt;summary&gt;&lt;strong&gt;4 user prompts&lt;/strong&gt;&lt;/summary&gt;
+- [18:46] PROMPT: Please start from fetch origin/main...
+- [18:47] DECISION (Version): Should this be a major version bump?   Minor (0.9.0)
+&lt;/details&gt;
+```
+
+## Implementation Plan
+
+### 1. Detect AskUserQuestion in `analyzeSession()` (internal/ci/summary.go)
+- When `toolName == &#34;AskUserQuestion&#34;`:
+  - Parse `input.questions` JSON to extract question headers and text
+  - Create entry with `Type: &#34;DECISION&#34;`
+  - Store `ToolID` to match with answer later
+
+### 2. Capture user&#39;s answer from tool result
+- When processing tool results, if the corresponding tool use was `AskUserQuestion`:
+  - Parse the answer from the result content
+  - Attach answer to the DECISION entry
+
+### 3. Update `isUserAction()` helper
+- Add `&#34;DECISION&#34;` to the list of user action types
+- This ensures decisions appear in the &#34;user prompts&#34; section
+
+### 4. Update markdown rendering
+- Format DECISION entries as: `[time] DECISION (Header): Question text   Answer`
+
+### 5. Update HTML templates
+- Simi...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding DECISION entry parsing in analyzeSession()&#34;,&#34;content&#34;:&#34;Detect AskUserQuestion and create DECISION entries in analyzeSession()&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:01</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand the structure. Let me check how the answer comes back in the tool result:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git show refs/notes/prompt-story-transcripts:claude-code/a42cdc6f-3726-4870-baed-f242fd09a297.jsonl 2&gt;/dev/null | grep -A2 &#34;toolu_01RVMwmpQdBtqgFDdCnXfr6m&#34; | head -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{&#34;cwd&#34;:&#34;/\u003cREDACTED\u003e/git/git-prompt-story&#34;,&#34;gitBranch&#34;:&#34;test-github-action&#34;,&#34;isSidechain&#34;:false,&#34;message&#34;:{&#34;content&#34;:[{&#34;id&#34;:&#34;toolu_01RVMwmpQdBtqgFDdCnXfr6m&#34;,&#34;input&#34;:{&#34;questions&#34;:[{&#34;header&#34;:&#34;Steps count&#34;,&#34;multiSelect&#34;:false,&#34;options&#34;:[{&#34;description&#34;:&#34;Count only TOOL_USE entries (Bash, Edit, Read, Glob, etc.)&#34;,&#34;label&#34;:&#34;Tool uses only&#34;},{&#34;description&#34;:&#34;Count tool uses &#43; assistant text responses&#34;,&#34;label&#34;:&#34;All assistant actions&#34;},{&#34;description&#34;:&#34;Count prompts, tool uses, assistant responses, tool rejects - all entries&#34;,&#34;label&#34;:&#34;Everything&#34;}],&#34;question&#34;:&#34;What should count as a &#39;step&#39; in &#39;number of total steps&#39;? Should it be tool uses only (Bash, Edit, Read, etc.) or all entries including assistant text responses?&#34;},{&#34;header&#34;:&#34;Prompts section&#34;,&#34;multiSelect&#34;:false,&#34;options&#34;:[{&#34;description&#34;:&#34;Just the text prompts the user typed&#34;,&#34;label&#34;:&#34;User prompts only&#34;},{&#34;description&#34;:&#34;User prompts plus /commands they used&#34;,&#34;label&#34;:&#34;User prompts &#43; commands&#34;},{&#34;description&#34;:&#34;Prompts, commands, and tool rejects&#34;,&#34;label&#34;:&#34;All user actions&#34;}],&#34;question&#34;:&#34;For the collapsible &#39;Prompts (user actions)&#39; section, what should be included?&#34;},{&#34;header&#34;:&#34;Header text&#34;,&#34;multiSelect&#34;:false,&#34;options&#34;:[{&#34;description&#34;:&#34;Use &#39;## Prompt Story&#39; as the header&#34;,&#34;label&#34;:&#34;Keep &#39;Prompt Story&#39;&#34;},{&#34;description&#34;:&#34;Start directly with the commit list&#34;,&#34;label&#34;:&#34;No header&#34;},{&#34;description&#34;:&#34;I&#39;ll specify what header text to use&#34;,&#34;label&#34;:&#34;Different header&#34;}],&#34;question&#34;:&#34;Should the commit list header still say &#39;Prompt Story&#39; or something different?&#34;}]},&#34;name&#34;:&#34;AskUserQuestion&#34;,&#34;type&#34;:&#34;tool_use&#34;}],&#34;id&#34;:&#34;msg_016zQHunqea6iLRf4Ak8oq5r&#34;,&#34;model&#34;:&#34;claude-opus-4-5-20251101&#34;,&#34;role&#34;:&#34;assistant&#34;,&#34;stop_reason&#34;:&#34;tool_use&#34;,&#34;stop_sequence&#34;:null,&#34;type&#34;:&#34;message&#34;,&#34;usage&#34;:{&#34;cache_creation&#34;:{&#34;ephemeral_1h_input_tokens&#34;:0,&#34;ephemeral_5m_input_tokens&#34;:8032},&#34;cache_creation_input_tokens&#34;:8032,&#34;cache_read_input_tokens&#34;:32510,&#34;input_tokens&#34;:8,&#34;output_tokens&#34;:650,&#34;service_tier&#34;:&#34;standard&#34;}},&#34;parentUuid&#34;:&#34;78b38144-5cbc-46ca-993d-70c158dd2b15...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I can see the answer structure. The tool result has `toolUseResult.answers` map with `&#34;Question text?&#34;: &#34;Answer label&#34;`. Now let me implement the changes:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    12 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    13 )
+    14 
+    15 // PromptEntry represents a single prompt or action in a session
+    16 type PromptEntry struct {
+    17 	Time         time.Time `json:&#34;time&#34;`
+    18 	Type         string    `json:&#34;type&#34;` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT, DECISION
+    19 	Text         string    `json:&#34;text&#34;`
+    20 	Truncated    bool      `json:&#34;truncated,omitempty&#34;`
+    21 	InWorkPeriod bool      `json:&#34;in_work_period&#34;` // true if within commit&#39;s work period
+    22 	ToolID       string    `json:&#34;tool_id,omitempty&#34;`     // For TOOL_USE/TOOL_RESULT: links them together
+    23 	ToolName     string    `json:&#34;tool_name,omitempty&#34;`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
+    24 	ToolInput    string    `json:&#34;tool_input,omitempty&#34;`  // For TOOL_USE: the tool input/command
+    25 	ToolOutput   string    `json:&#34;tool_output,omitempty&#34;` // For TOOL_RESULT: the tool output
+    26 	// For DECISION entries (AskUserQuestion)
+    27 	DecisionHeader string `json:&#34;decision_header,omitempty&#34;` // Question header (e.g., &#34;Version&#34;)
+    28 	DecisionAnswer string `json:&#34;decision_answer,omitempty&#34;` // User&#39;s selected answer
+    29 }
+    30 
+    31 // SessionSummary represents a summarized session within a commit
+    32 type SessionSummary struct {
+    33 	Tool     string        `json:&#34;tool&#34;`</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I need to add the `toolUseResult` field to MessageEntry to capture the answer data. Let me update the types:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    12 	Created  time.Time // First timestamp in file
+    13 	Modified time.Time // Last timestamp in file
+    14 }
+    15 
+    16 // MessageEntry represents a single JSONL line from Claude Code
+    17 type MessageEntry struct {
+    18 	Type          string          `json:&#34;type&#34;`      // &#34;user&#34;, &#34;assistant&#34;, &#34;file-history-snapshot&#34;
+    19 	SessionID     string          `json:&#34;sessionId&#34;`
+    20 	Timestamp     time.Time       `json:&#34;timestamp&#34;`
+    21 	GitBranch     string          `json:&#34;gitBranch&#34;`
+    22 	Snapshot      *Snapshot       `json:&#34;snapshot,omitempty&#34;`
+    23 	Message       *Message        `json:&#34;message,omitempty&#34;`
+    24 	ToolUseResult *ToolUseResult  `json:&#34;toolUseResult,omitempty&#34;` // For user entries with tool results
+    25 }
+    26 
+    27 // ToolUseResult contains structured answer data from AskUserQuestion
+    28 type ToolUseResult struct {
+    29 	Answers   map[string]string   `json:&#34;answers,omitempty&#34;`   // Question -&gt; Answer mapping
+    30 	Questions []AskUserQuestion   `json:&#34;questions,omitempty&#34;` // Original questions
+    31 }
+    32 
+    33 // AskUserQuestion represents a question from AskUserQuestion tool
+    34 type AskUserQuestion struct {
+    35 	Header   string                   `json:&#34;header&#34;`
+    36 	Question string                   `json:&#34;question&#34;`
+    37 	Options  []AskUserQuestionOption  `json:&#34;options&#34;`
+    38 }
+    39 
+    40 // AskUserQuestionOption represents an option for a question
+    41 type AskUserQuestionOption struct {
+    42 	Label       string `json:&#34;label&#34;`
+    43 	Description string `json:&#34;description&#34;`
+    44 }
+    45 
+    46 // Snapshot contains timestamp for file-history-snapshot entries
+    47 type Snapshot struct {
+    48 	Timestamp time.Time `json:&#34;timestamp&#34;`</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me update `analyzeSession()` to detect AskUserQuestion and create DECISION entries. First, I need to add a structure to hold pending questions and handle them when we get tool results:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   183 		End:     sess.Modified,
+   184 		Prompts: make([]PromptEntry, 0),
+   185 	}
+   186 
+   187 	// Map to track tool use entries by ID for linking with results
+   188 	toolUseEntries := make(map[string]*PromptEntry)
+   189 
+   190 	// Map to track AskUserQuestion entries by tool ID for linking with answers
+   191 	// Key is tool ID, value is slice of indices into ss.Prompts for the DECISION entries
+   192 	askUserQuestionEntries := make(map[string][]int)
+   193 
+   194 	for _, entry := range entries {
+   195 		// Get timestamp
+   196 		ts := entry.Timestamp
+   197 		if ts.IsZero() &amp;&amp; entry.Snapshot != nil {
+   198 			ts = entry.Snapshot.Timestamp</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to add a helper function to parse AskUserQuestion input and modify the tool use handling code. Let me add the helper first:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   401 
+   402 	return result
+   403 }
+   404 
+   405 // ToolUseInfo holds extracted information about a tool use
+   406 type ToolUseInfo struct {
+   407 	ID       string
+   408 	Name     string
+   409 	Input    string          // Formatted input string (e.g., command for Bash)
+   410 	RawInput json.RawMessage // Raw input JSON for AskUserQuestion parsing
+   411 }
+   412 
+   413 // AskUserQuestionInput represents the input to AskUserQuestion tool
+   414 type AskUserQuestionInput struct {
+   415 	Questions []struct {
+   416 		Header   string `json:&#34;header&#34;`
+   417 		Question string `json:&#34;question&#34;`
+   418 	} `json:&#34;questions&#34;`
+   419 }
+   420 
+   421 // parseAssistantContent parses assistant message content to determine type and text
+   422 // Returns: entryType, text, and slice of tool use info
+   423 func parseAssistantContent(rawContent json.RawMessage) (entryType, text string, toolUses []ToolUseInfo) {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to update `parseAssistantContent` to capture RawInput:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   450 			case &#34;text&#34;:
+   451 				if part.Text != &#34;&#34; {
+   452 					textParts = append(textParts, part.Text)
+   453 				}
+   454 			case &#34;tool_use&#34;:
+   455 				if part.Name != &#34;&#34; {
+   456 					toolInfo := ToolUseInfo{
+   457 						ID:       part.ID,
+   458 						Name:     part.Name,
+   459 						Input:    formatToolInput(part.Name, part.Input),
+   460 						RawInput: part.Input,
+   461 					}
+   462 					toolUses = append(toolUses, toolInfo)
+   463 				}
+   464 			}
+   465 		}
+   466 
+   467 		// If there are tool uses, report them</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to modify the tool use handling in `analyzeSession` to create DECISION entries for AskUserQuestion. Let me find and update that section:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   282 			if inWorkPeriod {
+   283 				ss.Prompts = append(ss.Prompts, pe)
+   284 			}
+   285 
+   286 		case &#34;assistant&#34;:
+   287 			if entry.Message != nil {
+   288 				entryType, text, toolUses := parseAssistantContent(entry.Message.RawContent)
+   289 
+   290 				if len(toolUses) &gt; 0 {
+   291 					// Create an entry for each tool use
+   292 					for _, tool := range toolUses {
+   293 						// Special handling for AskUserQuestion - create DECISION entries
+   294 						if tool.Name == &#34;AskUserQuestion&#34; {
+   295 							var askInput AskUserQuestionInput
+   296 							if err := json.Unmarshal(tool.RawInput, &amp;askInput); err == nil &amp;&amp; len(askInput.Questions) &gt; 0 {
+   297 								var indices []int
+   298 								for _, q := range askInput.Questions {
+   299 									pe := PromptEntry{
+   300 										Time:           ts,
+   301 										Type:           &#34;DECISION&#34;,
+   302 										Text:           q.Question,
+   303 										ToolID:         tool.ID,
+   304 										DecisionHeader: q.Header,
+   305 										InWorkPeriod:   inWorkPeriod,
+   306 									}
+   307 									if inWorkPeriod {
+   308 										ss.Prompts = append(ss.Prompts, pe)
+   309 										indices = append(indices, len(ss.Prompts)-1)
+   310 									}
+   311 								}
+   312 								if len(indices) &gt; 0 {
+   313 									askUserQuestionEntries[tool.ID] = indices
+   314 								}
+   315 								continue
+   316 							}
+   317 						}
+   318 
+   319 						pe := PromptEntry{
+   320 							Time:         ts,
+   321 							Type:         &#34;TOOL_USE&#34;,
+   322 							Text:         tool.Name,
+   323 							ToolID:       tool.ID,
+   324 							ToolName:     tool.Name,
+   325 							ToolInput:    tool.Input,
+   326 							InWorkPeriod: inWorkPeriod,
+   327 						}
+   328 						if !full &amp;&amp; len(pe.ToolInput) &gt; 500 {
+   329 							pe.ToolInput = pe.ToolInput[:500]
+   ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding DECISION entry parsing in analyzeSession()&#34;,&#34;content&#34;:&#34;Detect AskUserQuestion and create DECISION entries in analyzeSession()&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;C...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to add the code to capture answers when processing user messages with toolUseResult. Let me find the tool results handling section:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   235 				if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+   236 					continue
+   237 				}
+   238 
+   239 				// Check for tool results
+   240 				toolResults := parseToolResults(entry.Message.RawContent)
+   241 				if len(toolResults) &gt; 0 {
+   242 					for _, tr := range toolResults {
+   243 						// Find and update the corresponding tool use entry
+   244 						if toolUse, ok := toolUseEntries[tr.ToolUseID]; ok {
+   245 							toolUse.ToolOutput = tr.Content
+   246 						}
+   247 						// Check if this is an answer to AskUserQuestion
+   248 						if indices, ok := askUserQuestionEntries[tr.ToolUseID]; ok {
+   249 							// Try to get answers from ToolUseResult first
+   250 							if entry.ToolUseResult != nil &amp;&amp; entry.ToolUseResult.Answers != nil {
+   251 								for _, idx := range indices {
+   252 									if idx &lt; len(ss.Prompts) {
+   253 										question := ss.Prompts[idx].Text
+   254 										if answer, found := entry.ToolUseResult.Answers[question]; found {
+   255 											ss.Prompts[idx].DecisionAnswer = answer
+   256 										}
+   257 									}
+   258 								}
+   259 							}
+   260 						}
+   261 					}
+   262 					continue
+   263 				}
+   264 
+   265 				// Regular user prompt
+   266 				if msgText != &#34;&#34; {
+   267 					pe := PromptEntry{</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding DECISION entry parsing in analyzeSession()&#34;,&#34;content&#34;:&#34;Detect AskUserQuestion and create DECISION entries in analyzeSession()&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;C...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   792 func RenderJSON(summary *Summary) ([]byte, error) {
+   793 	return json.MarshalIndent(summary, &#34;&#34;, &#34;  &#34;)
+   794 }
+   795 
+   796 // isUserAction returns true if the entry type represents a user action
+   797 func isUserAction(entryType string) bool {
+   798 	switch entryType {
+   799 	case &#34;PROMPT&#34;, &#34;COMMAND&#34;, &#34;TOOL_REJECT&#34;, &#34;DECISION&#34;:
+   800 		return true
+   801 	default:
+   802 		return false
+   803 	}
+   804 }
+   805 
+   806 // countUserPrompts counts user action entries in a slice
+   807 func countUserPrompts(prompts []PromptEntry) int {
+   808 	count := 0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding DECISION entry parsing in analyzeSession()&#34;,&#34;content&#34;:&#34;Detect AskUserQuestion and create DECISION entries in analyzeSession()&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;C...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   735 		}
+   736 	}
+   737 }
+   738 
+   739 // formatMarkdownEntry formats a single entry for markdown display
+   740 func formatMarkdownEntry(entry PromptEntry) string {
+   741 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)
+   742 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+   743 	if len(text) &gt; 100 {
+   744 		text = text[:97] &#43; &#34;...&#34;
+   745 	}
+   746 	// Escape HTML to prevent breaking markdown structure
+   747 	text = html.EscapeString(text)
+   748 
+   749 	switch entry.Type {
+   750 	case &#34;TOOL_USE&#34;:
+   751 		if entry.ToolName != &#34;&#34; {
+   752 			input := entry.ToolInput
+   753 			if len(input) &gt; 60 {
+   754 				input = input[:57] &#43; &#34;...&#34;
+   755 			}
+   756 			input = strings.ReplaceAll(input, &#34;\n&#34;, &#34; &#34;)
+   757 			input = html.EscapeString(input)
+   758 			return fmt.Sprintf(&#34;- [%s] %s (%s): %s\n&#34;, timeStr, entry.Type, entry.ToolName, input)
+   759 		}
+   760 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   761 	case &#34;DECISION&#34;:
+   762 		header := entry.DecisionHeader
+   763 		if header == &#34;&#34; {
+   764 			header = &#34;Question&#34;
+   765 		}
+   766 		answer := entry.DecisionAnswer
+   767 		if answer == &#34;&#34; {
+   768 			answer = &#34;(no answer)&#34;
+   769 		}
+   770 		answer = html.EscapeString(answer)
+   771 		return fmt.Sprintf(&#34;- [%s] DECISION (%s): %s   %s\n&#34;, timeStr, header, text, answer)
+   772 	default:
+   773 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   774 	}
+   775 }
+   776 
+   777 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
+   778 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
+   779 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me update `formatMarkdownEntryCollapsible` to handle DECISION entries:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   773 		return fmt.Sprintf(&#34;- [%s] %s: %s\n&#34;, timeStr, entry.Type, text)
+   774 	}
+   775 }
+   776 
+   777 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
+   778 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
+   779 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)
+   780 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+   781 
+   782 	// DECISION entries: always show in full with answer
+   783 	if entry.Type == &#34;DECISION&#34; {
+   784 		header := entry.DecisionHeader
+   785 		if header == &#34;&#34; {
+   786 			header = &#34;Question&#34;
+   787 		}
+   788 		answer := entry.DecisionAnswer
+   789 		if answer == &#34;&#34; {
+   790 			answer = &#34;(no answer)&#34;
+   791 		}
+   792 		// Escape HTML
+   793 		text = html.EscapeString(text)
+   794 		answer = html.EscapeString(answer)
+   795 		return fmt.Sprintf(&#34;&lt;details open&gt;&lt;summary&gt;[%s] DECISION (%s): %s   %s&lt;/summary&gt;&lt;/details&gt;\n&#34;,
+   796 			timeStr, header, text, answer)
+   797 	}
+   798 
+   799 	// Short prompts (≤250 chars): &lt;details open&gt; (expanded by default)
+   800 	if len(text) &lt;= 250 {
+   801 		// Escape HTML to prevent breaking markdown structure
+   802 		text = html.EscapeString(text)
+   803 		return fmt.Sprintf(&#34;&lt;details open&gt;&lt;summary&gt;[%s] %s: %s&lt;/summary&gt;&lt;/details&gt;\n&#34;,
+   804 			timeStr, entry.Type, text)
+   805 	}
+   806 
+   807 	// Long prompts: &lt;details&gt; (collapsed) with truncated summary
+   808 	summary := text[:247] &#43; &#34;...&#34;
+   809 	continuation := entry.Text[247:] // Use original with newlines preserved
+   810 
+   811 	// Escape HTML in both summary and continuation
+   812 	summary = html.EscapeString(summary)
+   813 	continuation = html.EscapeString(continuation)
+   814 
+   815 	return fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;[%s] %s: %s&lt;/summary&gt;\n\n...%s\n\n&lt;/details&gt;\n&#34;,
+   816 		timeStr, entry.Type, summary, continuation)
+   817 }
+  ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me build to check for errors:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding DECISION entry parsing in analyzeSession()&#34;,&#34;content&#34;:&#34;Detect AskUserQuestion and create DECISION entries in analyzeSession()&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;C...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:05</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me test by finding a commit with AskUserQuestion:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --all --oneline | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">2acc5da Merge PII and tool output redaction into single feature bullet
+fc373cf Notes added by &#39;git notes add&#39;
+b7a8114 Merge pull request #17 from QuesmaOrg/bump-version-0.9.0
+2b407f3 deploy: ba43b8c6d432483708db8497c0f62b39ffd6328c
+a4455c8 Bump version to 0.9.0
+765a0a8 Notes added by &#39;git notes add&#39;
+8e361ee Merge pull request #16 from QuesmaOrg/test-improvements
+b549c45 deploy: 57455393c438fe88c5c2b187e2d94016bfa2d126
+f433a0d Merge pull request #15 from QuesmaOrg/remove-hash-markers
+cd63869 deploy: a3f34388bdc43e58ccafa86ec9ff833b01f96d73
+266a6f6 Add configurable tool output redaction and node removal
+1c0c634 Notes added by &#39;git notes add&#39;
+d541235 Notes added by &#39;git notes add&#39;
+5753846 Notes added by &#39;git notes add&#39;
+31f8e8f Simplify codebase: remove dead code and consolidate duplications
+9e27742 deploy: 59a433375d0130fea8e2e4e461280e69860e5e61
+8cb7e26 Notes added by &#39;git notes add&#39;
+90dfd0b Notes added by &#39;git notes add&#39;
+c0cbb94 deploy: fd0e477b3271a6ce67d8dc08a18a5b4a9c9f9fe4
+ca96c72 Notes added by &#39;git notes add&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=refs/notes/prompt-story list | while read blob commit; do
+  if git notes --ref=refs/notes/prompt-story show &#34;$commit&#34; 2&gt;/dev/null | grep -q &#34;a42cdc6f-3726-4870-baed-f242fd09a297&#34;; then
+    echo &#34;Found: $commit&#34;
+    break
+  fi
+done | head -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+(eval):1: parse error near `-5&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">for commit in $(git notes --ref=refs/notes/prompt-story list | awk &#39;{print $2}&#39; | head -10); do
+  if git notes --ref=refs/notes/prompt-story show &#34;$commit&#34; 2&gt;/dev/null | grep -q &#34;a42cdc6f&#34;; then
+    echo &#34;Found: $commit&#34;
+  fi
+done</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+(eval):1: parse error near `&lt;&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=refs/notes/prompt-story list 2&gt;/dev/null | head -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">fabebc8c0d5fd0c07c7b3545091e9587ac8dbd89 0210587c6f9b68319f851cd50bf79e9580b1a5bb
+136374bd7bf3ab99946e800156a127d62880c3a2 0404c3b11c7f9e6591296ef65f475394ded82467
+6f611645b9f63858586dcb595e1fec21e880d61b 059fcc48d944226b50efce76d3f989d38574ff09
+2794fddaebc33d1e45d9bfbe6ae9b8f7f659b684 067557b154904b31c9e9dde46ddbdd8aab67f2e2
+0b2e9872e45b73ea6c239f8782fd2e8149a0e116 145be0fd28e224113d3bb52c344044ae4b0482e2</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary HEAD~5..HEAD 2&gt;&amp;1 | head -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;38 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit f4586a8: Remove prompt-story-{hash} marker system ---
+
+&lt;details open&gt;&lt;summary&gt;[17:15] PROMPT: Please also tag so we kick of release job.&lt;/summary&gt;&lt;/details&gt;
+&lt;details&gt;&lt;summary&gt;[17:19] PROMPT: Amazing job on this pre-push hook, but I kind of don&amp;#39;t like that it runs even if there are no latest notes to be pushed, right? So is there anything that we can do about it? So those push only run when there&amp;#39;s actually something to do and only the...&lt;/summary&gt;
+
+...n add a comment about it? 
+
+&lt;/details&gt;
+&lt;details&gt;&lt;summary&gt;[17:24] PROMPT: This session is being continued from a previous conversation that ran out of context. The conversation is summarized below: Analysis: Let me chronologically analyze this conversation:  1. **Initial Request**: User asked to review the git-prompt-st...&lt;/summary&gt;
+
+...ory project and address two pain points:
+   - Pushing notes requires manual action (two separate commands)
+   - They want a one-liner for pushing notes
+   - They want to investigate automatic pushing via pre-push hook
+
+2. **Planning Phase**: I explored the codebase and found:
+   - Notes are stored in `refs/notes/prompt-story` and `refs/notes/prompt-story-transcripts`
+   - Currently requires two commands to push notes
+   - No pre-push hook exists
+
+3. **User Preferences Gathered**:
+   - For one-liner: Document the existing single command approach
+   - For auto-push: Install a pre-push hook as an opt-in option via `--auto-push` flag
+
+4. **Implementation - Part 1: One-liner updates**:
+   - Updated `.github/actions/prompt-story/action.yml` (lines 169-172)
+   - Updated `cmd/repair.go` (lines 133-134)
+   - Updated `README.md` (lines 324-327)
+   - Changed from two commands to: `git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts`
+
+5. **Implementation - Part 2: Pre-push hook**:
+   - Modified `cmd/install_hooks.go` - added `--auto-push` flag
+   - Modified `internal/hooks/installer.go` - ad...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me search for commits that have sessions with AskUserQuestion:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=refs/notes/prompt-story show 7654e125b2fd7cc5cdd5e1d7f66aafbe3af34cf7 2&gt;/dev/null | head -20</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log test-github-action --oneline -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">7654e12 Test commit to trigger GitHub Action
+ee169dd Add pages:read permission for GitHub Pages URL lookup
+f73de7c Fix GitHub Pages URL to use API instead of hardcoded pattern
+b8017a8 Fix YAML parsing error in action.yml
+ff6c2a0 Add smart comment behavior for prompt-story action</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=refs/notes/prompt-story show 7654e12 2&gt;/dev/null | head -5</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --all --oneline --notes=refs/notes/prompt-story 2&gt;/dev/null | grep -i &#34;a42cdc6f&#34; | head -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">          &#34;id&#34;: &#34;a42cdc6f-3726-4870-baed-f242fd09a297&#34;,
+          &#34;path&#34;: &#34;claude-code/a42cdc6f-3726-4870-baed-f242fd09a297.jsonl&#34;,
+          &#34;id&#34;: &#34;a42cdc6f-3726-4870-baed-f242fd09a297&#34;,</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --all --oneline --notes=refs/notes/prompt-story 2&gt;/dev/null | grep -B5 &#34;a42cdc6f&#34; | grep -E &#34;^[0-9a-f]{7,}&#34; | head -3</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary HEAD~20..HEAD 2&gt;&amp;1 | grep -i &#34;DECISION&#34; | head -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details open&gt;&lt;summary&gt;[15:39] DECISION (Branch name): What should I rename the branch to?   ci-testing&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:30] DECISION (Transcript): For the timeline view, should the Full Transcript also be a single timeline (all entries across all commits merged chronologically)?   Single timeline&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:30] DECISION (Commit marker): When inserting commit markers in the timeline, what format should they have?   Simple line&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[20:10] DECISION (Hook behavior): Should I also modify the installer to chain/call existing hooks (so they still run), or just write tests for the current backup-only behavior?   Test current behavior&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:03] DECISION (Steps format): For the &amp;#39;Full Transcript&amp;#39; section, when you say &amp;#39;just mention all steps&amp;#39;, do you want a brief list like &amp;#39;- 10:15 Read file.go&amp;#39; for each step (without the full content), or just a count like &amp;#39;This PR contains 45 steps&amp;#39;?   No something different instead of Full Transcript
+&lt;details open&gt;&lt;summary&gt;[16:09] DECISION (Push shortcut): For the one-liner push command, which approach do you prefer?   Document the one-liner&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:09] DECISION (Auto-push): For automatic note pushing, how aggressive should it be?   When installing hooks it should offer to do install pre-push hook&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:14] DECISION (Priority): Which area would you like to focus on first for test improvements?   Both - comprehensive approach&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:14] DECISION (Scope): What scope of improvements are you looking for?   Quick wins only&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[17:10] DECISION (Detection): How should we detect agent vs main sessions?   Convention-based (Recommended)&lt;/summary&gt;&lt;/details&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">DECISION entries are working. Now let me update the HTML templates:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/index.html.tmpl</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/index.html.tmpl</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/index.html.tmpl has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    86             data-entry-type=&#34;{{entryCategory .Type}}&#34;
+    87             data-in-work-period=&#34;{{.InWorkPeriod}}&#34;&gt;
+    88           &lt;span class=&#34;prompt-time&#34;&gt;{{formatTimeShort .Time}}&lt;/span&gt;
+    89           &lt;span class=&#34;prompt-type&#34;&gt;{{.Type}}&lt;/span&gt;
+    90           {{if eq .Type &#34;TOOL_USE&#34;}}
+    91           &lt;span class=&#34;tool-name&#34;&gt;{{.ToolName}}&lt;/span&gt;
+    92           {{if or .ToolInput .ToolOutput}}
+    93           &lt;details class=&#34;tool-details&#34; open&gt;
+    94             &lt;summary&gt;Hide details&lt;/summary&gt;
+    95             {{if .ToolInput}}
+    96             &lt;div class=&#34;tool-section-label&#34;&gt;Input&lt;/div&gt;
+    97             &lt;div class=&#34;tool-input&#34;&gt;{{.ToolInput}}&lt;/div&gt;
+    98             {{end}}
+    99             {{if .ToolOutput}}
+   100             &lt;div class=&#34;tool-section-label&#34;&gt;Output&lt;/div&gt;
+   101             &lt;div class=&#34;tool-output&#34;&gt;{{truncate .ToolOutput 2000}}&lt;/div&gt;
+   102             {{end}}
+   103           &lt;/details&gt;
+   104           {{end}}
+   105           {{else if eq .Type &#34;DECISION&#34;}}
+   106           &lt;span class=&#34;decision-header&#34;&gt;({{.DecisionHeader}})&lt;/span&gt;
+   107           &lt;span class=&#34;prompt-text&#34;&gt;{{.Text}}&lt;/span&gt;
+   108           &lt;span class=&#34;decision-answer&#34;&gt;  {{.DecisionAnswer}}&lt;/span&gt;
+   109           {{else}}
+   110           &lt;span class=&#34;prompt-text{{if .Truncated}} truncated{{end}}&#34;&gt;{{.Text}}&lt;/span&gt;
+   111           {{end}}
+   112         &lt;/li&gt;
+   113         {{end}}
+   114       &lt;/ul&gt;
+   115     &lt;/div&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/commit.html.tmpl</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/commit.html.tmpl</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/commit.html.tmpl has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    69             data-entry-type=&#34;{{entryCategory .Type}}&#34;
+    70             data-in-work-period=&#34;{{.InWorkPeriod}}&#34;&gt;
+    71           &lt;span class=&#34;prompt-time&#34;&gt;{{formatTimeShort .Time}}&lt;/span&gt;
+    72           &lt;span class=&#34;prompt-type&#34;&gt;{{.Type}}&lt;/span&gt;
+    73           {{if eq .Type &#34;TOOL_USE&#34;}}
+    74           &lt;span class=&#34;tool-name&#34;&gt;{{.ToolName}}&lt;/span&gt;
+    75           {{if or .ToolInput .ToolOutput}}
+    76           &lt;details class=&#34;tool-details&#34; open&gt;
+    77             &lt;summary&gt;Hide details&lt;/summary&gt;
+    78             {{if .ToolInput}}
+    79             &lt;div class=&#34;tool-section-label&#34;&gt;Input&lt;/div&gt;
+    80             &lt;div class=&#34;tool-input&#34;&gt;{{.ToolInput}}&lt;/div&gt;
+    81             {{end}}
+    82             {{if .ToolOutput}}
+    83             &lt;div class=&#34;tool-section-label&#34;&gt;Output&lt;/div&gt;
+    84             &lt;div class=&#34;tool-output&#34;&gt;{{truncate .ToolOutput 2000}}&lt;/div&gt;
+    85             {{end}}
+    86           &lt;/details&gt;
+    87           {{end}}
+    88           {{else if eq .Type &#34;DECISION&#34;}}
+    89           &lt;span class=&#34;decision-header&#34;&gt;({{.DecisionHeader}})&lt;/span&gt;
+    90           &lt;span class=&#34;prompt-text&#34;&gt;{{.Text}}&lt;/span&gt;
+    91           &lt;span class=&#34;decision-answer&#34;&gt;  {{.DecisionAnswer}}&lt;/span&gt;
+    92           {{else}}
+    93           &lt;span class=&#34;prompt-text{{if .Truncated}} truncated{{end}}&#34;&gt;{{.Text}}&lt;/span&gt;
+    94           {{end}}
+    95         &lt;/li&gt;
+    96         {{end}}
+    97       &lt;/ul&gt;
+    98     &lt;/div&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me add some CSS for the decision entries:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/styles.css</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/styles.css</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/styles.css has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   198   background-color: var(--assistant-bg);
+   199   border-left-color: #8b5cf6;
+   200 }
+   201 
+   202 .prompt-item.TOOL_USE {
+   203   background-color: var(--tool-bg);
+   204   border-left-color: #f59e0b;
+   205 }
+   206 
+   207 .prompt-item.DECISION {
+   208   background-color: #fdf4ff;
+   209   border-left-color: #a855f7;
+   210 }
+   211 
+   212 @media (prefers-color-scheme: dark) {
+   213   .prompt-item.DECISION {
+   214     background-color: #3b2a4a;
+   215     border-left-color: #a855f7;
+   216   }
+   217 }
+   218 
+   219 .prompt-item.outside-work-period {
+   220   opacity: 0.6;
+   221 }</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/styles.css</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/templates/styles.css has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   456   color: var(--text-muted);
+   457   margin-bottom: 4px;
+   458 }
+   459 
+   460 /* Tool name in header */
+   461 .tool-name {
+   462   font-weight: 600;
+   463   color: var(--text-primary);
+   464 }
+   465 
+   466 /* Decision entries */
+   467 .decision-header {
+   468   font-weight: 500;
+   469   color: var(--text-secondary);
+   470   margin-right: 4px;
+   471 }
+   472 
+   473 .decision-answer {
+   474   display: inline-block;
+   475   margin-left: 8px;
+   476   padding: 2px 8px;
+   477   background-color: #a855f7;
+   478   color: white;
+   479   border-radius: 4px;
+   480   font-size: 12px;
+   481   font-weight: 500;
+   482 }
+   483 
+   484 @media (prefers-color-scheme: dark) {
+   485   .decision-answer {
+   486     background-color: #7c3aed;
+   487   }
+   488 }
+   489 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me build and run the tests:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding DECISION entry parsing in analyzeSession()&#34;,&#34;content&#34;:&#34;Detect AskUserQuestion and create DECISION entries in analyzeSession()&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;C...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">#0 building with &#34;default&#34; instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 509B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/golang:1.24-alpine
+#2 DONE 1.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae
+#4 resolve docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 17.35MB 0.3s done
+#5 DONE 0.3s
+
+#6 [2/8] RUN apk add --no-cache git bash jq libfaketime socat
+#6 CACHED
+
+#7 [3/8] WORKDIR /build
+#7 CACHED
+
+#8 [4/8] COPY . .
+#8 DONE 0.3s
+
+#9 [5/8] RUN go build -o /usr/local/bin/git-prompt-story .
+#9 0.142 go: downloading github.com/spf13/cobra v1.10.2
+#9 0.444 go: downloading github.com/spf13/pflag v1.0.9
+#9 DONE 5.7s
+
+#10 [6/8] WORKDIR /workspace
+#10 DONE 0.0s
+
+#11 [7/8] RUN git config --global user.email &#34;&lt;EMAIL&gt;&#34; &amp;&amp;     git config --global user.name &#34;Test User&#34; &amp;&amp;     git config --global init.defaultBranch main
+#11 DONE 0.1s
+
+#12 [8/8] COPY e2e/ /e2e/
+#12 DONE 0.0s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 2.6s done
+#13 exporting manifest sha256:1e418507356d895edef61aa6f72395323949840fdcaf7fae5b799d3f5f50d3da
+#13 exporting manifest sha256:1e418507356d895edef61aa6f72395323949840fdcaf7fae5b799d3f5f50d3da done
+#13 exporting config sha256:d02ce2ffa63bd89711521be64f4373f3e3d5182126938892dd563c86bf6c2518 done
+#13 exporting attestation manifest sha256:ff027303eb3877beae21e2588441bb5e5ee94c2b0219ea3b962b5e13542e3d47 done
+#13 exporting manifest list sha256:920806b12d13cf246a2d766272eb4adfe2da9415682d3d2a59b6ce70ff53b430 done
+#13 naming to docker.io/library/git-prompt-story-e2e:latest done
+#13 unpacking to docker.io/library/git-prompt-story-e2e:latest
+#13 unpacking to docker....</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">- [09:23] ASSISTANT: Found pattern X in the following files...
+&lt;/details&gt;
+
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| 3603c1b | Add feature with agent assistance | Claude Code | 1 | 6 |
+
+---
+*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*
+    - User Prompts shows main session only (no agent indicator)
+    - Header shows &#39;1 user prompts&#39; (main session only)
+  Step 10: Verifying session IsAgent fields...
+    - Main session is_agent: false
+    - Agent session 1 is_agent: true
+    - Agent session 2 is_agent: true
+  Step 11: Cleanup...
+
+  All agent session handling assertions passed!
+
+=== 16/16 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All 16 tests passed. Let me show you the feature in action:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary HEAD~20..HEAD 2&gt;&amp;1 | head -80</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;115 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit ff6c2a0: Add smart comment behavior for prompt... ---
+
+&lt;details&gt;&lt;summary&gt;[15:05] PROMPT: The PR on branch test-github-action, did not found prompt-story.And I would like two fixes: 1. Please debug why this happened. There&amp;#39;s clearly a prompt story in that, so there should be something. 2. We would also love not to post any comment if t...&lt;/summary&gt;
+
+...here was no prompt story. Don&amp;#39;t post non-prompt story notes found in this PR.
+
+&lt;/details&gt;
+
+--- Commit b8017a8: Fix YAML parsing error in action.yml ---
+
+&lt;details&gt;&lt;summary&gt;[15:12] PROMPT: GitHub action failed, fix it: Error: QuesmaOrg/git-prompt-story/main/.github/actions/prompt-story/action.yml: (Line: 161, Col: 1, Idx: 5289) - (Line: 161, Col: 1, Idx: 5289): While scanning a simple key, could not find expected &amp;#39;:&amp;#39;. Error: System....&lt;/summary&gt;
+
+...ArgumentException: Unexpected type &amp;#39;&amp;#39; encountered while reading &amp;#39;action manifest root&amp;#39;. The type &amp;#39;MappingToken&amp;#39; was expected.
+   at GitHub.DistributedTask.ObjectTemplating.Tokens.TemplateTokenExtensions.AssertMapping(TemplateToken value, String objectDescription)
+   at GitHub.Runner.Worker.ActionManifestManagerLegacy.Load(IExecutionContext executionContext, String manifestFile)
+Error: Failed to load QuesmaOrg/git-prompt-story/main/.github/actions/prompt-story/action.yml
+
+&lt;/details&gt;
+
+--- Commit 4a58d56: Migrate notes from refs/notes/commits... ---
+
+&lt;details open&gt;&lt;summary&gt;[15:01] PROMPT: Yes, please move to refs/notes/prompt-story&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[15:19] PROMPT: Please commit for now. &lt;/summary&gt;&lt;/details&gt;
+
+--- Commit f73de7c: Fix GitHub Pages URL to use API inste... ---
+
+&lt;details&gt;&lt;summary&gt;[15:18] PROMPT: Ok it worked, great job! Still Still some rough edges, like the biggest one that the git link to transcript that should be on GitHub pages has not worked. Like, you know, it takes me over. I know maybe I should configure on GitHub site...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding DECISION entry parsing in analyzeSession()&#34;,&#34;content&#34;:&#34;Detect AskUserQuestion and create DECISION entries in analyzeSession()&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;C...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary HEAD~20..HEAD 2&gt;&amp;1 | grep -A2 -B2 &#34;DECISION&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[15:39] DECISION (Branch name): What should I rename the branch to?   ci-testing&lt;/summary&gt;&lt;/details&gt;
+
+--- Commit bab2b29: Improve PR comment format with nested... ---
+--
+
+&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:30] DECISION (Transcript): For the timeline view, should the Full Transcript also be a single timeline (all entries across all commits merged chronologically)?   Single timeline&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:30] DECISION (Commit marker): When inserting commit markers in the timeline, what format should they have?   Simple line&lt;/summary&gt;&lt;/details&gt;
+
+--- Commit 2c80a3a: Add E2E test for repair command ---
+--
+&lt;details open&gt;&lt;summary&gt;[19:50] PROMPT: We should get to bottom why this did not work out of the box.&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[20:09] PROMPT: Can you add e2e tests that would check how our install hook works if there are already  other hooks. We should keep them and add outs. Though installing us again should never double install us.&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[20:10] DECISION (Hook behavior): Should I also modify the installer to chain/call existing hooks (so they still run), or just write tests for the current backup-only behavior?   Test current behavior&lt;/summary&gt;&lt;/details&gt;
+
+--- Commit 979be4e: Use &amp;lt;details&amp;gt; tags for all prompts in... ---
+--
+
+&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:03] DECISION (Steps format): For the &amp;#39;Full Transcript&amp;#39; section, when you say &amp;#39;just mention all steps&amp;#39;, do you want a brief list like &amp;#39;- 10:15 Read file.go&amp;#39; for each step (without the full content), or just a count like &amp;#39;This PR contains 45 steps&amp;#39;?   No something different instead of Full Transcript
+Show all 168 steps I want to have title &amp;#34;All steps&amp;#34;, do not change actual content. Also brainstorm if there is potential to merge that title with foldable section. If so propose that for prompts above.&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:12] PRO...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The feature is working. Here&#39;s what was implemented:
+
+## Summary
+
+Added **DECISION** entries to ci-summary that surface Claude&#39;s questions (`AskUserQuestion` tool) in the User prompts section:
+
+**Format:**
+```
+[18:47] DECISION (Version): What version number should we release? → 0.9.0
+```
+
+**Changes made:**
+1. `internal/session/types.go` - Added `ToolUseResult` struct to capture answers
+2. `internal/ci/summary.go` - Added DECISION parsing, answer capture, and rendering
+3. `internal/ci/templates/index.html.tmpl` - Added DECISION display
+4. `internal/ci/templates/commit.html.tmpl` - Added DECISION display  
+5. `internal/ci/templates/styles.css` - Added purple styling for DECISION entries
+
+**All 16 e2e tests pass.**
+
+Would you like me to:
+1. Create a feature branch, bump version, and commit?
+2. Reinstall the global `git-prompt-story` binary?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please first pbcopy ci-summary for merge-privacy-bullets</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline merge-privacy-bullets 2&gt;/dev/null | head -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">2acc5da Merge PII and tool output redaction into single feature bullet
+b7a8114 Merge pull request #17 from QuesmaOrg/bump-version-0.9.0
+a4455c8 Bump version to 0.9.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary b7a8114..merge-privacy-bullets 2&gt;&amp;1 | pbcopy &amp;&amp; echo &#34;Copied to clipboard&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Copied to clipboard</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary b7a8114..merge-privacy-bullets 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details open&gt;&lt;summary&gt;&lt;strong&gt;3 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit 2acc5da: Merge PII and tool output redaction i... ---
+
+&lt;details&gt;&lt;summary&gt;[18:54] PROMPT: Please start new work on origin/main. I want to merge those two points in Readme.md PII scrubbing - Sensitive data (emails, API keys, passwords) automatically redacted (configurable) Tool output redaction - Read tool outputs redacted by default (f...&lt;/summary&gt;
+
+...ile contents already in git)
+
+Propose variants.
+
+&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[18:54] DECISION (Variant): Which variant do you prefer for the merged README bullet?   (no answer)&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[18:57] DECISION (Variant): Which variant do you prefer?   (no answer)&lt;/summary&gt;&lt;/details&gt;
+&lt;/details&gt;
+
+&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All 14 steps&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit 2acc5da: Merge PII and tool output redaction i... ---
+
+- [18:54] PROMPT: Please start new work on origin/main. I want to merge those two points in Readme.md PII scrubbing...
+- [18:54] ASSISTANT: Let me start fresh on origin/main and propose variants for merging those two bullet points.
+- [18:54] TOOL_USE (Write): /&amp;lt;REDACTED&amp;gt;/.claude/plans/serene-purring-shell.md
+- [18:54] ASSISTANT: Here are 5 variants for merging the two bullets:  **Option A: Privacy-focused** ``` - **Privacy s...
+- [18:54] DECISION (Variant): Which variant do you prefer for the merged README bullet?   (no answer)
+- [18:56] TOOL_USE (Edit): /&amp;lt;REDACTED&amp;gt;/.claude/plans/serene-purring-shell.md
+- [18:57] ASSISTANT: Here are 5 new variants with &amp;#34;Privacy scrubbing&amp;#34; and security/privacy focus:  **Option 1** ``` - ...
+- [18:57] DECISION (Variant): Which variant do you prefer?   (no answer)
+- [18:57] TOOL_USE (Edit): /&amp;lt;REDACTED&amp;gt;/.claude/plans/serene-purring-shell.md
+- [18:57] TOOL_USE (ExitPlanMode): {&amp;#34;plan&amp;#34;:&amp;#34;# Plan: Merge PII Scrubbing and Tool Output Reda...
+- [18:58] TOOL_USE (Bash): git fetch origin &amp;amp;&amp;amp; git checkout origin/main -B main
+- [18...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:24</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Copied to clipboard. Shows 3 user prompts including 2 DECISION entries.
+
+Note: The &#34;(no answer)&#34; appears because those DECISION entries either:
+- Were interrupted before an answer was given
+- The transcript was from before the `toolUseResult` field was added to the JSONL format
+
+Would you like me to create a feature branch, bump version, and commit the DECISION feature changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I gave decision, but recently we merged privacy centric feature that removed &#34;toolUseResult&#34;. Tell me if that was right decision (perhaps we can use other field) or we need to revert that redaction.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me investigate what the privacy feature did to `toolUseResult`:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">toolUseResult</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/session/types.go:24:	ToolUseResult *ToolUseResult  `json:&#34;toolUseResult,omitempty&#34;` // For user entries with tool results
+docs/PII_SCRUBBING.md:6:- Duplicate data removal (internal fields like `toolUseResult`)
+docs/PII_SCRUBBING.md:23:The `toolUseResult` field is automatically removed from session entries. This field duplicates data from `message.content` in a different format and saves ~37% storage.
+internal/scrubber/scrubber.go:42:	Path    string `yaml:&#34;path&#34;`    // JSON field path to remove (e.g., &#34;toolUseResult&#34;)
+internal/scrubber/scrubber.go:133:		// 1. Remove configured nodes (e.g., toolUseResult)
+internal/scrubber/scrubber.go:584:			Name: &#34;toolUseResult_duplicate&#34;,
+internal/scrubber/scrubber.go:585:			Path: &#34;toolUseResult&#34;,
+internal/scrubber/scrubber.go:586:			// toolUseResult is a Claude Code-specific field that duplicates data
+internal/scrubber/scrubber.go:590:			Comment: &#34;toolUseResult duplicates message.content data. CI HTML only uses message.content. Removing saves ~37% storage.&#34;,
+internal/scrubber/scrubber_test.go:610:	// JSONL with toolUseResult field (should be removed)
+internal/scrubber/scrubber_test.go:611:	input := `{&#34;type&#34;:&#34;user&#34;,&#34;message&#34;:{&#34;content&#34;:[{&#34;type&#34;:&#34;tool_result&#34;,&#34;tool_use_id&#34;:&#34;toolu_123&#34;,&#34;content&#34;:&#34;file contents&#34;}]},&#34;toolUseResult&#34;:{&#34;type&#34;:&#34;text&#34;,&#34;file&#34;:{&#34;filePath&#34;:&#34;/path/to/file.go&#34;,&#34;content&#34;:&#34;package main&#34;}}}`
+internal/scrubber/scrubber_test.go:618:	// Verify toolUseResult was removed
+internal/scrubber/scrubber_test.go:619:	if strings.Contains(string(result), &#34;toolUseResult&#34;) {
+internal/scrubber/scrubber_test.go:620:		t.Error(&#34;toolUseResult field was not removed&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git show refs/notes/prompt-story-transcripts:claude-code/a42cdc6f-3726-4870-baed-f242fd09a297.jsonl 2&gt;/dev/null | grep &#34;toolu_01RVMwmpQdBtqgFDdCnXfr6m&#34; | head -2 | python3 -c &#34;import sys,json; data=json.loads(sys.stdin.read().split(&#39;\n&#39;)[1]); print(&#39;toolUseResult:&#39;, json.dumps(data.get(&#39;toolUseResult&#39;), indent=2)); print(&#39;\nmessage.content:&#39;, json.dumps(data.get(&#39;message&#39;,{}).get(&#39;content&#39;), indent=2))&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">toolUseResult: {
+  &#34;answers&#34;: {
+    &#34;For the collapsible &#39;Prompts (user actions)&#39; section, what should be included?&#34;: &#34;All user actions&#34;,
+    &#34;Should the commit list header still say &#39;Prompt Story&#39; or something different?&#34;: &#34;No header&#34;,
+    &#34;What should count as a &#39;step&#39; in &#39;number of total steps&#39;? Should it be tool uses only (Bash, Edit, Read, etc.) or all entries including assistant text responses?&#34;: &#34;Everything&#34;
+  },
+  &#34;questions&#34;: [
+    {
+      &#34;header&#34;: &#34;Steps count&#34;,
+      &#34;multiSelect&#34;: false,
+      &#34;options&#34;: [
+        {
+          &#34;description&#34;: &#34;Count only TOOL_USE entries (Bash, Edit, Read, Glob, etc.)&#34;,
+          &#34;label&#34;: &#34;Tool uses only&#34;
+        },
+        {
+          &#34;description&#34;: &#34;Count tool uses &#43; assistant text responses&#34;,
+          &#34;label&#34;: &#34;All assistant actions&#34;
+        },
+        {
+          &#34;description&#34;: &#34;Count prompts, tool uses, assistant responses, tool rejects - all entries&#34;,
+          &#34;label&#34;: &#34;Everything&#34;
+        }
+      ],
+      &#34;question&#34;: &#34;What should count as a &#39;step&#39; in &#39;number of total steps&#39;? Should it be tool uses only (Bash, Edit, Read, etc.) or all entries including assistant text responses?&#34;
+    },
+    {
+      &#34;header&#34;: &#34;Prompts section&#34;,
+      &#34;multiSelect&#34;: false,
+      &#34;options&#34;: [
+        {
+          &#34;description&#34;: &#34;Just the text prompts the user typed&#34;,
+          &#34;label&#34;: &#34;User prompts only&#34;
+        },
+        {
+          &#34;description&#34;: &#34;User prompts plus /commands they used&#34;,
+          &#34;label&#34;: &#34;User prompts &#43; commands&#34;
+        },
+        {
+          &#34;description&#34;: &#34;Prompts, commands, and tool rejects&#34;,
+          &#34;label&#34;: &#34;All user actions&#34;
+        }
+      ],
+      &#34;question&#34;: &#34;For the collapsible &#39;Prompts (user actions)&#39; section, what should be included?&#34;
+    },
+    {
+      &#34;header&#34;: &#34;Header text&#34;,
+      &#34;multiSelect&#34;: false,
+      &#34;options&#34;: [
+        {
+          &#34;description&#34;: &#34;Use &#39;## Prompt Story&#39; as the header&#34;,
+          &#34;label&#34;: &#34;Keep &#39;Prompt Story&#39;&#34;
+        },
+        {
+          &#34;description&#34;: &#34;Start directl...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good catch! The data comparison shows:
+
+**`toolUseResult`** (removed by scrubber):
+```json
+{
+  &#34;answers&#34;: {&#34;What version?&#34;: &#34;0.9.0&#34;},
+  &#34;questions&#34;: [...]
+}
+```
+
+**`message.content`** (preserved):
+```json
+[{
+  &#34;type&#34;: &#34;tool_result&#34;,
+  &#34;content&#34;: &#34;User has answered your questions: \&#34;What version?\&#34;=\&#34;0.9.0\&#34;. You can now continue...&#34;
+}]
+```
+
+**The removal was the right decision** - the answers ARE still available in `message.content`, just as a parseable string format: `&#34;Question?&#34;=&#34;Answer&#34;`.
+
+I need to update my DECISION implementation to parse answers from `message.content` instead of relying on `toolUseResult`. This will:
+1. Work with both old transcripts (that have `toolUseResult`) and new ones (scrubbed)
+2. Keep the 37% storage savings
+3. No need to revert the redaction
+
+Should I update the implementation to parse from `message.content`?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:27</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Yes please, this is also privacy centric decision.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Fix: Parse DECISION answers from message.content instead of toolUseResult
+     2 
+     3 ## Problem
+     4 The current DECISION implementation relies on `toolUseResult.answers` to get user answers, but this field is removed by the privacy scrubber (saves 37% storage).
+     5 
+     6 ## Solution
+     7 Parse answers from `message.content` string which is preserved after scrubbing.
+     8 
+     9 **Input format** (in tool_result content):
+    10 ```
+    11 &#34;User has answered your questions: \&#34;What version?\&#34;=\&#34;0.9.0\&#34;, \&#34;Another question?\&#34;=\&#34;Answer\&#34;. You can now continue...&#34;
+    12 ```
+    13 
+    14 ## Implementation
+    15 
+    16 ### 1. Add helper function `parseAskUserQuestionAnswers(content string) map[string]string`
+    17 - Extract the part between `&#34;User has answered your questions: &#34;` and `&#34;. You can now continue&#34;`
+    18 - Parse `&#34;Question?&#34;=&#34;Answer&#34;` pairs using regex or string parsing
+    19 - Return map of question -&gt; answer
+    20 
+    21 ### 2. Update answer capture in `analyzeSession()` (lines 247-260)
+    22 Replace:
+    23 ```go
+    24 if entry.ToolUseResult != nil &amp;&amp; entry.ToolUseResult.Answers != nil {
+    25     // use ToolUseResult.Answers
+    26 }
+    27 ```
+    28 
+    29 With:
+    30 ```go
+    31 // Parse answers from tool result content (works with scrubbed transcripts)
+    32 answers := parseAskUserQuestionAnswers(tr.Content)
+    33 for _, idx := range indices {
+    34     if idx &lt; len(ss.Prompts) {
+    35         question := ss.Prompts[idx].Text
+    36         if answer, found := answers[question]; found {
+    37             ss.Prompts[idx].DecisionAnswer = answer
+    38         }
+    39     }
+    40 }
+    41 ```
+    42 
+    43 ### 3. Remove ToolUseResult dependency
+    44 - Can remove `ToolUseResult` struct from `internal/session/types.go` (optional cleanup)
+    45 - Or keep for...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Fix: Parse DECISION answers from message.content instead of toolUseResult\n\n## Problem\nThe current DECISION implementation relies on `toolUseResult.answers` to get user answers, but th...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+Please remove ToolUseResult.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    39     }
+    40 }
+    41 ```
+    42 
+    43 ### 3. Remove ToolUseResult from types.go
+    44 - Remove `ToolUseResult *ToolUseResult` field from `MessageEntry`
+    45 - Remove `ToolUseResult` struct
+    46 - Remove `AskUserQuestion` struct
+    47 - Remove `AskUserQuestionOption` struct
+    48 
+    49 ## Files to Modify
+    50 - `internal/ci/summary.go` - Add parser, update answer capture logic
+    51 - `internal/session/types.go` - Remove ToolUseResult and related structs
+    52 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Fix: Parse DECISION answers from message.content instead of toolUseResult\n\n## Problem\nThe current DECISION implementation relies on `toolUseResult.answers` to get user answers, but th...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/clever-gathering-quail.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Fix: Parse DECISION answers from message.content instead of toolUseResult
+
+## Problem
+The current DECISION implementation relies on `toolUseResult.answers` to get user answers, but this field is removed by the privacy scrubber (saves 37% storage).
+
+## Solution
+Parse answers from `message.content` string which is preserved after scrubbing.
+
+**Input format** (in tool_result content):
+```
+&#34;User has answered your questions: \&#34;What version?\&#34;=\&#34;0.9.0\&#34;, \&#34;Another question?\&#34;=\&#34;Answer\&#34;. You can now continue...&#34;
+```
+
+## Implementation
+
+### 1. Add helper function `parseAskUserQuestionAnswers(content string) map[string]string`
+- Extract the part between `&#34;User has answered your questions: &#34;` and `&#34;. You can now continue&#34;`
+- Parse `&#34;Question?&#34;=&#34;Answer&#34;` pairs using regex or string parsing
+- Return map of question -&gt; answer
+
+### 2. Update answer capture in `analyzeSession()` (lines 247-260)
+Replace:
+```go
+if entry.ToolUseResult != nil &amp;&amp; entry.ToolUseResult.Answers != nil {
+    // use ToolUseResult.Answers
+}
+```
+
+With:
+```go
+// Parse answers from tool result content (works with scrubbed transcripts)
+answers := parseAskUserQuestionAnswers(tr.Content)
+for _, idx := range indices {
+    if idx &lt; len(ss.Prompts) {
+        question := ss.Prompts[idx].Text
+        if answer, found := answers[question]; found {
+            ss.Prompts[idx].DecisionAnswer = answer
+        }
+    }
+}
+```
+
+### 3. Remove ToolUseResult from types.go
+- Remove `ToolUseResult *ToolUseResult` field from `MessageEntry`
+- Remove `ToolUseResult` struct
+- Remove `AskUserQuestion` struct
+- Remove `AskUserQuestionOption` struct
+
+## Files to Modify
+- `internal/ci/summary.go` - Add parser, update answer capture logic
+- `internal/session/types.go` - Remove ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding answer parser function&#34;,&#34;content&#34;:&#34;Add parseAskUserQuestionAnswers helper function&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Updating answer capture logic&#34;,&#34;content&#34;:&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   409 
+   410 	return results
+   411 }
+   412 
+   413 // parseAskUserQuestionAnswers parses answers from tool result content string
+   414 // Format: &#34;User has answered your questions: \&#34;Question?\&#34;=\&#34;Answer\&#34;, \&#34;Q2?\&#34;=\&#34;A2\&#34;. You can now continue...&#34;
+   415 func parseAskUserQuestionAnswers(content string) map[string]string {
+   416 	answers := make(map[string]string)
+   417 
+   418 	// Find the answers section
+   419 	prefix := &#34;User has answered your questions: &#34;
+   420 	suffix := &#34;. You can now continue&#34;
+   421 
+   422 	startIdx := strings.Index(content, prefix)
+   423 	if startIdx == -1 {
+   424 		return answers
+   425 	}
+   426 	startIdx &#43;= len(prefix)
+   427 
+   428 	endIdx := strings.Index(content, suffix)
+   429 	if endIdx == -1 || endIdx &lt;= startIdx {
+   430 		endIdx = len(content)
+   431 	}
+   432 
+   433 	answersSection := content[startIdx:endIdx]
+   434 
+   435 	// Parse &#34;Question?&#34;=&#34;Answer&#34; pairs
+   436 	// State machine to handle escaped quotes
+   437 	var currentQuestion, currentAnswer strings.Builder
+   438 	inQuestion := false
+   439 	inAnswer := false
+   440 	escaped := false
+   441 
+   442 	for i := 0; i &lt; len(answersSection); i&#43;&#43; {
+   443 		c := answersSection[i]
+   444 
+   445 		if escaped {
+   446 			if inQuestion {
+   447 				currentQuestion.WriteByte(c)
+   448 			} else if inAnswer {
+   449 				currentAnswer.WriteByte(c)
+   450 			}
+   451 			escaped = false
+   452 			continue
+   453 		}
+   454 
+   455 		if c == &#39;\\&#39; {
+   456 			escaped = true
+   457 			continue
+   458 		}
+   459 
+   460 		if c == &#39;&#34;&#39; {
+   461 			if !inQuestion &amp;&amp; !inAnswer {
+   462 				// Starting a question
+   463 				inQuestion = true
+   464 			} else if inQuestion {
+   465 				// Ending question, expect =&#34;
+   466 				inQuestion = false
+   467 			} else if inAnswer {
+   468 				// Ending answer
+   469 				inAnswer = f...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   431 	}
+   432 
+   433 	answersSection := content[startIdx:endIdx]
+   434 
+   435 	// Parse &#34;Question?&#34;=&#34;Answer&#34; pairs
+   436 	// State machine: 0=outside, 1=in question, 2=after question (expect =&#34;), 3=in answer
+   437 	var currentQuestion, currentAnswer strings.Builder
+   438 	state := 0
+   439 	escaped := false
+   440 
+   441 	for i := 0; i &lt; len(answersSection); i&#43;&#43; {
+   442 		c := answersSection[i]
+   443 
+   444 		if escaped {
+   445 			if state == 1 {
+   446 				currentQuestion.WriteByte(c)
+   447 			} else if state == 3 {
+   448 				currentAnswer.WriteByte(c)
+   449 			}
+   450 			escaped = false
+   451 			continue
+   452 		}
+   453 
+   454 		if c == &#39;\\&#39; {
+   455 			escaped = true
+   456 			continue
+   457 		}
+   458 
+   459 		switch state {
+   460 		case 0: // Outside, looking for opening quote of question
+   461 			if c == &#39;&#34;&#39; {
+   462 				state = 1
+   463 			}
+   464 		case 1: // In question
+   465 			if c == &#39;&#34;&#39; {
+   466 				state = 2 // End of question
+   467 			} else {
+   468 				currentQuestion.WriteByte(c)
+   469 			}
+   470 		case 2: // After question, expect = then &#34;
+   471 			if c == &#39;&#34;&#39; {
+   472 				state = 3 // Start of answer
+   473 			}
+   474 			// Skip = and whitespace
+   475 		case 3: // In answer
+   476 			if c == &#39;&#34;&#39; {
+   477 				// End of answer, save pair
+   478 				q := currentQuestion.String()
+   479 				a := currentAnswer.String()
+   480 				if q != &#34;&#34; {
+   481 					answers[q] = a
+   482 				}
+   483 				currentQuestion.Reset()
+   484 				currentAnswer.Reset()
+   485 				state = 0
+   486 			} else {
+   487 				currentAnswer.WriteByte(c)
+   488 			}
+   489 		}
+   490 	}
+   491 
+   492 	return answers
+   493 }
+   494 
+   495 // extractToolResultContent extracts text content from tool result
+   496 func extractToolResultContent(content any) string {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding answer parser function&#34;,&#34;content&#34;:&#34;Add parseAskUserQuestionAnswers helper function&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Updating answer capture logic&#34;,&#34;content&#34;:&#34;Up...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   243 						// Find and update the corresponding tool use entry
+   244 						if toolUse, ok := toolUseEntries[tr.ToolUseID]; ok {
+   245 							toolUse.ToolOutput = tr.Content
+   246 						}
+   247 						// Check if this is an answer to AskUserQuestion
+   248 						if indices, ok := askUserQuestionEntries[tr.ToolUseID]; ok {
+   249 							// Parse answers from tool result content (works with scrubbed transcripts)
+   250 							answers := parseAskUserQuestionAnswers(tr.Content)
+   251 							for _, idx := range indices {
+   252 								if idx &lt; len(ss.Prompts) {
+   253 									question := ss.Prompts[idx].Text
+   254 									if answer, found := answers[question]; found {
+   255 										ss.Prompts[idx].DecisionAnswer = answer
+   256 									}
+   257 								}
+   258 							}
+   259 						}
+   260 					}
+   261 					continue
+   262 				}
+   263 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding answer parser function&#34;,&#34;content&#34;:&#34;Add parseAskUserQuestionAnswers helper function&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Updating answer capture logic&#34;,&#34;content&#34;:&#34;Up...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    12 	Created  time.Time // First timestamp in file
+    13 	Modified time.Time // Last timestamp in file
+    14 }
+    15 
+    16 // MessageEntry represents a single JSONL line from Claude Code
+    17 type MessageEntry struct {
+    18 	Type      string    `json:&#34;type&#34;` // &#34;user&#34;, &#34;assistant&#34;, &#34;file-history-snapshot&#34;
+    19 	SessionID string    `json:&#34;sessionId&#34;`
+    20 	Timestamp time.Time `json:&#34;timestamp&#34;`
+    21 	GitBranch string    `json:&#34;gitBranch&#34;`
+    22 	Snapshot  *Snapshot `json:&#34;snapshot,omitempty&#34;`
+    23 	Message   *Message  `json:&#34;message,omitempty&#34;`
+    24 }
+    25 
+    26 // Snapshot contains timestamp for file-history-snapshot entries
+    27 type Snapshot struct {
+    28 	Timestamp time.Time `json:&#34;timestamp&#34;`</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary HEAD~20..HEAD 2&gt;&amp;1 | grep &#34;DECISION&#34; | head -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details open&gt;&lt;summary&gt;[15:39] DECISION (Branch name): What should I rename the branch to?   ci-testing&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:30] DECISION (Transcript): For the timeline view, should the Full Transcript also be a single timeline (all entries across all commits merged chronologically)?   Single timeline&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:30] DECISION (Commit marker): When inserting commit markers in the timeline, what format should they have?   Simple line&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[20:10] DECISION (Hook behavior): Should I also modify the installer to chain/call existing hooks (so they still run), or just write tests for the current backup-only behavior?   Test current behavior&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[19:03] DECISION (Steps format): For the &amp;#39;Full Transcript&amp;#39; section, when you say &amp;#39;just mention all steps&amp;#39;, do you want a brief list like &amp;#39;- 10:15 Read file.go&amp;#39; for each step (without the full content), or just a count like &amp;#39;This PR contains 45 steps&amp;#39;?   No something different instead of Full Transcript
+&lt;details open&gt;&lt;summary&gt;[16:09] DECISION (Push shortcut): For the one-liner push command, which approach do you prefer?   Document the one-liner&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:09] DECISION (Auto-push): For automatic note pushing, how aggressive should it be?   When installing hooks it should offer to do install pre-push hook&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:14] DECISION (Priority): Which area would you like to focus on first for test improvements?   Both - comprehensive approach&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:14] DECISION (Scope): What scope of improvements are you looking for?   Quick wins only&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[17:10] DECISION (Detection): How should we detect agent vs main sessions?   Convention-based (Recommended)&lt;/summary&gt;&lt;/details&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Answers are now parsed from `message.content`. Let me run the full tests:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All 6 steps&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit 3603c1b: Add feature with agent assistance ---
+
+- [09:24] PROMPT: [Agent task] Explore the codebase for pattern X
+- [09:25] ASSISTANT: Found pattern X in the following files...
+- [09:20] PROMPT: How do I implement feature X?
+- [09:25] ASSISTANT: Here&amp;#39;s how to implement feature X...
+- [09:22] PROMPT: [Agent task] Explore the codebase for pattern X
+- [09:23] ASSISTANT: Found pattern X in the following files...
+&lt;/details&gt;
+
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| 3603c1b | Add feature with agent assistance | Claude Code | 1 | 6 |
+
+---
+*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*
+    - User Prompts shows main session only (no agent indicator)
+    - Header shows &#39;1 user prompts&#39; (main session only)
+  Step 10: Verifying session IsAgent fields...
+    - Main session is_agent: false
+    - Agent session 1 is_agent: true
+    - Agent session 2 is_agent: true
+  Step 11: Cleanup...
+
+  All agent session handling assertions passed!
+
+=== 16/16 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding answer parser function&#34;,&#34;content&#34;:&#34;Add parseAskUserQuestionAnswers helper function&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Updating answer capture logic&#34;,&#34;content&#34;:&#34;Up...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All 16 tests pass. Summary of changes:
+
+**Privacy-centric update:**
+1. Added `parseAskUserQuestionAnswers()` - parses `&#34;Q?&#34;=&#34;A&#34;` pairs from message.content
+2. Removed `ToolUseResult` dependency - no longer needs the field removed by scrubber
+3. Removed 4 unused structs from `types.go`: `ToolUseResult`, `AskUserQuestion`, `AskUserQuestionOption`
+
+DECISION entries still working - answers now parsed from the preserved `message.content` string.
+
+Would you like me to create a feature branch, bump version, and commit?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please do commit and push to GitHub so I can review the logic</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch main
+Your branch is ahead of &#39;origin/main&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+Changes to be committed:
+  (use &#34;git restore --staged &lt;file&gt;...&#34; to unstage)
+	modified:   README.md
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   internal/ci/summary.go
+	modified:   internal/ci/templates/commit.html.tmpl
+	modified:   internal/ci/templates/index.html.tmpl
+	modified:   internal/ci/templates/styles.css
+	modified:   internal/session/types.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout -b add-decision-entries &amp;&amp; git add internal/ci/summary.go internal/ci/templates/commit.html.tmpl internal/ci/templates/index.html.tmpl internal/ci/templates/styles.css internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Switched to a new branch &#39;add-decision-entries&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff --cached --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> README.md                              |   3 &#43;-
+ internal/ci/summary.go                 | 182 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;--
+ internal/ci/templates/commit.html.tmpl |   4 &#43;
+ internal/ci/templates/index.html.tmpl  |   4 &#43;
+ internal/ci/templates/styles.css       |  36 &#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/session/types.go              |   2 &#43;-
+ 6 files changed, 221 insertions(&#43;), 10 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git restore --staged README.md &amp;&amp; git diff --cached --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> internal/ci/summary.go                 | 182 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;--
+ internal/ci/templates/commit.html.tmpl |   4 &#43;
+ internal/ci/templates/index.html.tmpl  |   4 &#43;
+ internal/ci/templates/styles.css       |  36 &#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/session/types.go              |   2 &#43;-
+ 5 files changed, 219 insertions(&#43;), 9 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">2acc5da Merge PII and tool output redaction into single feature bullet
+b7a8114 Merge pull request #17 from QuesmaOrg/bump-version-0.9.0
+a4455c8 Bump version to 0.9.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add DECISION entries to surface Claude&#39;s questions in ci-summary
+
+Surfaces AskUserQuestion tool interactions as DECISION entries in the
+User prompts section of ci-summary output.
+
+Format: [time] DECISION (Header): Question text → Answer
+
+Implementation:
+- Parse questions from AskUserQuestion tool input
+- Parse answers from message.content (privacy-centric: works with
+  scrubbed transcripts that have toolUseResult removed)
+- Add DECISION to isUserAction() so it appears in User prompts section
+- Add purple styling for DECISION entries in HTML templates
+- Remove unused ToolUseResult structs from types.go
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
