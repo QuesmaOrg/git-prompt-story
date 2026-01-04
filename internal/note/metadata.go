@@ -58,8 +58,8 @@ func (n *PromptStoryNote) ToJSON() ([]byte, error) {
 }
 
 // GenerateSummary creates the commit message line
-// Returns: "Prompt-Story: Used Claude Code | prompt-story-{sha}" or "Prompt-Story: none"
-func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
+// Returns: "Prompt-Story: Used Claude Code (N prompts)" or "Prompt-Story: none"
+func (n *PromptStoryNote) GenerateSummary(promptCount int) string {
 	if len(n.Sessions) == 0 {
 		return "Prompt-Story: none"
 	}
@@ -88,18 +88,7 @@ func (n *PromptStoryNote) GenerateSummary(noteSHA string) string {
 	}
 	sort.Strings(toolNames) // Consistent ordering
 
-	summary := fmt.Sprintf("Prompt-Story: Used %s", strings.Join(toolNames, ", "))
-
-	// Add AutoLink reference (GitHub will convert to clickable link)
-	if noteSHA != "" {
-		shortSHA := noteSHA
-		if len(shortSHA) > 7 {
-			shortSHA = shortSHA[:7]
-		}
-		summary += " | prompt-story-" + shortSHA
-	}
-
-	return summary
+	return fmt.Sprintf("Prompt-Story: Used %s (%d prompts)", strings.Join(toolNames, ", "), promptCount)
 }
 
 // NewPromptStoryNoteWithTime creates a new note with an explicit start time

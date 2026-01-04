@@ -6,9 +6,12 @@ echo "Analyzing commits..."
 COMMIT_RANGE="${BASE_SHA}..${HEAD_SHA}"
 echo "  Range: $COMMIT_RANGE"
 
-# Check if any commits have prompt-story markers in their messages
-COMMITS_WITH_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "prompt-story-" || echo "0")
-echo "  Commits with markers: $COMMITS_WITH_MARKERS"
+# Check if any commits have Prompt-Story markers in their messages
+COMMITS_WITH_ANY_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "Prompt-Story:" || echo "0")
+COMMITS_WITH_NONE_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "Prompt-Story: none" || echo "0")
+# Only count markers that indicate actual AI usage (not "none")
+COMMITS_WITH_MARKERS=$((COMMITS_WITH_ANY_MARKERS - COMMITS_WITH_NONE_MARKERS))
+echo "  Commits with AI markers: $COMMITS_WITH_MARKERS (total: $COMMITS_WITH_ANY_MARKERS, none: $COMMITS_WITH_NONE_MARKERS)"
 
 # Determine flags
 FULL_FLAG=""

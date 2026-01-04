@@ -11,9 +11,7 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
-const promptStoryPrefix = "prompt-story-"
-
-// ShowPrompts displays prompts for a given commit, range, or prompt-story reference
+// ShowPrompts displays prompts for a given commit or range
 func ShowPrompts(commitRef string, full bool) error {
 	// Determine the type of reference and get commit list
 	commits, err := resolveCommitSpec(commitRef)
@@ -35,18 +33,8 @@ func ShowPrompts(commitRef string, full bool) error {
 }
 
 // resolveCommitSpec resolves a commit specification to a list of commit SHAs
-// Supports: single ref, ranges (A..B), prompt-story-{hash}
+// Supports: single ref, ranges (A..B)
 func resolveCommitSpec(spec string) ([]string, error) {
-	// Check for prompt-story-{hash} prefix
-	if strings.HasPrefix(spec, promptStoryPrefix) {
-		hashPrefix := strings.TrimPrefix(spec, promptStoryPrefix)
-		sha, err := note.FindCommitByNoteHashWithFallback(hashPrefix)
-		if err != nil {
-			return nil, err
-		}
-		return []string{sha}, nil
-	}
-
 	// Check for range (contains ..)
 	if strings.Contains(spec, "..") {
 		commits, err := git.RevList(spec)

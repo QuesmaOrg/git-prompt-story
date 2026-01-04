@@ -122,3 +122,30 @@ func FilterSessionsByUserMessages(sessions []ClaudeSession, startWork, endWork t
 	}
 	return filtered
 }
+
+// CountUserMessagesInRange counts user messages across all sessions within the time range
+func CountUserMessagesInRange(sessions []ClaudeSession, startWork, endWork time.Time) int {
+	count := 0
+	for _, s := range sessions {
+		content, err := ReadSessionContent(s.Path)
+		if err != nil {
+			continue
+		}
+
+		entries, err := ParseMessages(content)
+		if err != nil {
+			continue
+		}
+
+		for _, entry := range entries {
+			if entry.Type != "user" {
+				continue
+			}
+			ts := entry.Timestamp
+			if !ts.IsZero() && !ts.Before(startWork) && !ts.After(endWork) {
+				count++
+			}
+		}
+	}
+	return count
+}

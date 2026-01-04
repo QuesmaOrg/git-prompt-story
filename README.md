@@ -29,7 +29,7 @@ git-prompt-story captures LLM sessions in your git history - making prompts revi
 - **Automatic capture** - Hooks detect active LLM sessions on commit
 - **PII scrubbing** - Sensitive data (emails, API keys, passwords) automatically redacted ([configurable](docs/PII_SCRUBBING.md))
 - **Review before push** - Curate or redact notes before sharing
-- **Viewer links** - Commit messages include links to rendered prompts
+- **Prompt tracking** - Commit messages show which tools and how many prompts were used
 
 ## Setup
 
@@ -53,7 +53,7 @@ That's it. Future commits will automatically capture active LLM sessions.
 
 ### Repository Owner
 
-Set up git-prompt-story for your team by adding a setup script and configuring GitHub AutoLinks.
+Set up git-prompt-story for your team by adding a setup script.
 
 #### 1. Add setup script
 
@@ -78,37 +78,7 @@ echo "git-prompt-story configured for this repository"
 
 Contributors run `./setup-prompt-story.sh` after cloning.
 
-#### 2. Configure GitHub AutoLinks
-
-Set up GitHub AutoLinks to convert `prompt-story-{sha}` references into clickable links:
-
-1. Go to your repository **Settings** > **Autolink references**
-2. Click **Add autolink reference**
-3. Configure:
-   - **Reference prefix**: `prompt-story-`
-   - **Target URL**: `https://prompt-story.quesma.com/OWNER/REPO/prompt/<num>`
-   - Replace `OWNER` and `REPO` with your repository owner and name
-4. Check **Alphanumeric** (the reference contains letters and numbers)
-5. Click **Add autolink reference**
-
-Now commit messages containing `prompt-story-abc1234` will automatically link to the viewer.
-
-#### 3. Install prompt server (optional for public repos, required for private)
-
-For private repositories, host your own viewer:
-
-```bash
-docker run -d \
-  -p 8080:8080 \
-  -e GITHUB_TOKEN=your-token \
-  ghcr.io/quesmaorg/git-prompt-story-server
-```
-
-Then update your AutoLink target URL to point to your hosted viewer.
-
-Public repos can use the hosted service at `https://prompt-story.quesma.com`.
-
-#### 4. Add GitHub Action (optional)
+#### 2. Add GitHub Action (optional)
 
 Add a GitHub Action to analyze LLM sessions and post summaries on PRs:
 
@@ -167,7 +137,7 @@ This action:
 │     ├── Save git note as blob {nid}                             │
 │     ├── Generate summary (tools used)                           |
 │     ├── Append to commit message:                               │
-│     │   "Prompt-Story: Used Claude Code | prompt-story-{sha}"   │
+│     │   "Prompt-Story: Used Claude Code (N prompts)"            │
 │     └── Save {nid} to .git/PENDING-PROMPT-STORY                 │
 │                    │                                            │
 │                    ▼                                            │
@@ -287,8 +257,6 @@ Config lives in `.git-prompt-story.json` or `~/.config/git-prompt-story.json`:
 }
 ```
 
-Viewer URLs are handled via GitHub AutoLinks (see Repository Owner setup above).
-
 ## Viewer Integration
 
 Notes are JSON - view them anywhere:
@@ -299,9 +267,6 @@ git notes show HEAD
 
 # Local pretty-print
 git-prompt-story show HEAD
-
-# Or use the hosted viewer via GitHub AutoLink
-# prompt-story-{sha} links are automatically converted to viewer URLs
 ```
 
 ## Privacy & Curation

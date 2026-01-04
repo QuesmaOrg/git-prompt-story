@@ -2,7 +2,6 @@ package repair
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
@@ -19,7 +18,6 @@ type RepairResult struct {
 	SessionsFound  int
 	NoteCreated    bool
 	NoteSHA        string
-	StaleMarker    string // existing marker in commit message, if any
 	AlreadyHasNote bool
 	Error          error
 }
@@ -53,10 +51,6 @@ func RepairCommit(sha string, opts Options) (*RepairResult, error) {
 			return result, nil
 		}
 	}
-
-	// Get commit message to check for stale marker
-	commitMsg, _ := getCommitMessage(fullSHA)
-	result.StaleMarker = extractPromptStoryMarker(commitMsg)
 
 	// Get repo root
 	repoRoot, err := git.GetRepoRoot()
@@ -165,16 +159,6 @@ func getParentCommit(sha string) (string, error) {
 // getCommitMessage returns the commit message for a commit
 func getCommitMessage(sha string) (string, error) {
 	return git.RunGit("log", "-1", "--format=%B", sha)
-}
-
-// extractPromptStoryMarker extracts the prompt-story-{hash} marker from a commit message
-func extractPromptStoryMarker(msg string) string {
-	re := regexp.MustCompile(`prompt-story-([a-f0-9]+)`)
-	matches := re.FindStringSubmatch(msg)
-	if len(matches) >= 2 {
-		return "prompt-story-" + matches[1]
-	}
-	return ""
 }
 
 // ScanCommitsNeedingRepair finds commits that have Prompt-Story markers but no notes

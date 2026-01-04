@@ -29,15 +29,3 @@ func GetNoteWithFallback(sha string) (string, error) {
 	return git.GetNote(LegacyNotesRef, sha)
 }
 
-// FindCommitByNoteHashWithFallback tries to find a commit by note hash,
-// checking both primary and legacy refs
-func FindCommitByNoteHashWithFallback(hashPrefix string) (string, error) {
-	// Try primary ref first
-	sha, err := git.FindCommitByNoteHash(NotesRef, hashPrefix)
-	if err == nil {
-		return sha, nil
-	}
-
-	// Fall back to legacy ref
-	return git.FindCommitByNoteHash(LegacyNotesRef, hashPrefix)
-}
