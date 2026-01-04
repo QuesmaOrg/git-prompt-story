@@ -102,6 +102,10 @@
             {{end}}
           </details>
           {{end}}
+          {{else if eq .Type "DECISION"}}
+          <span class="decision-header">({{.DecisionHeader}})</span>
+          <span class="prompt-text">{{.Text}}</span>
+          <span class="decision-answer">→ {{.DecisionAnswer}}</span>
           {{else}}
           <span class="prompt-text{{if .Truncated}} truncated{{end}}">{{.Text}}</span>
           {{end}}
