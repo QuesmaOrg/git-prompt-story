@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prompt Story - PR #19</title>
+  <title>64dc469 - Prompt Story</title>
   <style>:root {
   --bg-primary: #ffffff;
   --bg-secondary: #f6f8fa;
@@ -459,52 +459,14 @@ pre {
 </style>
 </head>
 <body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
   <div class="header">
-    <h1>Prompt Story</h1>
-    <p class="meta">PR #19 | 1 commit(s) with LLM sessions</p>
+    <h1><code>64dc469</code></h1>
+    <p class="meta">Add DECISION entries to surface Claude&#39;s questions in ci-summary</p>
   </div>
-
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-value">1</div>
-      <div class="stat-label">Commits Analyzed</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">1</div>
-      <div class="stat-label">With Sessions</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="visible-count">102</div>
-      <div class="stat-label">Entries</div>
-    </div>
-  </div>
-
-  
-  <h2>Commits</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Commit</th>
-        <th>Subject</th>
-        <th>Tool</th>
-        <th>Entries</th>
-        <th>Details</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      <tr>
-        <td><code>64dc469</code></td>
-        <td>Add DECISION entries to surface Claude&#39;s questi...</td>
-        <td>Claude Code</td>
-        <td>102</td>
-        <td><a href="64dc469.html">View transcript</a></td>
-      </tr>
-      
-    </tbody>
-  </table>
-
-  <h2>Session Details</h2>
 
   <div class="filter-controls">
     <label class="toggle-label">
@@ -517,21 +479,42 @@ pre {
       <span class="toggle-switch"></span>
       <span>Show whole session</span>
     </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">102</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>64dc469aac965a69d2650fe2fbc74b2a563c427f</code><br>
+    <strong>Work period:</strong> 2026-01-04 16:59 - 2026-01-04 17:34
   </div>
 
   
-  <div class="commit-card">
+  <div class="commit-card" data-is-agent="false">
     <div class="commit-header">
-      <h3><code>64dc469</code> Add DECISION entries to surface Claude&#39;s questions in ci-summary</h3>
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
       <div class="commit-meta">
-        Work period: 2026-01-04 16:59 - 2026-01-04 17:34
+        <code class="session-id">93c68bd4-42b2-4afa-9d5c-467ea0b21080</code> |
+        2026-01-04 16:52 - 2026-01-04 17:34 | <span class="session-count">102</span> entries
       </div>
     </div>
-    
     <div class="session">
-      <div class="session-header">
-        Claude Code | 2026-01-04 16:52 - 2026-01-04 17:34 | <span class="session-count">102</span> entries
-      </div>
       <ul class="prompt-list">
         
         <li class="prompt-item ASSISTANT"
@@ -3770,9 +3753,7 @@ EOF
         
       </ul>
     </div>
-    
   </div>
-  
   
 
   <div class="footer">
@@ -3783,16 +3764,33 @@ EOF
   (function() {
     const toggleAllEntries = document.getElementById('toggle-all-entries');
     const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
     const visibleCount = document.getElementById('visible-count');
-
-    if (!toggleAllEntries || !toggleWholeSession) return;
 
     function updateFilters() {
       const showAll = toggleAllEntries.checked;
       const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
       let count = 0;
 
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
       document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
         const isUser = el.dataset.entryType === 'user';
         const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
 
@@ -3810,15 +3808,16 @@ EOF
       visibleCount.textContent = count;
 
       
-      document.querySelectorAll('.session').forEach(session => {
-        const visible = session.querySelectorAll('.prompt-item:not(.hidden)').length;
-        const countEl = session.querySelector('.session-count');
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
         if (countEl) countEl.textContent = visible;
       });
     }
 
     toggleAllEntries.addEventListener('change', updateFilters);
     toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
 
     
     updateFilters();
