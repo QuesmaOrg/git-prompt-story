@@ -1,6 +1,26 @@
 # PII Scrubbing
 
-Transcripts are automatically scrubbed of sensitive data before storage.
+Transcripts are automatically scrubbed of sensitive data before storage. This includes:
+- PII pattern matching (emails, API keys, passwords, etc.)
+- Tool output redaction (Read tool outputs removed by default)
+- Duplicate data removal (internal fields like `toolUseResult`)
+
+## Tool Output Redaction
+
+By default, **Read tool outputs are redacted** with `<REDACTED>`. This saves ~8% storage and removes potentially sensitive file contents that are already available in git.
+
+| Tool | Redacted | Reason |
+|------|----------|--------|
+| Read | Yes | File contents already in git, may contain secrets |
+| Bash | No | Command outputs often needed for context |
+| Edit | No | Shows what was changed |
+| Write | No | Shows what was written |
+
+The tool input (file path, command) is preserved - only the output is redacted.
+
+## Storage Optimization
+
+The `toolUseResult` field is automatically removed from session entries. This field duplicates data from `message.content` in a different format and saves ~37% storage.
 
 ## Scrubbed Data Types
 
@@ -56,3 +76,28 @@ Add a custom recognizer in `internal/scrubber/scrubber.go`:
 ```
 
 Pattern order matters: specific patterns (like `sk-ant-`) must come before generic ones (like `api_key=`).
+
+## Adding Custom Tool Redactors
+
+To redact outputs from additional tools, add to `DefaultToolRedactors()`:
+
+```go
+{
+    Name:        "bash_tool_output",
+    ToolName:    "Bash",
+    Replacement: "<REDACTED>",
+    Comment:     "Redact Bash outputs for privacy",
+},
+```
+
+## Adding Custom Node Removers
+
+To remove additional JSON fields from session entries, add to `DefaultNodeRemovers()`:
+
+```go
+{
+    Name:    "thinkingMetadata_removal",
+    Path:    "thinkingMetadata",
+    Comment: "Remove thinking metadata to save space",
+},
+```
