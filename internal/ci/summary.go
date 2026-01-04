@@ -15,7 +15,7 @@ import (
 // PromptEntry represents a single prompt or action in a session
 type PromptEntry struct {
 	Time         time.Time `json:"time"`
-	Type         string    `json:"type"` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT
+	Type         string    `json:"type"` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT, DECISION
 	Text         string    `json:"text"`
 	Truncated    bool      `json:"truncated,omitempty"`
 	InWorkPeriod bool      `json:"in_work_period"` // true if within commit's work period
@@ -23,6 +23,9 @@ type PromptEntry struct {
 	ToolName     string    `json:"tool_name,omitempty"`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
 	ToolInput    string    `json:"tool_input,omitempty"`  // For TOOL_USE: the tool input/command
 	ToolOutput   string    `json:"tool_output,omitempty"` // For TOOL_RESULT: the tool output
+	// For DECISION entries (AskUserQuestion)
+	DecisionHeader string `json:"decision_header,omitempty"` // Question header (e.g., "Version")
+	DecisionAnswer string `json:"decision_answer,omitempty"` // User's selected answer
 }
 
 // SessionSummary represents a summarized session within a commit
@@ -184,6 +187,10 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 	// Map to track tool use entries by ID for linking with results
 	toolUseEntries := make(map[string]*PromptEntry)
 
+	// Map to track AskUserQuestion entries by tool ID for linking with answers
+	// Key is tool ID, value is slice of indices into ss.Prompts for the DECISION entries
+	askUserQuestionEntries := make(map[string][]int)
+
 	for _, entry := range entries {
 		// Get timestamp
 		ts := entry.Timestamp
@@ -237,6 +244,20 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						if toolUse, ok := toolUseEntries[tr.ToolUseID]; ok {
 							toolUse.ToolOutput = tr.Content
 						}
+						// Check if this is an answer to AskUserQuestion
+						if indices, ok := askUserQuestionEntries[tr.ToolUseID]; ok {
+							// Get answers from ToolUseResult (preserved by scrubber for decisions)
+							if entry.ToolUseResult != nil && entry.ToolUseResult.Answers != nil {
+								for _, idx := range indices {
+									if idx < len(ss.Prompts) {
+										question := ss.Prompts[idx].Text
+										if answer, found := entry.ToolUseResult.Answers[question]; found {
+											ss.Prompts[idx].DecisionAnswer = answer
+										}
+									}
+								}
+							}
+						}
 					}
 					continue
 				}
@@ -283,6 +304,32 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 				if len(toolUses) > 0 {
 					// Create an entry for each tool use
 					for _, tool := range toolUses {
+						// Special handling for AskUserQuestion - create DECISION entries
+						if tool.Name == "AskUserQuestion" {
+							var askInput AskUserQuestionInput
+							if err := json.Unmarshal(tool.RawInput, &askInput); err == nil && len(askInput.Questions) > 0 {
+								var indices []int
+								for _, q := range askInput.Questions {
+									pe := PromptEntry{
+										Time:           ts,
+										Type:           "DECISION",
+										Text:           q.Question,
+										ToolID:         tool.ID,
+										DecisionHeader: q.Header,
+										InWorkPeriod:   inWorkPeriod,
+									}
+									if inWorkPeriod {
+										ss.Prompts = append(ss.Prompts, pe)
+										indices = append(indices, len(ss.Prompts)-1)
+									}
+								}
+								if len(indices) > 0 {
+									askUserQuestionEntries[tool.ID] = indices
+								}
+								continue
+							}
+						}
+
 						pe := PromptEntry{
 							Time:         ts,
 							Type:         "TOOL_USE",
@@ -397,9 +444,18 @@ func extractToolResultContent(content any) string {
 
 // ToolUseInfo holds extracted information about a tool use
 type ToolUseInfo struct {
-	ID    string
-	Name  string
-	Input string // Formatted input string (e.g., command for Bash)
+	ID       string
+	Name     string
+	Input    string          // Formatted input string (e.g., command for Bash)
+	RawInput json.RawMessage // Raw input JSON for AskUserQuestion parsing
+}
+
+// AskUserQuestionInput represents the input to AskUserQuestion tool
+type AskUserQuestionInput struct {
+	Questions []struct {
+		Header   string `json:"header"`
+		Question string `json:"question"`
+	} `json:"questions"`
 }
 
 // parseAssistantContent parses assistant message content to determine type and text
@@ -438,9 +494,10 @@ func parseAssistantContent(rawContent json.RawMessage) (entryType, text string, 
 			case "tool_use":
 				if part.Name != "" {
 					toolInfo := ToolUseInfo{
-						ID:    part.ID,
-						Name:  part.Name,
-						Input: formatToolInput(part.Name, part.Input),
+						ID:       part.ID,
+						Name:     part.Name,
+						Input:    formatToolInput(part.Name, part.Input),
+						RawInput: part.Input,
 					}
 					toolUses = append(toolUses, toolInfo)
 				}
@@ -701,6 +758,17 @@ func formatMarkdownEntry(entry PromptEntry) string {
 			return fmt.Sprintf("- [%s] %s (%s): %s\n", timeStr, entry.Type, entry.ToolName, input)
 		}
 		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, text)
+	case "DECISION":
+		header := entry.DecisionHeader
+		if header == "" {
+			header = "Question"
+		}
+		answer := entry.DecisionAnswer
+		if answer == "" {
+			answer = "(no answer)"
+		}
+		answer = html.EscapeString(answer)
+		return fmt.Sprintf("- [%s] DECISION (%s): %s → %s\n", timeStr, header, text, answer)
 	default:
 		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, text)
 	}
@@ -710,6 +778,23 @@ func formatMarkdownEntry(entry PromptEntry) string {
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
+
+	// DECISION entries: always show in full with answer
+	if entry.Type == "DECISION" {
+		header := entry.DecisionHeader
+		if header == "" {
+			header = "Question"
+		}
+		answer := entry.DecisionAnswer
+		if answer == "" {
+			answer = "(no answer)"
+		}
+		// Escape HTML
+		text = html.EscapeString(text)
+		answer = html.EscapeString(answer)
+		return fmt.Sprintf("<details open><summary>[%s] DECISION (%s): %s → %s</summary></details>\n",
+			timeStr, header, text, answer)
+	}
 
 	// Short prompts (≤250 chars): <details open> (expanded by default)
 	if len(text) <= 250 {
@@ -739,7 +824,7 @@ func RenderJSON(summary *Summary) ([]byte, error) {
 // isUserAction returns true if the entry type represents a user action
 func isUserAction(entryType string) bool {
 	switch entryType {
-	case "PROMPT", "COMMAND", "TOOL_REJECT":
+	case "PROMPT", "COMMAND", "TOOL_REJECT", "DECISION":
 		return true
 	default:
 		return false

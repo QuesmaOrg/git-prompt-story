@@ -38,9 +38,10 @@ type ToolOutputRedactor struct {
 // NodeRemover configures removal of entire JSON nodes from session entries
 // This allows removing duplicate or unnecessary fields to save space
 type NodeRemover struct {
-	Name    string `yaml:"name"`
-	Path    string `yaml:"path"`    // JSON field path to remove (e.g., "toolUseResult")
-	Comment string `yaml:"comment"` // Explanation of why this removal exists
+	Name         string               `yaml:"name"`
+	Path         string               `yaml:"path"`    // JSON field path to remove (e.g., "toolUseResult")
+	ShouldRemove func(value any) bool `yaml:"-"`       // Predicate: return true to remove (nil = always remove)
+	Comment      string               `yaml:"comment"` // Explanation of why this removal exists
 }
 
 // CompiledRecognizer is a recognizer with compiled regex patterns
@@ -190,7 +191,12 @@ func (s *PIIScrubber) scrubValue(v interface{}) {
 // removeNodes removes configured JSON fields from the object
 func (s *PIIScrubber) removeNodes(obj map[string]interface{}) {
 	for _, nr := range s.nodeRemovers {
-		delete(obj, nr.Path)
+		if value, exists := obj[nr.Path]; exists {
+			// If no predicate, always remove; otherwise check predicate
+			if nr.ShouldRemove == nil || nr.ShouldRemove(value) {
+				delete(obj, nr.Path)
+			}
+		}
 	}
 }
 
@@ -584,10 +590,19 @@ func DefaultNodeRemovers() []NodeRemover {
 			Name: "toolUseResult_duplicate",
 			Path: "toolUseResult",
 			// toolUseResult is a Claude Code-specific field that duplicates data
-			// from message.content in a different format. The CI HTML rendering
-			// only uses message.content, so this field is redundant.
-			// Removing saves ~37% storage.
-			Comment: "toolUseResult duplicates message.content data. CI HTML only uses message.content. Removing saves ~37% storage.",
+			// from message.content in a different format. However, for AskUserQuestion
+			// responses, toolUseResult.answers contains structured decision data
+			// that is used by ci-summary to display DECISION entries.
+			ShouldRemove: func(value any) bool {
+				// Preserve if it contains AskUserQuestion answers (decision data)
+				if m, ok := value.(map[string]interface{}); ok {
+					if _, hasAnswers := m["answers"]; hasAnswers {
+						return false // Don't remove - has decision data
+					}
+				}
+				return true // Remove - just duplicate data
+			},
+			Comment: "toolUseResult duplicates message.content data, except for AskUserQuestion responses which contain decision answers.",
 		},
 	}
 }

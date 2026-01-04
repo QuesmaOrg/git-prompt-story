@@ -15,12 +15,18 @@ type ClaudeSession struct {
 
 // MessageEntry represents a single JSONL line from Claude Code
 type MessageEntry struct {
-	Type      string    `json:"type"`      // "user", "assistant", "file-history-snapshot"
-	SessionID string    `json:"sessionId"`
-	Timestamp time.Time `json:"timestamp"`
-	GitBranch string    `json:"gitBranch"`
-	Snapshot  *Snapshot `json:"snapshot,omitempty"`
-	Message   *Message  `json:"message,omitempty"`
+	Type          string         `json:"type"` // "user", "assistant", "file-history-snapshot"
+	SessionID     string         `json:"sessionId"`
+	Timestamp     time.Time      `json:"timestamp"`
+	GitBranch     string         `json:"gitBranch"`
+	Snapshot      *Snapshot      `json:"snapshot,omitempty"`
+	Message       *Message       `json:"message,omitempty"`
+	ToolUseResult *ToolUseResult `json:"toolUseResult,omitempty"` // For AskUserQuestion answers
+}
+
+// ToolUseResult contains structured answer data from AskUserQuestion
+type ToolUseResult struct {
+	Answers map[string]string `json:"answers,omitempty"` // Question -> Answer mapping
 }
 
 // Snapshot contains timestamp for file-history-snapshot entries
