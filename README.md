@@ -322,8 +322,7 @@ git-prompt-story edit <commit>
 Notes live in separate refs and must be explicitly pushed:
 
 ```bash
-git push origin refs/notes/prompt-story
-git push origin +refs/notes/prompt-story-transcripts
+git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
 ```
 
 ## Upgrading
