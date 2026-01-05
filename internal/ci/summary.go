@@ -792,7 +792,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		// Escape HTML
 		text = html.EscapeString(text)
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("<details open><summary>[%s] DECISION (%s): %s → %s</summary></details>\n",
+		return fmt.Sprintf("<details open><summary>[%s] DECISION (%s): %s → %s</summary></details>\n\n",
 			timeStr, header, text, answer)
 	}
 
@@ -800,7 +800,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	if len(text) <= 250 {
 		// Escape HTML to prevent breaking markdown structure
 		text = html.EscapeString(text)
-		return fmt.Sprintf("<details open><summary>[%s] %s: %s</summary></details>\n",
+		return fmt.Sprintf("<details open><summary>[%s] %s: %s</summary></details>\n\n",
 			timeStr, entry.Type, text)
 	}
 
@@ -812,7 +812,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("<details><summary>[%s] %s: %s</summary>\n\n...%s\n\n</details>\n",
+	return fmt.Sprintf("<details><summary>[%s] %s: %s</summary>\n\n...%s\n\n</details>\n\n",
 		timeStr, entry.Type, summary, continuation)
 }
 
