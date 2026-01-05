@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27191d3 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>27191d3</code></h1>
+    <p class="meta">Skip &lt;details&gt; tags in ci-summary when all user prompts are short</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">3</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">81</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>27191d3a12dfa158657aacfc3e96ad57a22033d5</code><br>
+    <strong>Work period:</strong> 2026-01-05 17:56 - 2026-01-05 18:24
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">efe74886-38e2-4ab8-9e4e-ff1c5428f89c</code> |
+        2026-01-05 18:08 - 2026-01-05 18:23 | <span class="session-count">59</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item COMMAND"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:08</span>
+          <span class="prompt-type">COMMAND</span>
+          
+          <span class="prompt-text">/clear</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">ci-summary is critical functionality. Actually if all user prompts are short and don&#39;t need expansion, we don&#39;t need to use &lt;details&gt; at all in user prompts, make a logic for that.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand the `ci-summary` functionality and how `&lt;details&gt;` tags are used for user prompts.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Find all code related to ci-summary command, particularly focusing on:
+1. How user prompts are fo...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Perfect! Now I have comprehensive information. Let me create a detailed summary report:
+
+## Summary: CI-Summary Command Code Analysis
+
+I&#39;ve found all the code related to the `ci-summary` command. Here&#39;s what I discovered:
+
+### Key Files
+
+1. **Command Entry Point**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_summary.go`
+2. **Core Implementation**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go`
+3. **Tests**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go`
+4. **E2E Tests**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh`
+
+---
+
+## 1. How User Prompts Are Formatted
+
+**Prompt Entry Types** (lines 209-286 in summary.go):
+- **PROMPT**: Regular user text input
+- **COMMAND**: User-invoked CLI commands (prefixed with `/`)
+- **DECISION**: Questions from AskUserQuestion tool
+- **ASSISTANT**: AI responses
+- **TOOL_USE**: Tool invocations (Bash, Edit, etc.)
+- **TOOL_REJECT**: User rejecting a tool call
+
+**Truncation Logic** (lines 278-280 in summary.go):
+```go
+if !full &amp;&amp; len(pe.Text) &gt; 2000 {
+    pe.Text = pe.Text[:2000] &#43; &#34;...[TRUNCATED]&#34;
+    pe.Truncated = true
+}
+```
+- User prompts are truncated at **2000 characters** when `--full` flag is not set
+- Tool inputs are truncated at **500 characters** (line 347-350)
+
+---
+
+## 2. Where `&lt;details&gt;` Tags Are Used for User Prompts
+
+**Location**: `RenderMarkdown()` function (lines 615-716) and `renderTimeline()` function (lines 740-762)
+
+### Main Sections with Details Tags:
+
+**Section 1: &#34;User Prompts&#34; Section** (lines 651-662):
+```go
+detailsTag := &#34;&lt;details&gt;&#34;
+if len(userTimeline) &lt; 10 {
+    detailsTag = &#34;&lt;details open&gt;&#34;
+}
+sb.WriteString(fmt.Sprintf(&#34;%s&lt;summary&gt;&lt;strong&gt;%d user prompts&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, detailsTag, len(userTimeline)))
+renderTimeline(&amp;sb, userTimeline, true)
+sb.WriteString(&#34;&lt;/details&gt;\n\n&#34;)
+```
+
+**Section 2: &#34;All Steps&#34; Section** (lines 664-667):
+```go
+sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All %d steps&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, len(fullT...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand the structure. Let me read the relevant code to make the change:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me also see the `formatMarkdownEntryCollapsible` function:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand. I need to:
+1. Add a helper to check if all prompts are short (≤250 chars)
+2. When all are short, skip `&lt;details&gt;` entirely and render as simple bullets</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper function to check if all prompts are short&#34;,&#34;content&#34;:&#34;Add helper function to check if all prompts are short&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Modifying...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me add the helper functions after `isUserAction`:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   852 func RenderJSON(summary *Summary) ([]byte, error) {
+   853 	return json.MarshalIndent(summary, &#34;&#34;, &#34;  &#34;)
+   854 }
+   855 
+   856 // isUserAction returns true if the entry type represents a user action
+   857 func isUserAction(entryType string) bool {
+   858 	switch entryType {
+   859 	case &#34;PROMPT&#34;, &#34;COMMAND&#34;, &#34;TOOL_REJECT&#34;, &#34;DECISION&#34;:
+   860 		return true
+   861 	default:
+   862 		return false
+   863 	}
+   864 }
+   865 
+   866 // allPromptsShort returns true if all entries have short text (≤250 chars)
+   867 func allPromptsShort(entries []TimelineEntry) bool {
+   868 	for _, te := range entries {
+   869 		text := strings.ReplaceAll(te.Entry.Text, &#34;\n&#34;, &#34; &#34;)
+   870 		if len(text) &gt; 250 {
+   871 			return false
+   872 		}
+   873 	}
+   874 	return true
+   875 }
+   876 
+   877 // formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
+   878 func formatMarkdownEntrySimple(entry PromptEntry) string {
+   879 	timeStr := entry.Time.Local().Format(&#34;15:04&#34;)
+   880 	emoji := getTypeEmoji(entry.Type)
+   881 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+   882 	text = html.EscapeString(text)
+   883 
+   884 	// DECISION entries: show with answer
+   885 	if entry.Type == &#34;DECISION&#34; {
+   886 		header := entry.DecisionHeader
+   887 		if header == &#34;&#34; {
+   888 			header = &#34;Question&#34;
+   889 		}
+   890 		answer := entry.DecisionAnswer
+   891 		if answer == &#34;&#34; {
+   892 			answer = &#34;(no answer)&#34;
+   893 		}
+   894 		answer = html.EscapeString(answer)
+   895 		return fmt.Sprintf(&#34;- %s %s %s: %s   %s\n&#34;, timeStr, emoji, header, text, answer)
+   896 	}
+   897 
+   898 	return fmt.Sprintf(&#34;- %s %s %s\n&#34;, timeStr, emoji, text)
+   899 }
+   900 
+   901 // countUserPrompts counts user action entries in a slice
+   902 func countUserPrompts(prompts []PromptEntry) int {
+   903 	count := 0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper function to check if all prompts are short&#34;,&#34;content&#34;:&#34;Add helper function to check if all prompts are short&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Modifying u...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me modify the user prompts section rendering:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   646 			}
+   647 		}
+   648 	}
+   649 
+   650 	// Render Prompts section
+   651 	if len(userTimeline) == 0 {
+   652 		sb.WriteString(&#34;*No user prompts in this PR*\n\n&#34;)
+   653 	} else if allPromptsShort(userTimeline) {
+   654 		// All prompts are short - skip &lt;details&gt; entirely for cleaner output
+   655 		sb.WriteString(fmt.Sprintf(&#34;**%d user prompts**\n\n&#34;, len(userTimeline)))
+   656 		renderTimeline(&amp;sb, userTimeline, false) // false = use simple formatting
+   657 	} else {
+   658 		// Some prompts are long - use collapsible sections
+   659 		// Expand by default when less than 10 user prompts
+   660 		detailsTag := &#34;&lt;details&gt;&#34;
+   661 		if len(userTimeline) &lt; 10 {
+   662 			detailsTag = &#34;&lt;details open&gt;&#34;
+   663 		}
+   664 		sb.WriteString(fmt.Sprintf(&#34;%s&lt;summary&gt;&lt;strong&gt;%d user prompts&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, detailsTag, len(userTimeline)))
+   665 		renderTimeline(&amp;sb, userTimeline, true)
+   666 		sb.WriteString(&#34;&lt;/details&gt;\n\n&#34;)
+   667 	}
+   668 
+   669 	// Render All Steps section
+   670 	sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All %d steps&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, len(fullTimeline)))
+   671 	renderTimeline(&amp;sb, fullTimeline, false)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Wait, I need to check - `renderTimeline` with `false` uses `formatMarkdownEntry` which truncates at 100 chars. I need to add a mode for simple full-text formatting:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I need to update `renderTimeline` to support a &#34;simple&#34; mode. Let me modify it to use a format mode string:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   740 		return &#34;📝&#34; // Unknown type
+   741 	}
+   742 }
+   743 
+   744 // Format modes for renderTimeline
+   745 const (
+   746 	formatRegular     = &#34;regular&#34;     // Truncated display (100 chars) - for &#34;All Steps&#34;
+   747 	formatCollapsible = &#34;collapsible&#34; // &lt;details&gt; tags for long prompts - for user prompts with some long
+   748 	formatSimple      = &#34;simple&#34;      // Full text, no details - for user prompts when all short
+   749 )
+   750 
+   751 // renderTimeline renders a list of timeline entries with commit markers
+   752 func renderTimeline(sb *strings.Builder, entries []TimelineEntry, formatMode string) {
+   753 	lastCommitIndex := -1
+   754 
+   755 	for _, te := range entries {
+   756 		// Insert commit marker when we cross to a new commit (including the first one)
+   757 		if te.CommitIndex != lastCommitIndex {
+   758 			subject := te.CommitSubj
+   759 			if len(subject) &gt; 40 {
+   760 				subject = subject[:37] &#43; &#34;...&#34;
+   761 			}
+   762 			subject = html.EscapeString(subject)
+   763 			sb.WriteString(fmt.Sprintf(&#34;\n#### %s: %s\n\n&#34;, te.CommitSHA, subject))
+   764 		}
+   765 		lastCommitIndex = te.CommitIndex
+   766 
+   767 		// Format the entry based on mode
+   768 		switch formatMode {
+   769 		case formatCollapsible:
+   770 			if isUserAction(te.Entry.Type) {
+   771 				sb.WriteString(formatMarkdownEntryCollapsible(te.Entry))
+   772 			} else {
+   773 				sb.WriteString(formatMarkdownEntry(te.Entry))
+   774 			}
+   775 		case formatSimple:
+   776 			sb.WriteString(formatMarkdownEntrySimple(te.Entry))
+   777 		default: // formatRegular
+   778 			sb.WriteString(formatMarkdownEntry(te.Entry))
+   779 		}
+   780 	}
+   781 }
+   782 
+   783 // formatMarkdownEntry formats a single entry for markdown display
+   784 func formatMarkdownEntry(entry PromptEntry) string {
+   785 	timeStr := entry.Time.Local()...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to update the call sites to use the new format mode constants:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   646 			}
+   647 		}
+   648 	}
+   649 
+   650 	// Render Prompts section
+   651 	if len(userTimeline) == 0 {
+   652 		sb.WriteString(&#34;*No user prompts in this PR*\n\n&#34;)
+   653 	} else if allPromptsShort(userTimeline) {
+   654 		// All prompts are short - skip &lt;details&gt; entirely for cleaner output
+   655 		sb.WriteString(fmt.Sprintf(&#34;**%d user prompts**\n\n&#34;, len(userTimeline)))
+   656 		renderTimeline(&amp;sb, userTimeline, formatSimple)
+   657 	} else {
+   658 		// Some prompts are long - use collapsible sections
+   659 		// Expand by default when less than 10 user prompts
+   660 		detailsTag := &#34;&lt;details&gt;&#34;
+   661 		if len(userTimeline) &lt; 10 {
+   662 			detailsTag = &#34;&lt;details open&gt;&#34;
+   663 		}
+   664 		sb.WriteString(fmt.Sprintf(&#34;%s&lt;summary&gt;&lt;strong&gt;%d user prompts&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, detailsTag, len(userTimeline)))
+   665 		renderTimeline(&amp;sb, userTimeline, formatCollapsible)
+   666 		sb.WriteString(&#34;&lt;/details&gt;\n\n&#34;)
+   667 	}
+   668 
+   669 	// Render All Steps section
+   670 	sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All %d steps&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, len(fullTimeline)))
+   671 	renderTimeline(&amp;sb, fullTimeline, false)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   665 		renderTimeline(&amp;sb, userTimeline, formatCollapsible)
+   666 		sb.WriteString(&#34;&lt;/details&gt;\n\n&#34;)
+   667 	}
+   668 
+   669 	// Render All Steps section
+   670 	sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All %d steps&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, len(fullTimeline)))
+   671 	renderTimeline(&amp;sb, fullTimeline, formatRegular)
+   672 	sb.WriteString(&#34;&lt;/details&gt;\n\n&#34;)
+   673 
+   674 	// Link to full transcripts
+   675 	if pagesURL != &#34;&#34; {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper function to check if all prompts are short&#34;,&#34;content&#34;:&#34;Add helper function to check if all prompts are short&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Modifying u...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+#0 building with &#34;default&#34; instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 509B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/golang:1.24-alpine
+#2 DONE 1.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae
+#4 resolve docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 12.46MB 0.1s done
+#5 DONE 0.1s
+
+#6 [2/8] RUN apk add --no-cache git bash jq libfaketime socat
+#6 CACHED
+
+#7 [3/8] WORKDIR /build
+#7 CACHED
+
+#8 [4/8] COPY . .
+#8 DONE 0.1s
+
+#9 [5/8] RUN go build -o /usr/local/bin/git-prompt-story .
+#9 0.158 go: downloading github.com/spf13/cobra v1.10.2
+#9 0.543 go: downloading github.com/spf13/pflag v1.0.9
+#9 DONE 5.8s
+
+#10 [6/8] WORKDIR /workspace
+#10 DONE 0.0s
+
+#11 [7/8] RUN git config --global user.email &#34;&lt;EMAIL&gt;&#34; &amp;&amp;     git config --global user.name &#34;Test User&#34; &amp;&amp;     git config --global init.defaultBranch main
+#11 DONE 0.1s
+
+#12 [8/8] COPY e2e/ /e2e/
+#12 DONE 0.0s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 2.9s done
+#13 exporting manifest sha256:06c5c60b6c52a3afa9747f39200e52123fa501aae02adef8264414bcc8f3fb46
+#13 exporting manifest sha256:06c5c60b6c52a3afa9747f39200e52123fa501aae02adef8264414bcc8f3fb46 0.0s done
+#13 exporting config sha256:5d84228ecc223af72c9ae6c7f60315023ae1ec88bf576d698ad336f43d7177ff done
+#13 exporting attestation manifest sha256:0e050d64f62937b7edfe25d051326d2eb0f2bedb793cce7d3517759437c09356 done
+#13 exporting manifest list sha256:15c6dc37c1a2ec52358fae93ebf380e097759935a4e5f603399bc07e9f8ac92a done
+#13 naming to docker.io/library/git-prompt-story-e2e:latest done
+#13 unpacking to docker.io/library/git-prompt-story-e2e:latest
+#13 unp...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">One test failed. Let me check the ci-summary test to understand what it expects:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Markdown should have user prompts section</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-75-MD_OUTPUT=$(git-prompt-story ci-summary &#34;${INITIAL_COMMIT}..HEAD&#34; --format=markdown)
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-76-
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-77-echo &#34;$MD_OUTPUT&#34; | grep -q &#34;| Commit | Subject | Tool(s) | User Prompts | Steps |&#34; || fail &#34;Markdown should have new table header&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-78-echo &#34;    - Has new table header&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-79-
+e2e/tests/10-ci-commands.sh:80:echo &#34;$MD_OUTPUT&#34; | grep -q &#34;user prompts&lt;/strong&gt;&#34; || fail &#34;Markdown should have user prompts section&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-81-echo &#34;    - Has user prompts section&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-82-
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-83-echo &#34;$MD_OUTPUT&#34; | grep -q &#34;All.*steps&lt;/strong&gt;&#34; || fail &#34;Markdown should have All steps section&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-84-echo &#34;    - Has All steps section&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-85-
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-86-echo &#34;$MD_OUTPUT&#34; | grep -q &#34;Claude Code&#34; || fail &#34;Markdown should mention Claude Code&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-87-echo &#34;    - Mentions Claude Code&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh-88-
+e2e/tests/10-ci-commands.sh-89-# Step 6: Test ci-summary with pages-url option
+e2e/tests/10-ci-commands.sh-90-echo &#34;  Step 6: Testing ci-summary with pages-url...&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The test expects `user prompts&lt;/strong&gt;` which is in the `&lt;details&gt;` format. Let me check what prompts the test creates to see if they&#39;re short:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">create_mock_session</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 15 files
+e2e/tests/12-repair-command.sh
+e2e/tests/07-show-ranges.sh
+e2e/tests/15-agent-sessions.sh
+e2e/lib/helpers.sh
+e2e/tests/17-rebase-flow.sh
+e2e/tests/10-ci-commands.sh
+e2e/tests/14-pre-push-hook.sh
+e2e/tests/13-hook-installation.sh
+e2e/tests/11-squash-flow.sh
+e2e/tests/03-amend-flow.sh
+e2e/tests/04-multiple-sessions.sh
+e2e/tests/05-no-sessions.sh
+e2e/tests/01-basic-flow.sh
+e2e/tests/02-session-detection.sh
+e2e/tests/09-pii-scrubbing.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">create_mock_session</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">11:# Usage: create_mock_session &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+12:# Example: create_mock_session &#34;test-session-1&#34; &#34;2025-01-15T09:15:00Z&#34; &#34;2025-01-15T10:25:00Z&#34;
+13:create_mock_session() {
+14-    local session_id=&#34;$1&#34;
+15-    local start_time=&#34;$2&#34;
+16-    local end_time=&#34;$3&#34;
+17-
+18-    local repo_path=$(pwd)
+19-    local encoded_path=$(echo &#34;$repo_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+20-    local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+21-
+22-    mkdir -p &#34;$session_dir&#34;
+23-
+24-    cat &gt; &#34;$session_dir/$session_id.jsonl&#34; &lt;&lt; EOF
+25-{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;How do I implement feature X?&#34;}}
+26-{&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;Here&#39;s how to implement feature X...&#34;}]}}
+27-EOF
+28-
+29-    echo &#34;  Created mock session: $session_dir/$session_id.jsonl&#34;
+30-}
+31-
+32-# Create a mock Claude Code session with tool uses for testing PR comment format
+33:# Usage: create_mock_session_with_tools &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+34:create_mock_session_with_tools() {
+35-    local session_id=&#34;$1&#34;
+36-    local start_time=&#34;$2&#34;
+37-    local end_time=&#34;$3&#34;
+38-
+39-    local repo_path=$(pwd)
+40-    local encoded_path=$(echo &#34;$repo_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+41-    local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+42-
+43-    mkdir -p &#34;$session_dir&#34;
+44-
+45-    cat &gt; &#34;$session_dir/$session_id.jsonl&#34; &lt;&lt; EOF
+46-{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;Add a new function to utils.go&#34;}}
+47-{&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;I&#39;ll help you add a new function.&#34;},{&#34;type&#34;:&#34;tool_use&#34;,&#34;id&#34;:&#34;tool1&#34;,&#34;name&#34;:&#34;Read&#34;,&#34;input&#34;:{&#34;file_path&#34;:&#34;/utils.go&#34;}}]}}
+48-{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;times...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The mock sessions have short prompts (&#34;How do I implement feature X?&#34;), so my new logic is correctly using the simple format. I need to update the test to accept either format:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    76 
+    77 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;| Commit | Subject | Tool(s) | User Prompts | Steps |&#34; || fail &#34;Markdown should have new table header&#34;
+    78 echo &#34;    - Has new table header&#34;
+    79 
+    80 # User prompts section can be either &#34;**N user prompts**&#34; (simple) or &#34;&lt;strong&gt;N user prompts&lt;/strong&gt;&#34; (details)
+    81 echo &#34;$MD_OUTPUT&#34; | grep -qE &#34;(user prompts&lt;/strong&gt;|user prompts\*\*)&#34; || fail &#34;Markdown should have user prompts section&#34;
+    82 echo &#34;    - Has user prompts section&#34;
+    83 
+    84 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;All.*steps&lt;/strong&gt;&#34; || fail &#34;Markdown should have All steps section&#34;
+    85 echo &#34;    - Has All steps section&#34;
+    86 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== E2E Test Suite ===
+
+Running: 01-basic-flow
+[1/5] Basic Hook Flow
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Initial commit time: 2025-01-15 09:00:00 &#43;0000
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Hooks installed successfully
+  Step 4: Creating mock session (09:15 - 10:25)...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/test-session-1.jsonl
+  Step 5: Creating feature commit at 10:30...
+[main 912634d] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Feature commit time: 2025-01-15 10:30:00 &#43;0000
+  Step 6: Verifying results...
+    Checking commit message...
+    - Commit message contains Prompt-Story trailer
+    Checking note attachment...
+    - Note is attached to HEAD
+    Checking note content...
+    - Note version is 1
+    - Note contains 1 session
+    - Session ID is correct
+    Verifying work timestamps...
+    - start_work = 2025-01-15T09:00:00Z (previous commit)
+    Verifying session timestamps match JSONL times...
+    - session.created = 2025-01-15T09:15:00Z (from JSONL)
+    - session.modified = 2025-01-15T10:25:00Z (from JSONL)
+    Checking transcript storage...
+    - Transcript stored at refs/notes/prompt-story-transcripts:claude-code/test-session-1.jsonl
+
+  All assertions passed!
+
+Running: 02-session-detection
+[2/5] Session Detection
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Step 4: Creating mock sessions...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-1.jsonl
+  Created mock session for /workspace/other-repo: /root/.clau...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass now. Let me update the todo list:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding helper function to check if all prompts are short&#34;,&#34;content&#34;:&#34;Add helper function to check if all prompts are short&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Modifying u...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! The changes implement the logic to skip `&lt;details&gt;` tags when all user prompts are short (≤250 chars):
+
+**Changes made:**
+
+1. **`internal/ci/summary.go`**:
+   - Added `allPromptsShort()` helper function that checks if all entries have text ≤250 chars
+   - Added `formatMarkdownEntrySimple()` for clean bullet formatting without `&lt;details&gt;` tags  
+   - Added format mode constants (`formatRegular`, `formatCollapsible`, `formatSimple`)
+   - Modified `renderTimeline()` to accept format mode string instead of boolean
+   - Updated user prompts section logic: if all prompts are short, outputs `**N user prompts**` with simple bullets; otherwise uses `&lt;details&gt;` with collapsible entries
+
+2. **`e2e/tests/10-ci-commands.sh`**:
+   - Updated test to accept either format (markdown `**` or HTML `&lt;strong&gt;`)
+
+**Before (when all prompts are short):**
+```html
+&lt;details open&gt;&lt;summary&gt;&lt;strong&gt;2 user prompts&lt;/strong&gt;&lt;/summary&gt;
+- &lt;details open&gt;&lt;summary&gt;09:20 💬 Short prompt&lt;/summary&gt;&lt;/details&gt;
+&lt;/details&gt;
+```
+
+**After (when all prompts are short):**
+```markdown
+**2 user prompts**
+- 09:20 💬 Short prompt
+```
+
+Would you like me to bump the version in `VERSION` and run `go install .` to reinstall globally?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please also add in 10-cic-ommands test with very long user prompt to verify it all works.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll add a helper function for creating a session with a long prompt, then add a test case to verify `&lt;details&gt;` tags are used:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/lib/helpers.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    25 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;How do I implement feature X?&#34;}}
+    26 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;Here&#39;s how to implement feature X...&#34;}]}}
+    27 EOF
+    28 
+    29     echo &#34;  Created mock session: $session_dir/$session_id.jsonl&#34;
+    30 }
+    31 
+    32 # Create a mock Claude Code session with a long user prompt (&gt;250 chars)
+    33 # Usage: create_mock_session_with_long_prompt &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+    34 create_mock_session_with_long_prompt() {
+    35     local session_id=&#34;$1&#34;
+    36     local start_time=&#34;$2&#34;
+    37     local end_time=&#34;$3&#34;
+    38 
+    39     local repo_path=$(pwd)
+    40     local encoded_path=$(echo &#34;$repo_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+    41     local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+    42 
+    43     mkdir -p &#34;$session_dir&#34;
+    44 
+    45     # Create a prompt that is definitely longer than 250 characters
+    46     local long_prompt=&#34;I need help implementing a comprehensive authentication system for my web application. The system should support multiple authentication methods including username/password, OAuth2 with Google and GitHub providers, and magic link email authentication. Additionally, I want to implement role-based access control with at least three roles: admin, editor, and viewer.&#34;
+    47 
+    48     cat &gt; &#34;$session_dir/$session_id.jsonl&#34; &lt;&lt; EOF
+    49 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;$long_prompt&#34;}}
+    50 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me add the test case to 10-ci-commands.sh after Step 5:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    86 
+    87 echo &#34;$MD_OUTPUT&#34; | grep -q &#34;Claude Code&#34; || fail &#34;Markdown should mention Claude Code&#34;
+    88 echo &#34;    - Mentions Claude Code&#34;
+    89 
+    90 # Step 5b: Test ci-summary with long user prompt (should use &lt;details&gt; format)
+    91 echo &#34;  Step 5b: Testing ci-summary with long user prompt...&#34;
+    92 cleanup_sessions
+    93 rm -rf /workspace/test-repo
+    94 mkdir -p /workspace/test-repo
+    95 cd /workspace/test-repo
+    96 git init
+    97 
+    98 echo &#34;initial&#34; &gt; file.txt
+    99 git add file.txt
+   100 faketime &#39;2025-01-15 09:00:00&#39; git commit -m &#34;Initial commit&#34;
+   101 LONG_PROMPT_INITIAL=$(git rev-parse HEAD)
+   102 
+   103 git-prompt-story install-hooks
+   104 
+   105 # Create session with a long prompt (&gt;250 chars)
+   106 create_mock_session_with_long_prompt &#34;long-session&#34; &#34;2025-01-15T09:15:00Z&#34; &#34;2025-01-15T09:45:00Z&#34;
+   107 echo &#34;feature&#34; &gt;&gt; file.txt
+   108 git add file.txt
+   109 export GIT_AUTHOR_DATE=&#34;2025-01-15T10:00:00Z&#34;
+   110 export GIT_COMMITTER_DATE=&#34;2025-01-15T10:00:00Z&#34;
+   111 faketime &#39;2025-01-15 10:00:00&#39; git commit -m &#34;Add feature with long prompt&#34;
+   112 unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
+   113 
+   114 LONG_MD=$(git-prompt-story ci-summary &#34;${LONG_PROMPT_INITIAL}..HEAD&#34; --format=markdown)
+   115 
+   116 # Long prompts should use &lt;details&gt;&lt;summary&gt;&lt;strong&gt; format, NOT **markdown** format
+   117 echo &#34;$LONG_MD&#34; | grep -q &#34;user prompts&lt;/strong&gt;&#34; || fail &#34;Long prompts should use &lt;details&gt; format with &lt;/strong&gt;&#34;
+   118 echo &#34;    - Long prompts use &lt;details&gt; format&#34;
+   119 
+   120 # Should also have the collapsible individual entry
+   121 echo &#34;$LONG_MD&#34; | grep -q &#34;&lt;details&gt;&lt;summary&gt;&#34; || fail &#34;Long prompts should have collapsible entries&#34;
+   122 echo &#34;    - Has collapsible entries for long prompts&#34;
+   123 
+   124 # Step 6: Test ci-summary with pages-url option
+   125...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I need to fix the remaining test steps that reference the old commits. Let me check and update them:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I need to update the remaining steps to use the new test repo context:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   127 
+   128 echo &#34;$PAGES_MD&#34; | grep -q &#34;https://example.github.io/repo/pr-42/&#34; || fail &#34;Markdown should contain pages URL&#34;
+   129 echo &#34;    - Contains pages URL&#34;
+   130 
+   131 # Step 7: Test ci-html generation
+   132 echo &#34;  Step 7: Testing ci-html generation...&#34;
+   133 rm -rf /tmp/html-test
+   134 LONG_PROMPT_COMMIT=$(git rev-parse HEAD)
+   135 git-prompt-story ci-html &#34;${LONG_PROMPT_INITIAL}..HEAD&#34; --output-dir=/tmp/html-test --pr=42
+   136 
+   137 test -f /tmp/html-test/index.html || fail &#34;index.html should be created&#34;
+   138 echo &#34;    - index.html created&#34;
+   139 
+   140 # Check that commit page was created (short SHA format)
+   141 SHORT_SHA=$(echo &#34;$LONG_PROMPT_COMMIT&#34; | cut -c1-7)
+   142 
+   143 test -f &#34;/tmp/html-test/${SHORT_SHA}.html&#34; || fail &#34;${SHORT_SHA}.html should be created&#34;
+   144 echo &#34;    - ${SHORT_SHA}.html created&#34;
+   145 
+   146 # Verify HTML content
+   147 grep -q &#34;PR #42&#34; /tmp/html-test/index.html || fail &#34;index.html should contain PR number&#34;
+   148 echo &#34;    - index.html contains PR #42&#34;
+   149 
+   150 grep -q &#34;Prompt Story&#34; /tmp/html-test/index.html || fail &#34;index.html should contain title&#34;
+   151 echo &#34;    - index.html contains title&#34;
+   152 
+   153 # Step 8: Test ci-summary output to file
+   154 echo &#34;  Step 8: Testing ci-summary file output...&#34;
+   155 rm -f /tmp/summary.md
+   156 git-prompt-story ci-summary &#34;${LONG_PROMPT_INITIAL}..HEAD&#34; --format=markdown --output=/tmp/summary.md
+   157 
+   158 test -f /tmp/summary.md || fail &#34;Output file should be created&#34;
+   159 echo &#34;    - Output file created&#34;
+   160 
+   161 grep -q &#34;| Commit | Subject | Tool(s) | User Prompts | Steps |&#34; /tmp/summary.md || fail &#34;Output file should have content&#34;
+   162 echo &#34;    - Output file has content&#34;
+   163 
+   164 # Step 9: Test with no notes (should handle gracefully)
+   165 echo &#34;  Step 9: Tes...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let&#39;s run the tests to verify:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== E2E Test Suite ===
+
+Running: 01-basic-flow
+[1/5] Basic Hook Flow
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Initial commit time: 2025-01-15 09:00:00 &#43;0000
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Hooks installed successfully
+  Step 4: Creating mock session (09:15 - 10:25)...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/test-session-1.jsonl
+  Step 5: Creating feature commit at 10:30...
+[main 912634d] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Feature commit time: 2025-01-15 10:30:00 &#43;0000
+  Step 6: Verifying results...
+    Checking commit message...
+    - Commit message contains Prompt-Story trailer
+    Checking note attachment...
+    - Note is attached to HEAD
+    Checking note content...
+    - Note version is 1
+    - Note contains 1 session
+    - Session ID is correct
+    Verifying work timestamps...
+    - start_work = 2025-01-15T09:00:00Z (previous commit)
+    Verifying session timestamps match JSONL times...
+    - session.created = 2025-01-15T09:15:00Z (from JSONL)
+    - session.modified = 2025-01-15T10:25:00Z (from JSONL)
+    Checking transcript storage...
+    - Transcript stored at refs/notes/prompt-story-transcripts:claude-code/test-session-1.jsonl
+
+  All assertions passed!
+
+Running: 02-session-detection
+[2/5] Session Detection
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Step 4: Creating mock sessions...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-1.jsonl
+  Created mock session for /workspace/other-repo: /root/.clau...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All 17 tests pass. Here&#39;s a summary of what was added:
+
+**Changes:**
+
+1. **`e2e/lib/helpers.sh`** - Added `create_mock_session_with_long_prompt()` helper function that creates a session with a 350&#43; character prompt
+
+2. **`e2e/tests/10-ci-commands.sh`** - Added **Step 5b** that:
+   - Creates a fresh test repo with a long prompt session
+   - Verifies the markdown output uses `&lt;details&gt;` format (`user prompts&lt;/strong&gt;`)
+   - Verifies collapsible entries are present (`&lt;details&gt;&lt;summary&gt;`)
+
+The test now covers both scenarios:
+- **Short prompts** (Step 5): Uses simple `**N user prompts**` markdown format
+- **Long prompts** (Step 5b): Uses `&lt;details&gt;&lt;summary&gt;&lt;strong&gt;N user prompts&lt;/strong&gt;&lt;/summary&gt;` HTML format with collapsible entries
+
+Would you like me to bump the version and run `go install .` to reinstall globally?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:23</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please commit and push to main</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:23</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;m currently on the `cleanup` branch. Per CLAUDE.md, I&#39;ll commit and push to this branch rather than main:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch cleanup
+Your branch is up to date with &#39;origin/cleanup&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   e2e/lib/helpers.sh
+	modified:   e2e/tests/10-ci-commands.sh
+	modified:   internal/ci/summary.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> e2e/lib/helpers.sh          | 24 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ e2e/tests/10-ci-commands.sh | 58 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;---------
+ internal/ci/summary.go      | 68 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-----
+ 3 files changed, 130 insertions(&#43;), 20 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">f8cbc71 Cleanup: fix test numbering and remove legacy refs/notes/commits support
+7e8c073 Add e2e tests for generate-github-workflow command
+007991e Remove redundant examples folder</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add e2e/lib/helpers.sh e2e/tests/10-ci-commands.sh internal/ci/summary.go &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Skip &lt;details&gt; tags in ci-summary when all user prompts are short
+
+When all user prompts are ≤250 characters, render them as simple
+markdown bullets instead of using HTML &lt;details&gt; tags. This produces
+cleaner output for sessions with brief prompts.
+
+- Add allPromptsShort() helper to check if all entries are short
+- Add formatMarkdownEntrySimple() for clean bullet formatting
+- Add format mode constants (regular, collapsible, simple)
+- Update renderTimeline() to accept format mode string
+- Add create_mock_session_with_long_prompt() test helper
+- Add Step 5b test to verify &lt;details&gt; format for long prompts
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[cleanup 8b94aaf] Skip &lt;details&gt; tags in ci-summary when all user prompts are short
+ 3 files changed, 130 insertions(&#43;), 20 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card agent-session" data-is-agent="true">
+    <div class="commit-header">
+      <h3>
+        <span class="badge agent">Agent</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">agent-a075db5</code> |
+        2026-01-05 18:14 - 2026-01-05 18:14 | <span class="session-count">15</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Find all code related to ci-summary command, particularly focusing on:
+1. How user prompts are formatted
+2. Where `&lt;details&gt;` tags are used for user prompts
+3. The logic that decides when to use collapsible sections
+
+Search for files containing ci-summary, details tags in the context of prompts, and any thresholds or conditions for collapsing content.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll help you find all code related to the ci-summary command, focusing on user prompt formatting, details tags, and collapsible section logic. Let me search the codebase systematically.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*ci-summary*</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ci-summary</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">&amp;lt;details&amp;gt;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 1 file
+internal/ci/summary_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">collapsible|collapse</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 3 files
+internal/ci/summary.go
+internal/ci/summary_test.go
+internal/ci/templates/styles.css</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Great! Now let me read the main implementation files:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_summary.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me search for additional context on how the details tags are used and check for any threshold logic:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">details open|details&amp;gt;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">657:			detailsTag = &#34;&lt;details open&gt;&#34;
+827:		return fmt.Sprintf(&#34;- &lt;details open&gt;&lt;summary&gt;%s %s %s: %s   %s&lt;/summary&gt;&lt;/details&gt;\n\n&#34;,
+831:	// Short prompts (≤250 chars): &lt;details open&gt; (expanded by default)
+835:		return fmt.Sprintf(&#34;- &lt;details open&gt;&lt;summary&gt;%s %s %s&lt;/summary&gt;&lt;/details&gt;\n\n&#34;,</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now I have comprehensive information. Let me create a detailed summary report:
+
+## Summary: CI-Summary Command Code Analysis
+
+I&#39;ve found all the code related to the `ci-summary` command. Here&#39;s what I discovered:
+
+### Key Files
+
+1. **Command Entry Point**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_summary.go`
+2. **Core Implementation**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go`
+3. **Tests**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go`
+4. **E2E Tests**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh`
+
+---
+
+## 1. How User Prompts Are Formatted
+
+**Prompt Entry Types** (lines 209-286 in summary.go):
+- **PROMPT**: Regular user text input
+- **COMMAND**: User-invoked CLI commands (prefixed with `/`)
+- **DECISION**: Questions from AskUserQuestion tool
+- **ASSISTANT**: AI responses
+- **TOOL_USE**: Tool invocations (Bash, Edit, etc.)
+- **TOOL_REJECT**: User rejecting a tool call
+
+**Truncation Logic** (lines 278-280 in summary.go):
+```go
+if !full &amp;&amp; len(pe.Text) &gt; 2000 {
+    pe.Text = pe.Text[:2000] &#43; &#34;...[TRUNCATED]&#34;
+    pe.Truncated = true
+}
+```
+- User prompts are truncated at **2000 characters** when `--full` flag is not set
+- Tool inputs are truncated at **500 characters** (line 347-350)
+
+---
+
+## 2. Where `&lt;details&gt;` Tags Are Used for User Prompts
+
+**Location**: `RenderMarkdown()` function (lines 615-716) and `renderTimeline()` function (lines 740-762)
+
+### Main Sections with Details Tags:
+
+**Section 1: &#34;User Prompts&#34; Section** (lines 651-662):
+```go
+detailsTag := &#34;&lt;details&gt;&#34;
+if len(userTimeline) &lt; 10 {
+    detailsTag = &#34;&lt;details open&gt;&#34;
+}
+sb.WriteString(fmt.Sprintf(&#34;%s&lt;summary&gt;&lt;strong&gt;%d user prompts&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, detailsTag, len(userTimeline)))
+renderTimeline(&amp;sb, userTimeline, true)
+sb.WriteString(&#34;&lt;/details&gt;\n\n&#34;)
+```
+
+**Section 2: &#34;All Steps&#34; Section** (lines 664-667):
+```go
+sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All %d steps&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, len(fullTimeline)))
+renderTimeline(&amp;sb, fullTimeline, false)
+sb.WriteString(&#34;&lt;/details&gt;\n\n&#34;)
+```
+
+---
+
+## 3. Logic for Collapsible Sections
+
+### Threshold for User Prompts Section (lines 654-658):
+- **&lt; 10 user prompts**: Uses `&lt;details open&gt;` (expanded by default)
+- **≥ 10 user prompts**: Uses `&lt;details&gt;` (collapsed by default)
+
+### Per-Entry Collapsible Logic (lines 740-761):
+
+In `renderTimeline()`, the `collapseLongPrompts` parameter controls whether individual entries are collapsible:
+- Only set to `true` for the user prompts section (line 660)
+- Set to `false` for the all steps section (line 666)
+
+### Individual Entry Collapsibility (lines 808-849 in `formatMarkdownEntryCollapsible`):
+
+**For DECISION entries** (lines 815-829):
+- Always shown in full with answer
+- Uses `&lt;details open&gt;` (always expanded)
+
+**For prompts ≤ 250 characters** (lines 832-837):
+```go
+if len(text) &lt;= 250 {
+    return fmt.Sprintf(&#34;- &lt;details open&gt;&lt;summary&gt;%s %s %s&lt;/summary&gt;&lt;/details&gt;\n\n&#34;,
+        timeStr, emoji, text)
+}
+```
+- Uses `&lt;details open&gt;` (expanded by default)
+
+**For prompts &gt; 250 characters** (lines 839-849):
+```go
+summary := text[:247] &#43; &#34;...&#34;
+continuation := entry.Text[247:]
+return fmt.Sprintf(&#34;- &lt;details&gt;&lt;summary&gt;%s %s %s&lt;/summary&gt;\n\n...%s\n\n&lt;/details&gt;\n\n&#34;,
+    timeStr, emoji, summary, continuation)
+```
+- Uses `&lt;details&gt;` (collapsed)
+- Summary shows first 247 chars with ellipsis
+- Full text shown in expanded content with ellipsis prefix
+
+---
+
+## Thresholds Summary
+
+| Threshold | Purpose | Applies To |
+|-----------|---------|-----------|
+| &lt; 10 | User prompts section expansion | Entire &#34;User prompts&#34; section |
+| ≤ 250 chars | Individual entry expansion | Per-prompt collapsibility |
+| 2000 chars | Prompt truncation | User prompt text content |
+| 500 chars | Tool input truncation | Tool use input field |
+
+---
+
+## HTML Escaping
+
+Both formatting functions escape HTML to prevent breaking markdown structure:
+- Line 773: `text = html.EscapeString(text)` in `formatMarkdownEntry()`
+- Lines 844-845: HTML escaping in `formatMarkdownEntryCollapsible()` for both summary and continuation
+
+This prevents malicious or accidental HTML in prompts from breaking the `&lt;details&gt;` structure.</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 3: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">95d2cad1-0f79-4d1b-89cc-9a422379b8b9</code> |
+        2026-01-05 17:33 - 2026-01-05 18:02 | <span class="session-count">7</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:56</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed `f8cbc71`. Here&#39;s a summary of all cleanup commits on this branch:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline main..HEAD 2&gt;/dev/null || git log --oneline -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">f8cbc71 Cleanup: fix test numbering and remove legacy refs/notes/commits support
+7e8c073 Add e2e tests for generate-github-workflow command
+007991e Remove redundant examples folder
+d6e7a38 Add generate-github-workflow command and simplify README
+4fa4c55 Add bullet prefix to collapsible entries for email readability</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:56</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">**Cleanup branch commits:**
+1. `d6e7a38` - Add `generate-github-workflow` command, simplify README, remove Tests.md
+2. `007991e` - Remove redundant examples folder
+3. `7e8c073` - Add e2e tests for generate-github-workflow
+4. `f8cbc71` - Fix test numbering, remove legacy refs/notes/commits support
+
+Anything else to clean up?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:56</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please push and give me link to PR</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push -u origin cleanup</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+branch &#39;cleanup&#39; set up to track &#39;origin/cleanup&#39;.
+remote: 
+remote: Create a pull request for &#39;cleanup&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/cleanup        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      cleanup -&gt; cleanup</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">gh pr create --title &#34;Cleanup: add generate-github-workflow command and remove legacy code&#34; --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
+## Summary
+
+- Add interactive `generate-github-workflow` command that creates `.github/workflows/prompt-story.yml` with optional GitHub Pages support
+- Replace verbose &#34;Repository Owner&#34; section in README with brief command reference
+- Remove outdated `Tests.md` and redundant `examples/` folder
+- Fix duplicate test numbering (two tests had number 14)
+- Remove legacy `refs/notes/commits` support
+
+## Changes
+
+| File | Change |
+|------|--------|
+| `cmd/generate_github_workflow.go` | New command |
+| `internal/workflow/generator.go` | Workflow generation logic |
+| `README.md` | Simplified setup instructions |
+| `Tests.md` | Removed |
+| `examples/` | Removed |
+| `e2e/tests/16-generate-workflow.sh` | New e2e tests |
+| `e2e/tests/17-rebase-flow.sh` | Renamed from 14 |
+| `internal/note/refs.go` | Removed legacy ref support |
+| `.github/actions/prompt-story/scripts/fetch-notes.sh` | Removed legacy fetch |
+
+## Test plan
+
+- [x] All 17 e2e tests pass
+- [x] Unit tests pass
+- [x] `go build` succeeds
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 127
+(eval):1: command not found: gh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">`gh` CLI is not installed. You can create the PR manually at:
+
+https://github.com/QuesmaOrg/git-prompt-story/pull/new/cleanup
+
+Or install `gh` and run:
+```bash
+gh pr create
+```</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
