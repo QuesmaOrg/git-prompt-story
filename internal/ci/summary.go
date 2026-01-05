@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"sort"
 	"strings"
 	"time"
 
@@ -646,6 +647,11 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 			}
 		}
 	}
+
+	// Sort userTimeline chronologically across all sessions
+	sort.Slice(userTimeline, func(i, j int) bool {
+		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
+	})
 
 	// Render Prompts section
 	if len(userTimeline) == 0 {
