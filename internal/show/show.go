@@ -97,6 +97,16 @@ type displayEntry struct {
 }
 
 func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (bool, error) {
+	// Check if session was removed
+	if sess.Removed {
+		fmt.Printf("Session: %s/%s [REMOVED]\n", sess.Tool, sess.ID)
+		if sess.RemovedAt != nil {
+			fmt.Printf("Removed at: %s\n", sess.RemovedAt.Local().Format("2006-01-02 15:04"))
+		}
+		fmt.Println()
+		return true, nil
+	}
+
 	// Extract relative path from full ref path
 	relPath := strings.TrimPrefix(sess.Path, note.TranscriptsRef+"/")
 

@@ -20,11 +20,13 @@ type PromptStoryNote struct {
 
 // SessionEntry describes one LLM session referenced by the note
 type SessionEntry struct {
-	Tool     string    `json:"tool"`
-	ID       string    `json:"id"`
-	Path     string    `json:"path"`
-	Created  time.Time `json:"created"`
-	Modified time.Time `json:"modified"`
+	Tool      string     `json:"tool"`
+	ID        string     `json:"id"`
+	Path      string     `json:"path"`
+	Created   time.Time  `json:"created"`
+	Modified  time.Time  `json:"modified"`
+	Removed   bool       `json:"removed,omitempty"`
+	RemovedAt *time.Time `json:"removed_at,omitempty"`
 }
 
 // NewPromptStoryNote creates a new note from discovered sessions

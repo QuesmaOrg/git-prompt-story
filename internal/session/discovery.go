@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/QuesmaOrg/git-prompt-story/internal/banned"
 )
 
 // FindSessions discovers Claude Code sessions for a given repo path
@@ -147,4 +149,15 @@ func CountUserMessagesInRange(sessions []ClaudeSession, startWork, endWork time.
 		}
 	}
 	return count
+}
+
+// FilterBanned removes sessions that are in the banned list
+func FilterBanned(sessions []ClaudeSession) []ClaudeSession {
+	var filtered []ClaudeSession
+	for _, s := range sessions {
+		if !banned.IsBanned(s.ID) {
+			filtered = append(filtered, s)
+		}
+	}
+	return filtered
 }

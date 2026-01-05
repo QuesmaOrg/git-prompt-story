@@ -33,3 +33,27 @@ func GetNote(ref, object string) (string, error) {
 	}
 	return strings.TrimSpace(string(out)), nil
 }
+
+// ListNotedCommits returns all commit SHAs that have notes in the given ref
+func ListNotedCommits(ref string) ([]string, error) {
+	cmd := exec.Command("git", "notes", "--ref="+ref, "list")
+	out, err := cmd.Output()
+	if err != nil {
+		// No notes exist
+		return nil, nil
+	}
+
+	var commits []string
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		// Format: note-sha SP commit-sha
+		parts := strings.Fields(line)
+		if len(parts) >= 2 {
+			commits = append(commits, parts[1])
+		}
+	}
+	return commits, nil
+}

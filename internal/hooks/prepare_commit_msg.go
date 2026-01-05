@@ -72,6 +72,11 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		sessions = session.FilterSessionsByUserMessages(sessions, startWork, endWork)
 		debugLog.log("FilterSessionsByUserMessages: %d -> %d sessions", beforeMsgFilter, len(sessions))
 
+		// Filter out banned sessions
+		beforeBanFilter := len(sessions)
+		sessions = session.FilterBanned(sessions)
+		debugLog.log("FilterBanned: %d -> %d sessions", beforeBanFilter, len(sessions))
+
 		for _, s := range sessions {
 			debugLog.log("  - kept: %s", s.ID)
 		}
