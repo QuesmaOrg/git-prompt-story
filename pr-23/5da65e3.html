@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5da65e3 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>5da65e3</code></h1>
+    <p class="meta">Bump version to 0.11.0</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">16</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>5da65e3d825b08976ff016f43b35e180b9a0f5c6</code><br>
+    <strong>Work period:</strong> 2026-01-05 16:20 - 2026-01-05 16:25
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">cc90e5ff-af8a-4c7f-98e8-6ef096b91848</code> |
+        2026-01-05 15:19 - 2026-01-05 16:25 | <span class="session-count">16</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">This session is being continued from a previous conversation that ran out of context. The conversation is summarized below:
+Analysis:
+Let me chronologically analyze the conversation:
+
+1. **Initial Request**: User wanted to create a new branch from origin/main to fix an issue related to prompt counting discrepancy - PR description showed &#34;112 prompts&#34; but CI summary showed &#34;16 user prompts&#34;.
+
+2. **First Fix - User Prompt Count**: 
+   - Created branch `fix-user-prompt-count`
+   - Added `CountUserActionsInRange()` function in `internal/session/discovery.go`
+   - Changed `internal/hooks/prepare_commit_msg.go` to use new function
+   - Changed `internal/note/metadata.go` message from &#34;prompts&#34; to &#34;user prompts&#34;
+
+3. **Second Fix - Extra newlines after details tags**:
+   - User complained about rendering issues in markdown
+   - Added extra `\n` after `&lt;/details&gt;` tags in `internal/ci/summary.go`
+
+4. **Third Fix - Truncation markers**:
+   - User wanted `...[TRUNCATED]` markers for long text truncations
+   - Added to 3 places in `internal/ci/summary.go`
+
+5. **Fourth Fix - Markdown styling with emojis**:
+   - User chose emojis for entry types
+   - User chose better commit markers (#### instead of ---)
+   - User chose to remove type labels entirely
+   - Added `getTypeEmoji()` function
+   - Changed commit markers from `--- Commit abc: ... ---` to `#### abc: ...`
+   - Removed redundant type labels, using only emojis
+
+6. **Removed pin emoji**: User didn&#39;t want 📌 in commit markers
+
+7. **Filter system-injected meta messages**:
+   - User noticed &#34;Caveat: The messages below were generated...&#34; appearing
+   - Investigated and found `isMeta: true` field in JSONL
+   - Added `IsMeta` field to `MessageEntry` struct
+   - Added filters in 3 places to skip meta messages
+
+8. **Time format changes**:
+   - User asked to brainstorm time format options
+   - First chose italic `*16:17*` but it didn&#39;t render well
+   - Changed to plain `16:17` without brackets
+
+9. **Push and PR**: Pushed branch to remote
+
+10. **Unknown type emoji and test**:
+    - User wanted emoji for unknown types AND to display the type text
+    - Added `📝` as fallback emoji for unknown types
+    - Modified `formatMarkdownEntry()` to show `📝 CUSTOM_TYPE: text` for unknown types
+    - Added unit test `TestGetTypeEmoji`
+    - Added test case for unknown type display
+    - Updated existing tests to match new emoji format
+
+Key user feedback moments:
+- User rejected italic time format - &#34;I don&#39;t like it, it doesn&#39;t render&#34;
+- User wanted to remove pin emoji from commit markers
+- User wanted to filter system messages by investigating WHY they appeared (isMeta field)
+- User explicitly asked for unknown type to show the type text AND add unit test
+
+Summary:
+1. Primary Request and Intent:
+   The user wanted to fix a discrepancy where PR descriptions showed &#34;112 prompts&#34; but CI summary showed &#34;16 user prompts&#34;. This expanded into multiple improvements to the CI summary markdown output:
+   - Align prompt counting to show only actual user actions (excluding tool results, system messages)
+   - Improve markdown rendering with extra newlines, truncation markers
+   - Add emoji styling for entry types (💬, 🔧, 🤖, ❌, 📋, ❓, 📝)
+   - Cleaner commit markers using `####` heading format
+   - Remove redundant type labels (just use emojis)
+   - Filter out system-injected meta messages (isMeta: true)
+   - Use plain time format (16:17 instead of [16:17])
+   - Add fallback emoji for unknown types with type name display
+
+2. Key Technical Concepts:
+   - JSONL transcript parsing from Claude Code sessions
+   - `isMeta` field in Claude Code JSONL indicates system-injected messages
+   - Git notes for storing prompt-story metadata
+   - Markdown rendering in GitHub PR comments
+   - Go unit testing with table-driven tests
+   - Entry types: PROMPT, TOOL_USE, ASSISTANT, TOOL_REJECT, COMMAND, DECISION
+
+3. Files and Code Sections:
+
+   - **`internal/session/types.go`**
+     - Added `IsMeta` field to filter system messages
+     ```go
+     type MessageEntry struct {
+         Type          string         `json:&#34;type&#34;`
+         SessionID     string         `json:&#34;sessionId&#34;`
+         Timestamp     time.Time      `json:&#34;timestamp&#34;`
+         GitBranch     string         `json:&#34;gitBranch&#34;`
+         IsMeta        bool           `json:&#34;isMeta&#34;` // System-injected message
+         Snapshot      *Snapshot      `json:&#34;snapshot,omitempty&#34;`
+         Message       *Message       `json:&#34;message,omitempty&#34;`
+         ToolUseResult *ToolUseResult `json:&#34;toolUseResult,omitempty&#34;`
+     }
+     ```
+
+   - **`internal/session/discovery.go`**
+     - Added `CountUserActionsInRange()` function for accurate user prompt counting
+     - Added `isUserActionEntry()` helper with IsMeta filter
+     - Added `isToolResultContent()` to detect tool results
+     ```go
+     func isUserActionEntry(entry MessageEntry) bool {
+         if entry.IsMeta {
+             return false
+         }
+         // ... rest of filtering logic
+     }
+     ```
+
+   - **`internal/ci/summary.go`**
+     - Added `getTypeEmoji()` function with 📝 fallback for unknown types
+     ```go
+     func getTypeEmoji(entryType string) string {
+         switch entryType {
+         case &#34;PROMPT&#34;:
+             return &#34;💬&#34;
+         case &#34;TOOL_USE&#34;:
+             return &#34;🔧&#34;
+         case &#34;ASSISTANT&#34;:
+             return &#34;🤖&#34;
+         case &#34;TOOL_REJECT&#34;:
+             return &#34;❌&#34;
+         case &#34;COMMAND&#34;:
+             return &#34;📋&#34;
+         case &#34;DECISION&#34;:
+             return &#34;❓&#34;
+         default:
+             return &#34;📝&#34; // Unknown type
+         }
+     }
+     ```
+     - Changed commit markers from `--- Commit %s: %s ---` to `#### %s: %s`
+     - Changed time format from `[%s]` to `%s`
+     - Added `...[TRUNCATED]` markers for long text truncations
+     - Added extra newline after `&lt;/details&gt;` tags
+     - Added IsMeta filter: `if entry.IsMeta { continue }`
+     - Modified `formatMarkdownEntry()` default case to show type name for unknown types:
+     ```go
+     default:
+         if entry.Type == &#34;PROMPT&#34; || entry.Type == &#34;ASSISTANT&#34; || entry.Type == &#34;COMMAND&#34; || entry.Type == &#34;TOOL_REJECT&#34; {
+             return fmt.Sprintf(&#34;- %s %s %s\n&#34;, timeStr, emoji, text)
+         }
+         return fmt.Sprintf(&#34;- %s %s %s: %s\n&#34;, timeStr, emoji, entry.Type, text)
+     }
+     ```
+
+   - **`internal/ci/summary_test.go`**
+     - Added `TestGetTypeEmoji` unit test:
+     ```go
+     func TestGetTypeEmoji(t *testing.T) {
+         tests := []struct {
+             entryType string
+             expected  string
+         }{
+             {&#34;PROMPT&#34;, &#34;💬&#34;},
+             {&#34;TOOL_USE&#34;, &#34;🔧&#34;},
+             {&#34;ASSISTANT&#34;, &#34;🤖&#34;},
+             {&#34;TOOL_REJECT&#34;, &#34;❌&#34;},
+             {&#34;COMMAND&#34;, &#34;📋&#34;},
+             {&#34;DECISION&#34;, &#34;❓&#34;},
+             {&#34;UNKNOWN&#34;, &#34;📝&#34;},
+             {&#34;&#34;, &#34;📝&#34;},
+             {&#34;random_type&#34;, &#34;📝&#34;},
+         }
+         // ... test implementation
+     }
+     ```
+     - Added test case for unknown type display:
+     ```go
+     {
+         name:     &#34;unknown type shows type name&#34;,
+         entry:    PromptEntry{Type: &#34;CUSTOM_TYPE&#34;, Text: &#34;Some content&#34;, Time: now},
+         contains: []string{&#34;09:30&#34;, &#34;📝&#34;, &#34;CUSTOM_TYPE:&#34;, &#34;Some content&#34;},
+     },
+     ```
+     - Updated existing tests to use emojis instead of type labels
+
+   - **`internal/hooks/prepare_commit_msg.go`**
+     - Changed to use `CountUserActionsInRange()` instead of `CountUserMessagesInRange()`
+
+   - **`internal/note/metadata.go`**
+     - Changed message from &#34;prompts&#34; to &#34;user prompts&#34;
+
+   - **`internal/show/show.go`**
+     - Added IsMeta filter
+
+4. Errors and fixes:
+   - **Italic time format didn&#39;t render**: User said &#34;I don&#39;t like it, it doesn&#39;t render&#34; - fixed by using plain time format `16:17` instead of `*16:17*`
+   - **Pin emoji unwanted**: User asked to remove 📌 from commit markers - simply removed it
+   - **Tests failing after emoji changes**: Tests expected old format like &#34;PROMPT&#34; and &#34;TOOL_USE (Bash)&#34; - updated tests to use new emoji format
+   - **Unknown types showed no type name**: User explicitly asked &#34;Please make sure we display unknown type text&#34; - modified default case to show `📝 TYPE: text`
+
+5. Problem Solving:
+   - Investigated why &#34;Caveat:&#34; system messages appeared by examining raw JSONL transcripts
+   - Discovered `isMeta: true` field as the proper indicator for system messages
+   - Chose to filter by `isMeta` field rather than text prefix for robustness
+
+6. All user messages:
+   - &#34;Create new branch, we would fix one issue out of origin/main&#34;
+   - &#34;As I saw on GitHub branch: add-multi-tool-support... Can we change logic so we would have: Prompt-Story: Used Claude Code (16 user prompts)&#34;
+   - &#34;One more thing in ci-summary, I wish that User prompts would renders more nicely over the email, instead... I want - after each &lt;/details&gt; extra new line&#34;
+   - &#34;I note there are some truncation logic... Can you make sure they always end up with &#39;...&#39; or other marker&#34;
+   - &#34;For long test truncation do ...[TRUNCATED]&#34;
+   - &#34;Can we also do some markdown styling? Brainstorm options with me&#34;
+   - Chose: &#34;A. Emoji for types, E. Simpler prompt display, B. Better commit markers&#34;
+   - &#34;Can we also remove type labels for this types (e.g. no ASSISTANT or TOOL_USE)&#34;
+   - &#34;Please remove #### 📌 this icon&#34;
+   - &#34;Can you show me sample ci-summary and do pbcopy out of add-multi-tool-support?&#34;
+   - &#34;Why I&#39;m seeing: Caveat: The messages below... I did not typed that&#34;
+   - &#34;Please do research and explain me why we see those messages&#34;
+   - Chose: &#34;Filter by isMeta field (Recommended)&#34;
+   - &#34;One more idea, why [16:17] markers for time?... Brainstorm options&#34;
+   - Chose: &#34;Use dimmed C variant&#34;
+   - &#34;I don&#39;t like it, it doesn&#39;t render, please just removed dimmed variant&#34;
+   - &#34;Make it plain 15:21&#34;
+   - &#34;do pbcopy of that ci-summary&#34;
+   - &#34;Please push to new branch and would merge it&#34;
+   - &#34;I want also emoji for unknown type and text if we did not recognize it, please add go unit test for that&#34;
+   - &#34;Please make sure we display unknown type text and add unit test for that&#34;
+
+7. Pending Tasks:
+   - None explicitly pending - user said they would merge the PR
+
+8. Current Work:
+   Just completed adding fallback emoji for unknown entry types with unit tests. The final commit was:
+   - Added `📝` as fallback emoji for unknown types in `getTypeEmoji()`
+   - Modified `formatMarkdownEntry()` to show type name for unknown types: `📝 CUSTOM_TYPE: text`
+   - Added `TestGetTypeEmoji` unit test
+   - Added test case for unknown type display
+   - Updated existing tests to match new emoji format
+   - Committed and pushed to branch `fix-user-prompt-count`
+
+   Branch has 7 commits:
+   ```
+   24c5f5a Add fallback emoji for unknown entry types with unit test
+   d9afead Use plain time format for cleaner appearance
+   c719a3a Filter system-injected meta messages from prompt counts
+   10335b2 Improve markdown styling with emojis and cleaner format
+   01b837c Add ...[TRUNCATED] marker for long text truncations
+   d83bf04 Add extra newline after details tags in markdown output
+   6d491f5 Fix prompt count to show user prompts only
+   ```
+
+9. Optional Next Step:
+   None - the user&#39;s last explicit request was to add emoji for unknown types with unit test, which was completed and pushed. The PR is ready for the user to merge..
+Please continue the conversation from where we left it off without asking the user any further questions. Continue with the last task that you were asked to work on.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Based on the conversation summary, the work on the `fix-user-prompt-count` branch was completed. Let me verify the current state:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git branch -a | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  add-decision-entries
+  add-multi-tool-support
+  add-remove-command
+  auto-push-notes
+  bump-version-0.8.0
+  bump-version-0.9.0
+  ci-testing
+  claude/simplify-note-format-5N8Bh
+  cursor-support
+  e2e-tests
+* fix-user-prompt-count
+&#43; main
+  merge-privacy-bullets
+  new-pr-comment-format
+  pr-comment-improvements
+  remove-hash-markers
+  repair-command
+  test-github-action
+  test-improvements
+  update-readme</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">24c5f5a Add fallback emoji for unknown entry types with unit test
+d9afead Use plain time format for cleaner appearance
+c719a3a Filter system-injected meta messages from prompt counts
+10335b2 Improve markdown styling with emojis and cleaner format
+01b837c Add ...[TRUNCATED] marker for long text truncations
+d83bf04 Add extra newline after details tags in markdown output
+6d491f5 Fix prompt count to show user prompts only
+9f8d505 Merge pull request #20 from QuesmaOrg/update-readme
+18424ad Fix PR comment detection to look for git-prompt-story
+1e332ff Bump version to 0.10.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch fix-user-prompt-count
+Your branch is up to date with &#39;origin/fix-user-prompt-count&#39;.
+
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The `fix-user-prompt-count` branch is complete and pushed to origin. Here&#39;s what was accomplished:
+
+**7 commits on the branch:**
+1. `6d491f5` - Fix prompt count to show user prompts only
+2. `d83bf04` - Add extra newline after details tags in markdown output
+3. `01b837c` - Add `...[TRUNCATED]` marker for long text truncations
+4. `10335b2` - Improve markdown styling with emojis and cleaner format
+5. `c719a3a` - Filter system-injected meta messages from prompt counts
+6. `d9afead` - Use plain time format for cleaner appearance
+7. `24c5f5a` - Add fallback emoji for unknown entry types with unit test
+
+**Key changes:**
+- Prompt counting now shows only actual user actions (excluding tool results, system messages)
+- Entry types use emojis: 💬 (PROMPT), 🔧 (TOOL_USE), 🤖 (ASSISTANT), ❌ (TOOL_REJECT), 📋 (COMMAND), ❓ (DECISION), 📝 (unknown)
+- Unknown types display as `📝 TYPE: text` 
+- Commit markers use `####` heading format
+- Time format is plain `16:17` instead of `[16:17]`
+- System-injected meta messages are filtered out
+
+The branch is ready for you to merge whenever you&#39;re ready.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:23</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">CAn you also release new version and install it globally.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat /&lt;REDACTED&gt;/git/git-prompt-story-tests/VERSION</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">0.10.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/VERSION</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/VERSION has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 0.11.0
+     2 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go install .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+Error: unknown command &#34;version&#34; for &#34;git-prompt-story&#34;
+Run &#39;git-prompt-story --help&#39; for usage.
+unknown command &#34;version&#34; for &#34;git-prompt-story&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story --help | head -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story captures LLM sessions (Claude Code, Cursor, etc.)
+and stores them as git notes attached to your commits.
+
+Usage:
+  git-prompt-story [command]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story --version 2&gt;/dev/null || which git-prompt-story</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story version 0.11.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Bumped version from 0.10.0 to **0.11.0** and installed globally:
+
+```
+git-prompt-story version 0.11.0
+```
+
+Would you like me to commit the version bump?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:24</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Yes please</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add /&lt;REDACTED&gt;/git/git-prompt-story-tests/VERSION &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Bump version to 0.11.0
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
