@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>c719a3a - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>c719a3a</code></h1>
+    <p class="meta">Filter system-injected meta messages from prompt counts</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">49</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>c719a3a11b1807e4fdae9156e8d12100263b4e9f</code><br>
+    <strong>Work period:</strong> 2026-01-05 15:52 - 2026-01-05 16:04
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">cc90e5ff-af8a-4c7f-98e8-6ef096b91848</code> |
+        2026-01-05 15:19 - 2026-01-05 16:04 | <span class="session-count">49</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:52</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Branch now has 4 commits:
+
+```
+1db428a Improve markdown styling with emojis and cleaner format
+01b837c Add ...[TRUNCATED] marker for long text truncations
+d83bf04 Add extra newline after details tags in markdown output
+6d491f5 Fix prompt count to show user prompts only
+```
+
+Example output now looks like:
+```markdown
+#### 📌 d71b261: Add feature with agent assistance
+
+&lt;details open&gt;&lt;summary&gt;[09:20] 💬 How do I implement feature X?&lt;/summary&gt;&lt;/details&gt;
+
+- [09:25] 🤖 Here&#39;s how to implement feature X...
+- [09:24] 🔧 Bash: git status
+```</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please remove #### 📌 this icon.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   742 			if len(subject) &gt; 40 {
+   743 				subject = subject[:37] &#43; &#34;...&#34;
+   744 			}
+   745 			subject = html.EscapeString(subject)
+   746 			sb.WriteString(fmt.Sprintf(&#34;\n#### %s: %s\n\n&#34;, te.CommitSHA, subject))
+   747 		}
+   748 		lastCommitIndex = te.CommitIndex
+   749 
+   750 		// Format the entry</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add internal/ci/summary.go &amp;&amp; git commit --amend -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Improve markdown styling with emojis and cleaner format
+
+- Add emojis for entry types: 💬 prompt, 🔧 tool, 🤖 assistant, etc.
+- Use #### heading for commit markers instead of dashes
+- Remove redundant type labels (PROMPT, ASSISTANT, etc.)
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[fix-user-prompt-count 10335b2] Improve markdown styling with emojis and cleaner format
+ Date: Mon Jan 5 17:52:23 2026 &#43;0200
+ 1 file changed, 33 insertions(&#43;), 11 deletions(-)
+Transferred prompt-story note to 10335b2 (1 sessions)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Commit markers now just use `#### abc1234: Subject` without the pin emoji.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:55</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Can you show me sample ci-summary and do pbcopy out of add-multi-tool-support?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story ci-summary origin/add-multi-tool-support --format=markdown | pbcopy &amp;&amp; git-prompt-story ci-summary origin/add-multi-tool-support --format=markdown</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;16 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+--- Commit 7410070: Add multi-tool support implementation... ---
+
+&lt;details open&gt;&lt;summary&gt;[16:17] PROMPT: Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:17] COMMAND: /clear&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:18] PROMPT: Please create new branch out of origin/main, will be implementing design for multi-tool use (e.g. Add Cursor).&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:21] DECISION (Cursor format): What is the session storage format for Cursor? Do you know where Cursor stores its conversation sessions (similar to Claude Code&amp;#39;s ~/.claude/projects/)?   I know the location/format&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:21] DECISION (Architecture): Should we create a generic tool provider interface, or just add Cursor support alongside Claude Code as a one-off?   Generic interface (Recommended)&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:21] DECISION (Detection): How should the tool be selected when discovering sessions?   Both options&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:21] DECISION (Cursor details): What is the path and format of Cursor&amp;#39;s session storage? (e.g., directory path, file extension, JSON structure)   It is SQLLite, but I will translate it to JSON/JSONL during capture.&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:28] DECISION (JSONL parsing): Should the ToolProvider be responsible for parsing JSONL into a common internal format, with each provider having its own parser?   Yes, provider parses&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:28] DECISION (Display model): For displaying user steps and messages, what abstraction do you envision?   Both layers&lt;/summary&gt;&lt;/details&gt;
+&lt;details open&gt;&lt;summary&gt;[16:28] DECISION (Claude code): What Claude-specific ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I notice that&#39;s showing the old format because it&#39;s using the old binary. Let me rebuild and show the new format:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; ./git-prompt-story ci-summary origin/add-multi-tool-support --format=markdown | pbcopy &amp;&amp; ./git-prompt-story ci-summary origin/add-multi-tool-support --format=markdown</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;16 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+#### 7410070: Add multi-tool support implementation...
+
+&lt;details open&gt;&lt;summary&gt;[16:17] 💬 Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:17] 📋 /clear&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:18] 💬 Please create new branch out of origin/main, will be implementing design for multi-tool use (e.g. Add Cursor).&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Cursor format: What is the session storage format for Cursor? Do you know where Cursor stores its conversation sessions (similar to Claude Code&amp;#39;s ~/.claude/projects/)?   I know the location/format&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Architecture: Should we create a generic tool provider interface, or just add Cursor support alongside Claude Code as a one-off?   Generic interface (Recommended)&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Detection: How should the tool be selected when discovering sessions?   Both options&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Cursor details: What is the path and format of Cursor&amp;#39;s session storage? (e.g., directory path, file extension, JSON structure)   It is SQLLite, but I will translate it to JSON/JSONL during capture.&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:28] ❓ JSONL parsing: Should the ToolProvider be responsible for parsing JSONL into a common internal format, with each provider having its own parser?   Yes, provider parses&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:28] ❓ Display model: For displaying user steps and messages, what abstraction do you envision?   Both layers&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:28] ❓ Claude code: What Claude-specific code should move to the provider? (select all that apply)   ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:56</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! The new format is now in your clipboard. Key changes visible:
+
+- `#### 7410070: Add multi-tool...` - cleaner commit headers
+- `💬` user prompts, `📋` commands, `❓` decisions
+- `🔧` tool uses, `🤖` assistant responses
+- No redundant type labels like &#34;PROMPT:&#34; or &#34;ASSISTANT:&#34;</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:56</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I already used the local version - the output I showed has all the new styling:
+
+- ✅ `#### 7410070:` commit headers (no dashes or pin emoji)
+- ✅ `💬` `📋` `❓` `🔧` `🤖` emojis for entry types
+- ✅ No type labels (PROMPT, ASSISTANT removed)
+
+That output is now in your clipboard. Would you like me to run it again or show a different range?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:57</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Why I&#39;m seeing: Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.
+
+I did not typed that.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:58</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good catch! That&#39;s a system-injected message from Claude Code, not something you typed. It appears as a &#34;user&#34; type entry in the transcript but should be filtered out.
+
+Let me check how we&#39;re currently handling this:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Caveat|system-reminder|local-command</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go-167-			}
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go-168-			// Skip local command output entries
+internal/show/show.go:169:			if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go-170-				entryType = &#34;&#34;
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go-171-				text = &#34;&#34;
+--
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go-209-
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go-210-	// Skip local command outputs
+internal/session/discovery.go:211:	if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go-212-		return false
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go-213-	}
+--
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go-233-
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go-234-				// Skip local command output entries
+internal/ci/summary.go:235:				if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go-236-					continue
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go-237-				}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:58</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! We filter `&lt;local-command-stdout&gt;` but not the &#34;Caveat:&#34; system message. This is a Claude Code system-injected message that should be filtered out.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/shimmering-bubbling-waterfall.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/shimmering-bubbling-waterfall.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Filter System-Injected Messages
+     2 
+     3 ## Problem
+     4 CI summary shows &#34;Caveat: The messages below were generated by the user while running local commands...&#34; which is a system-injected message, not a real user prompt.
+     5 
+     6 ## Solution
+     7 Add filter to skip messages starting with &#34;Caveat:&#34; in the same places we filter `&lt;local-command-stdout&gt;`.
+     8 
+     9 ## Files to Modify
+    10 
+    11 ### 1. `internal/ci/summary.go` (~line 235)
+    12 Add filter after the local-command-stdout check:
+    13 ```go
+    14 if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+    15     continue
+    16 }
+    17 // Skip system-injected caveat messages
+    18 if strings.HasPrefix(msgText, &#34;Caveat: The messages below were generated&#34;) {
+    19     continue
+    20 }
+    21 ```
+    22 
+    23 ### 2. `internal/session/discovery.go` (~line 211)
+    24 Same filter in `isUserActionEntry()`:
+    25 ```go
+    26 if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+    27     return false
+    28 }
+    29 if strings.HasPrefix(msgText, &#34;Caveat: The messages below were generated&#34;) {
+    30     return false
+    31 }
+    32 ```
+    33 
+    34 ### 3. `internal/show/show.go` (~line 169)
+    35 Same filter in show command.
+    36 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:58</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Simple fix - filter out messages starting with `&#34;Caveat: The messages below were generated&#34;` in 3 places.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Filter System-Injected Messages\n\n## Problem\nCI summary shows \&#34;Caveat: The messages below were generated by the user while running local commands...\&#34; which is a system-injected...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+Please do research and explain me why we see those messages.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:59</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me look at the actual transcript data to understand where these messages come from:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git show refs/notes/prompt-story-transcripts:claude-code/$(git notes --ref=prompt-story show origin/add-multi-tool-support 2&gt;/dev/null | jq -r &#39;.sessions[0].id&#39;).jsonl 2&gt;/dev/null | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+(eval):1: parse error near `)&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=prompt-story show origin/add-multi-tool-support 2&gt;/dev/null | jq -r &#39;.sessions[0].path&#39;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">claude-code/f086cd40-d348-4f56-80b5-38ec30316f82.jsonl</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git show &#34;refs/notes/prompt-story-transcripts:claude-code/f086cd40-d348-4f56-80b5-38ec30316f82.jsonl&#34; 2&gt;/dev/null | head -5 | jq -c &#39;.message.content[0].text // .message.content // .message&#39; 2&gt;/dev/null | head -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">null
+null</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git show &#34;refs/notes/prompt-story-transcripts:claude-code/f086cd40-d348-4f56-80b5-38ec30316f82.jsonl&#34; 2&gt;/dev/null | head -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{&#34;isSnapshotUpdate&#34;:false,&#34;messageId&#34;:&#34;2f4329e2-67cd-415e-b8e1-0889cedfc1e1&#34;,&#34;snapshot&#34;:{&#34;messageId&#34;:&#34;2f4329e2-67cd-415e-b8e1-0889cedfc1e1&#34;,&#34;timestamp&#34;:&#34;2026-01-05T14:17:30.686Z&#34;,&#34;trackedFileBackups&#34;:{}},&#34;type&#34;:&#34;file-history-snapshot&#34;}
+{&#34;cwd&#34;:&#34;/\u003cREDACTED\u003e/git/git-prompt-story-tests&#34;,&#34;gitBranch&#34;:&#34;update-readme&#34;,&#34;isMeta&#34;:true,&#34;isSidechain&#34;:false,&#34;message&#34;:{&#34;content&#34;:&#34;Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.&#34;,&#34;role&#34;:&#34;user&#34;},&#34;parentUuid&#34;:null,&#34;sessionId&#34;:&#34;f086cd40-d348-4f56-80b5-38ec30316f82&#34;,&#34;timestamp&#34;:&#34;2026-01-05T14:17:30.686Z&#34;,&#34;type&#34;:&#34;user&#34;,&#34;userType&#34;:&#34;external&#34;,&#34;uuid&#34;:&#34;315f4236-f7b4-4653-8865-d172f2aa5cc7&#34;,&#34;version&#34;:&#34;2.0.76&#34;}
+{&#34;cwd&#34;:&#34;/\u003cREDACTED\u003e/git/git-prompt-story-tests&#34;,&#34;gitBranch&#34;:&#34;update-readme&#34;,&#34;isSidechain&#34;:false,&#34;message&#34;:{&#34;content&#34;:&#34;\u003ccommand-name\u003e/clear\u003c/command-name\u003e\n            \u003ccommand-message\u003eclear\u003c/command-message\u003e\n            \u003ccommand-args\u003e\u003c/command-args\u003e&#34;,&#34;role&#34;:&#34;user&#34;},&#34;parentUuid&#34;:&#34;315f4236-f7b4-4653-8865-d172f2aa5cc7&#34;,&#34;sessionId&#34;:&#34;f086cd40-d348-4f56-80b5-38ec30316f82&#34;,&#34;timestamp&#34;:&#34;2026-01-05T14:17:30.678Z&#34;,&#34;type&#34;:&#34;user&#34;,&#34;userType&#34;:&#34;external&#34;,&#34;uuid&#34;:&#34;2f4329e2-67cd-415e-b8e1-0889cedfc1e1&#34;,&#34;version&#34;:&#34;2.0.76&#34;}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! Looking at the raw transcript:
+
+```json
+{
+  &#34;type&#34;: &#34;user&#34;,
+  &#34;userType&#34;: &#34;external&#34;, 
+  &#34;isMeta&#34;: true,
+  &#34;message&#34;: {
+    &#34;content&#34;: &#34;Caveat: The messages below were generated by the user...&#34;
+  }
+}
+```
+
+## Explanation
+
+This is a **meta message** injected by Claude Code (note `&#34;isMeta&#34;: true`). It happens when:
+
+1. You run local commands (like `/clear`, shell commands, etc.)
+2. Claude Code records these as &#34;external&#34; user actions
+3. Before showing them to the AI, it prepends this &#34;Caveat&#34; warning telling Claude not to respond to local command output
+
+**Why it appears as a prompt:** Our parser treats all `type: &#34;user&#34;` entries as user prompts, but doesn&#39;t check the `isMeta` field.
+
+## Better Fix
+
+Instead of filtering by text content, we should filter by the `isMeta: true` field - that&#39;s the proper indicator for system-injected messages.</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">16:00</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Filter method)</span>
+          <span class="prompt-text">How should we filter these system messages?</span>
+          <span class="decision-answer">→ Filter by isMeta field (Recommended)</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check where we parse the `isMeta` field:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">isMeta|IsMeta|is_meta</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No matches found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/shimmering-bubbling-waterfall.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/shimmering-bubbling-waterfall.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Filter System-Injected Meta Messages
+     2 
+     3 ## Problem
+     4 CI summary shows &#34;Caveat: The messages below were generated by the user while running local commands...&#34; which is a system-injected meta message (`isMeta: true`), not a real user prompt.
+     5 
+     6 ## Root Cause
+     7 The `MessageEntry` struct doesn&#39;t parse the `isMeta` field from the JSONL, so we can&#39;t filter these system messages.
+     8 
+     9 ## Solution
+    10 Add `IsMeta` field to `MessageEntry` and filter it out in all places that process user messages.
+    11 
+    12 ## Files to Modify
+    13 
+    14 ### 1. `internal/session/types.go`
+    15 Add IsMeta field to MessageEntry:
+    16 ```go
+    17 type MessageEntry struct {
+    18     Type          string         `json:&#34;type&#34;`
+    19     SessionID     string         `json:&#34;sessionId&#34;`
+    20     Timestamp     time.Time      `json:&#34;timestamp&#34;`
+    21     GitBranch     string         `json:&#34;gitBranch&#34;`
+    22     IsMeta        bool           `json:&#34;isMeta&#34;`  // NEW: system-injected message flag
+    23     Snapshot      *Snapshot      `json:&#34;snapshot,omitempty&#34;`
+    24     Message       *Message       `json:&#34;message,omitempty&#34;`
+    25     ToolUseResult *ToolUseResult `json:&#34;toolUseResult,omitempty&#34;`
+    26 }
+    27 ```
+    28 
+    29 ### 2. `internal/ci/summary.go` (~line 233)
+    30 Add filter after existing checks:
+    31 ```go
+    32 // Skip meta/system messages
+    33 if entry.IsMeta {
+    34     continue
+    35 }
+    36 ```
+    37 
+    38 ### 3. `internal/session/discovery.go` - `isUserActionEntry()`
+    39 Add filter:
+    40 ```go
+    41 // Skip meta/system messages
+    42 if entry.IsMeta {
+    43     return false
+    44 }
+    45 ```
+    46 
+    47 ### 4. `internal/show/show.go` (~line 165)
+    48 Add filter in parseTranscript():
+    49 ```go
+    50 // Skip meta...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Filter System-Injected Meta Messages\n\n## Problem\nCI summary shows \&#34;Caveat: The messages below were generated by the user while running local commands...\&#34; which is a system-inj...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/shimmering-bubbling-waterfall.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Filter System-Injected Meta Messages
+
+## Problem
+CI summary shows &#34;Caveat: The messages below were generated by the user while running local commands...&#34; which is a system-injected meta message (`isMeta: true`), not a real user prompt.
+
+## Root Cause
+The `MessageEntry` struct doesn&#39;t parse the `isMeta` field from the JSONL, so we can&#39;t filter these system messages.
+
+## Solution
+Add `IsMeta` field to `MessageEntry` and filter it out in all places that process user messages.
+
+## Files to Modify
+
+### 1. `internal/session/types.go`
+Add IsMeta field to MessageEntry:
+```go
+type MessageEntry struct {
+    Type          string         `json:&#34;type&#34;`
+    SessionID     string         `json:&#34;sessionId&#34;`
+    Timestamp     time.Time      `json:&#34;timestamp&#34;`
+    GitBranch     string         `json:&#34;gitBranch&#34;`
+    IsMeta        bool           `json:&#34;isMeta&#34;`  // NEW: system-injected message flag
+    Snapshot      *Snapshot      `json:&#34;snapshot,omitempty&#34;`
+    Message       *Message       `json:&#34;message,omitempty&#34;`
+    ToolUseResult *ToolUseResult `json:&#34;toolUseResult,omitempty&#34;`
+}
+```
+
+### 2. `internal/ci/summary.go` (~line 233)
+Add filter after existing checks:
+```go
+// Skip meta/system messages
+if entry.IsMeta {
+    continue
+}
+```
+
+### 3. `internal/session/discovery.go` - `isUserActionEntry()`
+Add filter:
+```go
+// Skip meta/system messages
+if entry.IsMeta {
+    return false
+}
+```
+
+### 4. `internal/show/show.go` (~line 165)
+Add filter in parseTranscript():
+```go
+// Skip meta/system messages
+if entry.IsMeta {
+    continue
+}
+```
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    12 	Created  time.Time // First timestamp in file
+    13 	Modified time.Time // Last timestamp in file
+    14 }
+    15 
+    16 // MessageEntry represents a single JSONL line from Claude Code
+    17 type MessageEntry struct {
+    18 	Type          string         `json:&#34;type&#34;` // &#34;user&#34;, &#34;assistant&#34;, &#34;file-history-snapshot&#34;
+    19 	SessionID     string         `json:&#34;sessionId&#34;`
+    20 	Timestamp     time.Time      `json:&#34;timestamp&#34;`
+    21 	GitBranch     string         `json:&#34;gitBranch&#34;`
+    22 	IsMeta        bool           `json:&#34;isMeta&#34;` // System-injected message (e.g., caveat warnings)
+    23 	Snapshot      *Snapshot      `json:&#34;snapshot,omitempty&#34;`
+    24 	Message       *Message       `json:&#34;message,omitempty&#34;`
+    25 	ToolUseResult *ToolUseResult `json:&#34;toolUseResult,omitempty&#34;` // For AskUserQuestion answers
+    26 }
+    27 
+    28 // ToolUseResult contains structured answer data from AskUserQuestion
+    29 type ToolUseResult struct {
+    30 	Answers map[string]string `json:&#34;answers,omitempty&#34;` // Question -&gt; Answer mapping</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;String to replace not found in file.
+String: 			// Skip local command output entries
+			if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+				continue
+			}&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;String to replace not found in file.
+String: 			// Skip local command output entries
+			if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+				continue
+			}
+
+			// Check for tool results&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   230 						continue
+   231 					}
+   232 				}
+   233 
+   234 				// Skip local command output entries
+   235 				if strings.HasPrefix(msgText, &#34;&lt;local-command-stdout&gt;&#34;) {
+   236 					continue
+   237 				}
+   238 
+   239 				// Skip meta/system-injected messages
+   240 				if entry.IsMeta {
+   241 					continue
+   242 				}
+   243 
+   244 				// Check for tool results
+   245 				toolResults := parseToolResults(entry.Message.RawContent)
+   246 				if len(toolResults) &gt; 0 {
+   247 					for _, tr := range toolResults {
+   248 						// Find and update the corresponding tool use entry</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now add the filter in discovery.go:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;File has not been read yet. Read it first before writing to it.&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   187 	}
+   188 	return count
+   189 }
+   190 
+   191 // isUserActionEntry determines if a message entry represents a user action
+   192 // (prompt, command, or tool rejection) as opposed to tool results or system messages
+   193 func isUserActionEntry(entry MessageEntry) bool {
+   194 	// Skip meta/system-injected messages
+   195 	if entry.IsMeta {
+   196 		return false
+   197 	}
+   198 
+   199 	// Only consider user and tool_reject entries
+   200 	switch entry.Type {
+   201 	case &#34;tool_reject&#34;:
+   202 		return true
+   203 	case &#34;user&#34;:
+   204 		// Continue to check content
+   205 	default:
+   206 		return false
+   207 	}
+   208 
+   209 	if entry.Message == nil {
+   210 		return false
+   211 	}
+   212 
+   213 	msgText := entry.Message.GetTextContent()
+   214 
+   215 	// Skip local command outputs</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now add the filter in show.go:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   124 		// Skip entries outside work period or without timestamp
+   125 		if ts.IsZero() {
+   126 			continue
+   127 		}
+   128 		if ts.Before(startWork) || ts.After(endWork) {
+   129 			continue
+   130 		}
+   131 
+   132 		// Skip meta/system-injected messages
+   133 		if entry.IsMeta {
+   134 			continue
+   135 		}
+   136 
+   137 		// Determine entry type and text to display
+   138 		var entryType, text string
+   139 
+   140 		switch entry.Type {
+   141 		case &#34;user&#34;:</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me build and test:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; e2e/run-tests.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== E2E Test Suite ===
+
+Running: 01-basic-flow
+[1/5] Basic Hook Flow
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Initial commit time: 2025-01-15 09:00:00 &#43;0000
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Hooks installed successfully
+  Step 4: Creating mock session (09:15 - 10:25)...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/test-session-1.jsonl
+  Step 5: Creating feature commit at 10:30...
+[main 912634d] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Feature commit time: 2025-01-15 10:30:00 &#43;0000
+  Step 6: Verifying results...
+    Checking commit message...
+    - Commit message contains Prompt-Story trailer
+    Checking note attachment...
+    - Note is attached to HEAD
+    Checking note content...
+    - Note version is 1
+    - Note contains 1 session
+    - Session ID is correct
+    Verifying work timestamps...
+    - start_work = 2025-01-15T09:00:00Z (previous commit)
+    Verifying session timestamps match JSONL times...
+    - session.created = 2025-01-15T09:15:00Z (from JSONL)
+    - session.modified = 2025-01-15T10:25:00Z (from JSONL)
+    Checking transcript storage...
+    - Transcript stored at refs/notes/prompt-story-transcripts:claude-code/test-session-1.jsonl
+
+  All assertions passed!
+
+Running: 02-session-detection
+[2/5] Session Detection
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Step 4: Creating mock sessions...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-1.jsonl
+  Created mock session for /workspace/other-repo: /root/.clau...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:03</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass! Let me verify the &#34;Caveat:&#34; message is now filtered:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary origin/add-multi-tool-support --format=markdown | head -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;15 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+#### 7410070: Add multi-tool support implementation...
+
+&lt;details open&gt;&lt;summary&gt;[16:17] 📋 /clear&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:18] 💬 Please create new branch out of origin/main, will be implementing design for multi-tool use (e.g. Add Cursor).&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Cursor format: What is the session storage format for Cursor? Do you know where Cursor stores its conversation sessions (similar to Claude Code&amp;#39;s ~/.claude/projects/)?   I know the location/format&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Architecture: Should we create a generic tool provider interface, or just add Cursor support alongside Claude Code as a one-off?   Generic interface (Recommended)&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Detection: How should the tool be selected when discovering sessions?   Both options&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:21] ❓ Cursor details: What is the path and format of Cursor&amp;#39;s session storage? (e.g., directory path, file extension, JSON structure)   It is SQLLite, but I will translate it to JSON/JSONL during capture.&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:28] ❓ JSONL parsing: Should the ToolProvider be responsible for parsing JSONL into a common internal format, with each provider having its own parser?   Yes, provider parses&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:28] ❓ Display model: For displaying user steps and messages, what abstraction do you envision?   Both layers&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:28] ❓ Claude code: What Claude-specific code should move to the provider? (select all that apply)   Session discovery, JSONL parsing, Message filtering&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;[16:30] ❓ Common format: The current PromptEntry type seems like a good common abstraction (Type, Text, ToolName, etc.). Should we keep this as the common forma...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:04</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The &#34;Caveat:&#34; message is now filtered out:
+- Before: **16 user prompts** (included the system message)
+- After: **15 user prompts** (filtered correctly)
+
+Let me commit:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add internal/session/types.go internal/session/discovery.go internal/ci/summary.go internal/show/show.go &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Filter system-injected meta messages from prompt counts
+
+Skip messages with isMeta: true flag, which are system-injected
+messages like &#34;Caveat: The messages below were generated...&#34;
+that appear in Claude Code transcripts but aren&#39;t user prompts.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[fix-user-prompt-count c719a3a] Filter system-injected meta messages from prompt counts
+ 4 files changed, 16 insertions(&#43;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
