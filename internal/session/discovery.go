@@ -11,7 +11,8 @@ import (
 
 // FindSessions discovers Claude Code sessions for a given repo path
 // Returns sessions sorted by modified time (most recent first)
-func FindSessions(repoPath string) ([]ClaudeSession, error) {
+// If trace is non-nil, it records discovery details for explainability.
+func FindSessions(repoPath string, trace *TraceContext) ([]ClaudeSession, error) {
 	absPath, err := filepath.Abs(repoPath)
 	if err != nil {
 		return nil, err
@@ -22,14 +23,32 @@ func FindSessions(repoPath string) ([]ClaudeSession, error) {
 		return nil, err
 	}
 
+	// Record trace info
+	if trace != nil {
+		trace.RepoPath = absPath
+		trace.EncodedPath = encodePathForClaude(absPath)
+		trace.SessionDir = claudeDir
+	}
+
 	// Check if directory exists
 	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
+		if trace != nil {
+			trace.SessionDirExists = false
+		}
 		return nil, nil // No sessions directory = no sessions
+	}
+
+	if trace != nil {
+		trace.SessionDirExists = true
 	}
 
 	files, err := filepath.Glob(filepath.Join(claudeDir, "*.jsonl"))
 	if err != nil {
 		return nil, err
+	}
+
+	if trace != nil {
+		trace.FoundFiles = files
 	}
 
 	var sessions []ClaudeSession
@@ -46,6 +65,14 @@ func FindSessions(repoPath string) ([]ClaudeSession, error) {
 			Created:  created,
 			Modified: modified,
 		})
+
+		// Initialize session trace
+		if trace != nil {
+			st := trace.FindOrCreateSessionTrace(id)
+			st.Path = f
+			st.Created = created
+			st.Modified = modified
+		}
 	}
 
 	// Sort by modified time (most recent first)
@@ -75,13 +102,30 @@ func encodePathForClaude(repoPath string) string {
 
 // FilterSessionsByTime filters sessions to only those overlapping with the work period
 // A session overlaps if: session.Modified >= startWork AND session.Created <= endWork
-func FilterSessionsByTime(sessions []ClaudeSession, startWork, endWork time.Time) []ClaudeSession {
+// If trace is non-nil, it records the decision reason for each session.
+func FilterSessionsByTime(sessions []ClaudeSession, startWork, endWork time.Time, trace *TraceContext) []ClaudeSession {
 	var filtered []ClaudeSession
 	for _, s := range sessions {
 		// Session overlaps with work period if it was modified after work started
 		// and created before work ended
 		if !s.Modified.Before(startWork) && !s.Created.After(endWork) {
 			filtered = append(filtered, s)
+			if trace != nil {
+				st := trace.FindOrCreateSessionTrace(s.ID)
+				st.TimeFilterPassed = true
+				st.TimeFilterReason = "PASS (overlaps work period)"
+			}
+		} else {
+			if trace != nil {
+				st := trace.FindOrCreateSessionTrace(s.ID)
+				st.TimeFilterPassed = false
+				if s.Modified.Before(startWork) {
+					st.TimeFilterReason = "FAIL (modified before work start)"
+				} else {
+					st.TimeFilterReason = "FAIL (created after work end)"
+				}
+				st.FinalReason = st.TimeFilterReason
+			}
 		}
 	}
 	return filtered
@@ -89,35 +133,64 @@ func FilterSessionsByTime(sessions []ClaudeSession, startWork, endWork time.Time
 
 // HasUserMessagesInRange checks if a session has any user messages within the time range
 func HasUserMessagesInRange(sessionPath string, startWork, endWork time.Time) (bool, error) {
+	has, _, err := CountUserMessagesInRangeForSession(sessionPath, startWork, endWork)
+	return has, err
+}
+
+// CountUserMessagesInRangeForSession counts user messages in a single session within the time range
+// Returns (hasMessages, count, error)
+func CountUserMessagesInRangeForSession(sessionPath string, startWork, endWork time.Time) (bool, int, error) {
 	content, err := ReadSessionContent(sessionPath)
 	if err != nil {
-		return false, err
+		return false, 0, err
 	}
 
 	entries, err := ParseMessages(content)
 	if err != nil {
-		return false, err
+		return false, 0, err
 	}
 
+	count := 0
 	for _, entry := range entries {
 		if entry.Type != "user" {
 			continue
 		}
 		ts := entry.Timestamp
 		if !ts.IsZero() && !ts.Before(startWork) && !ts.After(endWork) {
-			return true, nil
+			count++
 		}
 	}
-	return false, nil
+	return count > 0, count, nil
 }
 
 // FilterSessionsByUserMessages filters to only sessions with user messages in time range
-func FilterSessionsByUserMessages(sessions []ClaudeSession, startWork, endWork time.Time) []ClaudeSession {
+// If trace is non-nil, it records the decision reason and message count for each session.
+func FilterSessionsByUserMessages(sessions []ClaudeSession, startWork, endWork time.Time, trace *TraceContext) []ClaudeSession {
 	var filtered []ClaudeSession
 	for _, s := range sessions {
-		hasMessages, err := HasUserMessagesInRange(s.Path, startWork, endWork)
+		hasMessages, count, err := CountUserMessagesInRangeForSession(s.Path, startWork, endWork)
 		if err == nil && hasMessages {
 			filtered = append(filtered, s)
+			if trace != nil {
+				st := trace.FindOrCreateSessionTrace(s.ID)
+				st.UserMsgPassed = true
+				st.UserMsgCount = count
+				st.UserMsgReason = "PASS"
+				st.Included = true
+				st.FinalReason = "included"
+			}
+		} else {
+			if trace != nil {
+				st := trace.FindOrCreateSessionTrace(s.ID)
+				st.UserMsgPassed = false
+				st.UserMsgCount = count
+				if strings.HasPrefix(s.ID, "agent-") {
+					st.UserMsgReason = "FAIL (agent session)"
+				} else {
+					st.UserMsgReason = "FAIL (no user messages in range)"
+				}
+				st.FinalReason = st.UserMsgReason
+			}
 		}
 	}
 	return filtered
