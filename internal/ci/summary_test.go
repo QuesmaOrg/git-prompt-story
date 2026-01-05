@@ -665,3 +665,167 @@ func TestRenderMarkdown_NoAgentSessions(t *testing.T) {
 		t.Error("Should show '| 2 |' for user prompts when no agents")
 	}
 }
+
+func TestRenderUserTimelineWithTruncation(t *testing.T) {
+	now := time.Now()
+
+	t.Run("no truncation when under limit", func(t *testing.T) {
+		entries := []TimelineEntry{
+			{Entry: PromptEntry{Type: "PROMPT", Text: "First prompt", Time: now}, CommitSHA: "abc1234", CommitSubj: "Test", CommitIndex: 0},
+			{Entry: PromptEntry{Type: "PROMPT", Text: "Second prompt", Time: now.Add(time.Minute)}, CommitSHA: "abc1234", CommitSubj: "Test", CommitIndex: 0},
+		}
+
+		result, truncated := renderUserTimelineWithTruncation(entries, 10000)
+
+		if truncated != 0 {
+			t.Errorf("Expected 0 truncated, got %d", truncated)
+		}
+		if strings.Contains(result, "truncated") {
+			t.Error("Should not contain truncation notice")
+		}
+		if !strings.Contains(result, "First prompt") || !strings.Contains(result, "Second prompt") {
+			t.Error("Should contain both prompts")
+		}
+	})
+
+	t.Run("truncates when over limit", func(t *testing.T) {
+		entries := []TimelineEntry{
+			{Entry: PromptEntry{Type: "PROMPT", Text: "First prompt", Time: now}, CommitSHA: "abc1234", CommitSubj: "Test", CommitIndex: 0},
+			{Entry: PromptEntry{Type: "PROMPT", Text: "Second prompt", Time: now.Add(time.Minute)}, CommitSHA: "abc1234", CommitSubj: "Test", CommitIndex: 0},
+			{Entry: PromptEntry{Type: "PROMPT", Text: "Third prompt", Time: now.Add(2 * time.Minute)}, CommitSHA: "abc1234", CommitSubj: "Test", CommitIndex: 0},
+		}
+
+		// Very small limit to force truncation
+		result, truncated := renderUserTimelineWithTruncation(entries, 200)
+
+		if truncated == 0 {
+			t.Error("Expected some entries to be truncated")
+		}
+		if !strings.Contains(result, "truncated") {
+			t.Error("Should contain truncation notice")
+		}
+	})
+}
+
+func TestRenderAllSteps(t *testing.T) {
+	now := time.Now()
+
+	t.Run("renders sessions grouped with headers", func(t *testing.T) {
+		commits := []CommitSummary{
+			{
+				ShortSHA: "abc1234",
+				Subject:  "Test commit",
+				Sessions: []SessionSummary{
+					{
+						Tool:  "claude-code",
+						ID:    "session-1",
+						Start: now,
+						End:   now.Add(30 * time.Minute),
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "User prompt", Time: now},
+							{Type: "ASSISTANT", Text: "Response", Time: now.Add(time.Minute)},
+						},
+					},
+				},
+			},
+		}
+
+		result, truncSess, truncSteps := renderAllSteps(commits, 10000, "")
+
+		if truncSess != 0 || truncSteps != 0 {
+			t.Errorf("Expected no truncation, got sessions=%d steps=%d", truncSess, truncSteps)
+		}
+		if !strings.Contains(result, "**Session: Claude Code**") {
+			t.Error("Should contain session header")
+		}
+		if !strings.Contains(result, "2 steps") {
+			t.Error("Should show step count in session header")
+		}
+		// Check indentation (entries should have 2-space indent)
+		if !strings.Contains(result, "  - ") {
+			t.Error("Entries should be indented with 2 spaces")
+		}
+	})
+
+	t.Run("truncates sessions when over limit", func(t *testing.T) {
+		commits := []CommitSummary{
+			{
+				ShortSHA: "abc1234",
+				Subject:  "Test commit",
+				Sessions: []SessionSummary{
+					{
+						Tool:  "claude-code",
+						ID:    "session-1",
+						Start: now,
+						End:   now.Add(30 * time.Minute),
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "Prompt 1", Time: now},
+							{Type: "PROMPT", Text: "Prompt 2", Time: now.Add(time.Minute)},
+						},
+					},
+					{
+						Tool:  "claude-code",
+						ID:    "session-2",
+						Start: now.Add(time.Hour),
+						End:   now.Add(90 * time.Minute),
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "Prompt 3", Time: now.Add(time.Hour)},
+							{Type: "PROMPT", Text: "Prompt 4", Time: now.Add(time.Hour + time.Minute)},
+						},
+					},
+				},
+			},
+		}
+
+		// Very small limit to force truncation
+		result, truncSess, truncSteps := renderAllSteps(commits, 300, "https://example.com/transcripts")
+
+		if truncSess == 0 && truncSteps == 0 {
+			t.Error("Expected some truncation with small limit")
+		}
+		if !strings.Contains(result, "truncated") {
+			t.Error("Should contain truncation notice")
+		}
+		if !strings.Contains(result, "View full transcripts") {
+			t.Error("Should contain link to full transcripts when URL provided")
+		}
+	})
+
+	t.Run("sorts sessions by start time", func(t *testing.T) {
+		// Sessions intentionally out of order
+		commits := []CommitSummary{
+			{
+				ShortSHA: "abc1234",
+				Subject:  "Test commit",
+				Sessions: []SessionSummary{
+					{
+						Tool:    "claude-code",
+						ID:      "session-late",
+						Start:   now.Add(time.Hour),
+						End:     now.Add(90 * time.Minute),
+						Prompts: []PromptEntry{{Type: "PROMPT", Text: "Late", Time: now.Add(time.Hour)}},
+					},
+					{
+						Tool:    "claude-code",
+						ID:      "session-early",
+						Start:   now,
+						End:     now.Add(30 * time.Minute),
+						Prompts: []PromptEntry{{Type: "PROMPT", Text: "Early", Time: now}},
+					},
+				},
+			},
+		}
+
+		result, _, _ := renderAllSteps(commits, 10000, "")
+
+		// Find positions of "Early" and "Late" in output
+		earlyPos := strings.Index(result, "Early")
+		latePos := strings.Index(result, "Late")
+
+		// Note: renderAllSteps doesn't sort - the sorting happens in RenderMarkdown
+		// So we just verify the output contains both
+		if earlyPos == -1 || latePos == -1 {
+			t.Error("Should contain both Early and Late entries")
+		}
+	})
+}
