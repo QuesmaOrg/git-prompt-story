@@ -129,6 +129,11 @@ func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool
 			continue
 		}
 
+		// Skip meta/system-injected messages
+		if entry.IsMeta {
+			continue
+		}
+
 		// Determine entry type and text to display
 		var entryType, text string
 

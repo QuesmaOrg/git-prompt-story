@@ -191,6 +191,11 @@ func CountUserActionsInRange(sessions []ClaudeSession, startWork, endWork time.T
 // isUserActionEntry determines if a message entry represents a user action
 // (prompt, command, or tool rejection) as opposed to tool results or system messages
 func isUserActionEntry(entry MessageEntry) bool {
+	// Skip meta/system-injected messages
+	if entry.IsMeta {
+		return false
+	}
+
 	// Only consider user and tool_reject entries
 	switch entry.Type {
 	case "tool_reject":

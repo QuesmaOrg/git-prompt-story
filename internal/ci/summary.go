@@ -236,6 +236,11 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 					continue
 				}
 
+				// Skip meta/system-injected messages
+				if entry.IsMeta {
+					continue
+				}
+
 				// Check for tool results
 				toolResults := parseToolResults(entry.Message.RawContent)
 				if len(toolResults) > 0 {
