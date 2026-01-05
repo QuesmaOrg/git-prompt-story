@@ -19,6 +19,7 @@ type MessageEntry struct {
 	SessionID     string         `json:"sessionId"`
 	Timestamp     time.Time      `json:"timestamp"`
 	GitBranch     string         `json:"gitBranch"`
+	IsMeta        bool           `json:"isMeta"` // System-injected message (e.g., caveat warnings)
 	Snapshot      *Snapshot      `json:"snapshot,omitempty"`
 	Message       *Message       `json:"message,omitempty"`
 	ToolUseResult *ToolUseResult `json:"toolUseResult,omitempty"` // For AskUserQuestion answers

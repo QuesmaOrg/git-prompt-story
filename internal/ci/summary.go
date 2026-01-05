@@ -236,6 +236,11 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 					continue
 				}
 
+				// Skip meta/system-injected messages
+				if entry.IsMeta {
+					continue
+				}
+
 				// Check for tool results
 				toolResults := parseToolResults(entry.Message.RawContent)
 				if len(toolResults) > 0 {
@@ -271,7 +276,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						InWorkPeriod: inWorkPeriod,
 					}
 					if !full && len(pe.Text) > 2000 {
-						pe.Text = pe.Text[:2000]
+						pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
 						pe.Truncated = true
 					}
 					if inWorkPeriod {
@@ -340,7 +345,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 							InWorkPeriod: inWorkPeriod,
 						}
 						if !full && len(pe.ToolInput) > 500 {
-							pe.ToolInput = pe.ToolInput[:500]
+							pe.ToolInput = pe.ToolInput[:500] + "...[TRUNCATED]"
 							pe.Truncated = true
 						}
 						if inWorkPeriod {
@@ -357,7 +362,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						InWorkPeriod: inWorkPeriod,
 					}
 					if !full && len(pe.Text) > 2000 {
-						pe.Text = pe.Text[:2000]
+						pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
 						pe.Truncated = true
 					}
 					if inWorkPeriod {
@@ -711,6 +716,26 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 	return sb.String()
 }
 
+// getTypeEmoji returns an emoji for the entry type
+func getTypeEmoji(entryType string) string {
+	switch entryType {
+	case "PROMPT":
+		return "💬"
+	case "TOOL_USE":
+		return "🔧"
+	case "ASSISTANT":
+		return "🤖"
+	case "TOOL_REJECT":
+		return "❌"
+	case "COMMAND":
+		return "📋"
+	case "DECISION":
+		return "❓"
+	default:
+		return "📝" // Unknown type
+	}
+}
+
 // renderTimeline renders a list of timeline entries with commit markers
 func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPrompts bool) {
 	lastCommitIndex := -1
@@ -723,7 +748,7 @@ func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPr
 				subject = subject[:37] + "..."
 			}
 			subject = html.EscapeString(subject)
-			sb.WriteString(fmt.Sprintf("\n--- Commit %s: %s ---\n\n", te.CommitSHA, subject))
+			sb.WriteString(fmt.Sprintf("\n#### %s: %s\n\n", te.CommitSHA, subject))
 		}
 		lastCommitIndex = te.CommitIndex
 
@@ -739,6 +764,7 @@ func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPr
 // formatMarkdownEntry formats a single entry for markdown display
 func formatMarkdownEntry(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
+	emoji := getTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	if len(text) > 100 {
 		text = text[:97] + "..."
@@ -755,9 +781,9 @@ func formatMarkdownEntry(entry PromptEntry) string {
 			}
 			input = strings.ReplaceAll(input, "\n", " ")
 			input = html.EscapeString(input)
-			return fmt.Sprintf("- [%s] %s (%s): %s\n", timeStr, entry.Type, entry.ToolName, input)
+			return fmt.Sprintf("- %s %s %s: %s\n", timeStr, emoji, entry.ToolName, input)
 		}
-		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, text)
+		return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
 	case "DECISION":
 		header := entry.DecisionHeader
 		if header == "" {
@@ -768,15 +794,21 @@ func formatMarkdownEntry(entry PromptEntry) string {
 			answer = "(no answer)"
 		}
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("- [%s] DECISION (%s): %s → %s\n", timeStr, header, text, answer)
+		return fmt.Sprintf("- %s %s %s: %s → %s\n", timeStr, emoji, header, text, answer)
 	default:
-		return fmt.Sprintf("- [%s] %s: %s\n", timeStr, entry.Type, text)
+		// For known types (PROMPT, ASSISTANT), just show emoji + text
+		// For unknown types, show emoji + type + text
+		if entry.Type == "PROMPT" || entry.Type == "ASSISTANT" || entry.Type == "COMMAND" || entry.Type == "TOOL_REJECT" {
+			return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
+		}
+		return fmt.Sprintf("- %s %s %s: %s\n", timeStr, emoji, entry.Type, text)
 	}
 }
 
 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
+	emoji := getTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 
 	// DECISION entries: always show in full with answer
@@ -792,16 +824,16 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		// Escape HTML
 		text = html.EscapeString(text)
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("<details open><summary>[%s] DECISION (%s): %s → %s</summary></details>\n",
-			timeStr, header, text, answer)
+		return fmt.Sprintf("<details open><summary>%s %s %s: %s → %s</summary></details>\n\n",
+			timeStr, emoji, header, text, answer)
 	}
 
 	// Short prompts (≤250 chars): <details open> (expanded by default)
 	if len(text) <= 250 {
 		// Escape HTML to prevent breaking markdown structure
 		text = html.EscapeString(text)
-		return fmt.Sprintf("<details open><summary>[%s] %s: %s</summary></details>\n",
-			timeStr, entry.Type, text)
+		return fmt.Sprintf("<details open><summary>%s %s %s</summary></details>\n\n",
+			timeStr, emoji, text)
 	}
 
 	// Long prompts: <details> (collapsed) with truncated summary
@@ -812,8 +844,8 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("<details><summary>[%s] %s: %s</summary>\n\n...%s\n\n</details>\n",
-		timeStr, entry.Type, summary, continuation)
+	return fmt.Sprintf("<details><summary>%s %s %s</summary>\n\n...%s\n\n</details>\n\n",
+		timeStr, emoji, summary, continuation)
 }
 
 // RenderJSON generates JSON output
