@@ -3,15 +3,31 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 var version = "dev"
 
-func SetVersion(v string) {
+func SetVersionInfo(v, commit, date string) {
 	version = v
-	rootCmd.Version = v
+
+	// Build version string with optional commit and date
+	var parts []string
+	parts = append(parts, v)
+	if commit != "" {
+		parts = append(parts, commit)
+	}
+	if date != "" {
+		// Shorten ISO date to just the date part if it's a full timestamp
+		if len(date) > 10 {
+			date = date[:10]
+		}
+		parts = append(parts, date)
+	}
+
+	rootCmd.Version = strings.Join(parts, " ")
 }
 
 var rootCmd = &cobra.Command{
