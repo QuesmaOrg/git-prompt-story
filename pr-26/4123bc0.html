@@ -1,0 +1,3369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4123bc0 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>4123bc0</code></h1>
+    <p class="meta">Sort user prompts chronologically in ci-summary output</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">4</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">102</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>4123bc036eeb82577e7b134c5620ca308c30e454</code><br>
+    <strong>Work period:</strong> 2026-01-05 16:32 - 2026-01-05 17:20
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">76762c62-54e6-4d66-9407-fb8ae3ee50f9</code> |
+        2026-01-05 16:34 - 2026-01-05 17:20 | <span class="session-count">47</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item COMMAND"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:34</span>
+          <span class="prompt-type">COMMAND</span>
+          
+          <span class="prompt-text">/clear</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Ok, I have new issue visible on simplify-versioning ci-summary markdown. The first thing I see is not chronologic, so I&#39;m seeing some dates going up and the new dates. I&#39;m suspecting there&#39;s a multiple session there, and that&#39;s very confusing for the users because the time goes back at some point. I wonder what we can do about it.
+
+The second is that it&#39;s not clear for me why these sessions were picked up in the first place. Maybe this is a good time to think how users can troubleshoot, or maybe it should be a command that explains what we did behind the scenes and why we picked up these sessions and not others. We make it more explainable. Please brainstorm and present me several options! </span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand how `ci-summary` works, how sessions are selected, and how the output is ordered. Let me launch parallel explorations.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the codebase to understand how the `ci-summary` command works. Look for:
+1. How the ci-su...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the codebase to understand how sessions are selected and filtered. Look for:
+1. How sessi...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Excellent! Now let me create a comprehensive summary of my findings. Let me compile a report of the codebase exploration:
+
+## Summary: Session Selection and Filtering in git-prompt-story
+
+Based on my analysis of the codebase, here&#39;s how sessions are selected and filtered:
+
+### 1. SESSION IDENTIFICATION AND LOADING
+
+**File: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/discovery.go`**
+
+Sessions are identified through:
+- **Location**: `~/.claude/projects/{encoded-repo-path}/` directory
+  - Path encoding converts `/&lt;REDACTED&gt;/git/myapp` to `-Users-jacek-git-myapp`
+- **File format**: JSONL files (one session per file) with UUID-based filenames
+- **Metadata extraction**: `ParseSessionMetadata()` reads first/last timestamps and git branch from the JSONL
+
+Each session is represented by `ClaudeSession` struct (types.go):
+```go
+type ClaudeSession struct {
+    ID       string    // Session UUID (filename without .jsonl)
+    Path     string    // Full path to JSONL file
+    Created  time.Time // First timestamp in file
+    Modified time.Time // Last timestamp in file
+}
+```
+
+Sessions are discovered sorted by modified time (most recent first):
+```go
+// FindSessions() in discovery.go
+sort.Slice(sessions, func(i, j int) bool {
+    return sessions[i].Modified.After(sessions[j].Modified)
+})
+```
+
+### 2. SESSION FILTERING CRITERIA
+
+**File: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/discovery.go`**
+
+Three filtering functions control which sessions are included:
+
+#### A. Time-Based Filtering: `FilterSessionsByTime()`
+```go
+// A session overlaps if: session.Modified &gt;= startWork AND session.Created &lt;= endWork
+if !s.Modified.Before(startWork) &amp;&amp; !s.Created.After(endWork) {
+    // Include session
+}
+```
+- Sessions must have been **modified** after work started (startWork)
+- Sessions must have been **created** before work ended (endWork)
+- This captures sessions active during the work period
+
+#### B. User Message Filtering: `FilterSessionsByUserMessages()`
+```go
+// Only inclu...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I now have a good understanding of how the system works. Let me create the plan file with brainstorming options for both issues.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:37</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ve explored the codebase and identified the root causes. Here&#39;s what I found:
+
+**Issue 1 - Chronological ordering:** The code shows sessions sequentially within each commit. If you have overlapping sessions (e.g., Session A: 9:00-10:00, Session B: 9:30-10:30), showing them one after another creates time jumps.
+
+**Issue 2 - Explainability:** The session selection logic involves 3 filters (time overlap, user messages in range, excluding agent sessions) but none of this is exposed to users.
+
+I&#39;ve brainstormed several options in the plan file. Let me get your input on the key decisions:</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">16:37</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Ordering)</span>
+          <span class="prompt-text">For the chronological ordering issue, how should multiple sessions be presented?</span>
+          <span class="decision-answer">→ Show both views</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">16:37</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Explain)</span>
+          <span class="prompt-text">For explainability, how should session selection reasoning be exposed?</span>
+          <span class="decision-answer">→ Skip explanaibility for now.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Got it! So we&#39;ll focus on **fixing the chronological ordering** with the &#34;show both views&#34; approach - merge the User Prompts timeline chronologically, but keep the All Steps section per-session. Let me update the plan with this focused approach.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">TimelineEntry struct</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/ci/summary.go:607:type TimelineEntry struct {
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-608-	Entry       PromptEntry
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-609-	CommitSHA   string
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-610-	CommitSubj  string
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-611-	CommitIndex int // Order of commit in the PR
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-612-}
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-613-
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-614-// RenderMarkdown generates markdown output for PR comment
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-615-func RenderMarkdown(summary *Summary, pagesURL string) string {
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-616-	var sb strings.Builder
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-617-</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">PromptEntry struct</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/ci/summary.go:16:type PromptEntry struct {
+internal/ci/summary.go-17-	Time         time.Time `json:&#34;time&#34;`
+internal/ci/summary.go-18-	Type         string    `json:&#34;type&#34;` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT, DECISION
+internal/ci/summary.go-19-	Text         string    `json:&#34;text&#34;`
+internal/ci/summary.go-20-	Truncated    bool      `json:&#34;truncated,omitempty&#34;`
+internal/ci/summary.go-21-	InWorkPeriod bool      `json:&#34;in_work_period&#34;` // true if within commit&#39;s work period
+internal/ci/summary.go-22-	ToolID       string    `json:&#34;tool_id,omitempty&#34;`     // For TOOL_USE/TOOL_RESULT: links them together
+internal/ci/summary.go-23-	ToolName     string    `json:&#34;tool_name,omitempty&#34;`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
+internal/ci/summary.go-24-	ToolInput    string    `json:&#34;tool_input,omitempty&#34;`  // For TOOL_USE: the tool input/command
+internal/ci/summary.go-25-	ToolOutput   string    `json:&#34;tool_output,omitempty&#34;` // For TOOL_RESULT: the tool output
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-26-	// For DECISION entries (AskUserQuestion)
+internal/ci/summary.go-27-	DecisionHeader string `json:&#34;decision_header,omitempty&#34;` // Question header (e.g., &#34;Version&#34;)
+internal/ci/summary.go-28-	DecisionAnswer string `json:&#34;decision_answer,omitempty&#34;` // User&#39;s selected answer
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-29-}
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-30-
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-31-// SessionSummary represents a summarized session within a commit
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go-32-type SessionSummary struct {
+internal/ci/summary.go-33-	Tool     string        `json:&#34;tool&#34;`
+internal/ci/summary.go-34-	ID       string        `json:&#34;id&#34;`
+internal/ci/summary.go-35-	IsAgent  bool          `json:&#34;is_agent&#34;`  // True if this is an agent/subagent session
+internal/ci/summary.go-36-	Start    time.Time     `json:&#34;start&#34;`</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I have all the information I need. The fix is straightforward:
+- `PromptEntry` has a `Time` field
+- Sort `userTimeline` by `Entry.Time` after building it
+- Keep `fullTimeline` unsorted (maintains per-session grouping)
+
+Let me update the plan with the focused implementation:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Fix CI-Summary Chronological Ordering
+     2 
+     3 ## Problem
+     4 The ci-summary markdown output shows non-chronological dates when multiple sessions exist within a commit. Sessions are displayed sequentially, so if Session A runs 9:00-10:00 and Session B runs 9:30-10:30, showing them one after another creates confusing time jumps.
+     5 
+     6 ## Solution
+     7 **Show both views**: Merge the &#34;User Prompts&#34; section chronologically, but keep the &#34;All Steps&#34; section per-session (preserving the current behavior for the detailed view).
+     8 
+     9 ## Implementation
+    10 
+    11 ### File: `internal/ci/summary.go`
+    12 
+    13 **Change in `RenderMarkdown()` function (around line 648):**
+    14 
+    15 After building the `userTimeline` slice, add a sort by timestamp:
+    16 
+    17 ```go
+    18 // Sort userTimeline chronologically
+    19 sort.Slice(userTimeline, func(i, j int) bool {
+    20     return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
+    21 })
+    22 ```
+    23 
+    24 The `fullTimeline` remains unsorted, preserving the per-session grouping in the &#34;All Steps&#34; section.
+    25 
+    26 **Note:** The `sort` package is already imported in this file.
+    27 
+    28 ### Testing
+    29 
+    30 1. Run existing tests: `go test ./internal/ci/...`
+    31 2. Run e2e tests: `e2e/run-tests.sh`
+    32 3. Manual verification on the simplify-versioning branch output
+    33 
+    34 ## Files to Modify
+    35 - `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go` (single change ~line 648)
+    36 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The plan is ready. It&#39;s a minimal change - just adding a `sort.Slice()` call after building the `userTimeline` to sort entries chronologically. The &#34;All Steps&#34; section keeps the per-session grouping, giving users both views.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Fix CI-Summary Chronological Ordering\n\n## Problem\nThe ci-summary markdown output shows non-chronological dates when multiple sessions exist within a commit. Sessions are display...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Fix CI-Summary Chronological Ordering
+
+## Problem
+The ci-summary markdown output shows non-chronological dates when multiple sessions exist within a commit. Sessions are displayed sequentially, so if Session A runs 9:00-10:00 and Session B runs 9:30-10:30, showing them one after another creates confusing time jumps.
+
+## Solution
+**Show both views**: Merge the &#34;User Prompts&#34; section chronologically, but keep the &#34;All Steps&#34; section per-session (preserving the current behavior for the detailed view).
+
+## Implementation
+
+### File: `internal/ci/summary.go`
+
+**Change in `RenderMarkdown()` function (around line 648):**
+
+After building the `userTimeline` slice, add a sort by timestamp:
+
+```go
+// Sort userTimeline chronologically
+sort.Slice(userTimeline, func(i, j int) bool {
+    return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
+})
+```
+
+The `fullTimeline` remains unsorted, preserving the per-session grouping in the &#34;All Steps&#34; section.
+
+**Note:** The `sort` package is already imported in this file.
+
+### Testing
+
+1. Run existing tests: `go test ./internal/ci/...`
+2. Run e2e tests: `e2e/run-tests.sh`
+3. Manual verification on the simplify-versioning branch output
+
+## Files to Modify
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go` (single change ~line 648)
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding chronological sort to userTimeline&#34;,&#34;content&#34;:&#34;Add sort.Slice to userTimeline in RenderMarkdown&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Running unit tests&#34;,&#34;content&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   644 					userTimeline = append(userTimeline, te)
+   645 				}
+   646 			}
+   647 		}
+   648 	}
+   649 
+   650 	// Sort userTimeline chronologically across all sessions
+   651 	sort.Slice(userTimeline, func(i, j int) bool {
+   652 		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
+   653 	})
+   654 
+   655 	// Render Prompts section
+   656 	if len(userTimeline) == 0 {
+   657 		sb.WriteString(&#34;*No user prompts in this PR*\n\n&#34;)
+   658 	} else {
+   659 		// Expand by default when less than 10 user prompts</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding chronological sort to userTimeline&#34;,&#34;content&#34;:&#34;Add sort.Slice to userTimeline in RenderMarkdown&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Running unit tests&#34;,&#34;content&#34;:&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see - `sort` is not imported. Let me check the imports and add it:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;html&#34;
+     7 	&#34;sort&#34;
+     8 	&#34;strings&#34;
+     9 	&#34;time&#34;
+    10 
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    12 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    13 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.481s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding chronological sort to userTimeline&#34;,&#34;content&#34;:&#34;Add sort.Slice to userTimeline in RenderMarkdown&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Running unit tests&#34;,&#34;content&#34;:&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding chronological sort to userTimeline&#34;,&#34;content&#34;:&#34;Add sort.Slice to userTimeline in RenderMarkdown&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Running unit tests&#34;,&#34;content&#34;:&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:12</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! The fix adds a `sort.Slice()` call in `internal/ci/summary.go:651` that sorts the user timeline chronologically by timestamp after collecting entries from all sessions.
+
+**What changed:**
+- &#34;User prompts&#34; section: Now sorted chronologically across all sessions
+- &#34;All steps&#34; section: Unchanged - keeps per-session grouping
+
+Tests pass and the project builds. Would you like me to:
+1. Run `go install .` to update your global installation?
+2. Generate the ci-summary output for the simplify-versioning branch to verify it looks correct?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:14</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Yes, show me in pbcopy the branch to see if it looks correct.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary main..simplify-versioning | pbcopy</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: no commits in range main..simplify-versioning</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:16</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The branch was already merged. Let me find the right commit range:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">69c11a0 Merge pull request #24 from QuesmaOrg/simplify-versioning
+2233e2a Replace VERSION file with git tag-based versioning
+304f07f Merge pull request #23 from QuesmaOrg/fix-user-prompt-count
+5da65e3 Bump version to 0.11.0
+24c5f5a Add fallback emoji for unknown entry types with unit test
+d9afead Use plain time format for cleaner appearance
+c719a3a Filter system-injected meta messages from prompt counts
+10335b2 Improve markdown styling with emojis and cleaner format
+01b837c Add ...[TRUNCATED] marker for long text truncations
+d83bf04 Add extra newline after details tags in markdown output</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary 2233e2a | pbcopy &amp;&amp; echo &#34;Copied to clipboard&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Copied to clipboard</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Copied to clipboard. Let me also show you what it looks like:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary 2233e2a</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;21 user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+
+#### 2233e2a: Replace VERSION file with git tag-bas...
+
+&lt;details open&gt;&lt;summary&gt;16:19 📋 /clear&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:19 💬 Rebase on origin/main&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:22 📋 /clear&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:23 💬 I want to work now on privacy features. I should have a simple command line tools to review what is send in notes as part of sessions.&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:34 📋 /clear&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details&gt;&lt;summary&gt;16:36 💬 I want to add privacy feature to allow deleting session of tool as well as banning it from re-adding. Can you design a command line tool for that Please read ReadMeMD on potential IDs. If the use case is like, &amp;#34;I would like to disable this whole s...&lt;/summary&gt;
+
+...ession,&amp;#34; it will also remove it from remote if it&amp;#39;s already there and ban it forever from re-adding. I don&amp;#39;t know really how to do it. There are different design options. Maybe one of them is like, &amp;#34;We had this session but it was removed.&amp;#34; It was marked specially, or maybe the other way is like, &amp;#34;We have some other money of tracking that,&amp;#34; but please think for something. 
+
+&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:37 ❓ Local file: Should banning delete the original Claude Code session file from ~/.claude/projects/?   No, keep the file&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:37 ❓ CLI design: Should there be a subcommand structure?   The command should be remove and it should ask me few questions.&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:37 ❓ Remote sync: How should the command handle remote cleanup?   Interactive confirmation&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:41 💬 No please don&amp;#39;t use session ids, instead use commit or commit ranges, unban should be primarily interactive.&lt;/summary&gt;&lt;/details&gt;
+
+&lt;details open&gt;&lt;summary&gt;16:42 ❓ Dry run: Should `remove` ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The output is now in clipboard. Looking at the user prompts section, I can verify the timestamps are now chronological:
+
+- 16:19, 16:19, 16:22, 16:23, 16:34, 16:36, 16:37, 16:37, 16:37, 16:41, 16:42, 16:42, 17:22, 17:32, 17:33, 17:36, 17:58, 18:03, 18:24, 18:25, 18:28
+
+The &#34;All Steps&#34; section still shows per-session grouping (which has time jumps between sessions - that&#39;s expected as per your choice).
+
+Would you like me to run `go install .` to update your global installation?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please do commit</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The previous task (chronological ordering fix) is already implemented. Let me update the plan to reflect completion and exit so I can commit.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Fix CI-Summary Chronological Ordering
+     2 
+     3 ## Status: COMPLETED - Ready to commit
+     4 
+     5 ## What was done
+     6 Added `sort.Slice()` call in `internal/ci/summary.go` to sort the user timeline chronologically after collecting entries from all sessions.
+     7 
+     8 - &#34;User prompts&#34; section: Now sorted chronologically across all sessions
+     9 - &#34;All steps&#34; section: Unchanged - keeps per-session grouping
+    10 
+    11 ## Files modified
+    12 - `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go` (added sort import &#43; sort.Slice call)
+    13 
+    14 ## Next step
+    15 Commit the changes.
+    16 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Fix CI-Summary Chronological Ordering\n\n## Status: COMPLETED - Ready to commit\n\n## What was done\nAdded `sort.Slice()` call in `internal/ci/summary.go` to sort the user timeline...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/curious-skipping-emerson.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Fix CI-Summary Chronological Ordering
+
+## Status: COMPLETED - Ready to commit
+
+## What was done
+Added `sort.Slice()` call in `internal/ci/summary.go` to sort the user timeline chronologically after collecting entries from all sessions.
+
+- &#34;User prompts&#34; section: Now sorted chronologically across all sessions
+- &#34;All steps&#34; section: Unchanged - keeps per-session grouping
+
+## Files modified
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go` (added sort import &#43; sort.Slice call)
+
+## Next step
+Commit the changes.
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch main
+Your branch is up to date with &#39;origin/main&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   internal/ci/summary.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">diff --git a/internal/ci/summary.go b/internal/ci/summary.go
+index b83d8d7..c09e947 100644
+--- a/internal/ci/summary.go
+&#43;&#43;&#43; b/internal/ci/summary.go
+@@ -4,6 &#43;4,7 @@ import (
+ 	&#34;encoding/json&#34;
+ 	&#34;fmt&#34;
+ 	&#34;html&#34;
+&#43;	&#34;sort&#34;
+ 	&#34;strings&#34;
+ 	&#34;time&#34;
+ 
+@@ -647,6 &#43;648,11 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
+ 		}
+ 	}
+ 
+&#43;	// Sort userTimeline chronologically across all sessions
+&#43;	sort.Slice(userTimeline, func(i, j int) bool {
+&#43;		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
+&#43;	})
+&#43;
+ 	// Render Prompts section
+ 	if len(userTimeline) == 0 {
+ 		sb.WriteString(&#34;*No user prompts in this PR*\n\n&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">69c11a0 Merge pull request #24 from QuesmaOrg/simplify-versioning
+2233e2a Replace VERSION file with git tag-based versioning
+304f07f Merge pull request #23 from QuesmaOrg/fix-user-prompt-count</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout -b fix-chronological-ordering</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Switched to a new branch &#39;fix-chronological-ordering&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add internal/ci/summary.go &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Sort user prompts chronologically in ci-summary output
+
+When multiple sessions exist within a commit, the user prompts section
+now shows entries sorted by timestamp across all sessions, eliminating
+confusing time jumps. The &#34;All Steps&#34; section retains per-session grouping.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[fix-chronological-ordering 4123bc0] Sort user prompts chronologically in ci-summary output
+ 1 file changed, 6 insertions(&#43;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card agent-session" data-is-agent="true">
+    <div class="commit-header">
+      <h3>
+        <span class="badge agent">Agent</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">agent-a1536ae</code> |
+        2026-01-05 16:35 - 2026-01-05 16:36 | <span class="session-count">30</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Explore the codebase to understand how sessions are selected and filtered. Look for:
+1. How sessions are identified and loaded
+2. What criteria determine which sessions are included in summaries
+3. Any branch filtering or date range logic
+
+Focus on the session management and filtering code.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand session selection and filtering. Let me start by examining the project structure and key files.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">find /&lt;REDACTED&gt;/git/git-prompt-story -type f -name &#34;*.go&#34; | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/annotate_cloud.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/prepare_commit_msg.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/transcript.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/metadata.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/show/show.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me search for session-related code:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">session</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 26 files
+internal/show/show.go
+internal/hooks/prepare_commit_msg.go
+internal/note/metadata.go
+internal/session/discovery.go
+internal/session/types.go
+internal/ci/summary_test.go
+internal/ci/summary.go
+internal/scrubber/scrubber.go
+internal/scrubber/scrubber_test.go
+internal/session/parser_test.go
+internal/repair/repair.go
+internal/cloud/converter.go
+internal/git/objects.go
+cmd/repair.go
+internal/note/merge_test.go
+cmd/install_hooks.go
+internal/note/transcript.go
+internal/hooks/post_rewrite.go
+cmd/annotate_cloud.go
+cmd/ci_summary.go
+internal/note/merge.go
+internal/cloud/types.go
+internal/cloud/client.go
+cmd/root.go
+cmd/show.go
+internal/session/parser.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/prepare_commit_msg.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/parser.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/reflog.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/cloud/client.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/cloud/types.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/repo.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/annotate_cloud.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/transcript.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/cloud/converter.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/objects.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/repair/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/scrubber/scrubber_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/parser_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/notes.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/scrubber/scrubber.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go
+/&lt;REDACTED&gt;/git/git-p...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good! I found session-related files. Let me examine the key session files:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/discovery.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/parser.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me look at how branches and notes are handled:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/metadata.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">FilterSessions|branch</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 12 files
+internal/hooks/prepare_commit_msg.go
+internal/session/discovery.go
+internal/session/parser_test.go
+internal/repair/repair.go
+internal/cloud/converter.go
+cmd/annotate_cloud.go
+internal/git/repo.go
+cmd/ci_summary.go
+internal/cloud/types.go
+internal/cloud/client.go
+internal/git/reflog.go
+internal/session/parser.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the git repo module and see how branches are used in session discovery:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/repo.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">CalculateWorkStartTime|FilterByBranch</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 4 files
+internal/hooks/prepare_commit_msg.go
+internal/note/metadata.go
+internal/repair/repair.go
+internal/git/reflog.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the git reflog and post_commit code to understand how sessions are collected:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/reflog.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/post_commit.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/repair/repair.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me check the prepare_commit_msg hook to see how sessions are initially selected:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/prepare_commit_msg.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">branch|Branch</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/session/parser.go:11:// ParseSessionMetadata extracts first/last timestamps and branch from JSONL
+internal/session/parser.go:12:func ParseSessionMetadata(sessionPath string) (created, modified time.Time, branch string, err error) {
+internal/session/parser.go:25:	var lastBranch string
+internal/session/parser.go:46:		if entry.GitBranch != &#34;&#34; {
+internal/session/parser.go:47:			lastBranch = entry.GitBranch
+internal/session/parser.go:55:	return first, last, lastBranch, nil
+internal/session/types.go:21:	GitBranch     string         `json:&#34;gitBranch&#34;`
+internal/session/parser_test.go:176:	content := `{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test&#34;,&#34;timestamp&#34;:&#34;2025-01-15T09:15:00Z&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;Start&#34;}}
+internal/session/parser_test.go:178:{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test&#34;,&#34;timestamp&#34;:&#34;2025-01-15T09:30:00Z&#34;,&#34;gitBranch&#34;:&#34;feature&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;End&#34;}}`
+internal/session/parser_test.go:184:	created, modified, branch, err := ParseSessionMetadata(sessionPath)
+internal/session/parser_test.go:201:	// Verify branch (last non-empty branch)
+internal/session/parser_test.go:202:	if branch != &#34;feature&#34; {
+internal/session/parser_test.go:203:		t.Errorf(&#34;Expected branch &#39;feature&#39;, got %q&#34;, branch)
+internal/session/parser_test.go:215:	created, modified, branch, err := ParseSessionMetadata(sessionPath)
+internal/session/parser_test.go:220:	// Empty file should return zero times and empty branch
+internal/session/parser_test.go:227:	if branch != &#34;&#34; {
+internal/session/parser_test.go:228:		t.Errorf(&#34;Expected empty branch, got %q&#34;, branch)
+internal/session/parser_test.go:246:	lines = append(lines, `{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test&#34;,&#34;timestamp&#34;:&#34;2025-01-15T09:00:00Z&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;Start&#34;}}`)
+internal/session/parser_test.go:248:	lines = append(lines, `{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test&#34;,&#34;timestamp&#34;:&#34;2025-01-15T10:00:00Z&#34;,&#34;gitBranch&#34;:&#34;develop&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;End&#34;}}`)
+internal/sessio...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now let me check the session tests to better understand filtering:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/parser_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Excellent! Now let me create a comprehensive summary of my findings. Let me compile a report of the codebase exploration:
+
+## Summary: Session Selection and Filtering in git-prompt-story
+
+Based on my analysis of the codebase, here&#39;s how sessions are selected and filtered:
+
+### 1. SESSION IDENTIFICATION AND LOADING
+
+**File: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/discovery.go`**
+
+Sessions are identified through:
+- **Location**: `~/.claude/projects/{encoded-repo-path}/` directory
+  - Path encoding converts `/&lt;REDACTED&gt;/git/myapp` to `-Users-jacek-git-myapp`
+- **File format**: JSONL files (one session per file) with UUID-based filenames
+- **Metadata extraction**: `ParseSessionMetadata()` reads first/last timestamps and git branch from the JSONL
+
+Each session is represented by `ClaudeSession` struct (types.go):
+```go
+type ClaudeSession struct {
+    ID       string    // Session UUID (filename without .jsonl)
+    Path     string    // Full path to JSONL file
+    Created  time.Time // First timestamp in file
+    Modified time.Time // Last timestamp in file
+}
+```
+
+Sessions are discovered sorted by modified time (most recent first):
+```go
+// FindSessions() in discovery.go
+sort.Slice(sessions, func(i, j int) bool {
+    return sessions[i].Modified.After(sessions[j].Modified)
+})
+```
+
+### 2. SESSION FILTERING CRITERIA
+
+**File: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/discovery.go`**
+
+Three filtering functions control which sessions are included:
+
+#### A. Time-Based Filtering: `FilterSessionsByTime()`
+```go
+// A session overlaps if: session.Modified &gt;= startWork AND session.Created &lt;= endWork
+if !s.Modified.Before(startWork) &amp;&amp; !s.Created.After(endWork) {
+    // Include session
+}
+```
+- Sessions must have been **modified** after work started (startWork)
+- Sessions must have been **created** before work ended (endWork)
+- This captures sessions active during the work period
+
+#### B. User Message Filtering: `FilterSessionsByUserMessages()`
+```go
+// Only includes sessions with actual user messages in the time range
+HasUserMessagesInRange(sessionPath, startWork, endWork)
+```
+- Reads the full session JSONL file
+- Scans for entries with `type == &#34;user&#34;`
+- Checks if message timestamp falls within `[startWork, endWork]`
+- Excludes sessions without user interaction
+
+#### C. User Action Filtering: `CountUserActionsInRange()`
+Sophisticated filtering that counts and identifies actual user actions:
+```go
+// Skips agent sessions (IDs starting with &#34;agent-&#34;)
+if strings.HasPrefix(s.ID, &#34;agent-&#34;) {
+    continue
+}
+
+// Identifies user actions via isUserActionEntry():
+switch entry.Type {
+case &#34;tool_reject&#34;:
+    return true // User rejected a tool
+case &#34;user&#34;:
+    // Check content to validate it&#39;s actual user action
+    // Skips: local command outputs, system messages (IsMeta), tool results
+    // Counts: commands (starting with &#34;/&#34;), regular prompts, tool rejections
+}
+```
+
+### 3. BRANCH FILTERING AND DETECTION
+
+**Files: Multiple (reflog.go, parser.go, parser_test.go)**
+
+Branch information is **captured but not used for filtering** sessions:
+
+**Capture points:**
+- `ParseSessionMetadata()` reads `GitBranch` from each message entry
+- Returns the **last non-empty branch** found in the session
+- Stored in message entries as: `&#34;gitBranch&#34;: &#34;main&#34;` or `&#34;gitBranch&#34;: &#34;feature&#34;`
+
+**Where branch is used:**
+- **Not for filtering** session inclusion
+- **Used for display** in CI summaries and cloud session matching
+- Cloud sessions can match by branch name (`FindSessionByBranch()` in cloud/client.go)
+- Test coverage in `parser_test.go` shows branch is extracted and stored
+
+### 4. DATE RANGE LOGIC
+
+**File: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/reflog.go`**
+
+Work period calculation (`CalculateWorkStartTime()`):
+```go
+// startWork = most recent of: previous commit timestamp OR branch switch timestamp
+// endWork = current time (or commit timestamp for existing commits)
+
+prevTime := GetPreviousCommitTimestamp(ref)  // Previous commit time
+switchTime := GetLastBranchSwitchTimestamp() // Last git checkout action
+
+// Return the more recent timestamp
+return max(switchTime, prevTime)
+```
+
+**Key points:**
+- Branch switches detected from git reflog `checkout:` entries
+- Amend detection: if `source == &#34;commit&#34;` AND SHA provided, uses `HEAD^` as reference
+- `HasUserMessagesInRange()` checks: `!ts.Before(startWork) &amp;&amp; !ts.After(endWork)`
+
+### 5. PRACTICAL WORKFLOW
+
+**File: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/prepare_commit_msg.go`**
+
+The complete session selection flow during commit:
+
+```
+1. FindSessions(repoPath) 
+   → discovers all JSONL files in ~/.claude/projects/{repo-hash}/
+
+2. CalculateWorkStartTime(isAmend)
+   → determines work period start
+
+3. FilterSessionsByTime(sessions, startWork, endWork)
+   → removes sessions outside time window
+   
+4. FilterSessionsByUserMessages(sessions, startWork, endWork)
+   → removes sessions without user input in time window
+
+5. CountUserActionsInRange(sessions, startWork, endWork)
+   → counts actual user prompts/commands (excludes agent sessions)
+
+6. Stores sessions with transcripts &#43; creates git note
+```
+
+### 6. KEY OBSERVATIONS
+
+1. **No explicit branch filtering** - all sessions on any branch are considered
+2. **Branch information is captured** but used for metadata only (display/matching)
+3. **Agent sessions are distinguished** - IDs starting with `&#34;agent-&#34;` are separate
+4. **Time ranges are tight** - bounded by commit timestamps and branch switches
+5. **Meta/system messages excluded** - `IsMeta` flag filters out system-injected content
+6. **Tool results excluded** - only actual user prompts/commands/rejections counted
+7. **Local command outputs excluded** - messages starting with `&lt;local-command-stdout&gt;` skipped
+
+This design allows capturing LLM sessions from any branch working on a commit, with filtering based on actual temporal overlap and user interaction, while separately tracking whether work was done in agent vs. direct sessions.</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card agent-session" data-is-agent="true">
+    <div class="commit-header">
+      <h3>
+        <span class="badge agent">Agent</span>
+        Session 3: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">agent-af18cb1</code> |
+        2026-01-05 16:35 - 2026-01-05 16:36 | <span class="session-count">21</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Explore the codebase to understand how the `ci-summary` command works. Look for:
+1. How the ci-summary command is implemented
+2. How it selects which sessions to include
+3. How entries are ordered in the output
+
+Focus on finding the main files involved and tracing the code flow.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand how the `ci-summary` command works. Let me start by searching for the main implementation files.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/prepare_commit_msg.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/parser.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/reflog.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/cloud/client.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/cloud/types.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/repo.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/annotate_cloud.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/transcript.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/cloud/converter.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/objects.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/repair/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/scrubber/scrubber_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/parser_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/notes.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/scrubber/scrubber.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go
+/&lt;REDACTED&gt;/git/git-p...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">find /&lt;REDACTED&gt;/git/git-prompt-story -type f -name &#34;*.go&#34; | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/annotate_cloud.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/prepare_commit_msg.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/transcript.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/metadata.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/merge_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story/internal/show/show.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good! I found the key files. Let me read the `ci_summary.go` command file and the internal implementation file:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now let me also check for related files to understand the session types and data structures:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/metadata.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Excellent! Now let me check the git and session discovery logic to complete the picture:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">func ResolveCommitSpec</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 1 file
+internal/git/objects.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/repo.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me check the objects.go file to find ResolveCommitSpec:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/objects.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now let me check a few more utility functions to understand the complete flow:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">func GetNoteWithFallback|func GetPreviousCommitTimestamp</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 2 files
+internal/note/refs.go
+internal/git/reflog.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/refs.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/reflog.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now I have a comprehensive understanding of the codebase. Let me create a detailed analysis document:
+
+## Summary of `ci-summary` Command Implementation
+
+Based on my exploration of the codebase, here&#39;s a comprehensive analysis of how the `ci-summary` command works:
+
+### 1. **Command Entry Point** (`/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go`)
+
+The command is a Cobra CLI command that:
+- Accepts a commit range argument (e.g., `HEAD~5..HEAD`, `abc123..def456`, `main..feature-branch`)
+- Takes optional flags:
+  - `--format` (markdown or json, default: markdown)
+  - `--full` (include full prompt text without truncation)
+  - `--pages-url` (URL to GitHub Pages transcripts)
+  - `--output` (write to file instead of stdout)
+
+The command execution flow:
+1. Calls `ci.GenerateSummary(commitRange, full)` to analyze commits
+2. Renders output in the specified format using either `RenderMarkdown()` or `RenderJSON()`
+3. Outputs to stdout or file
+
+### 2. **Session Selection** (`/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go`, lines 69-109)
+
+The `GenerateSummary()` function selects which sessions to include:
+
+**Commit Resolution:**
+- Uses `git.ResolveCommitSpec(commitRange)` to convert the range to a list of commit SHAs
+- Handles range syntax like `A..B` and single refs like `HEAD`
+- `RevList()` returns commits in **reverse chronological order (newest first)**
+
+**Session Filtering:**
+For each commit SHA:
+- Retrieves the prompt-story note attached to the commit
+- Parses the JSON to extract `SessionEntry` objects
+- Each session references a transcript stored in `refs/notes/prompt-story-transcripts`
+- **Only commits with notes are included** - commits without notes are silently skipped
+
+**Session Analysis:**
+- For each session, extracts entries using `analyzeSession()` 
+- Separates user prompts into **main sessions** vs **agent sessions** based on session ID prefix
+- Agent sessions have IDs starting with `&#34;agent-&#34;` (see `IsAgentSession()` function, line 43)
+- Counts entries and categorizes them by type
+
+### 3. **Entry Ordering** (`/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go`, lines 614-717)
+
+The `RenderMarkdown()` function handles ordering:
+
+**Commit Reversal:**
+```go
+// Reverse commits to show oldest first (chronological order)
+commits := make([]CommitSummary, len(summary.Commits))
+for i, c := range summary.Commits {
+    commits[len(summary.Commits)-1-i] = c
+}
+```
+
+- Since `ResolveCommitSpec()` returns commits in reverse chronological order (newest first)
+- The rendering reverses them to show **oldest to newest** in the output
+
+**Timeline Construction:**
+- Builds two timelines:
+  1. **User Timeline**: Contains only user actions (PROMPT, COMMAND, TOOL_REJECT, DECISION) from main sessions
+  2. **Full Timeline**: Contains all entry types including ASSISTANT, TOOL_USE, etc.
+
+**Entry Type Classification** (lines 856-863):
+User actions include:
+- `PROMPT` - User prompts
+- `COMMAND` - CLI commands like `/commit`
+- `TOOL_REJECT` - User rejections of tool calls
+- `DECISION` - User answers from AskUserQuestion skill
+
+Non-user actions (counted but not shown in user timeline):
+- `ASSISTANT` - Model responses
+- `TOOL_USE` - Tool invocations
+- `TOOL_RESULT` - Tool execution results
+
+**Timeline Ordering:**
+- Entries are ordered by their **timestamp within each session**
+- Commit markers are inserted when transitioning between commits (line 745)
+- Entries maintain their original chronological order from sessions
+
+### 4. **Data Structure Hierarchy**
+
+```
+Summary
+├── Commits[] (CommitSummary)
+│   ├── SHA, ShortSHA, Subject
+│   ├── Sessions[] (SessionSummary)
+│   │   ├── Tool, ID, IsAgent, Start, End
+│   │   └── Prompts[] (PromptEntry)
+│   │       ├── Time, Type, Text
+│   │       ├── ToolID, ToolName, ToolInput, ToolOutput
+│   │       ├── DecisionHeader, DecisionAnswer
+│   │       └── InWorkPeriod
+│   ├── StartWork, EndWork (timestamps for work period filtering)
+├── TotalPrompts/TotalSteps
+├── TotalUserPrompts (main sessions only)
+├── TotalAgentPrompts (agent sessions only)
+└── TotalAgentSessions
+```
+
+### 5. **Key Implementation Details**
+
+**Work Period Filtering:**
+- Each entry has an `InWorkPeriod` boolean flag
+- Only entries within the work period are included in output
+- Work period is calculated from `StartWork` and `EndWork` in the note
+- `StartWork` is derived from the previous commit or branch switch
+- `EndWork` is the current commit timestamp
+
+**Text Truncation:**
+- User prompts truncated at 2000 characters (unless `--full` flag)
+- Tool input truncated at 500 characters
+- DECISION entries always shown in full
+
+**Tool Name Formatting:**
+- Tool names are formatted for display (e.g., &#34;claude-code&#34; → &#34;Claude Code&#34;)
+- Multiple tools shown as &#34;tools (N)&#34; in summary table
+- Single tool shown by name
+
+**HTML Escaping:**
+- All entry text is HTML-escaped to prevent breaking markdown structure
+- Protects against user content containing `&lt;details&gt;`, `&lt;script&gt;`, etc.
+
+### 6. **Markdown Rendering Structure**
+
+The markdown output includes:
+1. **User Prompts Section** - Collapsible details with user action count
+   - Expands by default if &lt; 10 user prompts
+   - Uses collapsible format for long prompts (&gt;250 chars)
+2. **All Steps Section** - Full transcript with all entry types
+3. **Transcripts Link** - If `--pages-url` provided
+4. **Summary Table** - Per-commit statistics
+
+---
+
+**Key Files Involved:**
+- `/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go` - Command handler
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go` - Core logic (864 lines)
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go` - Comprehensive tests (668 lines)
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/objects.go` - Commit resolution
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/reflog.go` - Timestamp calculation
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/refs.go` - Note retrieval
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go` - Data types</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 4: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">bcfc2a4d-f829-4d91-93f2-c274a7f809fe</code> |
+        2026-01-05 16:16 - 2026-01-05 16:33 | <span class="session-count">4</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:32</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Merged that, please tag latest main to v0.11.1 to verify that it works.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout main &amp;&amp; git pull origin main</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Your branch is behind &#39;origin/main&#39; by 9 commits, and can be fast-forwarded.
+  (use &#34;git pull&#34; to update your local branch)
+Updating 9f8d505..69c11a0
+Fast-forward
+ .goreleaser.yml                      |   3 &#43;-
+ CLAUDE.md                            |   4 &#43;-
+ VERSION                              |   1 -
+ internal/ci/summary.go               |  60 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-----
+ internal/ci/summary_test.go          |  45 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;---
+ internal/hooks/prepare_commit_msg.go |   4 &#43;-
+ internal/note/metadata.go            |   2 &#43;-
+ internal/session/discovery.go        | 104 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/session/types.go            |   1 &#43;
+ internal/show/show.go                |   5 &#43;&#43;
+ main.go                              |   9 &#43;--
+ 11 files changed, 204 insertions(&#43;), 34 deletions(-)
+ delete mode 100644 VERSION
+Switched to branch &#39;main&#39;
+From github.com:QuesmaOrg/git-prompt-story
+ * branch            main       -&gt; FETCH_HEAD
+   304f07f..69c11a0  main       -&gt; origin/main</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag v0.11.1 &amp;&amp; git push origin v0.11.1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new tag]         v0.11.1 -&gt; v0.11.1</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:33</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Tag `v0.11.1` pushed. This should trigger GoReleaser - check the Actions tab: https://github.com/QuesmaOrg/git-prompt-story/actions</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
