@@ -669,7 +669,12 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 	// Render Prompts section with truncation
 	if len(userTimeline) == 0 {
 		sb.WriteString("*No user prompts in this PR*\n\n")
+	} else if allPromptsShort(userTimeline) {
+		// All prompts are short - skip <details> entirely for cleaner output
+		sb.WriteString(fmt.Sprintf("**%d user prompts**\n\n", len(userTimeline)))
+		renderTimeline(&sb, userTimeline, formatSimple)
 	} else {
+		// Some prompts are long - use collapsible sections
 		// Expand by default when less than 10 user prompts
 		detailsTag := "<details>"
 		if len(userTimeline) < 10 {
@@ -757,8 +762,15 @@ func getTypeEmoji(entryType string) string {
 	}
 }
 
+// Format modes for renderTimeline
+const (
+	formatRegular     = "regular"     // Truncated display (100 chars) - for "All Steps"
+	formatCollapsible = "collapsible" // <details> tags for long prompts - for user prompts with some long
+	formatSimple      = "simple"      // Full text, no details - for user prompts when all short
+)
+
 // renderTimeline renders a list of timeline entries with commit markers
-func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPrompts bool) {
+func renderTimeline(sb *strings.Builder, entries []TimelineEntry, formatMode string) {
 	lastCommitIndex := -1
 
 	for _, te := range entries {
@@ -773,10 +785,17 @@ func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPr
 		}
 		lastCommitIndex = te.CommitIndex
 
-		// Format the entry
-		if collapseLongPrompts && isUserAction(te.Entry.Type) {
-			sb.WriteString(formatMarkdownEntryCollapsible(te.Entry))
-		} else {
+		// Format the entry based on mode
+		switch formatMode {
+		case formatCollapsible:
+			if isUserAction(te.Entry.Type) {
+				sb.WriteString(formatMarkdownEntryCollapsible(te.Entry))
+			} else {
+				sb.WriteString(formatMarkdownEntry(te.Entry))
+			}
+		case formatSimple:
+			sb.WriteString(formatMarkdownEntrySimple(te.Entry))
+		default: // formatRegular
 			sb.WriteString(formatMarkdownEntry(te.Entry))
 		}
 	}
@@ -1036,6 +1055,41 @@ func isUserAction(entryType string) bool {
 	default:
 		return false
 	}
+}
+
+// allPromptsShort returns true if all entries have short text (≤250 chars)
+func allPromptsShort(entries []TimelineEntry) bool {
+	for _, te := range entries {
+		text := strings.ReplaceAll(te.Entry.Text, "\n", " ")
+		if len(text) > 250 {
+			return false
+		}
+	}
+	return true
+}
+
+// formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
+func formatMarkdownEntrySimple(entry PromptEntry) string {
+	timeStr := entry.Time.Local().Format("15:04")
+	emoji := getTypeEmoji(entry.Type)
+	text := strings.ReplaceAll(entry.Text, "\n", " ")
+	text = html.EscapeString(text)
+
+	// DECISION entries: show with answer
+	if entry.Type == "DECISION" {
+		header := entry.DecisionHeader
+		if header == "" {
+			header = "Question"
+		}
+		answer := entry.DecisionAnswer
+		if answer == "" {
+			answer = "(no answer)"
+		}
+		answer = html.EscapeString(answer)
+		return fmt.Sprintf("- %s %s %s: %s → %s\n", timeStr, emoji, header, text, answer)
+	}
+
+	return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
 }
 
 // countUserPrompts counts user action entries in a slice

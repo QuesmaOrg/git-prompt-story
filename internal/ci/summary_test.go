@@ -191,8 +191,8 @@ func TestRenderMarkdown_Structure(t *testing.T) {
 		t.Error("Missing new table header")
 	}
 
-	// Verify Prompts section exists (new format: merged with details)
-	if !strings.Contains(result, "user prompts</strong>") {
+	// Verify Prompts section exists (either simple "**N user prompts**" or details "<strong>N user prompts</strong>")
+	if !strings.Contains(result, "user prompts</strong>") && !strings.Contains(result, "user prompts**") {
 		t.Error("Missing user prompts section")
 	}
 
@@ -201,9 +201,9 @@ func TestRenderMarkdown_Structure(t *testing.T) {
 		t.Error("Missing 'All N steps' section")
 	}
 
-	// Verify prompts section is collapsible with count
-	if !strings.Contains(result, "2 user prompts</strong>") {
-		t.Error("Missing collapsible user prompts section")
+	// Verify prompts section has count (either format)
+	if !strings.Contains(result, "2 user prompts</strong>") && !strings.Contains(result, "2 user prompts**") {
+		t.Error("Missing user prompts count section")
 	}
 
 	// Verify commit SHA in table
@@ -431,8 +431,8 @@ func TestRenderMarkdown_MultipleCommitsDifferentEntries(t *testing.T) {
 		t.Error("Should show total of 7 steps in All Steps section")
 	}
 
-	// Verify total user prompts count
-	if !strings.Contains(result, "4 user prompts</strong>") {
+	// Verify total user prompts count (either simple or details format)
+	if !strings.Contains(result, "4 user prompts</strong>") && !strings.Contains(result, "4 user prompts**") {
 		t.Error("Should show total of 4 user prompts")
 	}
 

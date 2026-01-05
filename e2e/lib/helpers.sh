@@ -29,6 +29,30 @@ EOF
     echo "  Created mock session: $session_dir/$session_id.jsonl"
 }
 
+# Create a mock Claude Code session with a long user prompt (>250 chars)
+# Usage: create_mock_session_with_long_prompt <session_id> <start_time> <end_time>
+create_mock_session_with_long_prompt() {
+    local session_id="$1"
+    local start_time="$2"
+    local end_time="$3"
+
+    local repo_path=$(pwd)
+    local encoded_path=$(echo "$repo_path" | tr '/' '-')
+    local session_dir="$HOME/.claude/projects/$encoded_path"
+
+    mkdir -p "$session_dir"
+
+    # Create a prompt that is definitely longer than 250 characters
+    local long_prompt="I need help implementing a comprehensive authentication system for my web application. The system should support multiple authentication methods including username/password, OAuth2 with Google and GitHub providers, and magic link email authentication. Additionally, I want to implement role-based access control with at least three roles: admin, editor, and viewer."
+
+    cat > "$session_dir/$session_id.jsonl" << EOF
+{"type":"user","sessionId":"$session_id","timestamp":"$start_time","cwd":"$repo_path","gitBranch":"main","message":{"role":"user","content":"$long_prompt"}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$end_time","message":{"role":"assistant","content":[{"type":"text","text":"I'll help you implement a comprehensive authentication system..."}]}}
+EOF
+
+    echo "  Created mock session with long prompt: $session_dir/$session_id.jsonl"
+}
+
 # Create a mock Claude Code session with tool uses for testing PR comment format
 # Usage: create_mock_session_with_tools <session_id> <start_time> <end_time>
 create_mock_session_with_tools() {
