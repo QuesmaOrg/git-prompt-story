@@ -1,16 +1,13 @@
 package main
 
 import (
-	_ "embed"
-	"strings"
-
 	"github.com/QuesmaOrg/git-prompt-story/cmd"
 )
 
-//go:embed VERSION
-var version string
+// version is set via ldflags during build: -ldflags "-X main.version=x.y.z"
+var version = "dev"
 
 func main() {
-	cmd.SetVersion(strings.TrimSpace(version))
+	cmd.SetVersion(version)
 	cmd.Execute()
 }
