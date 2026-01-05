@@ -36,7 +36,7 @@ func ShowPrompts(commitRef string, full bool) error {
 func showCommitPrompts(sha string, full bool) error {
 
 	// Get note attached to commit
-	noteContent, err := note.GetNoteWithFallback(sha)
+	noteContent, err := note.GetNote(sha)
 	if err != nil {
 		return fmt.Errorf("no prompt-story note found for commit %s", sha[:7])
 	}

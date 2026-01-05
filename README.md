@@ -50,74 +50,15 @@ git-prompt-story install-hooks --global --auto-push
 
 That's it. Future commits will automatically capture active LLM sessions.
 
-### Repository Owner
+### Repository CI Integration
 
-Set up git-prompt-story for your team by adding a setup script.
-
-#### 1. Add setup script
-
-Create `setup-prompt-story.sh` in your repo root:
+To add GitHub Action integration for your repository:
 
 ```bash
-#!/bin/bash
-set -e
-
-# Install git-prompt-story
-go install github.com/QuesmaOrg/git-prompt-story@latest
-
-# Install hooks for this repo
-# Add --auto-push to install pre-push hook that syncs notes automatically
-# Without --auto-push, push notes manually with:
-#   git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
-git-prompt-story install-hooks --auto-push
-
-echo "git-prompt-story configured for this repository"
+git-prompt-story generate-github-workflow
 ```
 
-Contributors run `./setup-prompt-story.sh` after cloning.
-
-#### 2. Add GitHub Action
-
-Add a GitHub Action to analyze LLM sessions and post summaries on PRs:
-
-```yaml
-# .github/workflows/prompt-story.yml
-name: Prompt Story
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-permissions:
-  contents: write # For GitHub Pages deployment
-  pull-requests: write # For PR comments
-
-jobs:
-  prompt-story:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@main
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment: true # Post summary comment on PR
-          deploy-pages: true # Deploy full transcripts to GitHub Pages
-```
-
-This action:
-
-- Fetches git notes from your repository
-- Generates a summary of LLM tools used in the PR
-- Posts an interactive HTML transcript to GitHub Pages
-- Adds a comment with links to the full transcript
-
-**Enabling GitHub Pages:** If you have not done it already, after the first workflow run, enable GitHub Pages:
-
-- Settings → Pages → Source: Deploy from a branch
-- Select `gh-pages` branch (created automatically by the action)
+This interactively generates a workflow file that posts PR summaries and optionally deploys full transcripts to GitHub Pages.
 
 ## How It Works
 

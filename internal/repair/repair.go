@@ -44,7 +44,7 @@ func RepairCommit(sha string, opts Options) (*RepairResult, error) {
 	result.ShortSHA = fullSHA[:7]
 
 	// Check if note already exists
-	existingNote, err := note.GetNoteWithFallback(fullSHA)
+	existingNote, err := note.GetNote(fullSHA)
 	if err == nil && existingNote != "" {
 		result.AlreadyHasNote = true
 		if !opts.Force {
@@ -200,7 +200,7 @@ func ScanCommitsNeedingRepair(commitRange string) ([]string, error) {
 		}
 
 		// Check if note exists
-		_, err = note.GetNoteWithFallback(sha)
+		_, err = note.GetNote(sha)
 		if err != nil {
 			// No note found - needs repair
 			commits = append(commits, sha)
