@@ -59,7 +59,7 @@ func processRewrittenCommit(newSHA string, oldSHAs []string) error {
 	var notes []*note.PromptStoryNote
 
 	for _, oldSHA := range oldSHAs {
-		noteData, err := note.GetNoteWithFallback(oldSHA)
+		noteData, err := note.GetNote(oldSHA)
 		if err != nil {
 			// No note on this commit, skip
 			continue

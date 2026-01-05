@@ -111,7 +111,7 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 // analyzeCommit extracts prompt data for a single commit
 func analyzeCommit(sha string, full bool) (*CommitSummary, error) {
 	// Get note attached to commit
-	noteContent, err := note.GetNoteWithFallback(sha)
+	noteContent, err := note.GetNote(sha)
 	if err != nil {
 		return nil, fmt.Errorf("no prompt-story note found for commit %s", sha[:7])
 	}
