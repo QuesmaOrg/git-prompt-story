@@ -40,7 +40,7 @@ Examples:
 		var output string
 		switch ciSummaryFormat {
 		case "markdown", "md":
-			output = ci.RenderMarkdown(summary, ciSummaryPagesURL)
+			output = ci.RenderMarkdown(summary, ciSummaryPagesURL, GetVersion())
 		case "json":
 			jsonBytes, err := ci.RenderJSON(summary)
 			if err != nil {

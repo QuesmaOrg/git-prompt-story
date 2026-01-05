@@ -145,7 +145,7 @@ func TestRenderMarkdown_NoCommits(t *testing.T) {
 		CommitsWithNotes: 0,
 	}
 
-	result := RenderMarkdown(summary, "")
+	result := RenderMarkdown(summary, "", "test")
 
 	expected := "No prompt-story notes found in this PR.\n"
 	if result != expected {
@@ -179,7 +179,7 @@ func TestRenderMarkdown_Structure(t *testing.T) {
 		},
 	}
 
-	result := RenderMarkdown(summary, "")
+	result := RenderMarkdown(summary, "", "test")
 
 	// Verify NO old header
 	if strings.Contains(result, "## Prompt Story") {
@@ -191,19 +191,14 @@ func TestRenderMarkdown_Structure(t *testing.T) {
 		t.Error("Missing new table header")
 	}
 
-	// Verify Prompts section exists (new format: merged with details)
-	if !strings.Contains(result, "user prompts</strong>") {
+	// Verify Prompts section exists with markdown header
+	if !strings.Contains(result, "# 2 user prompts") {
 		t.Error("Missing user prompts section")
 	}
 
-	// Verify All Steps section exists (renamed from Full Transcript)
-	if !strings.Contains(result, "All 5 steps</strong>") {
+	// Verify All Steps section exists with markdown header
+	if !strings.Contains(result, "# All 5 steps") {
 		t.Error("Missing 'All N steps' section")
-	}
-
-	// Verify prompts section is collapsible with count
-	if !strings.Contains(result, "2 user prompts</strong>") {
-		t.Error("Missing collapsible user prompts section")
 	}
 
 	// Verify commit SHA in table
@@ -248,7 +243,7 @@ func TestRenderMarkdown_MultipleTools(t *testing.T) {
 		},
 	}
 
-	result := RenderMarkdown(summary, "")
+	result := RenderMarkdown(summary, "", "test")
 
 	// Should show "tools (2)" for multiple tools
 	if !strings.Contains(result, "tools (2)") {
@@ -276,7 +271,7 @@ func TestRenderMarkdown_PagesURL(t *testing.T) {
 		},
 	}
 
-	result := RenderMarkdown(summary, "https://example.github.io/repo/pr-42/")
+	result := RenderMarkdown(summary, "https://example.github.io/repo/pr-42/", "test")
 
 	if !strings.Contains(result, "[View full transcripts](https://example.github.io/repo/pr-42/)") {
 		t.Error("Should contain pages URL link")
@@ -304,7 +299,7 @@ func TestRenderMarkdown_NoUserPrompts(t *testing.T) {
 		},
 	}
 
-	result := RenderMarkdown(summary, "")
+	result := RenderMarkdown(summary, "", "test")
 
 	// Should show message when no user prompts
 	if !strings.Contains(result, "*No user prompts in this PR*") {
@@ -408,7 +403,7 @@ func TestRenderMarkdown_MultipleCommitsDifferentEntries(t *testing.T) {
 		},
 	}
 
-	result := RenderMarkdown(summary, "")
+	result := RenderMarkdown(summary, "", "test")
 
 	// Verify table has two rows with different counts
 	// Commit 1: 2 user prompts, 4 steps
@@ -427,12 +422,12 @@ func TestRenderMarkdown_MultipleCommitsDifferentEntries(t *testing.T) {
 	}
 
 	// Verify total steps count in All Steps section
-	if !strings.Contains(result, "All 7 steps</strong>") {
+	if !strings.Contains(result, "# All 7 steps") {
 		t.Error("Should show total of 7 steps in All Steps section")
 	}
 
-	// Verify total user prompts count
-	if !strings.Contains(result, "4 user prompts</strong>") {
+	// Verify total user prompts count with markdown header
+	if !strings.Contains(result, "# 4 user prompts") {
 		t.Error("Should show total of 4 user prompts")
 	}
 
@@ -620,7 +615,7 @@ func TestRenderMarkdown_AgentSessionCounts(t *testing.T) {
 		},
 	}
 
-	result := RenderMarkdown(summary, "")
+	result := RenderMarkdown(summary, "", "test")
 
 	// Should show main session prompts only (no agent count)
 	if !strings.Contains(result, "| 2 |") {
@@ -653,7 +648,7 @@ func TestRenderMarkdown_NoAgentSessions(t *testing.T) {
 		},
 	}
 
-	result := RenderMarkdown(summary, "")
+	result := RenderMarkdown(summary, "", "test")
 
 	// Should NOT show agent count when there are no agents
 	if strings.Contains(result, "(+") {

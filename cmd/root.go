@@ -30,6 +30,10 @@ func SetVersionInfo(v, commit, date string) {
 	rootCmd.Version = strings.Join(parts, " ")
 }
 
+func GetVersion() string {
+	return version
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "git-prompt-story",
 	Short: "Capture LLM sessions alongside git commits",
