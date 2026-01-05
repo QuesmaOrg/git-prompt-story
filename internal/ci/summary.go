@@ -1019,7 +1019,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("<details><summary>%s %s %s</summary>\n\n...%s\n\n</details>\n\n",
+	return fmt.Sprintf("<details><summary>%s %s %s</summary>...%s</details>\n\n",
 		timeStr, emoji, summary, continuation)
 }
 
