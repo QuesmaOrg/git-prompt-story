@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var explainAllFlag bool
+
 var explainCmd = &cobra.Command{
 	Use:   "explain [commit]",
 	Short: "Explain session discovery and filtering decisions",
@@ -20,14 +22,16 @@ including:
 - Why each session was included or excluded
 
 By default explains decisions for HEAD. Optionally specify a commit to
-explain decisions relative to that commit's timestamp.`,
+explain decisions relative to that commit's timestamp.
+
+Use --all to show details for every session (including excluded ones).`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		commit := "HEAD"
 		if len(args) > 0 {
 			commit = args[0]
 		}
-		if err := explain.Explain(commit, os.Stdout); err != nil {
+		if err := explain.Explain(commit, explainAllFlag, os.Stdout); err != nil {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
 			os.Exit(1)
 		}
@@ -35,5 +39,6 @@ explain decisions relative to that commit's timestamp.`,
 }
 
 func init() {
+	explainCmd.Flags().BoolVar(&explainAllFlag, "all", false, "Show all sessions including excluded ones")
 	rootCmd.AddCommand(explainCmd)
 }
