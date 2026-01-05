@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"sort"
@@ -147,4 +148,102 @@ func CountUserMessagesInRange(sessions []ClaudeSession, startWork, endWork time.
 		}
 	}
 	return count
+}
+
+// CountUserActionsInRange counts actual user actions (prompts, commands, tool rejects)
+// across all sessions within the time range, excluding agent sessions.
+// This matches the counting logic used in CI summary.
+func CountUserActionsInRange(sessions []ClaudeSession, startWork, endWork time.Time) int {
+	count := 0
+	for _, s := range sessions {
+		// Skip agent sessions (IDs starting with "agent-")
+		if strings.HasPrefix(s.ID, "agent-") {
+			continue
+		}
+
+		content, err := ReadSessionContent(s.Path)
+		if err != nil {
+			continue
+		}
+
+		entries, err := ParseMessages(content)
+		if err != nil {
+			continue
+		}
+
+		for _, entry := range entries {
+			ts := entry.Timestamp
+			if ts.IsZero() {
+				continue
+			}
+			if ts.Before(startWork) || ts.After(endWork) {
+				continue
+			}
+
+			if isUserActionEntry(entry) {
+				count++
+			}
+		}
+	}
+	return count
+}
+
+// isUserActionEntry determines if a message entry represents a user action
+// (prompt, command, or tool rejection) as opposed to tool results or system messages
+func isUserActionEntry(entry MessageEntry) bool {
+	// Only consider user and tool_reject entries
+	switch entry.Type {
+	case "tool_reject":
+		return true
+	case "user":
+		// Continue to check content
+	default:
+		return false
+	}
+
+	if entry.Message == nil {
+		return false
+	}
+
+	msgText := entry.Message.GetTextContent()
+
+	// Skip local command outputs
+	if strings.HasPrefix(msgText, "<local-command-stdout>") {
+		return false
+	}
+
+	// Check if this is a tool_result (tool output returned as user message)
+	if isToolResultContent(entry.Message.RawContent) {
+		return false
+	}
+
+	// Commands (starting with /) count as user actions
+	if strings.HasPrefix(msgText, "<command-name>") {
+		return true
+	}
+
+	// Regular prompts with non-empty content
+	return msgText != ""
+}
+
+// isToolResultContent checks if the raw content is a tool_result array
+func isToolResultContent(rawContent []byte) bool {
+	if len(rawContent) == 0 {
+		return false
+	}
+
+	// Tool results are typically in an array with type "tool_result"
+	var parts []struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(rawContent, &parts); err != nil {
+		return false
+	}
+
+	for _, part := range parts {
+		if part.Type == "tool_result" {
+			return true
+		}
+	}
+	return false
 }

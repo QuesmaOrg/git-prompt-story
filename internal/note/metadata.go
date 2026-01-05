@@ -80,7 +80,7 @@ func (n *PromptStoryNote) GenerateSummary(promptCount int) string {
 	}
 	sort.Strings(toolNames) // Consistent ordering
 
-	return fmt.Sprintf("Prompt-Story: Used %s (%d prompts)", strings.Join(toolNames, ", "), promptCount)
+	return fmt.Sprintf("Prompt-Story: Used %s (%d user prompts)", strings.Join(toolNames, ", "), promptCount)
 }
 
 // GetTranscriptPath returns the path within the transcript tree for a session
