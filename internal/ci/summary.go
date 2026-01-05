@@ -271,7 +271,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						InWorkPeriod: inWorkPeriod,
 					}
 					if !full && len(pe.Text) > 2000 {
-						pe.Text = pe.Text[:2000]
+						pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
 						pe.Truncated = true
 					}
 					if inWorkPeriod {
@@ -340,7 +340,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 							InWorkPeriod: inWorkPeriod,
 						}
 						if !full && len(pe.ToolInput) > 500 {
-							pe.ToolInput = pe.ToolInput[:500]
+							pe.ToolInput = pe.ToolInput[:500] + "...[TRUNCATED]"
 							pe.Truncated = true
 						}
 						if inWorkPeriod {
@@ -357,7 +357,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 						InWorkPeriod: inWorkPeriod,
 					}
 					if !full && len(pe.Text) > 2000 {
-						pe.Text = pe.Text[:2000]
+						pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
 						pe.Truncated = true
 					}
 					if inWorkPeriod {
