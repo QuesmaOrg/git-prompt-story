@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Story - PR #30</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Prompt Story</h1>
+    <p class="meta">PR #30 | 1 commit(s) with LLM sessions</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Commits Analyzed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">With Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">36</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  
+  <h2>Commits</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Commit</th>
+        <th>Subject</th>
+        <th>Tool</th>
+        <th>Entries</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td><code>b074f19</code></td>
+        <td>Add version, commit hash, and date to --version...</td>
+        <td>Claude Code</td>
+        <td>36</td>
+        <td><a href="b074f19.html">View transcript</a></td>
+      </tr>
+      
+    </tbody>
+  </table>
+
+  <h2>Session Details</h2>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+  </div>
+
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3><code>b074f19</code> Add version, commit hash, and date to --version output</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-05 18:23 - 2026-01-05 18:33
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-05 17:50 - 2026-01-05 18:33 | <span class="session-count">36</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:24</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please psh new v0.12.0 release</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag -a v0.12.0 -m &#34;v0.12.0: Add explain command and improve ci-summary rendering&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:24</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push origin v0.12.0</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new tag]         v0.12.0 -&gt; v0.12.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Tag `v0.12.0` pushed to origin. If you have GoReleaser set up, it should trigger automatically.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Ok, version doesn&#39;t work even after properly installing it, please fix it:
+➜  git-prompt-story git:(fix-chronological-ordering) git-prompt-story --version
+zsh: command not found: git-prompt-story
+➜  git-prompt-story git:(fix-chronological-ordering) go install github.com/QuesmaOrg/git-prompt-story@latest
+
+➜  git-prompt-story git:(fix-chronological-ordering) git-prompt-story --version
+git-prompt-story version dev
+
+Please also include release date and hash in --version string</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me look at how versioning is currently implemented:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 7 files
+internal/ci/summary_test.go
+main.go
+internal/scrubber/scrubber.go
+internal/note/merge_test.go
+internal/note/merge.go
+internal/cloud/client.go
+cmd/root.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/main.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/.goreleaser*</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see the issue. When using `go install @latest`, the ldflags aren&#39;t applied. I&#39;ll use `runtime/debug.ReadBuildInfo()` which provides the version for modules installed via `go install`. I&#39;ll also add commit hash and date:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/main.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/main.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package main
+     2 
+     3 import (
+     4 	&#34;runtime/debug&#34;
+     5 
+     6 	&#34;github.com/QuesmaOrg/git-prompt-story/cmd&#34;
+     7 )
+     8 
+     9 // These are set via ldflags during GoReleaser build:
+    10 // -ldflags &#34;-X main.version=x.y.z -X main.commit=abc123 -X main.date=2025-01-05&#34;
+    11 var (
+    12 	version = &#34;dev&#34;
+    13 	commit  = &#34;&#34;
+    14 	date    = &#34;&#34;
+    15 )
+    16 
+    17 func main() {
+    18 	// If version is still &#34;dev&#34;, try to get it from build info (go install @version)
+    19 	if version == &#34;dev&#34; {
+    20 		if info, ok := debug.ReadBuildInfo(); ok {
+    21 			// Module version (e.g., v0.12.0)
+    22 			if info.Main.Version != &#34;&#34; &amp;&amp; info.Main.Version != &#34;(devel)&#34; {
+    23 				version = info.Main.Version
+    24 			}
+    25 			// Get vcs info from build settings
+    26 			for _, setting := range info.Settings {
+    27 				switch setting.Key {
+    28 				case &#34;vcs.revision&#34;:
+    29 					if commit == &#34;&#34; &amp;&amp; len(setting.Value) &gt;= 7 {
+    30 						commit = setting.Value[:7]
+    31 					}
+    32 				case &#34;vcs.time&#34;:
+    33 					if date == &#34;&#34; {
+    34 						date = setting.Value
+    35 					}
+    36 				}
+    37 			}
+    38 		}
+    39 	}
+    40 
+    41 	cmd.SetVersionInfo(version, commit, date)
+    42 	cmd.Execute()
+    43 }
+    44 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package cmd
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;os&#34;
+     6 	&#34;strings&#34;
+     7 
+     8 	&#34;github.com/spf13/cobra&#34;
+     9 )
+    10 
+    11 var version = &#34;dev&#34;
+    12 
+    13 func SetVersionInfo(v, commit, date string) {
+    14 	version = v
+    15 
+    16 	// Build version string with optional commit and date
+    17 	var parts []string
+    18 	parts = append(parts, v)
+    19 	if commit != &#34;&#34; {
+    20 		parts = append(parts, commit)
+    21 	}
+    22 	if date != &#34;&#34; {
+    23 		// Shorten ISO date to just the date part if it&#39;s a full timestamp
+    24 		if len(date) &gt; 10 {
+    25 			date = date[:10]
+    26 		}
+    27 		parts = append(parts, date)
+    28 	}
+    29 
+    30 	rootCmd.Version = strings.Join(parts, &#34; &#34;)
+    31 }
+    32 
+    33 var rootCmd = &amp;cobra.Command{
+    34 	Use:   &#34;git-prompt-story&#34;,
+    35 	Short: &#34;Capture LLM sessions alongside git commits&#34;,
+    36 	Long: `git-prompt-story captures LLM sessions (Claude Code, Cursor, etc.)
+    37 and stores them as git notes attached to your commits.`,
+    38 	Version: version,
+    39 }
+    40 
+    41 func Execute() {
+    42 	if err := rootCmd.Execute(); err != nil {
+    43 		fmt.Fprintln(os.Stderr, err)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now update GoReleaser to also pass commit and date:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    20       - windows
+    21     goarch:
+    22       - amd64
+    23       - arm64
+    24     ldflags:
+    25       - -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}}
+    26 
+    27 archives:
+    28   - id: default
+    29     format: tar.gz</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; ./git-prompt-story --version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story version v0.12.0&#43;dirty 42dee53 2026-01-05</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">It works. Now let me commit, push, and create a new release tag:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add main.go cmd/root.go .goreleaser.yml &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add version, commit hash, and date to --version output
+
+Use runtime/debug.ReadBuildInfo() to get version info when installed via
+`go install @version`. Also includes commit hash and date from build info
+or ldflags.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[fix-chronological-ordering 2485b9d] Add version, commit hash, and date to --version output
+ 3 files changed, 52 insertions(&#43;), 6 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag -d v0.12.0 &amp;&amp; git push origin :refs/tags/v0.12.0</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+No let me mege that PR and will cut new version</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+remote: 
+remote: Create a pull request for &#39;fix-chronological-ordering&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/fix-chronological-ordering        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      fix-chronological-ordering -&gt; fix-chronological-ordering</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Pushed. Merge your PR and then cut the new version tag from main.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please push to branch with better name</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout -b add-explain-command</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Switched to a new branch &#39;add-explain-command&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push -u origin add-explain-command</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+No we just fixing version reporting, explain was merged, please rebase on origin/main and do that</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin &amp;&amp; git checkout main &amp;&amp; git pull origin main</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Your branch is behind &#39;origin/main&#39; by 16 commits, and can be fast-forwarded.
+  (use &#34;git pull&#34; to update your local branch)
+Updating 69c11a0..ff5ab30
+Fast-forward
+ .../actions/prompt-story/scripts/fetch-notes.sh    |   9 &#43;-
+ README.md                                          |  67 &#43;-----
+ Tests.md                                           | 242 ---------------------
+ cmd/explain.go                                     |  44 &#43;&#43;&#43;&#43;
+ cmd/generate_github_workflow.go                    |  28 &#43;&#43;&#43;
+ e2e/tests/16-generate-workflow.sh                  | 101 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ e2e/tests/{14-rebase-flow.sh =&gt; 17-rebase-flow.sh} |   0
+ examples/prompt-story.yml                          |  48 ----
+ internal/ci/summary.go                             | 193 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-
+ internal/ci/summary_test.go                        | 170 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-
+ internal/explain/explain.go                        | 229 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/git/reflog.go                             |  43 &#43;&#43;&#43;-
+ internal/hooks/post_rewrite.go                     |   2 &#43;-
+ internal/hooks/prepare_commit_msg.go               |   6 &#43;-
+ internal/note/refs.go                              |  17 &#43;-
+ internal/repair/repair.go                          |  10 &#43;-
+ internal/session/discovery.go                      |  89 &#43;&#43;&#43;&#43;&#43;&#43;&#43;-
+ internal/session/trace.go                          |  59 &#43;&#43;&#43;&#43;&#43;
+ internal/show/show.go                              |   2 &#43;-
+ internal/workflow/generator.go                     | 130 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ 20 files changed, 1079 insertions(&#43;), 410 deletions(-)
+ delete mode 100644 Tests.md
+ create mode 100644 cmd/explain.go
+ create mode 100644 cmd/generate_github_workflow.go
+ create mode 100755 e2e/tests/16-generate-workflow.sh
+ rename e2e/tests/{14-rebase-flow.sh =&gt; 17-rebase-flow.sh} (100%)
+ delete mode 100644 examples/prompt-story.yml
+ create mode 100644 internal/explain/explain.go
+ create mode 100644 internal/session/trace.go
+ create mode 100644 internal/workflow/generator.go
+From github.com:QuesmaOrg/git-prom...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout -b fix-version-reporting</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Switched to a new branch &#39;fix-version-reporting&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/main.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I&#39;ll apply the version fix changes:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/main.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/main.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package main
+     2 
+     3 import (
+     4 	&#34;runtime/debug&#34;
+     5 
+     6 	&#34;github.com/QuesmaOrg/git-prompt-story/cmd&#34;
+     7 )
+     8 
+     9 // These are set via ldflags during GoReleaser build:
+    10 // -ldflags &#34;-X main.version=x.y.z -X main.commit=abc123 -X main.date=2025-01-05&#34;
+    11 var (
+    12 	version = &#34;dev&#34;
+    13 	commit  = &#34;&#34;
+    14 	date    = &#34;&#34;
+    15 )
+    16 
+    17 func main() {
+    18 	// If version is still &#34;dev&#34;, try to get it from build info (go install @version)
+    19 	if version == &#34;dev&#34; {
+    20 		if info, ok := debug.ReadBuildInfo(); ok {
+    21 			// Module version (e.g., v0.12.0)
+    22 			if info.Main.Version != &#34;&#34; &amp;&amp; info.Main.Version != &#34;(devel)&#34; {
+    23 				version = info.Main.Version
+    24 			}
+    25 			// Get vcs info from build settings
+    26 			for _, setting := range info.Settings {
+    27 				switch setting.Key {
+    28 				case &#34;vcs.revision&#34;:
+    29 					if commit == &#34;&#34; &amp;&amp; len(setting.Value) &gt;= 7 {
+    30 						commit = setting.Value[:7]
+    31 					}
+    32 				case &#34;vcs.time&#34;:
+    33 					if date == &#34;&#34; {
+    34 						date = setting.Value
+    35 					}
+    36 				}
+    37 			}
+    38 		}
+    39 	}
+    40 
+    41 	cmd.SetVersionInfo(version, commit, date)
+    42 	cmd.Execute()
+    43 }
+    44 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package cmd
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;os&#34;
+     6 	&#34;strings&#34;
+     7 
+     8 	&#34;github.com/spf13/cobra&#34;
+     9 )
+    10 
+    11 var version = &#34;dev&#34;
+    12 
+    13 func SetVersionInfo(v, commit, date string) {
+    14 	version = v
+    15 
+    16 	// Build version string with optional commit and date
+    17 	var parts []string
+    18 	parts = append(parts, v)
+    19 	if commit != &#34;&#34; {
+    20 		parts = append(parts, commit)
+    21 	}
+    22 	if date != &#34;&#34; {
+    23 		// Shorten ISO date to just the date part if it&#39;s a full timestamp
+    24 		if len(date) &gt; 10 {
+    25 			date = date[:10]
+    26 		}
+    27 		parts = append(parts, date)
+    28 	}
+    29 
+    30 	rootCmd.Version = strings.Join(parts, &#34; &#34;)
+    31 }
+    32 
+    33 var rootCmd = &amp;cobra.Command{
+    34 	Use:   &#34;git-prompt-story&#34;,
+    35 	Short: &#34;Capture LLM sessions alongside git commits&#34;,</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    20       - windows
+    21     goarch:
+    22       - amd64
+    23       - arm64
+    24     ldflags:
+    25       - -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}}
+    26 
+    27 archives:
+    28   - id: default
+    29     format: tar.gz</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; ./git-prompt-story --version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story version v0.12.1-0.20260105182312-ff5ab3002b68&#43;dirty ff5ab30 2026-01-05</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add main.go cmd/root.go .goreleaser.yml &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add version, commit hash, and date to --version output
+
+Use runtime/debug.ReadBuildInfo() to get version info when installed via
+`go install @version`. Also includes commit hash and date from build info
+or ldflags.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34; &amp;&amp; git push -u origin fix-version-reporting</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
+  
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const visibleCount = document.getElementById('visible-count');
+
+    if (!toggleAllEntries || !toggleWholeSession) return;
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      let count = 0;
+
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.session').forEach(session => {
+        const visible = session.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = session.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
