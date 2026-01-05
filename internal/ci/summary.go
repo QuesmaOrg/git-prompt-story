@@ -118,7 +118,7 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 // analyzeCommit extracts prompt data for a single commit
 func analyzeCommit(sha string, full bool) (*CommitSummary, error) {
 	// Get note attached to commit
-	noteContent, err := note.GetNoteWithFallback(sha)
+	noteContent, err := note.GetNote(sha)
 	if err != nil {
 		return nil, fmt.Errorf("no prompt-story note found for commit %s", sha[:7])
 	}
@@ -999,7 +999,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		// Escape HTML
 		text = html.EscapeString(text)
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("<details open><summary>%s %s %s: %s → %s</summary></details>\n\n",
+		return fmt.Sprintf("- <details open><summary>%s %s %s: %s → %s</summary></details>\n\n",
 			timeStr, emoji, header, text, answer)
 	}
 
@@ -1007,7 +1007,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	if len(text) <= 250 {
 		// Escape HTML to prevent breaking markdown structure
 		text = html.EscapeString(text)
-		return fmt.Sprintf("<details open><summary>%s %s %s</summary></details>\n\n",
+		return fmt.Sprintf("- <details open><summary>%s %s %s</summary></details>\n\n",
 			timeStr, emoji, text)
 	}
 
@@ -1019,7 +1019,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("<details><summary>%s %s %s</summary>...%s</details>\n\n",
+	return fmt.Sprintf("- <details><summary>%s %s %s</summary>...%s</details>\n\n",
 		timeStr, emoji, summary, continuation)
 }
 
