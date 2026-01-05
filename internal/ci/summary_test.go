@@ -6,6 +6,32 @@ import (
 	"time"
 )
 
+func TestGetTypeEmoji(t *testing.T) {
+	tests := []struct {
+		entryType string
+		expected  string
+	}{
+		{"PROMPT", "💬"},
+		{"TOOL_USE", "🔧"},
+		{"ASSISTANT", "🤖"},
+		{"TOOL_REJECT", "❌"},
+		{"COMMAND", "📋"},
+		{"DECISION", "❓"},
+		{"UNKNOWN", "📝"},
+		{"", "📝"},
+		{"random_type", "📝"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.entryType, func(t *testing.T) {
+			result := getTypeEmoji(tt.entryType)
+			if result != tt.expected {
+				t.Errorf("getTypeEmoji(%q) = %q, want %q", tt.entryType, result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestIsUserAction(t *testing.T) {
 	tests := []struct {
 		entryType string
@@ -190,9 +216,9 @@ func TestRenderMarkdown_Structure(t *testing.T) {
 		t.Error("Missing 'Claude Code' tool name")
 	}
 
-	// Verify TOOL_USE formatting
-	if !strings.Contains(result, "TOOL_USE (Bash)") {
-		t.Error("Missing 'TOOL_USE (Bash)' formatting")
+	// Verify TOOL_USE formatting (emoji + tool name)
+	if !strings.Contains(result, "🔧 Bash:") {
+		t.Error("Missing tool use emoji formatting")
 	}
 }
 
@@ -297,17 +323,22 @@ func TestFormatMarkdownEntry(t *testing.T) {
 		{
 			name:     "prompt entry",
 			entry:    PromptEntry{Type: "PROMPT", Text: "Hello world", Time: now},
-			contains: []string{"09:30", "PROMPT", "Hello world"},
+			contains: []string{"09:30", "💬", "Hello world"},
 		},
 		{
 			name:     "tool use with name",
 			entry:    PromptEntry{Type: "TOOL_USE", ToolName: "Bash", ToolInput: "ls -la", Time: now},
-			contains: []string{"09:30", "TOOL_USE (Bash)", "ls -la"},
+			contains: []string{"09:30", "🔧", "Bash:", "ls -la"},
 		},
 		{
 			name:     "long text truncation",
 			entry:    PromptEntry{Type: "PROMPT", Text: strings.Repeat("a", 150), Time: now},
-			contains: []string{"09:30", "PROMPT", "..."},
+			contains: []string{"09:30", "💬", "..."},
+		},
+		{
+			name:     "unknown type shows type name",
+			entry:    PromptEntry{Type: "CUSTOM_TYPE", Text: "Some content", Time: now},
+			contains: []string{"09:30", "📝", "CUSTOM_TYPE:", "Some content"},
 		},
 	}
 
@@ -391,7 +422,7 @@ func TestRenderMarkdown_MultipleCommitsDifferentEntries(t *testing.T) {
 	}
 
 	// Verify commit marker exists between commits
-	if !strings.Contains(result, "--- Commit def5678: Second commit ---") {
+	if !strings.Contains(result, "#### def5678: Second commit") {
 		t.Error("Should have commit marker for second commit")
 	}
 

@@ -732,7 +732,7 @@ func getTypeEmoji(entryType string) string {
 	case "DECISION":
 		return "❓"
 	default:
-		return ""
+		return "📝" // Unknown type
 	}
 }
 
@@ -796,7 +796,12 @@ func formatMarkdownEntry(entry PromptEntry) string {
 		answer = html.EscapeString(answer)
 		return fmt.Sprintf("- %s %s %s: %s → %s\n", timeStr, emoji, header, text, answer)
 	default:
-		return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
+		// For known types (PROMPT, ASSISTANT), just show emoji + text
+		// For unknown types, show emoji + type + text
+		if entry.Type == "PROMPT" || entry.Type == "ASSISTANT" || entry.Type == "COMMAND" || entry.Type == "TOOL_REJECT" {
+			return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
+		}
+		return fmt.Sprintf("- %s %s %s: %s\n", timeStr, emoji, entry.Type, text)
 	}
 }
 
