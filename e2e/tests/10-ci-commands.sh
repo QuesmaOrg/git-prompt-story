@@ -77,11 +77,11 @@ MD_OUTPUT=$(git-prompt-story ci-summary "${INITIAL_COMMIT}..HEAD" --format=markd
 echo "$MD_OUTPUT" | grep -q "| Commit | Subject | Tool(s) | User Prompts | Steps |" || fail "Markdown should have new table header"
 echo "    - Has new table header"
 
-# User prompts section can be either "**N user prompts**" (simple) or "<strong>N user prompts</strong>" (details)
-echo "$MD_OUTPUT" | grep -qE "(user prompts</strong>|user prompts\*\*)" || fail "Markdown should have user prompts section"
+# User prompts section uses markdown header "# N user prompts"
+echo "$MD_OUTPUT" | grep -q "# .* user prompts" || fail "Markdown should have user prompts section header"
 echo "    - Has user prompts section"
 
-echo "$MD_OUTPUT" | grep -q "All.*steps</strong>" || fail "Markdown should have All steps section"
+echo "$MD_OUTPUT" | grep -q "# All .* steps" || fail "Markdown should have All steps section"
 echo "    - Has All steps section"
 
 echo "$MD_OUTPUT" | grep -q "Claude Code" || fail "Markdown should mention Claude Code"
@@ -113,11 +113,11 @@ unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 
 LONG_MD=$(git-prompt-story ci-summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown)
 
-# Long prompts should use <details><summary><strong> format, NOT **markdown** format
-echo "$LONG_MD" | grep -q "user prompts</strong>" || fail "Long prompts should use <details> format with </strong>"
-echo "    - Long prompts use <details> format"
+# Section should use markdown header
+echo "$LONG_MD" | grep -q "# 1 user prompts" || fail "Long prompts should have markdown header"
+echo "    - Has markdown header for user prompts"
 
-# Should also have the collapsible individual entry
+# Individual long prompts should have collapsible <details> entries
 echo "$LONG_MD" | grep -q "<details><summary>" || fail "Long prompts should have collapsible entries"
 echo "    - Has collapsible entries for long prompts"
 
