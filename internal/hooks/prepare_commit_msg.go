@@ -45,7 +45,7 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 	debugLog.log("isAmend: %v (source=commit&&sha: %v, hasMarker: %v)", isAmend, source == "commit" && sha != "", hasMarker)
 
 	// Find Claude Code sessions for this repo
-	sessions, err := session.FindSessions(repoRoot)
+	sessions, err := session.FindSessions(repoRoot, nil)
 	if err != nil {
 		// Don't fail the commit, just log
 		fmt.Fprintf(os.Stderr, "git-prompt-story: warning: %v\n", err)
@@ -64,12 +64,12 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		debugLog.log("Work period: %s - %s (now)", startWork.UTC().Format(time.RFC3339), endWork.Format(time.RFC3339))
 
 		beforeFilter := len(sessions)
-		sessions = session.FilterSessionsByTime(sessions, startWork, endWork)
+		sessions = session.FilterSessionsByTime(sessions, startWork, endWork, nil)
 		debugLog.log("FilterSessionsByTime: %d -> %d sessions", beforeFilter, len(sessions))
 
 		// Filter to only sessions with actual user messages in work period
 		beforeMsgFilter := len(sessions)
-		sessions = session.FilterSessionsByUserMessages(sessions, startWork, endWork)
+		sessions = session.FilterSessionsByUserMessages(sessions, startWork, endWork, nil)
 		debugLog.log("FilterSessionsByUserMessages: %d -> %d sessions", beforeMsgFilter, len(sessions))
 
 		for _, s := range sessions {

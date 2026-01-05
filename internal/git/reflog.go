@@ -68,42 +68,75 @@ func GetLastBranchSwitchTimestamp() (time.Time, error) {
 	return time.Time{}, nil
 }
 
+// WorkPeriodTrace captures how the work period was calculated (for explainability)
+type WorkPeriodTrace struct {
+	IsAmend             bool
+	Ref                 string
+	PrevCommitTimestamp time.Time
+	BranchSwitchTime    time.Time
+	CalculatedStart     time.Time
+	Explanation         string
+}
+
 // CalculateWorkStartTime determines the start of work for the current commit
 // Returns the most recent of: previous commit timestamp or branch switch timestamp
 // isAmend: set to true when amending a commit (uses HEAD^ instead of HEAD)
 func CalculateWorkStartTime(isAmend bool) (time.Time, error) {
+	result, _, err := CalculateWorkStartTimeWithTrace(isAmend)
+	return result, err
+}
+
+// CalculateWorkStartTimeWithTrace is like CalculateWorkStartTime but also returns trace info
+func CalculateWorkStartTimeWithTrace(isAmend bool) (time.Time, *WorkPeriodTrace, error) {
+	trace := &WorkPeriodTrace{
+		IsAmend: isAmend,
+	}
+
 	ref := "HEAD"
 	if isAmend {
 		ref = "HEAD^"
 	}
+	trace.Ref = ref
 
 	prevTime, err := GetPreviousCommitTimestamp(ref)
 	if err != nil {
 		prevTime = time.Time{}
 	}
+	trace.PrevCommitTimestamp = prevTime
 
 	switchTime, err := GetLastBranchSwitchTimestamp()
 	if err != nil {
 		switchTime = time.Time{}
 	}
+	trace.BranchSwitchTime = switchTime
 
 	// Return the more recent of the two timestamps
 	if switchTime.IsZero() && prevTime.IsZero() {
-		return time.Time{}, nil
+		trace.Explanation = "No previous commit or branch switch found (initial commit)"
+		trace.CalculatedStart = time.Time{}
+		return time.Time{}, trace, nil
 	}
 
 	if switchTime.IsZero() {
-		return prevTime, nil
+		trace.Explanation = "Using previous commit timestamp (no branch switch found)"
+		trace.CalculatedStart = prevTime
+		return prevTime, trace, nil
 	}
 
 	if prevTime.IsZero() {
-		return switchTime, nil
+		trace.Explanation = "Using branch switch timestamp (no previous commit)"
+		trace.CalculatedStart = switchTime
+		return switchTime, trace, nil
 	}
 
 	// Return max (most recent)
 	if switchTime.After(prevTime) {
-		return switchTime, nil
+		trace.Explanation = "Using branch switch timestamp (more recent than commit)"
+		trace.CalculatedStart = switchTime
+		return switchTime, trace, nil
 	}
 
-	return prevTime, nil
+	trace.Explanation = "Using previous commit timestamp (more recent than branch switch)"
+	trace.CalculatedStart = prevTime
+	return prevTime, trace, nil
 }

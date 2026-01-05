@@ -495,9 +495,9 @@ func TestFormatMarkdownEntryCollapsible_LongText(t *testing.T) {
 		t.Error("Should contain rest of text in details")
 	}
 
-	// The continuation should start with "..."
-	if !strings.Contains(result, "\n\n...") {
-		t.Error("Continuation should start with '...'")
+	// The continuation should start with "..." (directly after </summary>, no newlines)
+	if !strings.Contains(result, "</summary>...") {
+		t.Error("Continuation should start with '...' directly after </summary>")
 	}
 }
 
