@@ -497,20 +497,20 @@ pre {
 <body>
   <div class="header">
     <h1>Prompt Story</h1>
-    <p class="meta">PR #28 | 2 commit(s) with LLM sessions</p>
+    <p class="meta">PR #28 | 3 commit(s) with LLM sessions</p>
   </div>
 
   <div class="stats">
     <div class="stat">
-      <div class="stat-value">2</div>
+      <div class="stat-value">4</div>
       <div class="stat-label">Commits Analyzed</div>
     </div>
     <div class="stat">
-      <div class="stat-value">2</div>
+      <div class="stat-value">3</div>
       <div class="stat-label">With Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">173</div>
+      <div class="stat-value" id="visible-count">190</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
@@ -528,6 +528,14 @@ pre {
       </tr>
     </thead>
     <tbody>
+      
+      <tr>
+        <td><code>42dee53</code></td>
+        <td>Fix details tag rendering in ci-summary</td>
+        <td>Claude Code</td>
+        <td>17</td>
+        <td><a href="42dee53.html">View transcript</a></td>
+      </tr>
       
       <tr>
         <td><code>58595ea</code></td>
@@ -563,6 +571,369 @@ pre {
     </label>
   </div>
 
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3><code>42dee53</code> Fix details tag rendering in ci-summary</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-05 18:16 - 2026-01-05 18:21
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-05 17:50 - 2026-01-05 18:21 | <span class="session-count">17</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed as `58595ea`. Branch is now 2 commits ahead of origin.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">please push and let me create PR</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+remote: 
+remote: Create a pull request for &#39;fix-chronological-ordering&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/fix-chronological-ordering        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      fix-chronological-ordering -&gt; fix-chronological-ordering</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:16</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Pushed. Create your PR at:
+https://github.com/QuesmaOrg/git-prompt-story/pull/new/fix-chronological-ordering</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">In your PR this resulted in broken ci-summary, it does not render correctly:
+- &lt;details&gt;&lt;summary&gt;17:53 💬 Okay, so I would also like to improve general explainability. What has happened in this pre-hooks by some commit has. prompt story or don&amp;#39;t and currently our directory is not really supporting that. So maybe it&amp;#39;s a good opportunity to refactor.  F...&lt;/summary&gt;
+
+...or Claude Code, we look in this folder, then we are finding this file may potentially match, then we look inside those files and we make some decisions. So if you could design such a logic and ask me some questions, it would be really useful so you could run and see why some things were included or not included in given commit as like a prompt story. Make this part of our architecture. Don&amp;#39;t make something separate; it should be embedded in default logic. 
+
+&lt;/details&gt;
+
+please fix it should look like: - &lt;details&gt;&lt;summary&gt;17:53 💬 Okay, so I would also like to improve general explainability. What has happened in this pre-hooks by some commit has. prompt story or don&amp;#39;t and currently our directory is not really supporting that. So maybe it&amp;#39;s a good opportunity to refactor.  F...&lt;/summary&gt;...or Claude Code, we look in this folder, then we are finding this file may potentially match, then we look inside those files and we make some decisions. So if you could design such a logic and ask me some questions, it would be really useful so you could run and see why some things were included or not included in given commit as like a prompt story. Make this part of our architecture. Don&amp;#39;t make something separate; it should be embedded in default logic. &lt;/details&gt;</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me find where the `&lt;details&gt;` rendering happens in ci-summary:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">&lt;details&gt;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/ci/summary_test.go:483:	// Long prompts should use &lt;details&gt; (not open)
+internal/ci/summary_test.go:484:	if !strings.Contains(result, &#34;&lt;details&gt;&lt;summary&gt;&#34;) {
+internal/ci/summary_test.go:485:		t.Error(&#34;Long prompts should use &lt;details&gt; (collapsed)&#34;)
+internal/ci/summary_test.go:508:		Text: &#34;Use &lt;details&gt; and &lt;summary&gt; tags for collapsible content&#34;,
+internal/ci/summary_test.go:514:	// The literal &lt;details&gt; in the prompt should be escaped to &amp;lt;details&amp;gt;
+internal/ci/summary_test.go:515:	// Otherwise it would break the outer &lt;details&gt; structure
+internal/ci/summary_test.go:516:	if strings.Contains(result, &#34;Use &lt;details&gt;&#34;) {
+internal/ci/summary_test.go:517:		t.Error(&#34;HTML tags in prompt text should be escaped, but found unescaped &lt;details&gt;&#34;)
+internal/ci/summary.go:674:		detailsTag := &#34;&lt;details&gt;&#34;
+internal/ci/summary.go:685:	sb.WriteString(fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All %d steps&lt;/strong&gt;&lt;/summary&gt;\n\n&#34;, len(fullTimeline)))
+internal/ci/summary.go:1014:	// Long prompts: &lt;details&gt; (collapsed) with truncated summary
+internal/ci/summary.go:1022:	return fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;%s %s %s&lt;/summary&gt;\n\n...%s\n\n&lt;/details&gt;\n\n&#34;,</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it. The issue is on line 1022 - there are `\n\n` around the continuation text which breaks rendering. The content should be directly after `&lt;/summary&gt;`:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1018 	// Escape HTML in both summary and continuation
+  1019 	summary = html.EscapeString(summary)
+  1020 	continuation = html.EscapeString(continuation)
+  1021 
+  1022 	return fmt.Sprintf(&#34;&lt;details&gt;&lt;summary&gt;%s %s %s&lt;/summary&gt;...%s&lt;/details&gt;\n\n&#34;,
+  1023 		timeStr, emoji, summary, continuation)
+  1024 }
+  1025 
+  1026 // RenderJSON generates JSON output
+  1027 func RenderJSON(summary *Summary) ([]byte, error) {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+--- FAIL: TestFormatMarkdownEntryCollapsible_LongText (0.00s)
+    summary_test.go:500: Continuation should start with &#39;...&#39;
+FAIL
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.329s
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Need to update the test to match the new format:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   494 	if !strings.Contains(result, &#34;CONTINUATION&#34;) {
+   495 		t.Error(&#34;Should contain rest of text in details&#34;)
+   496 	}
+   497 
+   498 	// The continuation should start with &#34;...&#34; (directly after &lt;/summary&gt;, no newlines)
+   499 	if !strings.Contains(result, &#34;&lt;/summary&gt;...&#34;) {
+   500 		t.Error(&#34;Continuation should start with &#39;...&#39; directly after &lt;/summary&gt;&#34;)
+   501 	}
+   502 }
+   503 
+   504 func TestFormatMarkdownEntryCollapsible_EscapesHTML(t *testing.T) {
+   505 	// Prompt text containing HTML tags that should be escaped</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/ci/...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.326s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Tests pass. Let me commit and push:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add internal/ci/summary.go internal/ci/summary_test.go &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix details tag rendering in ci-summary
+
+Remove newlines between &lt;/summary&gt; and continuation text to prevent
+broken markdown rendering in GitHub PR comments.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34; &amp;&amp; git push</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
   
   <div class="commit-card">
     <div class="commit-header">
@@ -1502,6 +1873,10 @@ each one individually. Use --all flag to show full details for every session.
 EOF
 )&#34;</div>
             
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[fix-chronological-ordering 58595ea] Add compact output for explain command with --all flag
+ 2 files changed, 86 insertions(&#43;), 35 deletions(-)</div>
             
           </details>
           
