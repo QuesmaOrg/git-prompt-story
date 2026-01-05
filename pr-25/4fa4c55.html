@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4fa4c55 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>4fa4c55</code></h1>
+    <p class="meta">Add bullet prefix to collapsible entries for email readability</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">23</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>4fa4c55eed9d565ee69a4d63fc2929fad9ba2433</code><br>
+    <strong>Work period:</strong> 2026-01-05 16:27 - 2026-01-05 17:30
+  </div>
+
+  
+  <div class="commit-card agent-session" data-is-agent="true">
+    <div class="commit-header">
+      <h3>
+        <span class="badge agent">Agent</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">agent-a1c4f98</code> |
+        2026-01-05 17:18 - 2026-01-05 17:18 | <span class="session-count">18</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I need to understand how the ci-summary feature formats its output for GitHub comments. The user is seeing poorly formatted emails from GitHub - text runs together without proper line breaks.
+
+Please find:
+1. The ci-summary command implementation
+2. How it generates GitHub comment markdown
+3. What formatting is currently used (newlines, bullet lists, details tags, etc.)
+4. The GitHub Actions workflow that posts these comments
+
+Focus on understanding the current output format and what GitHub/email rendering limitations might be causing the issue.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll help you investigate the ci-summary feature and its GitHub comment formatting. Let me search for the relevant code.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*ci-summary*</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*github*</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/workflows/release.yml
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/.goreleaser.yml
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/examples/prompt-story.yml
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/workflows/prompt-story.yml
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/workflows/test.yml
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/action.yml</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*.yaml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No files found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/*.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/prepare_commit_msg.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/parser.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/git/reflog.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/root.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/main.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/git/notes.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/cloud/types.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/cloud/client.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_html.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/git/repo.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/annotate_cloud.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/transcript.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/install_hooks.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/installer.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/hooks/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/scrubber/scrubber_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/html.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/cloud/converter.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/git/objects.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/git/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/refs.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/repair/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story-...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good! Now let me examine the ci-summary implementation and related files:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/workflows/prompt-story.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me check the GitHub Actions workflow that posts the comments:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/action.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">find /&lt;REDACTED&gt;/git/git-prompt-story-tests/.github -type f -name &#34;*.js&#34; -o -name &#34;*.sh&#34; | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/scripts/analyze.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/scripts/download-binary.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/scripts/fetch-notes.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the analyze script that generates the markdown:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/.github/actions/prompt-story/scripts/analyze.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:18</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now I have a comprehensive understanding of the ci-summary feature and its output formatting. Let me create a detailed report for you.
+
+## Summary: ci-summary Feature Output Formatting Analysis
+
+### 1. **Command Implementation**
+- **Location**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_summary.go`
+- **Core Logic**: `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go`
+- **Entry Point**: The `ci-summary` command accepts a commit range and renders output via `RenderMarkdown()` for GitHub comments
+
+### 2. **Markdown Output Structure**
+
+The `RenderMarkdown()` function (lines 614-717 in summary.go) generates GitHub comment markdown with this structure:
+
+**A. User Prompts Section** (lines 650-662)
+```
+&lt;details&gt;&lt;summary&gt;&lt;strong&gt;N user prompts&lt;/strong&gt;&lt;/summary&gt;
+
+[timeline entries]
+&lt;/details&gt;
+```
+- Expands by default if &lt; 10 prompts, otherwise collapsed
+- Uses `&lt;details&gt;` and `&lt;summary&gt;` HTML tags
+
+**B. All Steps Section** (lines 664-667)
+```
+&lt;details&gt;&lt;summary&gt;&lt;strong&gt;All N steps&lt;/strong&gt;&lt;/summary&gt;
+
+[full timeline with all entry types]
+&lt;/details&gt;
+```
+
+**C. Transcript Link** (lines 669-672)
+```
+[View full transcripts](URL)
+```
+
+**D. Summary Table** (lines 674-712)
+```
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| SHA    | Subject | Tools   | Count        | Count |
+```
+
+**E. Footer** (line 714)
+```
+---
+*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story)*
+```
+
+### 3. **Timeline Entry Formatting**
+
+Two rendering functions are used:
+
+**For user prompts** (lines 809-849: `formatMarkdownEntryCollapsible`):
+- **Short text (≤250 chars)**: `&lt;details open&gt;&lt;summary&gt;TIME EMOJI TEXT&lt;/summary&gt;&lt;/details&gt;`
+- **Long text (&gt;250 chars)**: `&lt;details&gt;&lt;summary&gt;TIME EMOJI SUMMARY...&lt;/summary&gt;\n\n...CONTINUATION\n\n&lt;/details&gt;`
+
+**For all entries in full timeline** (lines 765-806: `formatMarkdownEntry`):
+- Format: `- TIME EMOJI TEXT`
+- Example: `- 09:30 💬 This is a prompt`
+- TOOL_USE entries include tool name: `- 09:30 🔧 Bash: ls -la`
+- DECISION entries show answer: `- 09:30 ❓ Question: answer → selected`
+
+**Emojis used**:
+- PROMPT: 💬
+- TOOL_USE: 🔧
+- ASSISTANT: 🤖
+- TOOL_REJECT: ❌
+- COMMAND: 📋
+- DECISION: ❓
+- Unknown: 📝
+
+### 4. **Line Break Handling - THE ISSUE**
+
+This is where the email rendering problem likely originates:
+
+**In `formatMarkdownEntry` (line 768)**:
+```go
+text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+```
+
+**The problem**: Newlines are **stripped from text and replaced with single spaces**. This is done:
+- For all non-collapsible timeline entries (standard format)
+- For truncated text in collapsible headers
+
+**For collapsible text (line 812)**:
+```go
+text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+```
+
+Same issue - newlines replaced with spaces at the summary level.
+
+### 5. **How GitHub/Email Rendering Compounds This**
+
+When the markdown is posted to GitHub as a comment:
+1. GitHub renders the `&lt;details&gt;` and `&lt;summary&gt;` tags as collapsible elements
+2. Email clients (GitHub&#39;s email notifications) often strip or incorrectly render HTML tags
+3. The markdown conversion to email loses the `&lt;details&gt;` structure
+4. Without paragraph breaks or list formatting, everything becomes a continuous text run
+
+**Current flow**:
+```
+Original: &#34;Line 1\nLine 2\nLine 3&#34;
+         ↓ (newline → space replacement)
+Markdown: &#34;Line 1 Line 2 Line 3&#34;
+         ↓ (GitHub renders)
+HTML:    &#34;&lt;details&gt;Line 1 Line 2 Line 3&lt;/details&gt;&#34;
+         ↓ (Email strips &lt;details&gt;, loses structure)
+Email:   &#34;Line 1 Line 2 Line 3&#34; (run-on text)
+```
+
+### 6. **GitHub Actions Workflow**
+
+**Workflow file**: `.github/workflows/prompt-story.yml`
+- Triggers on PR: opened, synchronize, reopened
+- Uses action: `.github/actions/prompt-story/action.yml`
+- Calls script: `.github/actions/prompt-story/scripts/analyze.sh`
+
+**Workflow steps**:
+1. Fetches git notes
+2. Downloads git-prompt-story binary
+3. Runs `ci-summary` with `--format=markdown --output=./prompt-story-summary.md`
+4. Generates HTML pages if deploy-pages enabled
+5. Posts comment using GitHub API (action.yml lines 129-209)
+
+**Comment posting** (action.yml lines 140-156):
+- Reads the markdown file: `prompt-story-summary.md`
+- Adds pages link if deployed
+- Posts to GitHub as raw markdown (no additional escaping/formatting)
+
+### 7. **Current Formatting Limitations**
+
+The code explicitly removes newlines from timeline entries (lines 768, 812, 782):
+```go
+// Line 768 - in formatMarkdownEntry
+text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+
+// Line 782 - for tool input
+input := strings.ReplaceAll(input, &#34;\n&#34;, &#34; &#34;)
+
+// Line 812 - in collapsible format
+text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+```
+
+This is intentional for inline display, but causes the email rendering issue when:
+1. Multi-line prompts/responses get squashed to single lines
+2. The email client can&#39;t reconstruct paragraph structure
+3. There are no markdown-level separators (blank lines, bullet points) between items
+
+### 8. **What Could Improve Email Rendering**
+
+Based on the code analysis, potential improvements could include:
+- Using markdown list formatting (`-`) instead of raw text (already used but inconsistently)
+- Adding blank lines between entries (currently no blank lines after each entry)
+- Preserving some line breaks in collapsible content using `&lt;br&gt;` or markdown line breaks
+- Using blockquotes or code blocks for long text
+- Better handling in the `&lt;details&gt;` content itself
+
+The root cause is in the `formatMarkdownEntry` and `formatMarkdownEntryCollapsible` functions that strip all newlines and rely on HTML details tags for structure, which email clients don&#39;t properly render.</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">cc90e5ff-af8a-4c7f-98e8-6ef096b91848</code> |
+        2026-01-05 15:19 - 2026-01-05 17:11 | <span class="session-count">5</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:27</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Merged it, please tag it to kick out new build.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout main &amp;&amp; git pull</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 128
+fatal: &#39;main&#39; is already checked out at &#39;/&lt;REDACTED&gt;/git/git-prompt-story&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin &amp;&amp; git checkout origin/main --detach &amp;&amp; git pull origin main --rebase</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Already up to date.
+From github.com:QuesmaOrg/git-prompt-story
+   a043202..ebd6486  gh-pages   -&gt; origin/gh-pages
+   9f8d505..304f07f  main       -&gt; origin/main
+HEAD is now at 304f07f Merge pull request #23 from QuesmaOrg/fix-user-prompt-count
+From github.com:QuesmaOrg/git-prompt-story
+ * branch            main       -&gt; FETCH_HEAD</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag v0.11.0 &amp;&amp; git push origin v0.11.0</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new tag]         v0.11.0 -&gt; v0.11.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Tagged and pushed `v0.11.0` - build should be running now.</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
