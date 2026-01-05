@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>58595ea - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>58595ea</code></h1>
+    <p class="meta">Add compact output for explain command with --all flag</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">27</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>58595eaf0f6f0dc643857851f6d5c2df4f583890</code><br>
+    <strong>Work period:</strong> 2026-01-05 18:08 - 2026-01-05 18:16
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">ed0b9bf5-205b-4c19-8708-dc1e79361c57</code> |
+        2026-01-05 17:50 - 2026-01-05 18:15 | <span class="session-count">27</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch fix-chronological-ordering
+Your branch is ahead of &#39;origin/fix-chronological-ordering&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:09</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed as `35c65aa` on branch `fix-chronological-ordering`. 
+
+The branch is now 1 commit ahead of origin. Let me know if you&#39;d like me to push it.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I see a lot of excluded session this is too long, can you make this more compact, Maybe, group all excluded due to same reason?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">You&#39;re right - 80 sessions listed individually is way too verbose. Let me update the plan for a more compact output format.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/gleaming-crafting-lamport.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/gleaming-crafting-lamport.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/gleaming-crafting-lamport.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Compact Output for `explain` Command
+     2 
+     3 ## Goal
+     4 Refine the `explain` command output to be more compact by grouping excluded sessions by reason instead of listing each one individually.
+     5 
+     6 ## File to Modify
+     7 
+     8 `internal/explain/explain.go` - Update `renderExplanation()` function
+     9 
+    10 ## New Output Format
+    11 
+    12 ```
+    13 === Session Discovery ===
+    14 
+    15 Repository: /&lt;REDACTED&gt;/git/git-prompt-story
+    16 Session directory: ~/.claude/projects/-Users-jacek-git-git-prompt-story
+    17   Status: exists, found 80 session file(s)
+    18 
+    19 === Work Period ===
+    20 
+    21 Reference: HEAD
+    22 Previous commit: 2025-01-05 14:30:22
+    23 Branch switch: 2025-01-05 10:15:00
+    24 Result: Using previous commit (more recent)
+    25 Work period: 2025-01-05 14:30:22   2025-01-05 16:45:00
+    26 
+    27 === Included Sessions (2) ===
+    28 
+    29 76762c62-54e6-4d66-9407-fb8ae3ee50f9
+    30   Created:  2025-01-05 18:34:11
+    31   Modified: 2025-01-05 19:40:05
+    32   User messages: 6 in range
+    33     INCLUDED
+    34 
+    35 ed0b9bf5-205b-4c19-8708-dc1e79361c57
+    36   Created:  2025-01-05 19:50:59
+    37   Modified: 2025-01-05 20:06:36
+    38   User messages: 37 in range
+    39     INCLUDED
+    40 
+    41 === Excluded Sessions (78) ===
+    42 
+    43 Modified before work start: 70 sessions
+    44 No user messages in range: 8 sessions
+    45 
+    46 === Summary ===
+    47 Found: 80 session(s)
+    48 Included: 2 session(s)
+    49 ```
+    50 
+    51 ## Implementation
+    52 
+    53 1. Group sessions into included vs excluded
+    54 2. For included: show full details (as before)
+    55 3. For excluded: group by `FinalReason` and show count per reason
+    56 4. Keep summary at end
+    57 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The plan is updated. This is a straightforward change to `renderExplanation()` in `internal/explain/explain.go`:
+
+- Show full details only for **included** sessions
+- Group **excluded** sessions by reason with counts</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Compact Output for `explain` Command\n\n## Goal\nRefine the `explain` command output to be more compact by grouping excluded sessions by reason instead of listing each one individu...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+Please add flag to show all excluded.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/gleaming-crafting-lamport.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/gleaming-crafting-lamport.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    47 Found: 80 session(s)
+    48 Included: 2 session(s)
+    49 ```
+    50 
+    51 ## Implementation
+    52 
+    53 ### Files to modify:
+    54 
+    55 1. **`cmd/explain.go`** - Add `--all` flag
+    56    ```go
+    57    var allFlag bool
+    58    explainCmd.Flags().BoolVar(&amp;allFlag, &#34;all&#34;, false, &#34;Show all sessions including excluded ones&#34;)
+    59    ```
+    60 
+    61 2. **`internal/explain/explain.go`** - Update function signature and rendering
+    62    - Change `Explain(commitRef string, w io.Writer)` to `Explain(commitRef string, showAll bool, w io.Writer)`
+    63    - Update `renderExplanation` to accept `showAll` parameter
+    64    - When `showAll=false` (default): group excluded by reason
+    65    - When `showAll=true`: show every session with full details (current behavior)
+    66 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:12</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Updated the plan to include `--all` flag:
+- Default: compact output (grouped excluded sessions)
+- With `--all`: verbose output (every session listed)</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Compact Output for `explain` Command\n\n## Goal\nRefine the `explain` command output to be more compact by grouping excluded sessions by reason instead of listing each one individu...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/gleaming-crafting-lamport.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Compact Output for `explain` Command
+
+## Goal
+Refine the `explain` command output to be more compact by grouping excluded sessions by reason instead of listing each one individually.
+
+## File to Modify
+
+`internal/explain/explain.go` - Update `renderExplanation()` function
+
+## New Output Format
+
+```
+=== Session Discovery ===
+
+Repository: /&lt;REDACTED&gt;/git/git-prompt-story
+Session directory: ~/.claude/projects/-Users-jacek-git-git-prompt-story
+  Status: exists, found 80 session file(s)
+
+=== Work Period ===
+
+Reference: HEAD
+Previous commit: 2025-01-05 14:30:22
+Branch switch: 2025-01-05 10:15:00
+Result: Using previous commit (more recent)
+Work period: 2025-01-05 14:30:22   2025-01-05 16:45:00
+
+=== Included Sessions (2) ===
+
+76762c62-54e6-4d66-9407-fb8ae3ee50f9
+  Created:  2025-01-05 18:34:11
+  Modified: 2025-01-05 19:40:05
+  User messages: 6 in range
+    INCLUDED
+
+ed0b9bf5-205b-4c19-8708-dc1e79361c57
+  Created:  2025-01-05 19:50:59
+  Modified: 2025-01-05 20:06:36
+  User messages: 37 in range
+    INCLUDED
+
+=== Excluded Sessions (78) ===
+
+Modified before work start: 70 sessions
+No user messages in range: 8 sessions
+
+=== Summary ===
+Found: 80 session(s)
+Included: 2 session(s)
+```
+
+## Implementation
+
+### Files to modify:
+
+1. **`cmd/explain.go`** - Add `--all` flag
+   ```go
+   var allFlag bool
+   explainCmd.Flags().BoolVar(&amp;allFlag, &#34;all&#34;, false, &#34;Show all sessions including excluded ones&#34;)
+   ```
+
+2. **`internal/explain/explain.go`** - Update function signature and rendering
+   - Change `Explain(commitRef string, w io.Writer)` to `Explain(commitRef string, showAll bool, w io.Writer)`
+   - Update `renderExplanation` to accept `showAll` parameter
+   - When `showAll=false` (default): group excluded by reaso...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/explain.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/explain/explain.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/explain.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/cmd/explain.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package cmd
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;os&#34;
+     6 
+     7 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/explain&#34;
+     8 	&#34;github.com/spf13/cobra&#34;
+     9 )
+    10 
+    11 var explainAllFlag bool
+    12 
+    13 var explainCmd = &amp;cobra.Command{
+    14 	Use:   &#34;explain [commit]&#34;,
+    15 	Short: &#34;Explain session discovery and filtering decisions&#34;,
+    16 	Long: `Explain how git-prompt-story discovers and filters Claude Code sessions.
+    17 
+    18 Shows the decision process for what sessions would be included for a commit,
+    19 including:
+    20 - Where sessions are searched for
+    21 - How the work period is calculated
+    22 - Why each session was included or excluded
+    23 
+    24 By default explains decisions for HEAD. Optionally specify a commit to
+    25 explain decisions relative to that commit&#39;s timestamp.
+    26 
+    27 Use --all to show details for every session (including excluded ones).`,
+    28 	Args: cobra.MaximumNArgs(1),
+    29 	Run: func(cmd *cobra.Command, args []string) {
+    30 		commit := &#34;HEAD&#34;
+    31 		if len(args) &gt; 0 {
+    32 			commit = args[0]
+    33 		}
+    34 		if err := explain.Explain(commit, explainAllFlag, os.Stdout); err != nil {
+    35 			fmt.Fprintf(os.Stderr, &#34;git-prompt-story: %v\n&#34;, err)
+    36 			os.Exit(1)
+    37 		}
+    38 	},
+    39 }
+    40 
+    41 func init() {
+    42 	explainCmd.Flags().BoolVar(&amp;explainAllFlag, &#34;all&#34;, false, &#34;Show all sessions including excluded ones&#34;)
+    43 	rootCmd.AddCommand(explainCmd)
+    44 }
+    45 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/explain/explain.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/explain/explain.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    10 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    11 )
+    12 
+    13 // Explain runs the discovery and filtering pipeline with full tracing
+    14 // and outputs a human-readable explanation.
+    15 // If showAll is true, every session is listed with full details.
+    16 // If showAll is false (default), excluded sessions are grouped by reason.
+    17 func Explain(commitRef string, showAll bool, w io.Writer) error {
+    18 	// Get repo root
+    19 	repoRoot, err := git.GetRepoRoot()
+    20 	if err != nil {
+    21 		return fmt.Errorf(&#34;not in a git repository: %w&#34;, err)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/explain/explain.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/explain/explain.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    66 
+    67 	// Filter by user messages with tracing
+    68 	_ = session.FilterSessionsByUserMessages(sessions, startWork, endWork, trace)
+    69 
+    70 	// Output the explanation
+    71 	return renderExplanation(trace, showAll, w)
+    72 }
+    73 
+    74 func renderExplanation(trace *session.TraceContext, w io.Writer) error {
+    75 	// Header
+    76 	fmt.Fprintln(w, &#34;=== Session Discovery ===&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/explain/explain.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/explain/explain.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    70 	// Output the explanation
+    71 	return renderExplanation(trace, showAll, w)
+    72 }
+    73 
+    74 func renderExplanation(trace *session.TraceContext, showAll bool, w io.Writer) error {
+    75 	// Header
+    76 	fmt.Fprintln(w, &#34;=== Session Discovery ===&#34;)
+    77 	fmt.Fprintln(w)
+    78 
+    79 	// Session directory info
+    80 	fmt.Fprintf(w, &#34;Repository: %s\n&#34;, trace.RepoPath)
+    81 	fmt.Fprintf(w, &#34;Session directory: %s\n&#34;, trace.SessionDir)
+    82 
+    83 	// Show shortened path for readability
+    84 	shortPath := trace.SessionDir
+    85 	if strings.HasPrefix(shortPath, trace.RepoPath) {
+    86 		shortPath = &#34;~/.claude/projects/&#34; &#43; trace.EncodedPath
+    87 	}
+    88 	if shortPath != trace.SessionDir {
+    89 		fmt.Fprintf(w, &#34;  (%s)\n&#34;, shortPath)
+    90 	}
+    91 
+    92 	if trace.SessionDirExists {
+    93 		fmt.Fprintf(w, &#34;  Status: exists, found %d session file(s)\n&#34;, len(trace.FoundFiles))
+    94 	} else {
+    95 		fmt.Fprintln(w, &#34;  Status: directory does not exist&#34;)
+    96 	}
+    97 	fmt.Fprintln(w)
+    98 
+    99 	// Work period explanation
+   100 	fmt.Fprintln(w, &#34;=== Work Period ===&#34;)
+   101 	fmt.Fprintln(w)
+   102 	fmt.Fprintf(w, &#34;Reference: %s\n&#34;, trace.WorkPeriod.Ref)
+   103 	if !trace.WorkPeriod.PrevCommitTimestamp.IsZero() {
+   104 		fmt.Fprintf(w, &#34;Previous commit: %s\n&#34;,
+   105 			trace.WorkPeriod.PrevCommitTimestamp.Local().Format(&#34;2006-01-02 15:04:05&#34;))
+   106 	} else {
+   107 		fmt.Fprintln(w, &#34;Previous commit: (none - initial commit)&#34;)
+   108 	}
+   109 	if !trace.WorkPeriod.BranchSwitchTime.IsZero() {
+   110 		fmt.Fprintf(w, &#34;Branch switch: %s\n&#34;,
+   111 			trace.WorkPeriod.BranchSwitchTime.Local().Format(&#34;2006-01-02 15:04:05&#34;))
+   112 	} else {
+   113 		fmt.Fprintln(w, &#34;Branch switch: (none found)&#34;)
+   114 	}
+   115 	fmt.Fprintf(w, &#34;Result: %s\n&#34;, trace.WorkPeriod.Expla...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; ./git-prompt-story explain HEAD</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session Discovery ===
+
+Repository: /&lt;REDACTED&gt;/git/git-prompt-story
+Session directory: /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story
+  Status: exists, found 81 session file(s)
+
+=== Work Period ===
+
+Reference: HEAD
+Previous commit: 2026-01-05 20:08:55
+Branch switch: 2026-01-05 18:32:14
+Result: Using previous commit timestamp (more recent than branch switch)
+Work period: 2026-01-05 20:08:55   2026-01-05 20:14:05
+
+=== Included Sessions (1) ===
+
+ed0b9bf5-205b-4c19-8708-dc1e79361c57
+  Created:  2026-01-05 19:50:59
+  Modified: 2026-01-05 20:13:47
+  Time filter: PASS (overlaps work period)
+  User messages: PASS (13 messages in range)
+  -&gt; INCLUDED
+
+=== Excluded Sessions (79) ===
+
+FAIL (modified before work start): 79 session(s)
+
+=== Summary ===
+Found: 80 session(s)
+Included: 1 session(s)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Much better! Let me verify the `--all` flag works too:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story explain HEAD --all | head -80</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session Discovery ===
+
+Repository: /&lt;REDACTED&gt;/git/git-prompt-story
+Session directory: /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story
+  Status: exists, found 81 session file(s)
+
+=== Work Period ===
+
+Reference: HEAD
+Previous commit: 2026-01-05 20:08:55
+Branch switch: 2026-01-05 18:32:14
+Result: Using previous commit timestamp (more recent than branch switch)
+Work period: 2026-01-05 20:08:55   2026-01-05 20:14:21
+
+=== Included Sessions (1) ===
+
+ed0b9bf5-205b-4c19-8708-dc1e79361c57
+  Created:  2026-01-05 19:50:59
+  Modified: 2026-01-05 20:14:10
+  Time filter: PASS (overlaps work period)
+  User messages: PASS (14 messages in range)
+  -&gt; INCLUDED
+
+=== Excluded Sessions (79) ===
+
+1856744f-3e89-4948-a700-817f2af132ed
+  Created:  2025-12-29 20:15:02
+  Modified: 2025-12-30 18:56:22
+  Time filter: FAIL (modified before work start)
+  -&gt; EXCLUDED
+
+2849080e-9268-470d-9e02-bce2007c5f9d
+  Created:  2025-12-28 21:03:53
+  Modified: 2025-12-29 16:04:12
+  Time filter: FAIL (modified before work start)
+  -&gt; EXCLUDED
+
+2930a887-81e0-49bb-b754-562c85c2e03c
+  Created:  2026-01-05 17:32:07
+  Modified: 2026-01-05 18:07:37
+  Time filter: FAIL (modified before work start)
+  -&gt; EXCLUDED
+
+2fa5f6d5-47dc-493a-9f51-57be78a0e136
+  Created:  2026-01-05 16:34:44
+  Modified: 2026-01-05 17:25:21
+  Time filter: FAIL (modified before work start)
+  -&gt; EXCLUDED
+
+37ac5fb8-a345-4a87-ba49-239a8060be2b
+  Created:  2025-12-30 19:07:56
+  Modified: 2025-12-31 11:57:18
+  Time filter: FAIL (modified before work start)
+  -&gt; EXCLUDED
+
+74a79efd-d1d4-4eef-8006-d12cb2fda1fb
+  Created:  2025-12-31 19:41:16
+  Modified: 2026-01-01 15:29:22
+  Time filter: FAIL (modified before work start)
+  -&gt; EXCLUDED
+
+76762c62-54e6-4d66-9407-fb8ae3ee50f9
+  Created:  2026-01-05 18:34:11
+  Modified: 2026-01-05 19:40:05
+  Time filter: FAIL (modified before work start)
+  -&gt; EXCLUDED
+
+7af17bad-b2e2-45ef-855d-b5865b20348f
+  Created:  0001-01-01 02:13:28
+  Modified: 0001-01-01 02:13:28
+  Time filter: FAIL (modified before w...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Both modes work. Let me run the tests:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/show	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:14</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. 
+
+**Summary of changes:**
+- Default output is now compact - excluded sessions are grouped by reason
+- Added `--all` flag to show every session with full details
+
+**Example output (default):**
+```
+=== Included Sessions (1) ===
+
+ed0b9bf5-205b-4c19-8708-dc1e79361c57
+  Created:  2026-01-05 19:50:59
+  Modified: 2026-01-05 20:13:47
+  Time filter: PASS (overlaps work period)
+  User messages: PASS (13 messages in range)
+  -&gt; INCLUDED
+
+=== Excluded Sessions (79) ===
+
+FAIL (modified before work start): 79 session(s)
+
+=== Summary ===
+Found: 80 session(s)
+Included: 1 session(s)
+```
+
+Want me to commit this?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please commit</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch fix-chronological-ordering
+Your branch is ahead of &#39;origin/fix-chronological-ordering&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   cmd/explain.go
+	modified:   internal/explain/explain.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> cmd/explain.go              |   9 &#43;&#43;&#43;-
+ internal/explain/explain.go | 112 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-------------
+ 2 files changed, 86 insertions(&#43;), 35 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add cmd/explain.go internal/explain/explain.go &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add compact output for explain command with --all flag
+
+Default output now groups excluded sessions by reason instead of listing
+each one individually. Use --all flag to show full details for every session.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
