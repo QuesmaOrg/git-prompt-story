@@ -13,6 +13,12 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
+const (
+	// Size limits for markdown output to stay under GitHub's 65KB comment limit
+	maxUserPromptsSize = 20000 // Budget for user prompts section
+	maxAllStepsSize    = 40000 // Budget for all steps section
+)
+
 // PromptEntry represents a single prompt or action in a session
 type PromptEntry struct {
 	Time         time.Time `json:"time"`
@@ -627,6 +633,13 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		commits[len(summary.Commits)-1-i] = c
 	}
 
+	// Sort sessions within each commit by start time (earliest first)
+	for i := range commits {
+		sort.Slice(commits[i].Sessions, func(a, b int) bool {
+			return commits[i].Sessions[a].Start.Before(commits[i].Sessions[b].Start)
+		})
+	}
+
 	// Build timeline entries from all commits
 	var userTimeline []TimelineEntry
 	var fullTimeline []TimelineEntry
@@ -653,7 +666,7 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
 	})
 
-	// Render Prompts section
+	// Render Prompts section with truncation
 	if len(userTimeline) == 0 {
 		sb.WriteString("*No user prompts in this PR*\n\n")
 	} else {
@@ -663,16 +676,18 @@ func RenderMarkdown(summary *Summary, pagesURL string) string {
 			detailsTag = "<details open>"
 		}
 		sb.WriteString(fmt.Sprintf("%s<summary><strong>%d user prompts</strong></summary>\n\n", detailsTag, len(userTimeline)))
-		renderTimeline(&sb, userTimeline, true)
+		userPromptsContent, _ := renderUserTimelineWithTruncation(userTimeline, maxUserPromptsSize)
+		sb.WriteString(userPromptsContent)
 		sb.WriteString("</details>\n\n")
 	}
 
-	// Render All Steps section
+	// Render All Steps section with session grouping and truncation
 	sb.WriteString(fmt.Sprintf("<details><summary><strong>All %d steps</strong></summary>\n\n", len(fullTimeline)))
-	renderTimeline(&sb, fullTimeline, false)
+	allStepsContent, _, _ := renderAllSteps(commits, maxAllStepsSize, pagesURL)
+	sb.WriteString(allStepsContent)
 	sb.WriteString("</details>\n\n")
 
-	// Link to full transcripts
+	// Link to full transcripts (only if not already shown in truncation message)
 	if pagesURL != "" {
 		sb.WriteString(fmt.Sprintf("[View full transcripts](%s)\n\n", pagesURL))
 	}
@@ -765,6 +780,160 @@ func renderTimeline(sb *strings.Builder, entries []TimelineEntry, collapseLongPr
 			sb.WriteString(formatMarkdownEntry(te.Entry))
 		}
 	}
+}
+
+// renderAllSteps renders all steps grouped by session with truncation support
+// Returns the rendered string and count of truncated sessions/steps
+func renderAllSteps(commits []CommitSummary, maxSize int, pagesURL string) (string, int, int) {
+	var sb strings.Builder
+	truncatedSessions := 0
+	truncatedSteps := 0
+
+	for _, commit := range commits {
+		// Format commit header
+		subject := commit.Subject
+		if len(subject) > 40 {
+			subject = subject[:37] + "..."
+		}
+		subject = html.EscapeString(subject)
+		commitHeader := fmt.Sprintf("\n#### %s: %s\n\n", commit.ShortSHA, subject)
+
+		// Check if we can fit this commit header
+		if sb.Len()+len(commitHeader) > maxSize {
+			// Count remaining sessions and steps
+			for _, sess := range commit.Sessions {
+				truncatedSessions++
+				truncatedSteps += len(sess.Prompts)
+			}
+			continue
+		}
+		sb.WriteString(commitHeader)
+
+		for _, sess := range commit.Sessions {
+			// Format session header
+			toolName := note.FormatToolName(sess.Tool)
+			startTime := sess.Start.Local().Format("15:04")
+			endTime := sess.End.Local().Format("15:04")
+			sessionHeader := fmt.Sprintf("**Session: %s** (%s-%s, %d steps)\n", toolName, startTime, endTime, len(sess.Prompts))
+
+			// Estimate session size (header + entries)
+			estimatedEntrySize := len(sess.Prompts) * 80 // rough estimate per entry
+			if sb.Len()+len(sessionHeader)+estimatedEntrySize > maxSize {
+				truncatedSessions++
+				truncatedSteps += len(sess.Prompts)
+				continue
+			}
+
+			sb.WriteString(sessionHeader)
+
+			// Render entries with indent
+			for _, p := range sess.Prompts {
+				entryStr := formatMarkdownEntryIndented(p)
+				if sb.Len()+len(entryStr) > maxSize {
+					// Count remaining entries in this session
+					truncatedSteps++
+					continue
+				}
+				sb.WriteString(entryStr)
+			}
+			sb.WriteString("\n")
+		}
+	}
+
+	// Add truncation notice if needed
+	if truncatedSessions > 0 || truncatedSteps > 0 {
+		notice := fmt.Sprintf("\n*...truncated %d older sessions with %d steps", truncatedSessions, truncatedSteps)
+		if pagesURL != "" {
+			notice += fmt.Sprintf(". [View full transcripts](%s)", pagesURL)
+		}
+		notice += "*\n"
+		sb.WriteString(notice)
+	}
+
+	return sb.String(), truncatedSessions, truncatedSteps
+}
+
+// formatMarkdownEntryIndented formats a single entry with indentation for session grouping
+func formatMarkdownEntryIndented(entry PromptEntry) string {
+	timeStr := entry.Time.Local().Format("15:04")
+	emoji := getTypeEmoji(entry.Type)
+	text := strings.ReplaceAll(entry.Text, "\n", " ")
+	if len(text) > 100 {
+		text = text[:97] + "..."
+	}
+	text = html.EscapeString(text)
+
+	switch entry.Type {
+	case "TOOL_USE":
+		if entry.ToolName != "" {
+			input := entry.ToolInput
+			if len(input) > 60 {
+				input = input[:57] + "..."
+			}
+			input = strings.ReplaceAll(input, "\n", " ")
+			input = html.EscapeString(input)
+			return fmt.Sprintf("  - %s %s %s: %s\n", timeStr, emoji, entry.ToolName, input)
+		}
+		return fmt.Sprintf("  - %s %s %s\n", timeStr, emoji, text)
+	case "DECISION":
+		header := entry.DecisionHeader
+		if header == "" {
+			header = "Question"
+		}
+		answer := entry.DecisionAnswer
+		if answer == "" {
+			answer = "(no answer)"
+		}
+		answer = html.EscapeString(answer)
+		return fmt.Sprintf("  - %s %s %s: %s → %s\n", timeStr, emoji, header, text, answer)
+	default:
+		if entry.Type == "PROMPT" || entry.Type == "ASSISTANT" || entry.Type == "COMMAND" || entry.Type == "TOOL_REJECT" {
+			return fmt.Sprintf("  - %s %s %s\n", timeStr, emoji, text)
+		}
+		return fmt.Sprintf("  - %s %s %s: %s\n", timeStr, emoji, entry.Type, text)
+	}
+}
+
+// renderUserTimelineWithTruncation renders user prompts with size limit
+// Returns the rendered string and count of truncated prompts
+func renderUserTimelineWithTruncation(entries []TimelineEntry, maxSize int) (string, int) {
+	var sb strings.Builder
+	truncatedCount := 0
+	lastCommitIndex := -1
+
+	for _, te := range entries {
+		// Insert commit marker when we cross to a new commit
+		if te.CommitIndex != lastCommitIndex {
+			subject := te.CommitSubj
+			if len(subject) > 40 {
+				subject = subject[:37] + "..."
+			}
+			subject = html.EscapeString(subject)
+			header := fmt.Sprintf("\n#### %s: %s\n\n", te.CommitSHA, subject)
+			if sb.Len()+len(header) > maxSize {
+				truncatedCount++
+				continue
+			}
+			sb.WriteString(header)
+		}
+		lastCommitIndex = te.CommitIndex
+
+		// Format the entry
+		entryStr := formatMarkdownEntryCollapsible(te.Entry)
+		if sb.Len()+len(entryStr) > maxSize {
+			truncatedCount++
+			continue
+		}
+		sb.WriteString(entryStr)
+	}
+
+	// Add truncation notice if needed
+	if truncatedCount > 0 {
+		notice := fmt.Sprintf("\n*...truncated %d older user prompts*\n", truncatedCount)
+		sb.WriteString(notice)
+	}
+
+	return sb.String(), truncatedCount
 }
 
 // formatMarkdownEntry formats a single entry for markdown display
