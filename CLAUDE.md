@@ -12,11 +12,13 @@ Note: Tests can be slow as they use Docker containers.
 
 ## After Making Changes
 
-After making progress on the codebase, offer to reinstall the global `git-prompt-story`, bump version in `VERSION` file and do:
+After making progress on the codebase, offer to reinstall the global `git-prompt-story`:
 
 ```bash
 go install .
 ```
+
+Note: Local builds will show version "dev". Release builds get version from git tags via GoReleaser.
 
 ## Git Workflow
 
