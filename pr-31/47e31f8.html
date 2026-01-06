@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>47e31f8 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>47e31f8</code></h1>
+    <p class="meta">Add queue-operation support for messages typed while Claude is working</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">43</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>47e31f84f0763c697e59e07499e94fd7ec2d96df</code><br>
+    <strong>Work period:</strong> 2026-01-06 17:21 - 2026-01-06 17:36
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">df0e4371-f559-4eb6-abba-1523d33fc847</code> |
+        2026-01-06 14:19 - 2026-01-06 17:35 | <span class="session-count">43</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... -count=1 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.179s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	0.368s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	0.582s
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	0.784s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/show	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Tests pass. Now pushing to origin:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push origin skip-details-short-prompts 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The user doesn&#39;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:
+please create more relevant branch name</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout -b add-user-actions-test-constant &amp;&amp; git push -u origin add-user-actions-test-constant 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+remote: 
+remote: Create a pull request for &#39;add-user-actions-test-constant&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/add-user-actions-test-constant        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      add-user-actions-test-constant -&gt; add-user-actions-test-constant
+branch &#39;add-user-actions-test-constant&#39; set up to track &#39;origin/add-user-actions-test-constant&#39;.
+Switched to a new branch &#39;add-user-actions-test-constant&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Pushed to new branch `add-user-actions-test-constant`.
+
+Create PR at: https://github.com/QuesmaOrg/git-prompt-story/pull/new/add-user-actions-test-constant
+
+**Commits on branch** (2 total):
+1. `69c8148` - Fix tool rejection detection from Claude Code JSONL format
+2. `ff26428` - Add AllUserActionsJSONL test constant with all user action types</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[]}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">One user action is missing in commit 69c8148, I remember typing &#34;We filter out tool use results as privacy, maybe we need to revisit that&#34;, why it is not showing up anywhere?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good catch! Let me investigate how that message was stored in the JSONL:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input"># Search for the exact message in JSONL files
+grep -r &#34;filter out tool use results&#34; /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/*.jsonl 2&gt;/dev/null | head -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/df0e4371-f559-4eb6-abba-1523d33fc847.jsonl:{&#34;type&#34;:&#34;queue-operation&#34;,&#34;operation&#34;:&#34;enqueue&#34;,&#34;timestamp&#34;:&#34;2026-01-06T14:27:27.791Z&#34;,&#34;sessionId&#34;:&#34;df0e4371-f559-4eb6-abba-1523d33fc847&#34;,&#34;content&#34;:&#34;We filter out tool use results as privacy, maybe we need to revisit that&#34;}
+/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/df0e4371-f559-4eb6-abba-1523d33fc847.jsonl:{&#34;parentUuid&#34;:&#34;097382b1-042a-4a1c-ac8b-ab999ae472f2&#34;,&#34;isSidechain&#34;:false,&#34;userType&#34;:&#34;external&#34;,&#34;cwd&#34;:&#34;/&lt;REDACTED&gt;/git/git-prompt-story-tests&#34;,&#34;sessionId&#34;:&#34;df0e4371-f559-4eb6-abba-1523d33fc847&#34;,&#34;version&#34;:&#34;2.0.76&#34;,&#34;gitBranch&#34;:&#34;add-user-actions-test-constant&#34;,&#34;slug&#34;:&#34;twinkly-herding-salamander&#34;,&#34;type&#34;:&#34;user&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;One user action is missing in commit 69c8148, I remember typing \&#34;We filter out tool use results as privacy, maybe we need to revisit that\&#34;, why it is not showing up anywhere?&#34;},&#34;uuid&#34;:&#34;f2a9c436-c179-44d3-b39c-0695d9545598&#34;,&#34;timestamp&#34;:&#34;2026-01-06T17:26:12.814Z&#34;,&#34;thinkingMetadata&#34;:{&#34;level&#34;:&#34;high&#34;,&#34;disabled&#34;:false,&#34;triggers&#34;:[]},&#34;todos&#34;:[]}
+/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/df0e4371-f559-4eb6-abba-1523d33fc847.jsonl:{&#34;parentUuid&#34;:&#34;f2a9c436-c179-44d3-b39c-0695d9545598&#34;,&#34;isSidechain&#34;:false,&#34;userType&#34;:&#34;external&#34;,&#34;cwd&#34;:&#34;/&lt;REDACTED&gt;/git/git-prompt-story-tests&#34;,&#34;sessionId&#34;:&#34;df0e4371-f559-4eb6-abba-1523d33fc847&#34;,&#34;version&#34;:&#34;2.0.76&#34;,&#34;gitBranch&#34;:&#34;add-user-actions-test-constant&#34;,&#34;slug&#34;:&#34;twinkly-herding-salamander&#34;,&#34;message&#34;:{&#34;model&#34;:&#34;claude-opus-4-5-20251101&#34;,&#34;id&#34;:&#34;msg_01Vpfbu2EpMn9TqfEqdMBYr6&#34;,&#34;type&#34;:&#34;message&#34;,&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;thinking&#34;,&#34;thinking&#34;:&#34;The user is pointing out that they typed a message \&#34;We filter out tool use results as privacy, maybe we need to revisit that\&#34; during our conversation, but it&#39;s not showing up. Let me look at how that message was delivered - it appeared as a `&lt;system-reminder&gt;` tag inside a Read tool result.\n\nL...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! It&#39;s stored as a **`queue-operation`** type - a 5th user action type we&#39;re missing:
+
+```json
+{
+  &#34;type&#34;: &#34;queue-operation&#34;,
+  &#34;operation&#34;: &#34;enqueue&#34;,
+  &#34;timestamp&#34;: &#34;2026-01-06T14:27:27.791Z&#34;,
+  &#34;sessionId&#34;: &#34;df0e4371-f559-4eb6-abba-1523d33fc847&#34;,
+  &#34;content&#34;: &#34;We filter out tool use results as privacy, maybe we need to revisit that&#34;
+}
+```
+
+This happens when users type messages **while Claude is working** (during tool execution). Let me check how common these are:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input"># Count queue-operation entries
+grep -r &#39;&#34;type&#34;:&#34;queue-operation&#34;&#39; /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/*.jsonl 2&gt;/dev/null | wc -l</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">      20</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input"># Show a few examples
+grep -r &#39;&#34;type&#34;:&#34;queue-operation&#34;&#39; /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/*.jsonl 2&gt;/dev/null | head -5 | python3 -c &#34;import sys,json; [print(json.dumps(json.loads(line.split(&#39;:&#39;, 1)[1]), indent=2)) for line in sys.stdin]&#34; 2&gt;/dev/null || grep -r &#39;&#34;type&#34;:&#34;queue-operation&#34;&#39; /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/*.jsonl 2&gt;/dev/null | head -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{
+  &#34;type&#34;: &#34;queue-operation&#34;,
+  &#34;operation&#34;: &#34;enqueue&#34;,
+  &#34;timestamp&#34;: &#34;2025-12-31T10:36:04.373Z&#34;,
+  &#34;sessionId&#34;: &#34;21c91950-1aea-416d-bf0d-052195f3a6ab&#34;,
+  &#34;content&#34;: &#34;&lt;bash-notification&gt;\n&lt;shell-id&gt;be38b43&lt;/shell-id&gt;\n&lt;output-file&gt;/tmp/claude/-Users-jacek-git-git-prompt-story-tests/tasks/be38b43.output&lt;/output-file&gt;\n&lt;status&gt;failed&lt;/status&gt;\n&lt;summary&gt;Background command \&#34;Run just cloud integration test\&#34; failed with exit code 137.&lt;/summary&gt;\nRead the output file to retrieve the output.\n&lt;/bash-notification&gt;&#34;
+}
+{
+  &#34;type&#34;: &#34;queue-operation&#34;,
+  &#34;operation&#34;: &#34;remove&#34;,
+  &#34;timestamp&#34;: &#34;2025-12-31T10:36:04.408Z&#34;,
+  &#34;sessionId&#34;: &#34;21c91950-1aea-416d-bf0d-052195f3a6ab&#34;
+}
+{
+  &#34;type&#34;: &#34;queue-operation&#34;,
+  &#34;operation&#34;: &#34;enqueue&#34;,
+  &#34;timestamp&#34;: &#34;2025-12-31T21:08:29.065Z&#34;,
+  &#34;sessionId&#34;: &#34;28e696c1-6f69-4700-ba6f-77c697b5321a&#34;,
+  &#34;content&#34;: &#34;/usage&#34;
+}
+{
+  &#34;type&#34;: &#34;queue-operation&#34;,
+  &#34;operation&#34;: &#34;remove&#34;,
+  &#34;timestamp&#34;: &#34;2025-12-31T21:08:29.626Z&#34;,
+  &#34;sessionId&#34;: &#34;28e696c1-6f69-4700-ba6f-77c697b5321a&#34;
+}
+{
+  &#34;type&#34;: &#34;queue-operation&#34;,
+  &#34;operation&#34;: &#34;enqueue&#34;,
+  &#34;timestamp&#34;: &#34;2026-01-04T16:23:16.914Z&#34;,
+  &#34;sessionId&#34;: &#34;6a7b05a4-7ced-46b4-8257-da8686e610fe&#34;,
+  &#34;content&#34;: &#34;In Read, please use &lt;readcted&gt;&#34;
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input"># Find user-typed queue operations (not bash-notification or commands starting with /)
+grep -r &#39;&#34;type&#34;:&#34;queue-operation&#34;&#39; /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/*.jsonl 2&gt;/dev/null | grep &#39;&#34;operation&#34;:&#34;enqueue&#34;&#39; | grep -v &#39;bash-notification&#39; | grep -v &#39;&#34;content&#34;:&#34;/&#39; | head -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/6a7b05a4-7ced-46b4-8257-da8686e610fe.jsonl:{&#34;type&#34;:&#34;queue-operation&#34;,&#34;operation&#34;:&#34;enqueue&#34;,&#34;timestamp&#34;:&#34;2026-01-04T16:23:16.914Z&#34;,&#34;sessionId&#34;:&#34;6a7b05a4-7ced-46b4-8257-da8686e610fe&#34;,&#34;content&#34;:&#34;In Read, please use &lt;readcted&gt;&#34;}
+/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/83e97ccb-b588-4f85-adaf-8f7c6f06ff36.jsonl:{&#34;type&#34;:&#34;queue-operation&#34;,&#34;operation&#34;:&#34;enqueue&#34;,&#34;timestamp&#34;:&#34;2026-01-01T13:02:29.718Z&#34;,&#34;sessionId&#34;:&#34;83e97ccb-b588-4f85-adaf-8f7c6f06ff36&#34;,&#34;content&#34;:&#34;Please also update Readme.md as well as be backward compatible reading notes from other location.&#34;}
+/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/83e97ccb-b588-4f85-adaf-8f7c6f06ff36.jsonl:{&#34;type&#34;:&#34;queue-operation&#34;,&#34;operation&#34;:&#34;enqueue&#34;,&#34;timestamp&#34;:&#34;2026-01-01T18:11:18.357Z&#34;,&#34;sessionId&#34;:&#34;83e97ccb-b588-4f85-adaf-8f7c6f06ff36&#34;,&#34;content&#34;:&#34;The E2E test should fail.&#34;}
+/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/83e97ccb-b588-4f85-adaf-8f7c6f06ff36.jsonl:{&#34;type&#34;:&#34;queue-operation&#34;,&#34;operation&#34;:&#34;enqueue&#34;,&#34;timestamp&#34;:&#34;2026-01-01T18:16:45.506Z&#34;,&#34;sessionId&#34;:&#34;83e97ccb-b588-4f85-adaf-8f7c6f06ff36&#34;,&#34;content&#34;:&#34;The E2E test should fail.&#34;}
+/&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story-tests/cc90e5ff-af8a-4c7f-98e8-6ef096b91848.jsonl:{&#34;type&#34;:&#34;queue-operation&#34;,&#34;operation&#34;:&#34;enqueue&#34;,&#34;timestamp&#34;:&#34;2026-01-05T15:56:02.420Z&#34;,&#34;sessionId&#34;:&#34;cc90e5ff-af8a-4c7f-98e8-6ef096b91848&#34;,&#34;content&#34;:&#34;Please use local version with your changes.&#34;}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! There&#39;s a **5th user action type**: `queue-operation` with `operation: &#34;enqueue&#34;`. These are messages users type while Claude is working. Examples:
+- &#34;Please also update Readme.md...&#34;
+- &#34;The E2E test should fail.&#34;
+- &#34;We filter out tool use results as privacy...&#34;
+
+I need to add handling for this. Let me fix it:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding queue-operation handling to summary.go&#34;,&#34;content&#34;:&#34;Add queue-operation handling to summary.go&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Adding queue-operation handling...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check how summary.go parses the JSONL entries:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand the structure. I need to:
+1. Add `Operation` and `Content` fields to `MessageEntry` for queue-operation
+2. Add a `case &#34;queue-operation&#34;:` in summary.go
+3. Update session discovery</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/types.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    12 	Created  time.Time // First timestamp in file
+    13 	Modified time.Time // Last timestamp in file
+    14 }
+    15 
+    16 // MessageEntry represents a single JSONL line from Claude Code
+    17 type MessageEntry struct {
+    18 	Type          string         `json:&#34;type&#34;` // &#34;user&#34;, &#34;assistant&#34;, &#34;file-history-snapshot&#34;, &#34;queue-operation&#34;
+    19 	SessionID     string         `json:&#34;sessionId&#34;`
+    20 	Timestamp     time.Time      `json:&#34;timestamp&#34;`
+    21 	GitBranch     string         `json:&#34;gitBranch&#34;`
+    22 	IsMeta        bool           `json:&#34;isMeta&#34;` // System-injected message (e.g., caveat warnings)
+    23 	Snapshot      *Snapshot      `json:&#34;snapshot,omitempty&#34;`
+    24 	Message       *Message       `json:&#34;message,omitempty&#34;`
+    25 	ToolUseResult *ToolUseResult `json:&#34;toolUseResult,omitempty&#34;` // For AskUserQuestion answers
+    26 	// Queue operation fields (for messages typed while Claude is working)
+    27 	Operation string `json:&#34;operation,omitempty&#34;` // &#34;enqueue&#34;, &#34;remove&#34;
+    28 	Content   string `json:&#34;content,omitempty&#34;`   // The queued message content
+    29 }
+    30 
+    31 // ToolUseResult contains structured answer data from AskUserQuestion
+    32 type ToolUseResult struct {
+    33 	Answers map[string]string `json:&#34;answers,omitempty&#34;` // Question -&gt; Answer mapping</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now add the case for queue-operation in summary.go:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;String to replace not found in file.
+String: 				if inWorkPeriod {
+					ss.Prompts = append(ss.Prompts, pe)
+				}
+			}
+		}
+	}
+
+	return ss, nil
+}&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">sed -n &#39;395,410p&#39; /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">						pe.Truncated = true
+					}
+					if inWorkPeriod {
+						ss.Prompts = append(ss.Prompts, pe)
+					}
+				}
+			}
+		}
+	}
+
+	return ss, nil
+}
+
+// ToolResultInfo holds extracted tool result information
+type ToolResultInfo struct {
+	ToolUseID string</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   393 					if !full &amp;&amp; len(pe.Text) &gt; 2000 {
+   394 						pe.Text = pe.Text[:2000] &#43; &#34;...[TRUNCATED]&#34;
+   395 						pe.Truncated = true
+   396 					}
+   397 					if inWorkPeriod {
+   398 						ss.Prompts = append(ss.Prompts, pe)
+   399 					}
+   400 				}
+   401 			}
+   402 
+   403 		case &#34;queue-operation&#34;:
+   404 			// Messages typed by user while Claude is working
+   405 			// Only include &#34;enqueue&#34; operations with actual content
+   406 			if entry.Operation == &#34;enqueue&#34; &amp;&amp; entry.Content != &#34;&#34; {
+   407 				// Skip system notifications (bash notifications, etc.)
+   408 				if strings.HasPrefix(entry.Content, &#34;&lt;bash-notification&gt;&#34;) {
+   409 					continue
+   410 				}
+   411 				// Skip commands (they&#39;ll be processed as separate entries)
+   412 				if strings.HasPrefix(entry.Content, &#34;/&#34;) {
+   413 					continue
+   414 				}
+   415 				pe := PromptEntry{
+   416 					Time:         ts,
+   417 					Type:         &#34;PROMPT&#34;,
+   418 					Text:         entry.Content,
+   419 					InWorkPeriod: inWorkPeriod,
+   420 				}
+   421 				if !full &amp;&amp; len(pe.Text) &gt; 2000 {
+   422 					pe.Text = pe.Text[:2000] &#43; &#34;...[TRUNCATED]&#34;
+   423 					pe.Truncated = true
+   424 				}
+   425 				if inWorkPeriod {
+   426 					ss.Prompts = append(ss.Prompts, pe)
+   427 				}
+   428 			}
+   429 		}
+   430 	}
+   431 
+   432 	return ss, nil
+   433 }
+   434 
+   435 // ToolResultInfo holds extracted tool result information
+   436 type ToolResultInfo struct {
+   437 	ToolUseID string</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding queue-operation handling to summary.go&#34;,&#34;content&#34;:&#34;Add queue-operation handling to summary.go&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding queue-operation handling t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/session/discovery.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   268 	if entry.IsMeta {
+   269 		return false
+   270 	}
+   271 
+   272 	// Only consider user, tool_reject, and queue-operation entries
+   273 	switch entry.Type {
+   274 	case &#34;tool_reject&#34;:
+   275 		return true
+   276 	case &#34;queue-operation&#34;:
+   277 		// Messages typed while Claude is working
+   278 		if entry.Operation == &#34;enqueue&#34; &amp;&amp; entry.Content != &#34;&#34; {
+   279 			// Skip system notifications and commands
+   280 			if strings.HasPrefix(entry.Content, &#34;&lt;bash-notification&gt;&#34;) || strings.HasPrefix(entry.Content, &#34;/&#34;) {
+   281 				return false
+   282 			}
+   283 			return true
+   284 		}
+   285 		return false
+   286 	case &#34;user&#34;:
+   287 		// Continue to check content
+   288 	default:
+   289 		return false
+   290 	}
+   291 
+   292 	if entry.Message == nil {
+   293 		return false
+   294 	}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding queue-operation handling to summary.go&#34;,&#34;content&#34;:&#34;Add queue-operation handling to summary.go&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding queue-operation handling t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me update the test constant to include a queue-operation example:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   825 		}
+   826 	})
+   827 }
+   828 
+   829 // AllUserActionsJSONL contains Claude Code JSONL entries for all recognized user action types:
+   830 // - PROMPT: Regular user text message
+   831 // - COMMAND: Slash command (e.g., /clear, /compact)
+   832 // - TOOL_REJECT: User rejected a tool use (is_error=true with rejection message)
+   833 // - DECISION: User answered AskUserQuestion (toolUseResult.answers)
+   834 // - QUEUED_PROMPT: Message typed while Claude is working (queue-operation with operation=enqueue)
+   835 //
+   836 // Extracted from real Claude Code transcripts in ~/.claude/projects/
+   837 const AllUserActionsJSONL = `{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;timestamp&#34;:&#34;2026-01-05T10:00:00.000Z&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;Please run the tests and fix any errors&#34;},&#34;uuid&#34;:&#34;prompt-1&#34;}
+   838 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;timestamp&#34;:&#34;2026-01-05T10:00:30.000Z&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;I will run the tests now.&#34;}]},&#34;uuid&#34;:&#34;assistant-1&#34;}
+   839 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;timestamp&#34;:&#34;2026-01-05T10:01:00.000Z&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;&lt;command-name&gt;/compact&lt;/command-name&gt;\n            &lt;command-message&gt;compact&lt;/command-message&gt;\n            &lt;command-args&gt;&lt;/command-args&gt;&#34;},&#34;uuid&#34;:&#34;command-1&#34;}
+   840 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;timestamp&#34;:&#34;2026-01-05T10:01:30.000Z&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;tool_use&#34;,&#34;id&#34;:&#34;toolu_01ABC&#34;,&#34;name&#34;:&#34;Bash&#34;,&#34;input&#34;:{&#34;command&#34;:&#34;go test ./...&#34;}}]},&#34;uuid&#34;:&#34;assistant-2&#34;}
+   841 {&#34;type&#34;:&#34;queue-operation&#34;,&#34;operation&#34;:&#34;enqueue&#34;,&#34;timestamp&#34;:&#34;2026-01-05T10:01:45.000Z&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;content&#34;:&#34;We filter out tool use results as privacy, maybe we need to revisit that&#34;}
+   842 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;timestamp&#34;:&#34;2026...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now update the tests to account for the new queue-operation entry:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   843 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;timestamp&#34;:&#34;2026-01-05T10:02:30.000Z&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;tool_use&#34;,&#34;id&#34;:&#34;toolu_01DEF&#34;,&#34;name&#34;:&#34;AskUserQuestion&#34;,&#34;input&#34;:{&#34;questions&#34;:[{&#34;question&#34;:&#34;Which test package should I run?&#34;,&#34;header&#34;:&#34;Package&#34;,&#34;options&#34;:[{&#34;label&#34;:&#34;All packages&#34;,&#34;description&#34;:&#34;Run tests in all packages&#34;},{&#34;label&#34;:&#34;Only ci package&#34;,&#34;description&#34;:&#34;Run tests only in internal/ci&#34;}],&#34;multiSelect&#34;:false}]}}]},&#34;uuid&#34;:&#34;assistant-3&#34;}
+   844 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;test-session&#34;,&#34;timestamp&#34;:&#34;2026-01-05T10:03:00.000Z&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;tool_result&#34;,&#34;content&#34;:&#34;User has answered your questions: \&#34;Which test package should I run?\&#34;=\&#34;Only ci package\&#34;. You can now continue with the user&#39;s answers in mind.&#34;,&#34;tool_use_id&#34;:&#34;toolu_01DEF&#34;}]},&#34;uuid&#34;:&#34;decision-1&#34;,&#34;toolUseResult&#34;:{&#34;questions&#34;:[{&#34;question&#34;:&#34;Which test package should I run?&#34;,&#34;header&#34;:&#34;Package&#34;,&#34;options&#34;:[{&#34;label&#34;:&#34;All packages&#34;,&#34;description&#34;:&#34;Run tests in all packages&#34;},{&#34;label&#34;:&#34;Only ci package&#34;,&#34;description&#34;:&#34;Run tests only in internal/ci&#34;}],&#34;multiSelect&#34;:false}],&#34;answers&#34;:{&#34;Which test package should I run?&#34;:&#34;Only ci package&#34;}}}
+   845 `
+   846 
+   847 func TestAllUserActionsJSONL_ParsesAllTypes(t *testing.T) {
+   848 	// This test verifies that AllUserActionsJSONL contains valid entries
+   849 	// that produce all five user action types when parsed
+   850 
+   851 	lines := strings.Split(strings.TrimSpace(AllUserActionsJSONL), &#34;\n&#34;)
+   852 	if len(lines) != 8 {
+   853 		t.Errorf(&#34;Expected 8 JSONL lines, got %d&#34;, len(lines))
+   854 	}
+   855 
+   856 	// Verify each line is valid JSON
+   857 	for i, line := range lines {
+   858 		if line == &#34;&#34; {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   903 		}
+   904 	}
+   905 }
+   906 
+   907 func TestRenderMarkdown_AllUserActionTypes(t *testing.T) {
+   908 	// Test that markdown output includes all user action types with correct formatting
+   909 	// Note: queue-operation entries become PROMPT type after parsing
+   910 	now := time.Now()
+   911 
+   912 	summary := &amp;Summary{
+   913 		CommitsWithNotes: 1,
+   914 		TotalUserPrompts: 5, // PROMPT, COMMAND, TOOL_REJECT, DECISION, &#43; queued PROMPT
+   915 		TotalSteps:       8,
+   916 		Commits: []CommitSummary{
+   917 			{
+   918 				ShortSHA: &#34;abc1234&#34;,
+   919 				Subject:  &#34;Test all user actions&#34;,
+   920 				Sessions: []SessionSummary{
+   921 					{
+   922 						Tool:  &#34;claude-code&#34;,
+   923 						ID:    &#34;test-session&#34;,
+   924 						Start: now,
+   925 						End:   now.Add(5 * time.Minute),
+   926 						Prompts: []PromptEntry{
+   927 							{Type: &#34;PROMPT&#34;, Text: &#34;Please run the tests&#34;, Time: now, InWorkPeriod: true},
+   928 							{Type: &#34;ASSISTANT&#34;, Text: &#34;Running tests...&#34;, Time: now.Add(30 * time.Second), InWorkPeriod: true},
+   929 							{Type: &#34;COMMAND&#34;, Text: &#34;/compact&#34;, Time: now.Add(time.Minute), InWorkPeriod: true},
+   930 							{Type: &#34;TOOL_USE&#34;, Text: &#34;Bash&#34;, ToolName: &#34;Bash&#34;, Time: now.Add(90 * time.Second), InWorkPeriod: true},
+   931 							// Queued prompt (from queue-operation) becomes PROMPT type
+   932 							{Type: &#34;PROMPT&#34;, Text: &#34;Message typed while working&#34;, Time: now.Add(100 * time.Second), InWorkPeriod: true},
+   933 							{Type: &#34;TOOL_REJECT&#34;, Text: &#34;Please run only unit tests&#34;, Time: now.Add(2 * time.Minute), InWorkPeriod: true},
+   934 							{Type: &#34;DECISION&#34;, Text: &#34;Which package?&#34;, DecisionAnswer: &#34;Only ci&#34;, Time: now.Add(3 * time.Minute), InWorkPeriod: true},
+   935 							{Type: &#34;ASSISTANT&#34;, Text: &#34;Done.&#34;, Time: now.Add(4 * time.Minute), InWorkPeriod: true},
+   936 ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding queue-operation handling to summary.go&#34;,&#34;content&#34;:&#34;Add queue-operation handling to summary.go&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding queue-operation handling t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... -count=1 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.245s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	0.537s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	0.959s
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	0.757s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/show	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Let me amend the previous commit to include the queue-operation fix:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status &amp;&amp; git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch add-user-actions-test-constant
+Your branch is up to date with &#39;origin/add-user-actions-test-constant&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   internal/ci/summary.go
+	modified:   internal/ci/summary_test.go
+	modified:   internal/session/discovery.go
+	modified:   internal/session/types.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)
+ internal/ci/summary.go        | 27 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/ci/summary_test.go   | 24 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;--------
+ internal/session/discovery.go | 12 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-
+ internal/session/types.go     |  5 &#43;&#43;&#43;&#43;-
+ 4 files changed, 58 insertions(&#43;), 10 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add queue-operation support for messages typed while Claude is working
+
+When users type messages while Claude is executing tools, these are stored
+as &#34;queue-operation&#34; entries with operation=&#34;enqueue&#34; in the JSONL. These
+were previously being ignored.
+
+Changes:
+- Add Operation and Content fields to MessageEntry struct
+- Handle &#34;queue-operation&#34; type in summary.go analyzeSession()
+- Handle &#34;queue-operation&#34; type in discovery.go isUserActionEntry()
+- Skip system notifications (&lt;bash-notification&gt;) and commands (/)
+- Update test constant with queue-operation example
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
