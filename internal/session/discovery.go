@@ -410,9 +410,8 @@ func findAllSessionDirs() ([]string, error) {
 	return dirs, nil
 }
 
-// sessionContainsRepoPath checks if a session file contains references to the repo path
-// Looks for repoPath + "/" (file paths) or repoPath + '"' (cwd field in JSON)
-// to avoid matching /repo-v2 when searching for /repo
+// sessionContainsRepoPath checks if a session file's cwd field matches the repo path
+// Matches exact repo root or subfolders, excludes similar paths like /repo-v2
 func sessionContainsRepoPath(sessionPath, repoPath string) bool {
 	file, err := os.Open(sessionPath)
 	if err != nil {
@@ -420,9 +419,8 @@ func sessionContainsRepoPath(sessionPath, repoPath string) bool {
 	}
 	defer file.Close()
 
-	// Match file paths (repoPath/) or JSON strings like cwd field (repoPath")
-	pathPattern := repoPath + "/"
-	jsonPattern := repoPath + `"`
+	// Check cwd field: "cwd":"/path/to/repo" or "cwd":"/path/to/repo/subfolder"
+	cwdPrefix := `"cwd":"` + repoPath
 
 	scanner := bufio.NewScanner(file)
 	buf := make([]byte, 0, 64*1024)
@@ -430,8 +428,15 @@ func sessionContainsRepoPath(sessionPath, repoPath string) bool {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, pathPattern) || strings.Contains(line, jsonPattern) {
-			return true
+		if idx := strings.Index(line, cwdPrefix); idx != -1 {
+			endIdx := idx + len(cwdPrefix)
+			if endIdx >= len(line) {
+				return true
+			}
+			// Valid: exact match (") or subfolder (/)
+			if nextChar := line[endIdx]; nextChar == '"' || nextChar == '/' {
+				return true
+			}
 		}
 	}
 	return false
