@@ -745,13 +745,9 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 			}
 
 			// Render remaining in collapsible section
+			// Always use formatSimple inside to avoid nested <details> tags
 			sb.WriteString(fmt.Sprintf("\n<details><summary>Show %d more...</summary>\n\n", len(remaining)))
-			if allPromptsShort(remaining) {
-				renderTimeline(&sb, remaining, formatSimple)
-			} else {
-				content, _ := renderUserTimelineWithTruncation(remaining, maxUserPromptsSize)
-				sb.WriteString(content)
-			}
+			renderTimeline(&sb, remaining, formatSimple)
 			sb.WriteString("</details>\n\n")
 		}
 	}
@@ -1103,7 +1099,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 
 	// Long prompts: <details> (collapsed) with truncated summary
 	summary := text[:247] + "..."
-	continuation := entry.Text[247:] // Use original with newlines preserved
+	continuation := strings.ReplaceAll(entry.Text[247:], "\n", " ") // Remove newlines to avoid nested details issues
 
 	// Escape HTML in both summary and continuation
 	summary = html.EscapeString(summary)
