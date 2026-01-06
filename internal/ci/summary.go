@@ -1103,7 +1103,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 
 	// Long prompts: <details> (collapsed) with truncated summary
 	summary := text[:247] + "..."
-	continuation := entry.Text[247:] // Use original with newlines preserved
+	continuation := strings.ReplaceAll(entry.Text[247:], "\n", " ") // Remove newlines to avoid nested details issues
 
 	// Escape HTML in both summary and continuation
 	summary = html.EscapeString(summary)

@@ -3,7 +3,8 @@ set -e
 
 echo "Analyzing commits..."
 
-COMMIT_RANGE="${BASE_SHA}..${HEAD_SHA}"
+# Use branch reference to get commits new on PR branch
+COMMIT_RANGE="origin/${BASE_REF}..HEAD"
 echo "  Range: $COMMIT_RANGE"
 
 # Check if any commits have Prompt-Story markers in their messages
