@@ -338,6 +338,31 @@ EOF
     echo "  Created mock session with PII: $session_dir/$session_id.jsonl"
 }
 
+# Create a mock session for a subfolder of the current repo
+# Usage: create_mock_session_for_subfolder <subfolder> <session_id> <start_time> <end_time>
+# Example: create_mock_session_for_subfolder "src" "session-subfolder" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
+create_mock_session_for_subfolder() {
+    local subfolder="$1"
+    local session_id="$2"
+    local start_time="$3"
+    local end_time="$4"
+
+    local repo_path=$(pwd)
+    local subfolder_path="${repo_path}/${subfolder}"
+    local encoded_path=$(echo "$subfolder_path" | tr '/' '-')
+    local session_dir="$HOME/.claude/projects/$encoded_path"
+
+    mkdir -p "$session_dir"
+
+    # Note: cwd points to the subfolder, not the repo root
+    cat > "$session_dir/$session_id.jsonl" << EOF
+{"type":"user","sessionId":"$session_id","timestamp":"$start_time","cwd":"$subfolder_path","gitBranch":"main","message":{"role":"user","content":"Working from subfolder"}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$end_time","message":{"role":"assistant","content":[{"type":"text","text":"Helping from subfolder..."}]}}
+EOF
+
+    echo "  Created mock session for subfolder $subfolder: $session_dir/$session_id.jsonl"
+}
+
 # Create a mock agent session (with "agent-" prefix in session ID)
 # Usage: create_mock_agent_session <agent_suffix> <start_time> <end_time>
 # Example: create_mock_agent_session "explore1" "2025-01-15T09:15:00Z" "2025-01-15T09:20:00Z"
