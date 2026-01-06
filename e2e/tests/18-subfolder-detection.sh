@@ -4,12 +4,13 @@ source /e2e/lib/helpers.sh
 
 echo "[18] Subfolder Session Detection"
 
-# Test that sessions started from subfolders of the repo are correctly detected
+# Test that sessions started from various locations are correctly detected
 #
 # Timeline:
 #   09:00       - Initial commit
 #   09:15-10:25 - Session from repo root - SHOULD BE DETECTED
 #   09:15-10:25 - Session from /workspace/test-repo/src subfolder - SHOULD BE DETECTED
+#   09:15-10:25 - Session from /workspace (external/parent dir) editing repo files - SHOULD BE DETECTED
 #   09:15-10:25 - Session from /workspace/test-repo-v2 (different repo) - should NOT be detected
 #   10:30       - Feature commit
 
@@ -44,7 +45,11 @@ create_mock_session "session-root" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
 # Session 2: From src subfolder - SHOULD BE DETECTED
 create_mock_session_for_subfolder "src" "session-subfolder" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
 
-# Session 3: From similarly-named but different repo - should NOT be detected
+# Session 3: From external/parent directory editing files in repo - SHOULD BE DETECTED
+# This tests that sessions started from /workspace that edit /workspace/test-repo files are detected
+create_mock_session_for_external_dir "/workspace" "/workspace/test-repo" "session-external" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
+
+# Session 4: From similarly-named but different repo - should NOT be detected
 # This tests that we don't match /workspace/test-repo-v2 when looking for /workspace/test-repo
 create_mock_session_for_path "/workspace/test-repo-v2" "session-other-repo" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
 
@@ -75,15 +80,15 @@ echo "    - Note is attached to HEAD"
 echo "    Checking correct sessions are detected..."
 NOTE=$(git notes --ref=refs/notes/prompt-story show HEAD)
 
-# Should have exactly 2 sessions (root and subfolder)
+# Should have exactly 3 sessions (root, subfolder, and external)
 SESSION_COUNT=$(echo "$NOTE" | jq '.sessions | length')
-if [[ "$SESSION_COUNT" != "2" ]]; then
-    echo "    ERROR: Expected 2 sessions, got $SESSION_COUNT"
+if [[ "$SESSION_COUNT" != "3" ]]; then
+    echo "    ERROR: Expected 3 sessions, got $SESSION_COUNT"
     echo "    Note content:"
     echo "$NOTE" | jq .
     fail "Wrong number of sessions detected"
 fi
-echo "    - Exactly 2 sessions detected"
+echo "    - Exactly 3 sessions detected"
 
 # Session-root should be detected
 echo "$NOTE" | jq -e '.sessions[] | select(.id == "session-root")' > /dev/null || fail "session-root not detected"
@@ -92,6 +97,10 @@ echo "    - session-root (repo root) detected"
 # Session-subfolder should be detected
 echo "$NOTE" | jq -e '.sessions[] | select(.id == "session-subfolder")' > /dev/null || fail "session-subfolder not detected"
 echo "    - session-subfolder (src/) detected"
+
+# Session-external should be detected (from parent dir /workspace editing /workspace/test-repo files)
+echo "$NOTE" | jq -e '.sessions[] | select(.id == "session-external")' > /dev/null || fail "session-external not detected"
+echo "    - session-external (/workspace editing repo) detected"
 
 # Session-other-repo should NOT be detected
 if echo "$NOTE" | jq -e '.sessions[] | select(.id == "session-other-repo")' > /dev/null 2>&1; then
