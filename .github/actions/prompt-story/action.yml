@@ -80,8 +80,7 @@ runs:
       id: analyze
       shell: bash
       env:
-        BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         SUMMARY_MODE: ${{ inputs.summary-mode }}
         FAIL_IF_NO_NOTES: ${{ inputs.fail-if-no-notes }}
@@ -91,11 +90,10 @@ runs:
       if: inputs.deploy-pages == 'true' && steps.analyze.outputs.commits-with-notes != '0'
       shell: bash
       env:
-        BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
-        ./git-prompt-story ci-html "${BASE_SHA}..${HEAD_SHA}" \
+        ./git-prompt-story ci-html "origin/${BASE_REF}..HEAD" \
           --output-dir="./prompt-story-pages/pr-${PR_NUMBER}" \
           --pr="${PR_NUMBER}"
 
