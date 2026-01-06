@@ -705,7 +705,7 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 					CommitIndex: i,
 				}
 				fullTimeline = append(fullTimeline, te)
-				if isUserAction(p.Type) && !sess.IsAgent {
+				if IsUserAction(p.Type) && !sess.IsAgent {
 					userTimeline = append(userTimeline, te)
 				}
 			}
@@ -859,7 +859,7 @@ func renderTimeline(sb *strings.Builder, entries []TimelineEntry, formatMode str
 		// Format the entry based on mode
 		switch formatMode {
 		case formatCollapsible:
-			if isUserAction(te.Entry.Type) {
+			if IsUserAction(te.Entry.Type) {
 				sb.WriteString(formatMarkdownEntryCollapsible(te.Entry))
 			} else {
 				sb.WriteString(formatMarkdownEntry(te.Entry))
@@ -1118,8 +1118,9 @@ func RenderJSON(summary *Summary) ([]byte, error) {
 	return json.MarshalIndent(summary, "", "  ")
 }
 
-// isUserAction returns true if the entry type represents a user action
-func isUserAction(entryType string) bool {
+// IsUserAction returns true if the entry type represents a user action
+// (PROMPT, COMMAND, TOOL_REJECT, DECISION) vs system/assistant actions.
+func IsUserAction(entryType string) bool {
 	switch entryType {
 	case "PROMPT", "COMMAND", "TOOL_REJECT", "DECISION":
 		return true
@@ -1167,7 +1168,7 @@ func formatMarkdownEntrySimple(entry PromptEntry) string {
 func countUserPrompts(prompts []PromptEntry) int {
 	count := 0
 	for _, p := range prompts {
-		if isUserAction(p.Type) {
+		if IsUserAction(p.Type) {
 			count++
 		}
 	}
