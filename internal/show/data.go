@@ -14,7 +14,6 @@ const (
 	NodeTypeCommit NodeType = iota
 	NodeTypeSession
 	NodeTypeUserAction
-	NodeTypeStepGroup
 	NodeTypeStep
 )
 
@@ -115,9 +114,10 @@ func (s *SessionNode) Label() string {
 // UserActionNode represents a user action (PROMPT, COMMAND, TOOL_REJECT, DECISION)
 type UserActionNode struct {
 	BaseNode
-	entry     ci.PromptEntry
-	SessionID string
-	CommitSHA string
+	entry          ci.PromptEntry
+	SessionID      string
+	CommitSHA      string
+	FollowingSteps []*StepNode // Steps that follow this user action (shown in detail panel)
 }
 
 func NewUserActionNode(entry ci.PromptEntry, sessionID, commitSHA string, depth int) *UserActionNode {
@@ -129,56 +129,25 @@ func NewUserActionNode(entry ci.PromptEntry, sessionID, commitSHA string, depth 
 	}
 }
 
-func (u *UserActionNode) Type() NodeType        { return NodeTypeUserAction }
-func (u *UserActionNode) IsExpandable() bool    { return len(u.children) > 0 }
+func (u *UserActionNode) Type() NodeType         { return NodeTypeUserAction }
+func (u *UserActionNode) IsExpandable() bool     { return len(u.FollowingSteps) > 0 }
 func (u *UserActionNode) Entry() *ci.PromptEntry { return &u.entry }
-func (u *UserActionNode) Time() time.Time       { return u.entry.Time }
+func (u *UserActionNode) Time() time.Time        { return u.entry.Time }
+
+// Children returns the following steps as child nodes (for tree expansion)
+func (u *UserActionNode) Children() []Node {
+	nodes := make([]Node, len(u.FollowingSteps))
+	for i, s := range u.FollowingSteps {
+		nodes[i] = s
+	}
+	return nodes
+}
 
 func (u *UserActionNode) Label() string {
 	emoji := getTypeEmoji(u.entry.Type)
 	timeStr := u.entry.Time.Local().Format("15:04")
 	text := truncateText(u.entry.Text, 25)
 	return fmt.Sprintf("%s %s %s", emoji, timeStr, text)
-}
-
-// StepGroupNode represents a group of collapsed steps between user actions
-type StepGroupNode struct {
-	BaseNode
-	Steps     []*StepNode
-	SessionID string
-	CommitSHA string
-}
-
-func NewStepGroupNode(steps []*StepNode, sessionID, commitSHA string, depth int) *StepGroupNode {
-	sg := &StepGroupNode{
-		BaseNode:  BaseNode{depth: depth, expanded: false},
-		Steps:     steps,
-		SessionID: sessionID,
-		CommitSHA: commitSHA,
-	}
-	// Set children to the steps
-	sg.children = make([]Node, len(steps))
-	for i, s := range steps {
-		sg.children[i] = s
-	}
-	return sg
-}
-
-func (sg *StepGroupNode) Type() NodeType     { return NodeTypeStepGroup }
-func (sg *StepGroupNode) IsExpandable() bool { return true }
-func (sg *StepGroupNode) Time() time.Time {
-	if len(sg.Steps) > 0 {
-		return sg.Steps[0].entry.Time
-	}
-	return time.Time{}
-}
-
-func (sg *StepGroupNode) Label() string {
-	n := len(sg.Steps)
-	if n == 1 {
-		return "├─ 1 step"
-	}
-	return fmt.Sprintf("├─ %d steps", n)
 }
 
 // StepNode represents an individual step (TOOL_USE, ASSISTANT, etc.)

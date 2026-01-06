@@ -57,7 +57,7 @@ func LoadTree(commitSpec string, full bool) (*Tree, error) {
 					for _, n := range nodes {
 						if ua, ok := n.(*UserActionNode); ok {
 							tree.TotalActions++
-							tree.TotalSteps += 1 + len(ua.children)
+							tree.TotalSteps += 1 + len(ua.FollowingSteps)
 						}
 					}
 				}
@@ -76,54 +76,26 @@ func buildSessionNode(sess ci.SessionSummary, commitSHA string, depth int) *Sess
 	return sessNode
 }
 
-// buildActionNodes creates user action nodes with step groups between them
+// buildActionNodes creates user action nodes with following steps stored directly
 func buildActionNodes(sess ci.SessionSummary, commitSHA string, depth int) []Node {
 	var nodes []Node
-	var pendingSteps []*StepNode
+	var currentAction *UserActionNode
 
 	for _, entry := range sess.Prompts {
 		if ci.IsUserAction(entry.Type) {
-			// Create a user action node
+			// Create a new user action node
 			actionNode := NewUserActionNode(entry, sess.ID, commitSHA, depth)
-
-			// If there are pending steps, attach them to the previous action
-			if len(nodes) > 0 && len(pendingSteps) > 0 {
-				prevAction := findLastUserAction(nodes)
-				if prevAction != nil {
-					stepGroup := NewStepGroupNode(pendingSteps, sess.ID, commitSHA, depth+1)
-					prevAction.children = append(prevAction.children, stepGroup)
-				}
-				pendingSteps = nil
-			}
-
 			nodes = append(nodes, actionNode)
-		} else {
-			// This is a step (TOOL_USE, ASSISTANT, etc.)
-			stepNode := NewStepNode(entry, sess.ID, commitSHA, depth+2)
-			pendingSteps = append(pendingSteps, stepNode)
+			currentAction = actionNode
+		} else if currentAction != nil {
+			// This is a step (TOOL_USE, ASSISTANT, etc.) - attach to current action
+			stepNode := NewStepNode(entry, sess.ID, commitSHA, depth+1)
+			currentAction.FollowingSteps = append(currentAction.FollowingSteps, stepNode)
 		}
-	}
-
-	// Attach remaining steps to the last action
-	if len(nodes) > 0 && len(pendingSteps) > 0 {
-		lastAction := findLastUserAction(nodes)
-		if lastAction != nil {
-			stepGroup := NewStepGroupNode(pendingSteps, sess.ID, commitSHA, depth+1)
-			lastAction.children = append(lastAction.children, stepGroup)
-		}
+		// Steps before the first user action are ignored
 	}
 
 	return nodes
-}
-
-// findLastUserAction finds the last UserActionNode in the slice
-func findLastUserAction(nodes []Node) *UserActionNode {
-	for i := len(nodes) - 1; i >= 0; i-- {
-		if ua, ok := nodes[i].(*UserActionNode); ok {
-			return ua
-		}
-	}
-	return nil
 }
 
 // FlattenVisible returns all currently visible nodes in display order
@@ -232,7 +204,13 @@ func countUserActions(n Node) int {
 func countAllSteps(n Node) int {
 	count := 0
 	switch n.Type() {
-	case NodeTypeUserAction, NodeTypeStep:
+	case NodeTypeUserAction:
+		count = 1
+		// Also count following steps stored in UserActionNode
+		if ua, ok := n.(*UserActionNode); ok {
+			count += len(ua.FollowingSteps)
+		}
+	case NodeTypeStep:
 		count = 1
 	}
 	for _, child := range n.Children() {

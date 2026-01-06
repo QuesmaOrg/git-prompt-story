@@ -307,21 +307,25 @@ func (m model) renderDetail(width, height int) string {
 			sb.WriteString(wrapText(entry.Text, width-2))
 		}
 
-		// Show step count if has children
-		if len(n.Children()) > 0 {
-			sb.WriteString(fmt.Sprintf("\n\nFollowed by %d step(s)", countStepsInChildren(n.Children())))
-		}
-
-	case *StepGroupNode:
-		sb.WriteString(fmt.Sprintf("Step Group: %d steps\n", len(n.Steps)))
-		sb.WriteString("Press 'e' or Enter to expand\n\n")
-		sb.WriteString("Steps:\n")
-		for i, step := range n.Steps {
-			if i >= 10 {
-				sb.WriteString(fmt.Sprintf("  ... and %d more\n", len(n.Steps)-10))
-				break
+		// Show following steps in detail panel (when collapsed, as preview)
+		if len(n.FollowingSteps) > 0 && !n.IsExpanded() {
+			sb.WriteString("\n")
+			sb.WriteString(strings.Repeat("─", min(width-2, 40)))
+			sb.WriteString(fmt.Sprintf("\nFollowing steps (%d) - press 'e' to expand:\n", len(n.FollowingSteps)))
+			for _, step := range n.FollowingSteps {
+				stepEntry := step.Entry()
+				emoji := getTypeEmoji(stepEntry.Type)
+				timeStr := stepEntry.Time.Local().Format("15:04")
+				if stepEntry.Type == "TOOL_USE" && stepEntry.ToolName != "" {
+					input := truncateText(stepEntry.ToolInput, width-20)
+					sb.WriteString(fmt.Sprintf("%s %s %s: %s\n", emoji, timeStr, stepEntry.ToolName, input))
+				} else {
+					text := truncateText(stepEntry.Text, width-12)
+					sb.WriteString(fmt.Sprintf("%s %s %s\n", emoji, timeStr, text))
+				}
 			}
-			sb.WriteString(fmt.Sprintf("  %s %s\n", getTypeEmoji(step.entry.Type), truncateText(step.Label(), width-4)))
+		} else if len(n.FollowingSteps) > 0 {
+			sb.WriteString(fmt.Sprintf("\n\n%d steps expanded in tree", len(n.FollowingSteps)))
 		}
 
 	case *StepNode:
@@ -422,15 +426,6 @@ func wrapText(s string, width int) string {
 	return strings.TrimSuffix(result.String(), "\n")
 }
 
-func countStepsInChildren(children []Node) int {
-	count := 0
-	for _, child := range children {
-		if sg, ok := child.(*StepGroupNode); ok {
-			count += len(sg.Steps)
-		}
-	}
-	return count
-}
 
 // RunTUI starts the interactive TUI
 func RunTUI(commitSpec string, full bool) error {
