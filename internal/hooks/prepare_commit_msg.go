@@ -49,15 +49,8 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 	endWork := time.Now().UTC()
 	debugLog.log("Work period: %s - %s (now)", startWork.UTC().Format(time.RFC3339), endWork.Format(time.RFC3339))
 
-	// Check if full session scan is enabled
-	var findOpts *session.FindSessionsOptions
-	if os.Getenv("GIT_PROMPT_STORY_SCAN_ALL_SESSIONS") == "1" {
-		findOpts = &session.FindSessionsOptions{ScanAllSessions: true}
-		debugLog.log("GIT_PROMPT_STORY_SCAN_ALL_SESSIONS=1: scanning all sessions")
-	}
-
 	// Find Claude Code sessions for this repo (includes time filtering)
-	sessions, err := session.FindSessions(repoRoot, startWork, endWork, nil, findOpts)
+	sessions, err := session.FindSessions(repoRoot, startWork, endWork, nil)
 	if err != nil {
 		// Don't fail the commit, just log
 		fmt.Fprintf(os.Stderr, "git-prompt-story: warning: %v\n", err)

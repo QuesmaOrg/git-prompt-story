@@ -8,10 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	explainAllFlag         bool
-	explainScanAllSessions bool
-)
+var explainAllFlag bool
 
 var explainCmd = &cobra.Command{
 	Use:   "explain [commit]",
@@ -27,8 +24,7 @@ including:
 By default explains decisions for HEAD. Optionally specify a commit to
 explain decisions relative to that commit's timestamp.
 
-Use --all to show details for every session (including excluded ones).
-Use --scan-all-sessions to scan all session directories (catches external folders).`,
+Use --all to show details for every session (including excluded ones).`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		commit := "HEAD"
@@ -36,8 +32,7 @@ Use --scan-all-sessions to scan all session directories (catches external folder
 			commit = args[0]
 		}
 		opts := explain.ExplainOptions{
-			ShowAll:         explainAllFlag,
-			ScanAllSessions: explainScanAllSessions,
+			ShowAll: explainAllFlag,
 		}
 		if err := explain.Explain(commit, opts, os.Stdout); err != nil {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
@@ -48,6 +43,5 @@ Use --scan-all-sessions to scan all session directories (catches external folder
 
 func init() {
 	explainCmd.Flags().BoolVar(&explainAllFlag, "all", false, "Show all sessions including excluded ones")
-	explainCmd.Flags().BoolVar(&explainScanAllSessions, "scan-all-sessions", false, "Scan all session directories (slower, catches external folders)")
 	rootCmd.AddCommand(explainCmd)
 }

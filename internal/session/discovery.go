@@ -10,19 +10,12 @@ import (
 	"time"
 )
 
-// FindSessionsOptions configures how sessions are discovered
-type FindSessionsOptions struct {
-	// ScanAllSessions enables full scan mode which checks ALL session directories
-	// for references to the repo path, catching sessions started from external folders
-	ScanAllSessions bool
-}
-
 // FindSessions discovers Claude Code sessions for a given repo path within the work period.
+// Scans ALL session directories and greps for repo path references.
 // Uses file mtime for fast pre-filtering before reading content.
 // Returns sessions sorted by modified time (most recent first).
 // If trace is non-nil, it records discovery details for explainability.
-// If opts is nil, uses default options (prefix matching only).
-func FindSessions(repoPath string, startWork, endWork time.Time, trace *TraceContext, opts *FindSessionsOptions) ([]ClaudeSession, error) {
+func FindSessions(repoPath string, startWork, endWork time.Time, trace *TraceContext) ([]ClaudeSession, error) {
 	absPath, err := filepath.Abs(repoPath)
 	if err != nil {
 		return nil, err
@@ -32,20 +25,10 @@ func FindSessions(repoPath string, startWork, endWork time.Time, trace *TraceCon
 	if trace != nil {
 		trace.RepoPath = absPath
 		trace.EncodedPath = encodePathForClaude(absPath)
-		if opts != nil && opts.ScanAllSessions {
-			trace.ScanAllSessions = true
-		}
 	}
 
-	// Find candidate session directories
-	var candidateDirs []string
-	if opts != nil && opts.ScanAllSessions {
-		// Full scan mode: check ALL session directories
-		candidateDirs, err = findAllSessionDirs()
-	} else {
-		// Default mode: prefix matching for repo root and subfolders
-		candidateDirs, err = findCandidateSessionDirs(absPath)
-	}
+	// Find all session directories (full scan mode)
+	candidateDirs, err := findAllSessionDirs()
 	if err != nil {
 		return nil, err
 	}
@@ -95,18 +78,8 @@ func FindSessions(repoPath string, startWork, endWork time.Time, trace *TraceCon
 			continue
 		}
 
-		// Verify session belongs to this repo
-		var belongs bool
-		if opts != nil && opts.ScanAllSessions {
-			// Full scan mode: grep for repo path in session content
-			belongs = sessionContainsRepoPath(f, absPath)
-		} else {
-			// Default mode: check cwd field
-			cwd, ok := extractSessionCwd(f)
-			belongs = ok && isPathUnderRepo(cwd, absPath)
-		}
-
-		if !belongs {
+		// Verify session belongs to this repo (grep for repo path in content)
+		if !sessionContainsRepoPath(f, absPath) {
 			continue
 		}
 
@@ -410,41 +383,6 @@ func isToolResultContent(rawContent []byte) bool {
 	return false
 }
 
-// findCandidateSessionDirs finds all session directories that could contain
-// sessions for the given repo (repo root or any subfolder).
-// Uses prefix matching on encoded paths.
-func findCandidateSessionDirs(repoPath string) ([]string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-
-	projectsDir := filepath.Join(homeDir, ".claude", "projects")
-	encodedPrefix := encodePathForClaude(repoPath)
-
-	entries, err := os.ReadDir(projectsDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	var candidates []string
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-		name := entry.Name()
-		// Match exact (repo root) or prefix followed by dash (potential subfolder)
-		if name == encodedPrefix || strings.HasPrefix(name, encodedPrefix+"-") {
-			candidates = append(candidates, filepath.Join(projectsDir, name))
-		}
-	}
-
-	return candidates, nil
-}
-
 // findAllSessionDirs returns all session directories in ~/.claude/projects/
 func findAllSessionDirs() ([]string, error) {
 	homeDir, err := os.UserHomeDir()
@@ -472,48 +410,9 @@ func findAllSessionDirs() ([]string, error) {
 	return dirs, nil
 }
 
-// extractSessionCwd reads the cwd field from the first entry that has one
-func extractSessionCwd(sessionPath string) (string, bool) {
-	file, err := os.Open(sessionPath)
-	if err != nil {
-		return "", false
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	buf := make([]byte, 0, 64*1024)
-	scanner.Buffer(buf, 1024*1024)
-
-	for scanner.Scan() {
-		var entry struct {
-			Cwd string `json:"cwd"`
-		}
-		if err := json.Unmarshal(scanner.Bytes(), &entry); err == nil {
-			if entry.Cwd != "" {
-				return entry.Cwd, true
-			}
-		}
-	}
-	return "", false
-}
-
-// isPathUnderRepo checks if a path is the repo root or a subdirectory of it
-func isPathUnderRepo(path, repoRoot string) bool {
-	// Normalize paths
-	path = filepath.Clean(path)
-	repoRoot = filepath.Clean(repoRoot)
-
-	// Exact match (session started from repo root)
-	if path == repoRoot {
-		return true
-	}
-
-	// Subdirectory match
-	return strings.HasPrefix(path, repoRoot+string(filepath.Separator))
-}
-
 // sessionContainsRepoPath checks if a session file contains references to the repo path
-// Uses simple string matching (grep-style)
+// Looks for repoPath + "/" (file paths) or repoPath + '"' (cwd field in JSON)
+// to avoid matching /repo-v2 when searching for /repo
 func sessionContainsRepoPath(sessionPath, repoPath string) bool {
 	file, err := os.Open(sessionPath)
 	if err != nil {
@@ -521,12 +420,17 @@ func sessionContainsRepoPath(sessionPath, repoPath string) bool {
 	}
 	defer file.Close()
 
+	// Match file paths (repoPath/) or JSON strings like cwd field (repoPath")
+	pathPattern := repoPath + "/"
+	jsonPattern := repoPath + `"`
+
 	scanner := bufio.NewScanner(file)
 	buf := make([]byte, 0, 64*1024)
 	scanner.Buffer(buf, 1024*1024)
 
 	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), repoPath) {
+		line := scanner.Text()
+		if strings.Contains(line, pathPattern) || strings.Contains(line, jsonPattern) {
 			return true
 		}
 	}

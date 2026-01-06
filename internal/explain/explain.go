@@ -12,8 +12,7 @@ import (
 
 // ExplainOptions configures the explain command
 type ExplainOptions struct {
-	ShowAll         bool // Show all sessions including excluded ones
-	ScanAllSessions bool // Scan all session directories (not just prefix-matched)
+	ShowAll bool // Show all sessions including excluded ones
 }
 
 // Explain runs the discovery and filtering pipeline with full tracing
@@ -60,14 +59,8 @@ func Explain(commitRef string, opts ExplainOptions, w io.Writer) error {
 		Explanation:         workTrace.Explanation,
 	}
 
-	// Build FindSessions options
-	var findOpts *session.FindSessionsOptions
-	if opts.ScanAllSessions {
-		findOpts = &session.FindSessionsOptions{ScanAllSessions: true}
-	}
-
 	// Discover sessions with tracing (includes time filtering)
-	sessions, err := session.FindSessions(repoRoot, startWork, endWork, trace, findOpts)
+	sessions, err := session.FindSessions(repoRoot, startWork, endWork, trace)
 	if err != nil {
 		fmt.Fprintf(w, "Warning: %v\n", err)
 		sessions = nil
@@ -87,13 +80,6 @@ func renderExplanation(trace *session.TraceContext, showAll bool, w io.Writer) e
 
 	// Session directory info
 	fmt.Fprintf(w, "Repository: %s\n", trace.RepoPath)
-
-	// Show scan mode
-	if trace.ScanAllSessions {
-		fmt.Fprintln(w, "Scan mode: all sessions (--scan-all-sessions)")
-	} else {
-		fmt.Fprintln(w, "Scan mode: prefix matching (default)")
-	}
 
 	// Show candidate directories
 	if len(trace.CandidateDirs) > 0 {

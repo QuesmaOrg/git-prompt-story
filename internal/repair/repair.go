@@ -65,7 +65,7 @@ func RepairCommit(sha string, opts Options) (*RepairResult, error) {
 	}
 
 	// Find sessions (includes time filtering)
-	sessions, err := session.FindSessions(repoRoot, startWork, endWork, nil, nil)
+	sessions, err := session.FindSessions(repoRoot, startWork, endWork, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find sessions: %w", err)
 	}
