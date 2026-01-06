@@ -251,7 +251,27 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 				// Check for tool results
 				toolResults := parseToolResults(entry.Message.RawContent)
 				if len(toolResults) > 0 {
+					hasRejection := false
 					for _, tr := range toolResults {
+						// Check if this is a tool rejection (is_error=true with rejection message)
+						if tr.IsError && strings.Contains(tr.Content, "tool use was rejected") {
+							// Extract user's rejection message if present
+							text := "User rejected tool call"
+							if idx := strings.Index(tr.Content, "user said:\n"); idx != -1 {
+								text = strings.TrimSpace(tr.Content[idx+len("user said:\n"):])
+							}
+							pe := PromptEntry{
+								Time:         ts,
+								Type:         "TOOL_REJECT",
+								Text:         text,
+								InWorkPeriod: inWorkPeriod,
+							}
+							if inWorkPeriod {
+								ss.Prompts = append(ss.Prompts, pe)
+							}
+							hasRejection = true
+							continue
+						}
 						// Find and update the corresponding tool use entry
 						if toolUse, ok := toolUseEntries[tr.ToolUseID]; ok {
 							toolUse.ToolOutput = tr.Content
@@ -271,7 +291,9 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 							}
 						}
 					}
-					continue
+					if !hasRejection {
+						continue
+					}
 				}
 
 				// Regular user prompt
@@ -377,6 +399,33 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 					}
 				}
 			}
+
+		case "queue-operation":
+			// Messages typed by user while Claude is working
+			// Only include "enqueue" operations with actual content
+			if entry.Operation == "enqueue" && entry.Content != "" {
+				// Skip system notifications (bash notifications, etc.)
+				if strings.HasPrefix(entry.Content, "<bash-notification>") {
+					continue
+				}
+				// Skip commands (they'll be processed as separate entries)
+				if strings.HasPrefix(entry.Content, "/") {
+					continue
+				}
+				pe := PromptEntry{
+					Time:         ts,
+					Type:         "PROMPT",
+					Text:         entry.Content,
+					InWorkPeriod: inWorkPeriod,
+				}
+				if !full && len(pe.Text) > 2000 {
+					pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
+					pe.Truncated = true
+				}
+				if inWorkPeriod {
+					ss.Prompts = append(ss.Prompts, pe)
+				}
+			}
 		}
 	}
 
@@ -387,6 +436,7 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 type ToolResultInfo struct {
 	ToolUseID string
 	Content   string
+	IsError   bool
 }
 
 // parseToolResults extracts tool_result entries from user message content
@@ -410,10 +460,11 @@ func parseToolResults(rawContent json.RawMessage) []ToolResultInfo {
 	for _, part := range parts {
 		if part.Type == "tool_result" && part.ToolUseID != "" {
 			content := extractToolResultContent(part.Content)
-			if content != "" {
+			if content != "" || part.IsError {
 				results = append(results, ToolResultInfo{
 					ToolUseID: part.ToolUseID,
 					Content:   content,
+					IsError:   part.IsError,
 				})
 			}
 		}

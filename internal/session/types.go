@@ -15,7 +15,7 @@ type ClaudeSession struct {
 
 // MessageEntry represents a single JSONL line from Claude Code
 type MessageEntry struct {
-	Type          string         `json:"type"` // "user", "assistant", "file-history-snapshot"
+	Type          string         `json:"type"` // "user", "assistant", "file-history-snapshot", "queue-operation"
 	SessionID     string         `json:"sessionId"`
 	Timestamp     time.Time      `json:"timestamp"`
 	GitBranch     string         `json:"gitBranch"`
@@ -23,6 +23,9 @@ type MessageEntry struct {
 	Snapshot      *Snapshot      `json:"snapshot,omitempty"`
 	Message       *Message       `json:"message,omitempty"`
 	ToolUseResult *ToolUseResult `json:"toolUseResult,omitempty"` // For AskUserQuestion answers
+	// Queue operation fields (for messages typed while Claude is working)
+	Operation string `json:"operation,omitempty"` // "enqueue", "remove"
+	Content   string `json:"content,omitempty"`   // The queued message content
 }
 
 // ToolUseResult contains structured answer data from AskUserQuestion

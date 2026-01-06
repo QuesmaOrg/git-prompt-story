@@ -269,10 +269,20 @@ func isUserActionEntry(entry MessageEntry) bool {
 		return false
 	}
 
-	// Only consider user and tool_reject entries
+	// Only consider user, tool_reject, and queue-operation entries
 	switch entry.Type {
 	case "tool_reject":
 		return true
+	case "queue-operation":
+		// Messages typed while Claude is working
+		if entry.Operation == "enqueue" && entry.Content != "" {
+			// Skip system notifications and commands
+			if strings.HasPrefix(entry.Content, "<bash-notification>") || strings.HasPrefix(entry.Content, "/") {
+				return false
+			}
+			return true
+		}
+		return false
 	case "user":
 		// Continue to check content
 	default:
@@ -291,8 +301,13 @@ func isUserActionEntry(entry MessageEntry) bool {
 	}
 
 	// Check if this is a tool_result (tool output returned as user message)
-	if isToolResultContent(entry.Message.RawContent) {
+	// Rejections are tool_results with is_error=true, and they count as user actions
+	isToolResult, isRejection := isToolResultContent(entry.Message.RawContent)
+	if isToolResult && !isRejection {
 		return false
+	}
+	if isRejection {
+		return true
 	}
 
 	// Commands (starting with /) count as user actions
@@ -304,24 +319,33 @@ func isUserActionEntry(entry MessageEntry) bool {
 	return msgText != ""
 }
 
-// isToolResultContent checks if the raw content is a tool_result array
-func isToolResultContent(rawContent []byte) bool {
+// isToolResultContent checks if raw content is a tool result and if it's a rejection
+// Returns (isToolResult, isRejection)
+func isToolResultContent(rawContent []byte) (bool, bool) {
 	if len(rawContent) == 0 {
-		return false
+		return false, false
 	}
 
 	// Tool results are typically in an array with type "tool_result"
 	var parts []struct {
-		Type string `json:"type"`
+		Type    string `json:"type"`
+		IsError bool   `json:"is_error,omitempty"`
+		Content string `json:"content,omitempty"`
 	}
 	if err := json.Unmarshal(rawContent, &parts); err != nil {
-		return false
+		return false, false
 	}
 
+	isToolResult := false
+	isRejection := false
 	for _, part := range parts {
 		if part.Type == "tool_result" {
-			return true
+			isToolResult = true
+			// Check if this is a rejection (is_error=true with rejection message)
+			if part.IsError && strings.Contains(part.Content, "tool use was rejected") {
+				isRejection = true
+			}
 		}
 	}
-	return false
+	return isToolResult, isRejection
 }
