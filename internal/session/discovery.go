@@ -78,8 +78,8 @@ func FindSessions(repoPath string, startWork, endWork time.Time, trace *TraceCon
 			continue
 		}
 
-		// Verify session belongs to this repo (grep for repo path in content)
-		if !sessionContainsRepoPath(f, absPath) {
+		// Verify session belongs to this repo by checking first line cwd and timestamp
+		if !sessionBelongsToRepo(f, absPath, endWork) {
 			continue
 		}
 
@@ -410,30 +410,56 @@ func findAllSessionDirs() ([]string, error) {
 	return dirs, nil
 }
 
-// sessionContainsRepoPath checks if a session file references the repo path
-// Looks for repoPath + "/" (file paths, subfolders) or repoPath + '"' (exact cwd match)
-// This catches sessions started from repo root, subfolders, or external directories
-func sessionContainsRepoPath(sessionPath, repoPath string) bool {
+// sessionBelongsToRepo reads the first line of a session file to check:
+// 1. If the session started after endWork (skip if so)
+// 2. If the session's cwd is inside the repo path
+// Returns true if session should be included.
+// External folder sessions (cwd outside repo) are skipped for now (TODO: future enhancement).
+func sessionBelongsToRepo(sessionPath, repoPath string, endWork time.Time) bool {
 	file, err := os.Open(sessionPath)
 	if err != nil {
 		return false
 	}
 	defer file.Close()
 
-	// Match repo path followed by / (subfolders, file paths) or " (exact cwd match)
-	// Both patterns exclude /repo-v2 when searching for /repo
-	pathPattern := repoPath + "/"
-	cwdPattern := repoPath + `"`
-
+	// Read first line only
 	scanner := bufio.NewScanner(file)
 	buf := make([]byte, 0, 64*1024)
 	scanner.Buffer(buf, 1024*1024)
 
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, pathPattern) || strings.Contains(line, cwdPattern) {
-			return true
-		}
+	if !scanner.Scan() {
+		return false
 	}
+	firstLine := scanner.Bytes()
+
+	// Parse timestamp and cwd from first line
+	var entry struct {
+		Timestamp time.Time `json:"timestamp"`
+		Cwd       string    `json:"cwd"`
+	}
+	if err := json.Unmarshal(firstLine, &entry); err != nil {
+		return false
+	}
+
+	// Skip if session started after work ended
+	if !entry.Timestamp.IsZero() && entry.Timestamp.After(endWork) {
+		return false
+	}
+
+	// Check cwd using filepath for cross-OS portability
+	cwd := filepath.Clean(entry.Cwd)
+	repo := filepath.Clean(repoPath)
+
+	// Exact match (repo root)
+	if cwd == repo {
+		return true
+	}
+
+	// Subfolder of repo
+	if strings.HasPrefix(cwd, repo+string(filepath.Separator)) {
+		return true
+	}
+
+	// External folder - skip for now (TODO: implement file path scanning)
 	return false
 }
