@@ -1,6 +1,7 @@
 package session
 
 import (
+	"bufio"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -9,16 +10,13 @@ import (
 	"time"
 )
 
-// FindSessions discovers Claude Code sessions for a given repo path
-// Returns sessions sorted by modified time (most recent first)
+// FindSessions discovers Claude Code sessions for a given repo path within the work period.
+// Scans ALL session directories and greps for repo path references.
+// Uses file mtime for fast pre-filtering before reading content.
+// Returns sessions sorted by modified time (most recent first).
 // If trace is non-nil, it records discovery details for explainability.
-func FindSessions(repoPath string, trace *TraceContext) ([]ClaudeSession, error) {
+func FindSessions(repoPath string, startWork, endWork time.Time, trace *TraceContext) ([]ClaudeSession, error) {
 	absPath, err := filepath.Abs(repoPath)
-	if err != nil {
-		return nil, err
-	}
-
-	claudeDir, err := getClaudeSessionDir(absPath)
 	if err != nil {
 		return nil, err
 	}
@@ -27,38 +25,90 @@ func FindSessions(repoPath string, trace *TraceContext) ([]ClaudeSession, error)
 	if trace != nil {
 		trace.RepoPath = absPath
 		trace.EncodedPath = encodePathForClaude(absPath)
-		trace.SessionDir = claudeDir
 	}
 
-	// Check if directory exists
-	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
-		if trace != nil {
-			trace.SessionDirExists = false
-		}
-		return nil, nil // No sessions directory = no sessions
-	}
-
-	if trace != nil {
-		trace.SessionDirExists = true
-	}
-
-	files, err := filepath.Glob(filepath.Join(claudeDir, "*.jsonl"))
+	// Find all session directories (full scan mode)
+	candidateDirs, err := findAllSessionDirs()
 	if err != nil {
 		return nil, err
 	}
 
+	// Record candidate directories in trace
 	if trace != nil {
-		trace.FoundFiles = files
+		trace.CandidateDirs = candidateDirs
+		if len(candidateDirs) > 0 {
+			trace.SessionDir = candidateDirs[0] // Primary for backward compat
+			trace.SessionDirExists = true
+		} else {
+			trace.SessionDirExists = false
+		}
+	}
+
+	if len(candidateDirs) == 0 {
+		return nil, nil
+	}
+
+	// Collect all session files from candidate directories
+	var allFiles []string
+	for _, dir := range candidateDirs {
+		files, err := filepath.Glob(filepath.Join(dir, "*.jsonl"))
+		if err != nil {
+			continue
+		}
+		allFiles = append(allFiles, files...)
+	}
+
+	if trace != nil {
+		trace.FoundFiles = allFiles
 	}
 
 	var sessions []ClaudeSession
-	for _, f := range files {
+	skippedByMtime := 0
+
+	for _, f := range allFiles {
+		// Fast pre-filter: check file mtime before reading content
+		// If file hasn't been modified since before work started, skip it
+		info, err := os.Stat(f)
+		if err != nil {
+			continue
+		}
+		mtime := info.ModTime()
+		if mtime.Before(startWork) {
+			skippedByMtime++
+			continue
+		}
+
+		// Verify session belongs to this repo by checking first line cwd and timestamp
+		if !sessionBelongsToRepo(f, absPath, endWork) {
+			continue
+		}
+
 		id := strings.TrimSuffix(filepath.Base(f), ".jsonl")
 		created, modified, _, err := ParseSessionMetadata(f)
 		if err != nil {
 			// Skip files we can't parse
 			continue
 		}
+
+		// Time filter: session must overlap with work period
+		// Session overlaps if: modified >= startWork AND created <= endWork
+		if modified.Before(startWork) || created.After(endWork) {
+			if trace != nil {
+				st := trace.FindOrCreateSessionTrace(id)
+				st.Path = f
+				st.Created = created
+				st.Modified = modified
+				st.TimeFilterPassed = false
+				if modified.Before(startWork) {
+					st.TimeFilterReason = "FAIL (modified before work start)"
+				} else {
+					st.TimeFilterReason = "FAIL (created after work end)"
+				}
+				st.FinalReason = st.TimeFilterReason
+			}
+			continue
+		}
+
 		sessions = append(sessions, ClaudeSession{
 			ID:       id,
 			Path:     f,
@@ -72,7 +122,14 @@ func FindSessions(repoPath string, trace *TraceContext) ([]ClaudeSession, error)
 			st.Path = f
 			st.Created = created
 			st.Modified = modified
+			st.TimeFilterPassed = true
+			st.TimeFilterReason = "PASS (overlaps work period)"
 		}
+	}
+
+	// Record mtime skip stats in trace
+	if trace != nil {
+		trace.SkippedByMtime = skippedByMtime
 	}
 
 	// Sort by modified time (most recent first)
@@ -348,4 +405,134 @@ func isToolResultContent(rawContent []byte) (bool, bool) {
 		}
 	}
 	return isToolResult, isRejection
+}
+
+// findAllSessionDirs returns all session directories in ~/.claude/projects/
+func findAllSessionDirs() ([]string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	projectsDir := filepath.Join(homeDir, ".claude", "projects")
+
+	entries, err := os.ReadDir(projectsDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var dirs []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			dirs = append(dirs, filepath.Join(projectsDir, entry.Name()))
+		}
+	}
+
+	return dirs, nil
+}
+
+// sessionBelongsToRepo checks if a session file belongs to the repo by:
+// 1. Finding the first entry with cwd (may skip file-history-snapshot entries)
+// 2. Checking if session started after endWork (skip if so)
+// 3. Checking cwd relationship to repo:
+//   - cwd == repo → INCLUDE
+//   - cwd is subfolder of repo → INCLUDE
+//   - repo is subfolder of cwd (parent folder case) → scan for Write/Edit operations
+//   - else → SKIP
+func sessionBelongsToRepo(sessionPath, repoPath string, endWork time.Time) bool {
+	file, err := os.Open(sessionPath)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024)
+
+	// Find first entry with cwd (skip file-history-snapshot entries that don't have cwd)
+	var firstCwd string
+	var firstTimestamp time.Time
+	for scanner.Scan() {
+		var entry struct {
+			Timestamp time.Time `json:"timestamp"`
+			Cwd       string    `json:"cwd"`
+		}
+		if json.Unmarshal(scanner.Bytes(), &entry) == nil && entry.Cwd != "" {
+			firstCwd = entry.Cwd
+			firstTimestamp = entry.Timestamp
+			break
+		}
+	}
+
+	if firstCwd == "" {
+		return false
+	}
+
+	// Skip if session started after work ended
+	if !firstTimestamp.IsZero() && firstTimestamp.After(endWork) {
+		return false
+	}
+
+	// Check cwd using filepath for cross-OS portability
+	cwd := filepath.Clean(firstCwd)
+	repo := filepath.Clean(repoPath)
+
+	// Exact match (repo root)
+	if cwd == repo {
+		return true
+	}
+
+	// Subfolder of repo
+	if strings.HasPrefix(cwd, repo+string(filepath.Separator)) {
+		return true
+	}
+
+	// Parent folder case: repo is under cwd
+	// Scan subsequent lines for Write/Edit operations targeting the repo
+	if strings.HasPrefix(repo, cwd+string(filepath.Separator)) {
+		return scanForWritesToRepo(scanner, repo)
+	}
+
+	// External folder (not parent) - skip
+	return false
+}
+
+// scanForWritesToRepo scans remaining lines for Write/Edit tool uses targeting the repo.
+// Returns true if any Write or Edit operation has file_path inside repoPath.
+func scanForWritesToRepo(scanner *bufio.Scanner, repoPath string) bool {
+	for scanner.Scan() {
+		var entry struct {
+			Message struct {
+				Content []struct {
+					Type  string `json:"type"`
+					Name  string `json:"name"`
+					Input struct {
+						FilePath string `json:"file_path"`
+					} `json:"input"`
+				} `json:"content"`
+			} `json:"message"`
+		}
+		if json.Unmarshal(scanner.Bytes(), &entry) != nil {
+			continue
+		}
+
+		for _, item := range entry.Message.Content {
+			if item.Type != "tool_use" {
+				continue
+			}
+			if item.Name != "Write" && item.Name != "Edit" {
+				continue
+			}
+			filePath := filepath.Clean(item.Input.FilePath)
+			// Check if file_path is inside repo (exact match or subfolder)
+			if filePath == repoPath || strings.HasPrefix(filePath, repoPath+string(filepath.Separator)) {
+				return true
+			}
+		}
+	}
+	return false
 }

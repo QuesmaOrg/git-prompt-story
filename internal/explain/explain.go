@@ -10,11 +10,16 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
+// ExplainOptions configures the explain command
+type ExplainOptions struct {
+	ShowAll bool // Show all sessions including excluded ones
+}
+
 // Explain runs the discovery and filtering pipeline with full tracing
 // and outputs a human-readable explanation.
 // If showAll is true, every session is listed with full details.
 // If showAll is false (default), excluded sessions are grouped by reason.
-func Explain(commitRef string, showAll bool, w io.Writer) error {
+func Explain(commitRef string, opts ExplainOptions, w io.Writer) error {
 	// Get repo root
 	repoRoot, err := git.GetRepoRoot()
 	if err != nil {
@@ -54,21 +59,18 @@ func Explain(commitRef string, showAll bool, w io.Writer) error {
 		Explanation:         workTrace.Explanation,
 	}
 
-	// Discover sessions with tracing
-	sessions, err := session.FindSessions(repoRoot, trace)
+	// Discover sessions with tracing (includes time filtering)
+	sessions, err := session.FindSessions(repoRoot, startWork, endWork, trace)
 	if err != nil {
 		fmt.Fprintf(w, "Warning: %v\n", err)
 		sessions = nil
 	}
 
-	// Filter by time with tracing
-	sessions = session.FilterSessionsByTime(sessions, startWork, endWork, trace)
-
 	// Filter by user messages with tracing
 	_ = session.FilterSessionsByUserMessages(sessions, startWork, endWork, trace)
 
 	// Output the explanation
-	return renderExplanation(trace, showAll, w)
+	return renderExplanation(trace, opts.ShowAll, w)
 }
 
 func renderExplanation(trace *session.TraceContext, showAll bool, w io.Writer) error {
@@ -78,21 +80,33 @@ func renderExplanation(trace *session.TraceContext, showAll bool, w io.Writer) e
 
 	// Session directory info
 	fmt.Fprintf(w, "Repository: %s\n", trace.RepoPath)
-	fmt.Fprintf(w, "Session directory: %s\n", trace.SessionDir)
 
-	// Show shortened path for readability
-	shortPath := trace.SessionDir
-	if strings.HasPrefix(shortPath, trace.RepoPath) {
-		shortPath = "~/.claude/projects/" + trace.EncodedPath
-	}
-	if shortPath != trace.SessionDir {
-		fmt.Fprintf(w, "  (%s)\n", shortPath)
+	// Show candidate directories
+	if len(trace.CandidateDirs) > 0 {
+		fmt.Fprintf(w, "Candidate directories: %d\n", len(trace.CandidateDirs))
+		for _, dir := range trace.CandidateDirs {
+			fmt.Fprintf(w, "  - %s\n", dir)
+		}
+	} else {
+		fmt.Fprintf(w, "Session directory: %s\n", trace.SessionDir)
+
+		// Show shortened path for readability
+		shortPath := trace.SessionDir
+		if strings.HasPrefix(shortPath, trace.RepoPath) {
+			shortPath = "~/.claude/projects/" + trace.EncodedPath
+		}
+		if shortPath != trace.SessionDir {
+			fmt.Fprintf(w, "  (%s)\n", shortPath)
+		}
 	}
 
 	if trace.SessionDirExists {
-		fmt.Fprintf(w, "  Status: exists, found %d session file(s)\n", len(trace.FoundFiles))
+		fmt.Fprintf(w, "Status: found %d session file(s)\n", len(trace.FoundFiles))
+		if trace.SkippedByMtime > 0 {
+			fmt.Fprintf(w, "  Skipped by mtime: %d (not modified in work period)\n", trace.SkippedByMtime)
+		}
 	} else {
-		fmt.Fprintln(w, "  Status: directory does not exist")
+		fmt.Fprintln(w, "Status: no session directories found")
 	}
 	fmt.Fprintln(w)
 

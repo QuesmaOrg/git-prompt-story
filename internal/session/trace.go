@@ -11,6 +11,10 @@ type TraceContext struct {
 	SessionDirExists bool
 	FoundFiles       []string
 
+	// Extended discovery fields
+	CandidateDirs  []string // All candidate directories checked
+	SkippedByMtime int      // Files skipped due to mtime pre-filter
+
 	WorkPeriod WorkPeriodTrace
 	Sessions   []SessionTrace
 }

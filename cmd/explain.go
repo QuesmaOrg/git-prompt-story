@@ -31,7 +31,10 @@ Use --all to show details for every session (including excluded ones).`,
 		if len(args) > 0 {
 			commit = args[0]
 		}
-		if err := explain.Explain(commit, explainAllFlag, os.Stdout); err != nil {
+		opts := explain.ExplainOptions{
+			ShowAll: explainAllFlag,
+		}
+		if err := explain.Explain(commit, opts, os.Stdout); err != nil {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
 			os.Exit(1)
 		}
