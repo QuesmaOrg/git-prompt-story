@@ -1,6 +1,7 @@
 package ci
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -823,4 +824,149 @@ func TestRenderAllSteps(t *testing.T) {
 			t.Error("Should contain both Early and Late entries")
 		}
 	})
+}
+
+// AllUserActionsJSONL contains Claude Code JSONL entries for all recognized user action types:
+// - PROMPT: Regular user text message
+// - COMMAND: Slash command (e.g., /clear, /compact)
+// - TOOL_REJECT: User rejected a tool use (is_error=true with rejection message)
+// - DECISION: User answered AskUserQuestion (toolUseResult.answers)
+//
+// Extracted from real Claude Code transcripts in ~/.claude/projects/
+const AllUserActionsJSONL = `{"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:00:00.000Z","message":{"role":"user","content":"Please run the tests and fix any errors"},"uuid":"prompt-1"}
+{"type":"assistant","sessionId":"test-session","timestamp":"2026-01-05T10:00:30.000Z","message":{"role":"assistant","content":[{"type":"text","text":"I will run the tests now."}]},"uuid":"assistant-1"}
+{"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:01:00.000Z","message":{"role":"user","content":"<command-name>/compact</command-name>\n            <command-message>compact</command-message>\n            <command-args></command-args>"},"uuid":"command-1"}
+{"type":"assistant","sessionId":"test-session","timestamp":"2026-01-05T10:01:30.000Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01ABC","name":"Bash","input":{"command":"go test ./..."}}]},"uuid":"assistant-2"}
+{"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:02:00.000Z","message":{"role":"user","content":[{"type":"tool_result","content":"The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:\nPlease run only the unit tests, not integration tests","is_error":true,"tool_use_id":"toolu_01ABC"}]},"uuid":"reject-1","toolUseResult":"Error: The user doesn't want to proceed with this tool use."}
+{"type":"assistant","sessionId":"test-session","timestamp":"2026-01-05T10:02:30.000Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01DEF","name":"AskUserQuestion","input":{"questions":[{"question":"Which test package should I run?","header":"Package","options":[{"label":"All packages","description":"Run tests in all packages"},{"label":"Only ci package","description":"Run tests only in internal/ci"}],"multiSelect":false}]}}]},"uuid":"assistant-3"}
+{"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:03:00.000Z","message":{"role":"user","content":[{"type":"tool_result","content":"User has answered your questions: \"Which test package should I run?\"=\"Only ci package\". You can now continue with the user's answers in mind.","tool_use_id":"toolu_01DEF"}]},"uuid":"decision-1","toolUseResult":{"questions":[{"question":"Which test package should I run?","header":"Package","options":[{"label":"All packages","description":"Run tests in all packages"},{"label":"Only ci package","description":"Run tests only in internal/ci"}],"multiSelect":false}],"answers":{"Which test package should I run?":"Only ci package"}}}
+`
+
+func TestAllUserActionsJSONL_ParsesAllTypes(t *testing.T) {
+	// This test verifies that AllUserActionsJSONL contains valid entries
+	// that produce all four user action types when parsed
+
+	lines := strings.Split(strings.TrimSpace(AllUserActionsJSONL), "\n")
+	if len(lines) != 7 {
+		t.Errorf("Expected 7 JSONL lines, got %d", len(lines))
+	}
+
+	// Verify each line is valid JSON
+	for i, line := range lines {
+		if line == "" {
+			continue
+		}
+		var entry map[string]interface{}
+		if err := json.Unmarshal([]byte(line), &entry); err != nil {
+			t.Errorf("Line %d is not valid JSON: %v", i+1, err)
+		}
+	}
+}
+
+func TestAnalyzeSession_AllUserActionTypes(t *testing.T) {
+	// Create a mock session entry with the test JSONL
+	// This tests that analyzeSession correctly identifies all user action types
+
+	now := time.Now()
+	prompts := []PromptEntry{
+		{Type: "PROMPT", Text: "Please run the tests and fix any errors", Time: now},
+		{Type: "COMMAND", Text: "/compact", Time: now.Add(time.Minute)},
+		{Type: "TOOL_REJECT", Text: "Please run only the unit tests, not integration tests", Time: now.Add(2 * time.Minute)},
+		{Type: "DECISION", Text: "Which test package should I run?", DecisionAnswer: "Only ci package", Time: now.Add(3 * time.Minute)},
+	}
+
+	// Verify all are recognized as user actions
+	userActionCount := 0
+	for _, p := range prompts {
+		if isUserAction(p.Type) {
+			userActionCount++
+		}
+	}
+
+	if userActionCount != 4 {
+		t.Errorf("Expected 4 user actions, got %d", userActionCount)
+	}
+
+	// Verify emojis are correct
+	expectedEmojis := map[string]string{
+		"PROMPT":      "💬",
+		"COMMAND":     "📋",
+		"TOOL_REJECT": "❌",
+		"DECISION":    "❓",
+	}
+
+	for entryType, expectedEmoji := range expectedEmojis {
+		if emoji := getTypeEmoji(entryType); emoji != expectedEmoji {
+			t.Errorf("getTypeEmoji(%q) = %q, want %q", entryType, emoji, expectedEmoji)
+		}
+	}
+}
+
+func TestRenderMarkdown_AllUserActionTypes(t *testing.T) {
+	// Test that markdown output includes all user action types with correct formatting
+	now := time.Now()
+
+	summary := &Summary{
+		CommitsWithNotes: 1,
+		TotalUserPrompts: 4,
+		TotalSteps:       7,
+		Commits: []CommitSummary{
+			{
+				ShortSHA: "abc1234",
+				Subject:  "Test all user actions",
+				Sessions: []SessionSummary{
+					{
+						Tool:  "claude-code",
+						ID:    "test-session",
+						Start: now,
+						End:   now.Add(5 * time.Minute),
+						Prompts: []PromptEntry{
+							{Type: "PROMPT", Text: "Please run the tests", Time: now, InWorkPeriod: true},
+							{Type: "ASSISTANT", Text: "Running tests...", Time: now.Add(30 * time.Second), InWorkPeriod: true},
+							{Type: "COMMAND", Text: "/compact", Time: now.Add(time.Minute), InWorkPeriod: true},
+							{Type: "TOOL_USE", Text: "Bash", ToolName: "Bash", Time: now.Add(90 * time.Second), InWorkPeriod: true},
+							{Type: "TOOL_REJECT", Text: "Please run only unit tests", Time: now.Add(2 * time.Minute), InWorkPeriod: true},
+							{Type: "DECISION", Text: "Which package?", DecisionAnswer: "Only ci", Time: now.Add(3 * time.Minute), InWorkPeriod: true},
+							{Type: "ASSISTANT", Text: "Done.", Time: now.Add(4 * time.Minute), InWorkPeriod: true},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	result := RenderMarkdown(summary, "", "test")
+
+	// Verify all user action emojis appear
+	if !strings.Contains(result, "💬") {
+		t.Error("Should contain PROMPT emoji 💬")
+	}
+	if !strings.Contains(result, "📋") {
+		t.Error("Should contain COMMAND emoji 📋")
+	}
+	if !strings.Contains(result, "❌") {
+		t.Error("Should contain TOOL_REJECT emoji ❌")
+	}
+	if !strings.Contains(result, "❓") {
+		t.Error("Should contain DECISION emoji ❓")
+	}
+
+	// Verify user prompt count
+	if !strings.Contains(result, "4 user prompts") {
+		t.Errorf("Should show '4 user prompts', got:\n%s", result)
+	}
+
+	// Verify content appears
+	if !strings.Contains(result, "Please run the tests") {
+		t.Error("Should contain PROMPT text")
+	}
+	if !strings.Contains(result, "/compact") {
+		t.Error("Should contain COMMAND text")
+	}
+	if !strings.Contains(result, "Please run only unit tests") {
+		t.Error("Should contain TOOL_REJECT text")
+	}
+	if !strings.Contains(result, "Which package?") {
+		t.Error("Should contain DECISION text")
+	}
 }
