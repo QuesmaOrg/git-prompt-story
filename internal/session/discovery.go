@@ -410,11 +410,14 @@ func findAllSessionDirs() ([]string, error) {
 	return dirs, nil
 }
 
-// sessionBelongsToRepo reads the first line of a session file to check:
-// 1. If the session started after endWork (skip if so)
-// 2. If the session's cwd is inside the repo path
-// Returns true if session should be included.
-// External folder sessions (cwd outside repo) are skipped for now (TODO: future enhancement).
+// sessionBelongsToRepo checks if a session file belongs to the repo by:
+// 1. Finding the first entry with cwd (may skip file-history-snapshot entries)
+// 2. Checking if session started after endWork (skip if so)
+// 3. Checking cwd relationship to repo:
+//   - cwd == repo → INCLUDE
+//   - cwd is subfolder of repo → INCLUDE
+//   - repo is subfolder of cwd (parent folder case) → scan for Write/Edit operations
+//   - else → SKIP
 func sessionBelongsToRepo(sessionPath, repoPath string, endWork time.Time) bool {
 	file, err := os.Open(sessionPath)
 	if err != nil {
@@ -422,32 +425,36 @@ func sessionBelongsToRepo(sessionPath, repoPath string, endWork time.Time) bool 
 	}
 	defer file.Close()
 
-	// Read first line only
 	scanner := bufio.NewScanner(file)
 	buf := make([]byte, 0, 64*1024)
 	scanner.Buffer(buf, 1024*1024)
 
-	if !scanner.Scan() {
-		return false
+	// Find first entry with cwd (skip file-history-snapshot entries that don't have cwd)
+	var firstCwd string
+	var firstTimestamp time.Time
+	for scanner.Scan() {
+		var entry struct {
+			Timestamp time.Time `json:"timestamp"`
+			Cwd       string    `json:"cwd"`
+		}
+		if json.Unmarshal(scanner.Bytes(), &entry) == nil && entry.Cwd != "" {
+			firstCwd = entry.Cwd
+			firstTimestamp = entry.Timestamp
+			break
+		}
 	}
-	firstLine := scanner.Bytes()
 
-	// Parse timestamp and cwd from first line
-	var entry struct {
-		Timestamp time.Time `json:"timestamp"`
-		Cwd       string    `json:"cwd"`
-	}
-	if err := json.Unmarshal(firstLine, &entry); err != nil {
+	if firstCwd == "" {
 		return false
 	}
 
 	// Skip if session started after work ended
-	if !entry.Timestamp.IsZero() && entry.Timestamp.After(endWork) {
+	if !firstTimestamp.IsZero() && firstTimestamp.After(endWork) {
 		return false
 	}
 
 	// Check cwd using filepath for cross-OS portability
-	cwd := filepath.Clean(entry.Cwd)
+	cwd := filepath.Clean(firstCwd)
 	repo := filepath.Clean(repoPath)
 
 	// Exact match (repo root)
@@ -460,6 +467,48 @@ func sessionBelongsToRepo(sessionPath, repoPath string, endWork time.Time) bool 
 		return true
 	}
 
-	// External folder - skip for now (TODO: implement file path scanning)
+	// Parent folder case: repo is under cwd
+	// Scan subsequent lines for Write/Edit operations targeting the repo
+	if strings.HasPrefix(repo, cwd+string(filepath.Separator)) {
+		return scanForWritesToRepo(scanner, repo)
+	}
+
+	// External folder (not parent) - skip
+	return false
+}
+
+// scanForWritesToRepo scans remaining lines for Write/Edit tool uses targeting the repo.
+// Returns true if any Write or Edit operation has file_path inside repoPath.
+func scanForWritesToRepo(scanner *bufio.Scanner, repoPath string) bool {
+	for scanner.Scan() {
+		var entry struct {
+			Message struct {
+				Content []struct {
+					Type  string `json:"type"`
+					Name  string `json:"name"`
+					Input struct {
+						FilePath string `json:"file_path"`
+					} `json:"input"`
+				} `json:"content"`
+			} `json:"message"`
+		}
+		if json.Unmarshal(scanner.Bytes(), &entry) != nil {
+			continue
+		}
+
+		for _, item := range entry.Message.Content {
+			if item.Type != "tool_use" {
+				continue
+			}
+			if item.Name != "Write" && item.Name != "Edit" {
+				continue
+			}
+			filePath := filepath.Clean(item.Input.FilePath)
+			// Check if file_path is inside repo (exact match or subfolder)
+			if filePath == repoPath || strings.HasPrefix(filePath, repoPath+string(filepath.Separator)) {
+				return true
+			}
+		}
+	}
 	return false
 }

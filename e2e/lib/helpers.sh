@@ -363,29 +363,29 @@ EOF
     echo "  Created mock session for subfolder $subfolder: $session_dir/$session_id.jsonl"
 }
 
-# Create a mock session from an external directory that edits files in the repo
-# Usage: create_mock_session_for_external_dir <external_cwd> <repo_path> <session_id> <start_time> <end_time>
-# Example: create_mock_session_for_external_dir "/workspace" "/workspace/test-repo" "session-ext" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
-create_mock_session_for_external_dir() {
-    local external_cwd="$1"
+# Create a mock session from a parent directory that writes files in the repo
+# Usage: create_mock_session_for_parent_dir <parent_cwd> <repo_path> <session_id> <start_time> <end_time>
+# Example: create_mock_session_for_parent_dir "/workspace" "/workspace/test-repo" "session-parent" "2025-01-15T09:15:00Z" "2025-01-15T10:25:00Z"
+create_mock_session_for_parent_dir() {
+    local parent_cwd="$1"
     local repo_path="$2"
     local session_id="$3"
     local start_time="$4"
     local end_time="$5"
 
-    local encoded_path=$(echo "$external_cwd" | tr '/' '-')
+    local encoded_path=$(echo "$parent_cwd" | tr '/' '-')
     local session_dir="$HOME/.claude/projects/$encoded_path"
 
     mkdir -p "$session_dir"
 
-    # cwd is the external directory, but file operations reference the repo
+    # cwd is the parent directory, but Write operation targets the repo
     cat > "$session_dir/$session_id.jsonl" << EOF
-{"type":"user","sessionId":"$session_id","timestamp":"$start_time","cwd":"$external_cwd","gitBranch":"main","message":{"role":"user","content":"Edit file in test-repo"}}
-{"type":"assistant","sessionId":"$session_id","timestamp":"$start_time","message":{"role":"assistant","content":[{"type":"tool_use","id":"tool1","name":"Read","input":{"file_path":"$repo_path/file.txt"}}]}}
-{"type":"user","sessionId":"$session_id","timestamp":"$end_time","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"tool1","content":"file contents"}]}}
+{"type":"user","sessionId":"$session_id","timestamp":"$start_time","cwd":"$parent_cwd","gitBranch":"main","message":{"role":"user","content":"Edit file in test-repo"}}
+{"type":"assistant","sessionId":"$session_id","timestamp":"$start_time","message":{"role":"assistant","content":[{"type":"tool_use","id":"tool1","name":"Write","input":{"file_path":"$repo_path/file.txt","content":"new content"}}]}}
+{"type":"user","sessionId":"$session_id","timestamp":"$end_time","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"tool1","content":"File written successfully"}]}}
 EOF
 
-    echo "  Created mock session for external dir $external_cwd editing $repo_path: $session_dir/$session_id.jsonl"
+    echo "  Created mock session for parent dir $parent_cwd writing to $repo_path: $session_dir/$session_id.jsonl"
 }
 
 # Create a mock agent session (with "agent-" prefix in session ID)
