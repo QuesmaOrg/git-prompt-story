@@ -399,6 +399,33 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 					}
 				}
 			}
+
+		case "queue-operation":
+			// Messages typed by user while Claude is working
+			// Only include "enqueue" operations with actual content
+			if entry.Operation == "enqueue" && entry.Content != "" {
+				// Skip system notifications (bash notifications, etc.)
+				if strings.HasPrefix(entry.Content, "<bash-notification>") {
+					continue
+				}
+				// Skip commands (they'll be processed as separate entries)
+				if strings.HasPrefix(entry.Content, "/") {
+					continue
+				}
+				pe := PromptEntry{
+					Time:         ts,
+					Type:         "PROMPT",
+					Text:         entry.Content,
+					InWorkPeriod: inWorkPeriod,
+				}
+				if !full && len(pe.Text) > 2000 {
+					pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
+					pe.Truncated = true
+				}
+				if inWorkPeriod {
+					ss.Prompts = append(ss.Prompts, pe)
+				}
+			}
 		}
 	}
 

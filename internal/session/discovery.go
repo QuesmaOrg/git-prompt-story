@@ -269,10 +269,20 @@ func isUserActionEntry(entry MessageEntry) bool {
 		return false
 	}
 
-	// Only consider user and tool_reject entries
+	// Only consider user, tool_reject, and queue-operation entries
 	switch entry.Type {
 	case "tool_reject":
 		return true
+	case "queue-operation":
+		// Messages typed while Claude is working
+		if entry.Operation == "enqueue" && entry.Content != "" {
+			// Skip system notifications and commands
+			if strings.HasPrefix(entry.Content, "<bash-notification>") || strings.HasPrefix(entry.Content, "/") {
+				return false
+			}
+			return true
+		}
+		return false
 	case "user":
 		// Continue to check content
 	default:

@@ -831,12 +831,14 @@ func TestRenderAllSteps(t *testing.T) {
 // - COMMAND: Slash command (e.g., /clear, /compact)
 // - TOOL_REJECT: User rejected a tool use (is_error=true with rejection message)
 // - DECISION: User answered AskUserQuestion (toolUseResult.answers)
+// - QUEUED_PROMPT: Message typed while Claude is working (queue-operation with operation=enqueue)
 //
 // Extracted from real Claude Code transcripts in ~/.claude/projects/
 const AllUserActionsJSONL = `{"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:00:00.000Z","message":{"role":"user","content":"Please run the tests and fix any errors"},"uuid":"prompt-1"}
 {"type":"assistant","sessionId":"test-session","timestamp":"2026-01-05T10:00:30.000Z","message":{"role":"assistant","content":[{"type":"text","text":"I will run the tests now."}]},"uuid":"assistant-1"}
 {"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:01:00.000Z","message":{"role":"user","content":"<command-name>/compact</command-name>\n            <command-message>compact</command-message>\n            <command-args></command-args>"},"uuid":"command-1"}
 {"type":"assistant","sessionId":"test-session","timestamp":"2026-01-05T10:01:30.000Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01ABC","name":"Bash","input":{"command":"go test ./..."}}]},"uuid":"assistant-2"}
+{"type":"queue-operation","operation":"enqueue","timestamp":"2026-01-05T10:01:45.000Z","sessionId":"test-session","content":"We filter out tool use results as privacy, maybe we need to revisit that"}
 {"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:02:00.000Z","message":{"role":"user","content":[{"type":"tool_result","content":"The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:\nPlease run only the unit tests, not integration tests","is_error":true,"tool_use_id":"toolu_01ABC"}]},"uuid":"reject-1","toolUseResult":"Error: The user doesn't want to proceed with this tool use."}
 {"type":"assistant","sessionId":"test-session","timestamp":"2026-01-05T10:02:30.000Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01DEF","name":"AskUserQuestion","input":{"questions":[{"question":"Which test package should I run?","header":"Package","options":[{"label":"All packages","description":"Run tests in all packages"},{"label":"Only ci package","description":"Run tests only in internal/ci"}],"multiSelect":false}]}}]},"uuid":"assistant-3"}
 {"type":"user","sessionId":"test-session","timestamp":"2026-01-05T10:03:00.000Z","message":{"role":"user","content":[{"type":"tool_result","content":"User has answered your questions: \"Which test package should I run?\"=\"Only ci package\". You can now continue with the user's answers in mind.","tool_use_id":"toolu_01DEF"}]},"uuid":"decision-1","toolUseResult":{"questions":[{"question":"Which test package should I run?","header":"Package","options":[{"label":"All packages","description":"Run tests in all packages"},{"label":"Only ci package","description":"Run tests only in internal/ci"}],"multiSelect":false}],"answers":{"Which test package should I run?":"Only ci package"}}}
@@ -844,11 +846,11 @@ const AllUserActionsJSONL = `{"type":"user","sessionId":"test-session","timestam
 
 func TestAllUserActionsJSONL_ParsesAllTypes(t *testing.T) {
 	// This test verifies that AllUserActionsJSONL contains valid entries
-	// that produce all four user action types when parsed
+	// that produce all five user action types when parsed
 
 	lines := strings.Split(strings.TrimSpace(AllUserActionsJSONL), "\n")
-	if len(lines) != 7 {
-		t.Errorf("Expected 7 JSONL lines, got %d", len(lines))
+	if len(lines) != 8 {
+		t.Errorf("Expected 8 JSONL lines, got %d", len(lines))
 	}
 
 	// Verify each line is valid JSON
@@ -904,12 +906,13 @@ func TestAnalyzeSession_AllUserActionTypes(t *testing.T) {
 
 func TestRenderMarkdown_AllUserActionTypes(t *testing.T) {
 	// Test that markdown output includes all user action types with correct formatting
+	// Note: queue-operation entries become PROMPT type after parsing
 	now := time.Now()
 
 	summary := &Summary{
 		CommitsWithNotes: 1,
-		TotalUserPrompts: 4,
-		TotalSteps:       7,
+		TotalUserPrompts: 5, // PROMPT, COMMAND, TOOL_REJECT, DECISION, + queued PROMPT
+		TotalSteps:       8,
 		Commits: []CommitSummary{
 			{
 				ShortSHA: "abc1234",
@@ -925,6 +928,8 @@ func TestRenderMarkdown_AllUserActionTypes(t *testing.T) {
 							{Type: "ASSISTANT", Text: "Running tests...", Time: now.Add(30 * time.Second), InWorkPeriod: true},
 							{Type: "COMMAND", Text: "/compact", Time: now.Add(time.Minute), InWorkPeriod: true},
 							{Type: "TOOL_USE", Text: "Bash", ToolName: "Bash", Time: now.Add(90 * time.Second), InWorkPeriod: true},
+							// Queued prompt (from queue-operation) becomes PROMPT type
+							{Type: "PROMPT", Text: "Message typed while working", Time: now.Add(100 * time.Second), InWorkPeriod: true},
 							{Type: "TOOL_REJECT", Text: "Please run only unit tests", Time: now.Add(2 * time.Minute), InWorkPeriod: true},
 							{Type: "DECISION", Text: "Which package?", DecisionAnswer: "Only ci", Time: now.Add(3 * time.Minute), InWorkPeriod: true},
 							{Type: "ASSISTANT", Text: "Done.", Time: now.Add(4 * time.Minute), InWorkPeriod: true},
@@ -951,9 +956,9 @@ func TestRenderMarkdown_AllUserActionTypes(t *testing.T) {
 		t.Error("Should contain DECISION emoji ❓")
 	}
 
-	// Verify user prompt count
-	if !strings.Contains(result, "4 user prompts") {
-		t.Errorf("Should show '4 user prompts', got:\n%s", result)
+	// Verify user prompt count (includes queued prompt)
+	if !strings.Contains(result, "5 user prompts") {
+		t.Errorf("Should show '5 user prompts', got:\n%s", result)
 	}
 
 	// Verify content appears
@@ -962,6 +967,9 @@ func TestRenderMarkdown_AllUserActionTypes(t *testing.T) {
 	}
 	if !strings.Contains(result, "/compact") {
 		t.Error("Should contain COMMAND text")
+	}
+	if !strings.Contains(result, "Message typed while working") {
+		t.Error("Should contain queued PROMPT text")
 	}
 	if !strings.Contains(result, "Please run only unit tests") {
 		t.Error("Should contain TOOL_REJECT text")
