@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fd9824c - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>fd9824c</code></h1>
+    <p class="meta">Simplify TUI: remove StepGroupNode, show steps directly under user actions</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">42</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>fd9824cf1568dc73d83c09a58cd1e307d776b3ab</code><br>
+    <strong>Work period:</strong> 2026-01-06 18:25 - 2026-01-06 18:37
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">a291e289-359e-4ccd-850d-49c02439a586</code> |
+        2026-01-06 18:01 - 2026-01-06 18:37 | <span class="session-count">42</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch improve-show
+Your branch is ahead of &#39;origin/main&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed `78a522c`:
+
+```
+Add interactive TUI for show command with collapsible hierarchy
+
+- 8 files changed, 1060 insertions(&#43;), 13 deletions(-)
+- 3 new files: data.go, tree.go, tui.go
+```
+
+The branch `improve-show` is ready to push when you&#39;re ready.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:27</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I want to simplify, Just have user prompts -&gt; other steps. Please remove middle layer X steps in tree view. Instead show those steps in right panel on user prompt action.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:27</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">This is a simplification of what we just built. I understand - you want:
+- **Left panel**: Just user actions (no &#34;N steps&#34; groups)
+- **Right panel**: When a user action is selected, show its details AND the steps that follow it
+
+Let me update the plan with this simplified approach:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Simplify TUI - Remove Step Groups
+     2 
+     3 ## Goal
+     4 
+     5 Remove the &#34;N steps&#34; collapsible layer. Show only user actions in the tree, display following steps in the detail panel.
+     6 
+     7 ## Current vs New Design
+     8 
+     9 ### Before (current)
+    10 ```
+    11 ┌─────────────────────────────────┬─────────────────────────────────┐
+    12 │ ▶ Session: Claude Code (113e)   │ [User action details]           │
+    13 │   💬 09:15 Fix auth bug...      │                                 │
+    14 │      ├─ 3 steps (collapsed)     │                                 │
+    15 │   📋 09:17 /compact             │                                 │
+    16 │      ├─ 1 step (collapsed)      │                                 │
+    17 │   💬 09:25 Now add tests...     │                                 │
+    18 └─────────────────────────────────┴─────────────────────────────────┘
+    19 ```
+    20 
+    21 ### After (simplified)
+    22 ```
+    23 ┌─────────────────────────────────┬─────────────────────────────────┐
+    24 │ ▶ Session: Claude Code (113e)   │ 💬 PROMPT                       │
+    25 │   💬 09:15 Fix auth bug...      │ Time: 09:15:00                  │
+    26 │   📋 09:17 /compact             │                                 │
+    27 │  ▶💬 09:25 Now add tests...     │ Content:               ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:27</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The simplified design:
+- **Left panel**: Only user actions (no expandable &#34;N steps&#34; groups)
+- **Right panel**: User action details &#43; separator &#43; list of following steps
+
+This removes the middle layer completely and makes the tree much cleaner.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Simplify TUI - Remove Step Groups\n\n## Goal\n\nRemove the \&#34;N steps\&#34; collapsible layer. Show only user actions in the tree, display following steps in the detail panel.\n\n## Cur...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Simplify TUI - Remove Step Groups
+
+## Goal
+
+Remove the &#34;N steps&#34; collapsible layer. Show only user actions in the tree, display following steps in the detail panel.
+
+## Current vs New Design
+
+### Before (current)
+```
+┌─────────────────────────────────┬─────────────────────────────────┐
+│ ▶ Session: Claude Code (113e)   │ [User action details]           │
+│   💬 09:15 Fix auth bug...      │                                 │
+│      ├─ 3 steps (collapsed)     │                                 │
+│   📋 09:17 /compact             │                                 │
+│      ├─ 1 step (collapsed)      │                                 │
+│   💬 09:25 Now add tests...     │                                 │
+└─────────────────────────────────┴─────────────────────────────────┘
+```
+
+### After (simplified)
+```
+┌─────────────────────────────────┬─────────────────────────────────┐
+│ ▶ Session: Claude Code (113e)   │ 💬 PROMPT                       │
+│   💬 09:15 Fix auth bug...      │ Time: 09:15:00                  │
+│   📋 09:17 /compact             │                                 │
+│  ▶💬 09:25 Now add tests...     │ Content:                        │
+│   ❓ 09:28 Version: 2.0         │ Fix the auth bug in lo...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Updating UserActionNode in data.go&#34;,&#34;content&#34;:&#34;Update UserActionNode with FollowingSteps field&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Removing StepGroupNode type&#34;,&#34;content...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     9 
+    10 // NodeType represents the type of node in the tree
+    11 type NodeType int
+    12 
+    13 const (
+    14 	NodeTypeCommit NodeType = iota
+    15 	NodeTypeSession
+    16 	NodeTypeUserAction
+    17 	NodeTypeStep
+    18 )
+    19 
+    20 // Node represents a node in the tree hierarchy
+    21 type Node interface {
+    22 	Type() NodeType</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   110 	toolName := formatToolName(s.Tool)
+   111 	return fmt.Sprintf(&#34;Session: %s (%s)&#34;, toolName, s.ShortID)
+   112 }
+   113 
+   114 // UserActionNode represents a user action (PROMPT, COMMAND, TOOL_REJECT, DECISION)
+   115 type UserActionNode struct {
+   116 	BaseNode
+   117 	entry          ci.PromptEntry
+   118 	SessionID      string
+   119 	CommitSHA      string
+   120 	FollowingSteps []*StepNode // Steps that follow this user action (shown in detail panel)
+   121 }
+   122 
+   123 func NewUserActionNode(entry ci.PromptEntry, sessionID, commitSHA string, depth int) *UserActionNode {
+   124 	return &amp;UserActionNode{
+   125 		BaseNode:  BaseNode{depth: depth, expanded: false},
+   126 		entry:     entry,
+   127 		SessionID: sessionID,
+   128 		CommitSHA: commitSHA,
+   129 	}
+   130 }
+   131 
+   132 func (u *UserActionNode) Type() NodeType         { return NodeTypeUserAction }
+   133 func (u *UserActionNode) IsExpandable() bool     { return false } // Steps shown in detail panel, not as children
+   134 func (u *UserActionNode) Entry() *ci.PromptEntry { return &amp;u.entry }
+   135 func (u *UserActionNode) Time() time.Time        { return u.entry.Time }
+   136 
+   137 func (u *UserActionNode) Label() string {
+   138 	emoji := getTypeEmoji(u.entry.Type)
+   139 	timeStr := u.entry.Time.Local().Format(&#34;15:04&#34;)
+   140 	text := truncateText(u.entry.Text, 25)
+   141 	return fmt.Sprintf(&#34;%s %s %s&#34;, emoji, timeStr, text)
+   142 }
+   143 
+   144 // StepGroupNode represents a group of collapsed steps between user actions
+   145 type StepGroupNode struct {
+   146 	BaseNode</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   140 	text := truncateText(u.entry.Text, 25)
+   141 	return fmt.Sprintf(&#34;%s %s %s&#34;, emoji, timeStr, text)
+   142 }
+   143 
+   144 // StepNode represents an individual step (TOOL_USE, ASSISTANT, etc.)
+   145 type StepNode struct {
+   146 	BaseNode
+   147 	entry     ci.PromptEntry
+   148 	SessionID string</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Updating UserActionNode in data.go&#34;,&#34;content&#34;:&#34;Update UserActionNode with FollowingSteps field&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Removing StepGroupNode type&#34;,&#34;content&#34;:...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    75 	sessNode.children = actionNodes
+    76 	return sessNode
+    77 }
+    78 
+    79 // buildActionNodes creates user action nodes with following steps stored directly
+    80 func buildActionNodes(sess ci.SessionSummary, commitSHA string, depth int) []Node {
+    81 	var nodes []Node
+    82 	var currentAction *UserActionNode
+    83 
+    84 	for _, entry := range sess.Prompts {
+    85 		if ci.IsUserAction(entry.Type) {
+    86 			// Create a new user action node
+    87 			actionNode := NewUserActionNode(entry, sess.ID, commitSHA, depth)
+    88 			nodes = append(nodes, actionNode)
+    89 			currentAction = actionNode
+    90 		} else if currentAction != nil {
+    91 			// This is a step (TOOL_USE, ASSISTANT, etc.) - attach to current action
+    92 			stepNode := NewStepNode(entry, sess.ID, commitSHA, depth&#43;1)
+    93 			currentAction.FollowingSteps = append(currentAction.FollowingSteps, stepNode)
+    94 		}
+    95 		// Steps before the first user action are ignored
+    96 	}
+    97 
+    98 	return nodes
+    99 }
+   100 
+   101 // FlattenVisible returns all currently visible nodes in display order
+   102 func (t *Tree) FlattenVisible() []Node {
+   103 	var result []Node</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;String to replace not found in file.
+String: 			} else {
+				// Single session - show actions at root level
+				nodes := buildActionNodes(sess, commit.ShortSHA, 0)
+				tree.Roots = append(tree.Roots, nodes...)
+				for _, n := range nodes {
+					if ua, ok := n.(*UserActionNode); ok {
+						tree.TotalActions&#43;&#43;
+						tree.TotalSteps &#43;= 1 &#43; len(ua.children)
+					}
+				}
+			}&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    49 					sessNode := buildSessionNode(sess, commit.ShortSHA, 0)
+    50 					tree.Roots = append(tree.Roots, sessNode)
+    51 					tree.TotalActions &#43;= countUserActions(sessNode)
+    52 					tree.TotalSteps &#43;= countAllSteps(sessNode)
+    53 				} else {
+    54 					// Single session - show actions at root level
+    55 					nodes := buildActionNodes(sess, commit.ShortSHA, 0)
+    56 					tree.Roots = append(tree.Roots, nodes...)
+    57 					for _, n := range nodes {
+    58 						if ua, ok := n.(*UserActionNode); ok {
+    59 							tree.TotalActions&#43;&#43;
+    60 							tree.TotalSteps &#43;= 1 &#43; len(ua.FollowingSteps)
+    61 						}
+    62 					}
+    63 				}
+    64 			}
+    65 		}
+    66 	}
+    67 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   200 	}
+   201 	return count
+   202 }
+   203 
+   204 func countAllSteps(n Node) int {
+   205 	count := 0
+   206 	switch n.Type() {
+   207 	case NodeTypeUserAction:
+   208 		count = 1
+   209 		// Also count following steps stored in UserActionNode
+   210 		if ua, ok := n.(*UserActionNode); ok {
+   211 			count &#43;= len(ua.FollowingSteps)
+   212 		}
+   213 	case NodeTypeStep:
+   214 		count = 1
+   215 	}
+   216 	for _, child := range n.Children() {
+   217 		count &#43;= countAllSteps(child)
+   218 	}
+   219 	return count
+   220 }
+   221 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Updating UserActionNode in data.go&#34;,&#34;content&#34;:&#34;Update UserActionNode with FollowingSteps field&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Removing StepGroupNode type&#34;,&#34;content&#34;:...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   284 		if !n.End.IsZero() {
+   285 			sb.WriteString(fmt.Sprintf(&#34;End: %s\n&#34;, n.End.Local().Format(&#34;2006-01-02 15:04:05&#34;)))
+   286 		}
+   287 
+   288 	case *UserActionNode:
+   289 		entry := n.Entry()
+   290 		sb.WriteString(fmt.Sprintf(&#34;Type: %s %s\n&#34;, getTypeEmoji(entry.Type), entry.Type))
+   291 		sb.WriteString(fmt.Sprintf(&#34;Time: %s\n&#34;, entry.Time.Local().Format(&#34;2006-01-02 15:04:05&#34;)))
+   292 		sb.WriteString(fmt.Sprintf(&#34;Session: %s\n&#34;, n.SessionID[:min(8, len(n.SessionID))]))
+   293 		sb.WriteString(&#34;\n&#34;)
+   294 
+   295 		// Content based on type
+   296 		switch entry.Type {
+   297 		case &#34;DECISION&#34;:
+   298 			if entry.DecisionHeader != &#34;&#34; {
+   299 				sb.WriteString(fmt.Sprintf(&#34;Question: %s\n&#34;, entry.DecisionHeader))
+   300 			}
+   301 			sb.WriteString(fmt.Sprintf(&#34;Prompt: %s\n&#34;, entry.Text))
+   302 			if entry.DecisionAnswer != &#34;&#34; {
+   303 				sb.WriteString(fmt.Sprintf(&#34;Answer: %s\n&#34;, entry.DecisionAnswer))
+   304 			}
+   305 		default:
+   306 			sb.WriteString(&#34;Content:\n&#34;)
+   307 			sb.WriteString(wrapText(entry.Text, width-2))
+   308 		}
+   309 
+   310 		// Show following steps in detail panel
+   311 		if len(n.FollowingSteps) &gt; 0 {
+   312 			sb.WriteString(&#34;\n&#34;)
+   313 			sb.WriteString(strings.Repeat(&#34;─&#34;, min(width-2, 40)))
+   314 			sb.WriteString(fmt.Sprintf(&#34;\nFollowing steps (%d):\n&#34;, len(n.FollowingSteps)))
+   315 			for _, step := range n.FollowingSteps {
+   316 				stepEntry := step.Entry()
+   317 				emoji := getTypeEmoji(stepEntry.Type)
+   318 				timeStr := stepEntry.Time.Local().Format(&#34;15:04&#34;)
+   319 				if stepEntry.Type == &#34;TOOL_USE&#34; &amp;&amp; stepEntry.ToolName != &#34;&#34; {
+   320 					input := truncateText(stepEntry.ToolInput, width-20)
+   321 					sb.WriteString(fmt.Sprintf(&#34;%s %s %s: %s\n&#34;, emoji, timeStr, stepEntry.ToolName, input))
+   322 				} else {
+   323 					text := truncate...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">countStepsInChildren</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">427:func countStepsInChildren(children []Node) int {
+428-	count := 0
+429-	for _, child := range children {
+430-		if sg, ok := child.(*StepGroupNode); ok {
+431-			count &#43;= len(sg.Steps)
+432-		}
+433-	}
+434-	return count
+435-}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   423 	}
+   424 	return strings.TrimSuffix(result.String(), &#34;\n&#34;)
+   425 }
+   426 
+   427 
+   428 // RunTUI starts the interactive TUI
+   429 func RunTUI(commitSpec string, full bool) error {
+   430 	m, err := NewModel(commitSpec, full)
+   431 	if err != nil {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . 2&gt;&amp;1</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story show 007991e --no-interactive 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Commit: 007991e
+Work period: 2026-01-05 19:45 - 2026-01-05 19:47
+
+Session: claude-code/95d2cad1-0f79-4d1b-89cc-9a422379b8b9
+Duration: 2026-01-05 19:33 - 2026-01-05 19:47
+
+[19:46] PROMPT:
+  Should we also remove examples folder and references to it?
+[19:46] PROMPT:
+  Please remove it.
+[19:46] PROMPT:
+  Yes commit.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  Step 11: Final commit history verification...
+    Git log:
+eb05fd6 Add features B and C (squashed)
+9f8e1c1 Add feature A
+be63992 Initial commit
+    Total commits: 3
+
+  All rebase flow assertions passed!
+
+=== 17/17 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Updating UserActionNode in data.go&#34;,&#34;content&#34;:&#34;Update UserActionNode with FollowingSteps field&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Removing StepGroupNode type&#34;,&#34;content&#34;:...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:32</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Simplified the TUI:
+
+**Changes:**
+- Removed `StepGroupNode` type entirely
+- Added `FollowingSteps []*StepNode` field to `UserActionNode`
+- Tree now shows only user actions (no &#34;N steps&#34; groups)
+- Detail panel shows user action content &#43; separator &#43; list of following steps
+
+**Result:**
+- Left panel: Clean list of just user actions
+- Right panel: Full details &#43; following steps listed below a separator line
+
+All 17 tests pass. Try it:
+```bash
+./git-prompt-story show 007991e
+```</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">No the user prompt should still exapand/collapse in tree on show list of steps. Now after the change it doesn&#39;t</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I understand - you want user actions to expand/collapse to show steps directly (without the intermediate &#34;N steps&#34; group). Let me fix this:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   128 		CommitSHA: commitSHA,
+   129 	}
+   130 }
+   131 
+   132 func (u *UserActionNode) Type() NodeType         { return NodeTypeUserAction }
+   133 func (u *UserActionNode) IsExpandable() bool     { return len(u.FollowingSteps) &gt; 0 }
+   134 func (u *UserActionNode) Entry() *ci.PromptEntry { return &amp;u.entry }
+   135 func (u *UserActionNode) Time() time.Time        { return u.entry.Time }
+   136 
+   137 // Children returns the following steps as child nodes (for tree expansion)
+   138 func (u *UserActionNode) Children() []Node {
+   139 	nodes := make([]Node, len(u.FollowingSteps))
+   140 	for i, s := range u.FollowingSteps {
+   141 		nodes[i] = s
+   142 	}
+   143 	return nodes
+   144 }
+   145 
+   146 func (u *UserActionNode) Label() string {
+   147 	emoji := getTypeEmoji(u.entry.Type)
+   148 	timeStr := u.entry.Time.Local().Format(&#34;15:04&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me update the detail panel to show steps only when collapsed (since expanded shows them in tree):</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   306 			sb.WriteString(&#34;Content:\n&#34;)
+   307 			sb.WriteString(wrapText(entry.Text, width-2))
+   308 		}
+   309 
+   310 		// Show following steps in detail panel (when collapsed, as preview)
+   311 		if len(n.FollowingSteps) &gt; 0 &amp;&amp; !n.IsExpanded() {
+   312 			sb.WriteString(&#34;\n&#34;)
+   313 			sb.WriteString(strings.Repeat(&#34;─&#34;, min(width-2, 40)))
+   314 			sb.WriteString(fmt.Sprintf(&#34;\nFollowing steps (%d) - press &#39;e&#39; to expand:\n&#34;, len(n.FollowingSteps)))
+   315 			for _, step := range n.FollowingSteps {
+   316 				stepEntry := step.Entry()
+   317 				emoji := getTypeEmoji(stepEntry.Type)
+   318 				timeStr := stepEntry.Time.Local().Format(&#34;15:04&#34;)
+   319 				if stepEntry.Type == &#34;TOOL_USE&#34; &amp;&amp; stepEntry.ToolName != &#34;&#34; {
+   320 					input := truncateText(stepEntry.ToolInput, width-20)
+   321 					sb.WriteString(fmt.Sprintf(&#34;%s %s %s: %s\n&#34;, emoji, timeStr, stepEntry.ToolName, input))
+   322 				} else {
+   323 					text := truncateText(stepEntry.Text, width-12)
+   324 					sb.WriteString(fmt.Sprintf(&#34;%s %s %s\n&#34;, emoji, timeStr, text))
+   325 				}
+   326 			}
+   327 		} else if len(n.FollowingSteps) &gt; 0 {
+   328 			sb.WriteString(fmt.Sprintf(&#34;\n\n%d steps expanded in tree&#34;, len(n.FollowingSteps)))
+   329 		}
+   330 
+   331 	case *StepNode:
+   332 		entry := n.Entry()
+   333 		sb.WriteString(fmt.Sprintf(&#34;Type: %s %s\n&#34;, getTypeEmoji(entry.Type), entry.Type))</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . 2&gt;&amp;1</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    Total commits: 3
+
+  All rebase flow assertions passed!
+
+=== 17/17 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Fixed! Now the behavior is:
+
+**Tree view:**
+- User actions show ▶/▼ when they have following steps
+- Press `e` to expand → steps appear directly as children in tree
+- Press `c` to collapse → steps hidden
+
+**Detail panel:**
+- When collapsed: shows steps as preview with &#34;press &#39;e&#39; to expand&#34;
+- When expanded: says &#34;N steps expanded in tree&#34;
+
+No more intermediate &#34;N steps&#34; group - steps are direct children of user actions.
+
+Try it:
+```bash
+./git-prompt-story show 007991e
+```</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">18:37</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Amazing work commit please</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch improve-show
+Your branch is ahead of &#39;origin/main&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   internal/show/data.go
+	modified:   internal/show/tree.go
+	modified:   internal/show/tui.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> internal/show/data.go | 63 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;--------------------------------------
+ internal/show/tree.go | 56 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-------------------------------
+ internal/show/tui.go  | 41 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;------------------
+ 3 files changed, 51 insertions(&#43;), 109 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add internal/show/data.go internal/show/tree.go internal/show/tui.go &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Simplify TUI: remove StepGroupNode, show steps directly under user actions
+
+- Remove intermediate &#34;N steps&#34; collapsible group
+- Steps are now direct children of UserActionNode
+- User actions expand/collapse to show/hide their following steps
+- Detail panel shows steps preview when collapsed
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[improve-show fd9824c] Simplify TUI: remove StepGroupNode, show steps directly under user actions
+ 3 files changed, 51 insertions(&#43;), 109 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
