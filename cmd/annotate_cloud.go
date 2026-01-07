@@ -32,9 +32,21 @@ var annotateCloudCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if err := addCloudSession(commit, annotateCloudSessionIDFlag, annotateCloudAutoFlag, annotateCloudNoScrubFlag); err != nil {
+		// Forward to add command with cloud source
+		addSessionIDFlag = annotateCloudSessionIDFlag
+		addAutoFlag = annotateCloudAutoFlag
+		addNoScrubFlag = annotateCloudNoScrubFlag
+
+		result, err := addToCommit(commit, "cloud")
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
 			os.Exit(1)
+		}
+
+		if result.Skipped {
+			fmt.Printf("  %s: skipped (%s)\n", result.ShortSHA, result.Reason)
+		} else {
+			fmt.Printf("  %s: added %s session (%s)\n", result.ShortSHA, result.Source, result.SessionID)
 		}
 	},
 }
