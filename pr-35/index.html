@@ -497,20 +497,20 @@ pre {
 <body>
   <div class="header">
     <h1>Prompt Story</h1>
-    <p class="meta">PR #35 | 3 commit(s) with LLM sessions</p>
+    <p class="meta">PR #35 | 4 commit(s) with LLM sessions</p>
   </div>
 
   <div class="stats">
     <div class="stat">
-      <div class="stat-value">4</div>
+      <div class="stat-value">5</div>
       <div class="stat-label">Commits Analyzed</div>
     </div>
     <div class="stat">
-      <div class="stat-value">3</div>
+      <div class="stat-value">4</div>
       <div class="stat-label">With Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">327</div>
+      <div class="stat-value" id="visible-count">432</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
@@ -528,6 +528,14 @@ pre {
       </tr>
     </thead>
     <tbody>
+      
+      <tr>
+        <td><code>53e0adf</code></td>
+        <td>Deduplicate emoji and formatting code into shar...</td>
+        <td>Claude Code</td>
+        <td>105</td>
+        <td><a href="53e0adf.html">View transcript</a></td>
+      </tr>
       
       <tr>
         <td><code>709a47f</code></td>
@@ -571,6 +579,3257 @@ pre {
     </label>
   </div>
 
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3><code>53e0adf</code> Deduplicate emoji and formatting code into shared display package</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-07 08:02 - 2026-01-07 12:05
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-06 18:01 - 2026-01-07 12:05 | <span class="session-count">79</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -4</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">709a47f Add comprehensive tests for show command TUI
+fd9824c Simplify TUI: remove StepGroupNode, show steps directly under user actions
+78a522c Add interactive TUI for show command with collapsible hierarchy
+4b0de0a Merge pull request #31 from QuesmaOrg/add-user-actions-test-constant</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">This session is being continued from a previous conversation that ran out of context. The conversation is summarized below:
+Analysis:
+Let me analyze the conversation chronologically:
+
+1. **Initial Request**: User wanted to update the `show` command to combine what&#39;s shown in `ci-summary` with user prompts, with the ability to jump to all steps. They wanted to reuse existing code.
+
+2. **Exploration Phase**: I launched 3 Explore agents to understand:
+   - Current `show` command implementation
+   - `ci-summary` implementation
+   - User prompts display and navigation patterns
+
+3. **User Preferences Clarified**:
+   - Interactive TUI using Bubble Tea
+   - List &#43; detail view (left panel list, right panel details)
+   - Support both single commits and commit ranges
+
+4. **Initial Implementation**: Created TUI with dual-pane layout, hierarchical tree with commits → sessions → user actions → step groups (collapsed &#34;N steps&#34;)
+
+5. **First Bug Fix**: Panic due to terminal dimensions being 0 initially. Fixed by adding guards for min dimensions and &#34;Loading...&#34; state.
+
+6. **User Feedback - Simplification Request**: User wanted to remove the intermediate &#34;N steps&#34; layer. Instead, user prompts should expand/collapse to show steps directly.
+
+7. **Simplification Implementation**: Removed `StepGroupNode`, added `FollowingSteps` to `UserActionNode`, steps shown in detail panel.
+
+8. **User Feedback - Restore Expand/Collapse**: User said &#34;the user prompt should still expand/collapse in tree on show list of steps&#34;. I had broken this functionality.
+
+9. **Fix**: Made `UserActionNode` expandable again when it has following steps, with `Children()` method returning the steps as nodes.
+
+10. **Testing Phase**: User wanted comprehensive tests. I created:
+    - `internal/show/data_test.go` - unit tests for nodes, emoji, truncation
+    - `internal/show/tree_test.go` - unit tests for tree building, flatten, expand/collapse
+    - `e2e/tests/18-show-interactive-flag.sh` - e2e tests for --no-interactive flag
+
+11. **Bug Found During Testing**: `countAllSteps` was double-counting steps. Fixed by removing the manual `len(ua.FollowingSteps)` count since `Children()` traversal handles it.
+
+12. **E2E Test Fixes**: Fixed regex pattern for timestamp matching (`\[..:..\]` not `\[..:...\]`) and adjusted COMMAND test to just check for `/compact`.
+
+Key files created/modified:
+- `internal/show/data.go` - Node types (CommitNode, SessionNode, UserActionNode, StepNode)
+- `internal/show/tree.go` - Tree building and navigation
+- `internal/show/tui.go` - Bubble Tea TUI model
+- `cmd/show.go` - Added --interactive and --no-interactive flags
+- `internal/ci/summary.go` - Exported `IsUserAction()` function
+
+Commits made:
+1. `78a522c` - Add interactive TUI for show command
+2. `fd9824c` - Simplify TUI: remove StepGroupNode
+3. `709a47f` - Add comprehensive tests for show command TUI
+
+Summary:
+1. Primary Request and Intent:
+   The user wanted to update the `show` command to create an interactive TUI that combines the `ci-summary` display style with user prompts, allowing navigation and jumping to all steps. Key requirements:
+   - Interactive TUI using Bubble Tea (already in go.mod)
+   - Dual-pane layout: left panel with list, right panel with details
+   - Support both single commits and commit ranges
+   - User actions should be expandable to show following steps directly (not through intermediate &#34;N steps&#34; group)
+   - Steps shown in detail panel when collapsed, in tree when expanded
+   - Comprehensive test coverage (unit tests &#43; e2e tests)
+
+2. Key Technical Concepts:
+   - Bubble Tea TUI framework (`github.com/charmbracelet/bubbletea`)
+   - Lipgloss for styling (`github.com/charmbracelet/lipgloss`)
+   - Hierarchical tree data structure (Commit → Session → UserAction → Steps)
+   - Node interface pattern with multiple concrete implementations
+   - TTY detection for automatic mode selection (`github.com/mattn/go-isatty`)
+   - JSONL transcript parsing from `ci.GenerateSummary()`
+   - Git notes for prompt-story metadata
+
+3. Files and Code Sections:
+
+   - **`internal/show/data.go`** (Created)
+     - Defines node types for the tree hierarchy
+     - Key types: `CommitNode`, `SessionNode`, `UserActionNode`, `StepNode`
+     - `UserActionNode` has `FollowingSteps []*StepNode` field for storing steps
+     - `Children()` method returns `FollowingSteps` as `[]Node` for tree expansion
+     ```go
+     type UserActionNode struct {
+         BaseNode
+         entry          ci.PromptEntry
+         SessionID      string
+         CommitSHA      string
+         FollowingSteps []*StepNode // Steps that follow this user action
+     }
+     
+     func (u *UserActionNode) IsExpandable() bool     { return len(u.FollowingSteps) &gt; 0 }
+     func (u *UserActionNode) Children() []Node {
+         nodes := make([]Node, len(u.FollowingSteps))
+         for i, s := range u.FollowingSteps {
+             nodes[i] = s
+         }
+         return nodes
+     }
+     ```
+
+   - **`internal/show/tree.go`** (Created)
+     - Builds tree from `ci.GenerateSummary()`
+     - `buildActionNodes()` attaches steps to `UserActionNode.FollowingSteps`
+     - `FlattenVisible()` respects expansion state
+     ```go
+     func buildActionNodes(sess ci.SessionSummary, commitSHA string, depth int) []Node {
+         var nodes []Node
+         var currentAction *UserActionNode
+         for _, entry := range sess.Prompts {
+             if ci.IsUserAction(entry.Type) {
+                 actionNode := NewUserActionNode(entry, sess.ID, commitSHA, depth)
+                 nodes = append(nodes, actionNode)
+                 currentAction = actionNode
+             } else if currentAction != nil {
+                 stepNode := NewStepNode(entry, sess.ID, commitSHA, depth&#43;1)
+                 currentAction.FollowingSteps = append(currentAction.FollowingSteps, stepNode)
+             }
+         }
+         return nodes
+     }
+     ```
+
+   - **`internal/show/tui.go`** (Created)
+     - Bubble Tea model with dual-pane layout
+     - Handles keyboard navigation (j/k, e/c for expand/collapse, etc.)
+     - `renderDetail()` shows steps preview when collapsed
+     ```go
+     // Show following steps in detail panel (when collapsed, as preview)
+     if len(n.FollowingSteps) &gt; 0 &amp;&amp; !n.IsExpanded() {
+         sb.WriteString(&#34;\n&#34;)
+         sb.WriteString(strings.Repeat(&#34;─&#34;, min(width-2, 40)))
+         sb.WriteString(fmt.Sprintf(&#34;\nFollowing steps (%d) - press &#39;e&#39; to expand:\n&#34;, len(n.FollowingSteps)))
+         // ... render steps
+     }
+     ```
+
+   - **`cmd/show.go`** (Modified)
+     - Added `--interactive/-i` and `--no-interactive` flags
+     - TTY detection for automatic mode selection
+     ```go
+     isTTY := isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
+     useInteractive := (interactiveFlag || isTTY) &amp;&amp; !noInteractiveFlag
+     ```
+
+   - **`internal/ci/summary.go`** (Modified)
+     - Exported `IsUserAction()` function (was `isUserAction`)
+
+   - **`internal/show/data_test.go`** (Created)
+     - Unit tests for node types, emoji, truncation, labels
+
+   - **`internal/show/tree_test.go`** (Created)
+     - Unit tests for tree building, flatten, expand/collapse
+
+   - **`e2e/tests/18-show-interactive-flag.sh`** (Created)
+     - E2E tests for `--no-interactive` flag and output format
+
+4. Errors and fixes:
+   - **Panic: &#34;slice bounds out of range [:-5]&#34;**
+     - Caused by terminal dimensions being 0 before `WindowSizeMsg` received
+     - Fixed by adding early return for small dimensions and `max()` guards:
+     ```go
+     if m.width &lt; 20 || m.height &lt; 10 {
+         return &#34;Loading...&#34;
+     }
+     contentHeight := max(m.height-3, 5)
+     ```
+
+   - **User feedback: &#34;the user prompt should still expand/collapse&#34;**
+     - I had made `IsExpandable()` return `false` when simplifying
+     - Fixed by making `IsExpandable()` return `len(u.FollowingSteps) &gt; 0` and adding `Children()` method
+
+   - **Test failure: `countAllSteps` double-counting**
+     - Was counting steps both via `len(ua.FollowingSteps)` AND via `Children()` traversal
+     - Fixed by removing the manual count, relying only on `Children()` traversal
+
+   - **E2E test regex error**: Used `\[..:...\]` instead of `\[..:..\]` for timestamp matching
+
+   - **E2E test COMMAND check**: Output doesn&#39;t show &#34;COMMAND&#34; text, only shows `/compact`, adjusted test
+
+5. Problem Solving:
+   - Successfully created interactive TUI replacing plain text output
+   - Implemented hierarchical tree with proper expand/collapse
+   - Balanced showing steps in detail panel (preview) vs tree (when expanded)
+   - Created comprehensive test suite covering unit tests and e2e tests
+   - All 18 e2e tests now pass
+
+6. All user messages:
+   - &#34;Now I would like to update command show. Instead of current logic, I would like to use combination of what I show in ci-summary with user prompts with possibility to jump to all steps. Please re-use code and show me possible design of that.&#34;
+   - Selected &#34;Interactive TUI&#34;, &#34;List &#43; detail view&#34;, &#34;Both modes&#34; in questions
+   - &#34;Looks great, can we also collapse all other steps between user actions and let user expand them? Please also have ability to see multiple session or elements in session previously &lt;one element, but can be expanded, please show me preview in plan before implementing that.&#34;
+   - &#34;This failed with panic: runtime error: slice bounds out of range [:-5]&#34;
+   - &#34;Please commit&#34;
+   - &#34;I want to simplify, Just have user prompts -&gt; other steps. Please remove middle layer X steps in tree view. Instead show those steps in right panel on user prompt action.&#34;
+   - &#34;No the user prompt should still exapand/collapse in tree on show list of steps. Now after the change it doesn&#39;t&#34;
+   - &#34;Amazing work commit please&#34;
+   - &#34;Please add some test fcan you give few examples of usage so I can try this show and see how it works? I mean multisession or multi-commit example too.&#34;
+   - &#34;You are the best! Please commit your changes and then brainstorm how to test it really well, because it&#39;s absolutely terrific job of yours&#34;
+   - Selected &#34;Both&#34; for unit tests and e2e tests
+
+7. Pending Tasks:
+   - None explicitly pending - all requested tasks completed
+
+8. Current Work:
+   Just completed adding comprehensive tests for the show command TUI:
+   - Created `internal/show/data_test.go` with unit tests for node types
+   - Created `internal/show/tree_test.go` with unit tests for tree building
+   - Created `e2e/tests/18-show-interactive-flag.sh` for e2e testing
+   - Fixed `countAllSteps` double-counting bug found during testing
+   - All 18 e2e tests pass
+   - Committed as `709a47f`: &#34;Add comprehensive tests for show command TUI&#34;
+
+9. Optional Next Step:
+   No pending tasks. The user&#39;s request for tests has been completed. The branch `improve-show` has 3 commits ready:
+   - `78a522c` - Add interactive TUI for show command
+   - `fd9824c` - Simplify TUI: remove StepGroupNode
+   - `709a47f` - Add comprehensive tests for show command TUI
+
+   User may want to push/merge the branch or request additional features..
+Please continue the conversation from where we left it off without asking the user any further questions. Continue with the last task that you were asked to work on.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Based on the conversation summary, all requested work has been completed. Let me verify the current state and provide a summary of what was accomplished.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -5</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/show/... -v 2&gt;&amp;1 | tail -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestNodeExpandCollapse
+--- PASS: TestNodeExpandCollapse (0.00s)
+=== RUN   TestBuildActionNodes_Empty
+--- PASS: TestBuildActionNodes_Empty (0.00s)
+=== RUN   TestBuildActionNodes_OnlyUserActions
+--- PASS: TestBuildActionNodes_OnlyUserActions (0.00s)
+=== RUN   TestBuildActionNodes_WithSteps
+--- PASS: TestBuildActionNodes_WithSteps (0.00s)
+=== RUN   TestBuildActionNodes_StepsBeforeFirstAction
+--- PASS: TestBuildActionNodes_StepsBeforeFirstAction (0.00s)
+=== RUN   TestFlattenVisible_CollapsedTree
+--- PASS: TestFlattenVisible_CollapsedTree (0.00s)
+=== RUN   TestFlattenVisible_ExpandedAction
+--- PASS: TestFlattenVisible_ExpandedAction (0.00s)
+=== RUN   TestTreeExpandCollapse
+--- PASS: TestTreeExpandCollapse (0.00s)
+=== RUN   TestTreeToggleExpand
+--- PASS: TestTreeToggleExpand (0.00s)
+=== RUN   TestTreeExpandAll
+--- PASS: TestTreeExpandAll (0.00s)
+=== RUN   TestTreeCollapseAll
+--- PASS: TestTreeCollapseAll (0.00s)
+=== RUN   TestCountUserActions
+--- PASS: TestCountUserActions (0.00s)
+=== RUN   TestCountAllSteps
+--- PASS: TestCountAllSteps (0.00s)
+=== RUN   TestExpandCollapseOutOfBounds
+--- PASS: TestExpandCollapseOutOfBounds (0.00s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All unit tests pass. Let me check the uncommitted changes mentioned in the git status:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff --stat</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch improve-show
+Your branch and &#39;origin/main&#39; have diverged,
+and have 3 and 10 different commits each, respectively.
+  (use &#34;git pull&#34; to merge the remote branch into yours)
+
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:04</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The `improve-show` branch is complete with all changes committed. Here&#39;s a summary of what was accomplished:
+
+## Completed Work on `improve-show` Branch
+
+### 3 Commits Ready:
+1. **78a522c** - Add interactive TUI for show command with collapsible hierarchy
+2. **fd9824c** - Simplify TUI: remove StepGroupNode, show steps directly under user actions  
+3. **709a47f** - Add comprehensive tests for show command TUI
+
+### Features Implemented:
+- **Interactive dual-pane TUI** using Bubble Tea
+  - Left panel: hierarchical tree (commits → sessions → user actions → steps)
+  - Right panel: details for selected item
+- **Expand/collapse** user actions to show/hide steps
+- **Keyboard navigation**: j/k, e/c (expand/collapse), E/C (all), J/K (scroll detail), g/G (top/bottom), q (quit)
+- **Auto-detection**: Uses TUI when TTY, plain output otherwise
+- **Flags**: `--interactive/-i` and `--no-interactive` to override
+
+### Test Coverage:
+- **Unit tests** in `internal/show/data_test.go` and `internal/show/tree_test.go`
+- **E2E test** in `e2e/tests/18-show-interactive-flag.sh`
+- All 27 unit tests and 18 e2e tests pass
+
+### Files Created:
+- `internal/show/data.go` - Node types
+- `internal/show/tree.go` - Tree building
+- `internal/show/tui.go` - Bubble Tea model
+- `internal/show/render.go` - Non-interactive rendering
+- `internal/show/data_test.go` - Unit tests
+- `internal/show/tree_test.go` - Unit tests
+- `e2e/tests/18-show-interactive-flag.sh` - E2E tests
+
+Would you like me to push the branch or create a PR?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:04</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please push</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push -u origin improve-show</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+branch &#39;improve-show&#39; set up to track &#39;origin/improve-show&#39;.
+remote: 
+remote: Create a pull request for &#39;improve-show&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/improve-show        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      improve-show -&gt; improve-show</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:06</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Pushed. Create PR at: https://github.com/QuesmaOrg/git-prompt-story/pull/new/improve-show</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">11:06</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">While there, can you simplify and deduplicate with existing code. For example I want one set of emoji both for ci-summary as well as terminal interface</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:06</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:06</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">This is a different task - code deduplication. Let me explore where emoji definitions and other duplicated code exists.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:06</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Find all emoji definitions and display formatting code that might be duplicated between:
+1. The c...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Perfect! Now I have all the information I need. Let me create a comprehensive summary of the duplications I found.
+
+## Summary: Emoji Definitions and Display Formatting Code Duplication
+
+I&#39;ve identified significant duplication between the `ci-summary` command and the `show` command TUI. Here are the exact duplications:
+
+### 1. EMOJI MAPPINGS FOR ENTRY TYPES
+
+**internal/ci/summary.go: `getTypeEmoji()` function**
+- Location: **Lines 816-834**
+- Mapping:
+  - PROMPT   💬
+  - TOOL_USE   🔧
+  - ASSISTANT   🤖
+  - TOOL_REJECT   ❌
+  - COMMAND   📋
+  - DECISION   ❓
+  - Default   📝
+
+**internal/show/data.go: `getTypeEmoji()` function**
+- Location: **Lines 191-210**
+- Mapping:
+  - PROMPT   💬
+  - COMMAND   📋
+  - TOOL_REJECT   ❌
+  - DECISION   ❓
+  - TOOL_USE   🔧
+  - ASSISTANT   🤖
+  - TOOL_RESULT   📤 (only here)
+  - Default   •
+
+**Status**: DUPLICATED - Both functions are identical except that `show/data.go` includes `TOOL_RESULT   📤` while `ci/summary.go` uses 📝 as default instead of •
+
+---
+
+### 2. TEXT TRUNCATION FUNCTIONS
+
+**internal/show/data.go: `truncateText()` function**
+- Location: **Lines 212-225**
+- Functionality: Replaces newlines with spaces, then truncates to `maxLen` with &#34;...&#34;
+- Used by: `UserActionNode.Label()` (line 149) and `StepNode.Label()` (lines 181, 185)
+
+**internal/show/tui.go: Uses `truncateText()`**
+- Location: Lines 320, 323
+- Same usage pattern
+
+**internal/ci/html.go: Anonymous truncate function in template**
+- Location: **Lines 64-69**
+- Functionality: Inline lambda that truncates string to n chars with &#34;...&#34;
+```go
+&#34;truncate&#34;: func(s string, n int) string {
+    if len(s) &lt;= n {
+        return s
+    }
+    return s[:n-3] &#43; &#34;...&#34;
+}
+```
+
+**internal/show/show.go: `wrapAndTruncate()` function**
+- Location: **Lines 231-287**
+- Functionality: More sophisticated - wraps to maxWidth per line and limits to maxLines
+- Different from simple truncate but serves similar purpose
+
+**Status**: PARTIALLY DUPLICATED - `show/d...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found the duplications. Let me update the plan file with the deduplication strategy.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Deduplicate Emoji and Formatting Code
+     2 
+     3 ## Overview
+     4 
+     5 Consolidate duplicated emoji mappings and formatting utilities between `ci-summary` and `show` commands.
+     6 
+     7 ## Duplications Found
+     8 
+     9 ### 1. Emoji Mappings (HIGH PRIORITY)
+    10 - `internal/ci/summary.go:816-834` - `getTypeEmoji()`
+    11 - `internal/show/data.go:191-210` - `getTypeEmoji()` (duplicate)
+    12 
+    13 Both map entry types (PROMPT, TOOL_USE, etc.) to emojis. Minor differences:
+    14 - `show/data.go` has TOOL_RESULT   📤
+    15 - `ci/summary.go` uses 📝 as default, `show/data.go` uses •
+    16 
+    17 ### 2. Tool Name Formatting (MEDIUM PRIORITY)
+    18 - `internal/note/metadata.go:91-105` - `FormatToolName()` (canonical)
+    19 - `internal/show/data.go:227-234` - `formatToolName()` (incomplete duplicate)
+    20 
+    21 `show/data.go` is missing &#34;claude-cloud&#34;, &#34;cursor&#34;, &#34;codex&#34; mappings.
+    22 
+    23 ### 3. Text Truncation (LOW PRIORITY)
+    24 - `internal/show/data.go:212-225` - `truncateText()`
+    25 - `internal/ci/html.go:64-69` - inline truncate lambda
+    26 
+    27 Similar functionality but different contexts.
+    28 
+    29 ## Implementation Plan
+    30 
+    31 ### Step 1: Create Shared Display Package
+    32 Create `internal/display/display.go` with shared utilities:
+    33 - `GetTypeEmoji(entryType string) string` - consolidated emoji mapping
+    34 - `TruncateText(s string, maxLen int) string` - shared truncation
+    35 
+    36 ### Step 2: Update ci/summary.go
+    37 - Import `internal/display`
+    38 - Replace local `getTypeEmoji()` with `display.GetTypeEmoji()`
+    39 - Already uses `note.FormatToolName()` - no change needed
+    40 
+    41 ### Step 3: Update show/data.go
+    42 - Import `internal/display`
+    43 - Remove local `getTypeEmoji()` - use `display.Ge...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:08</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The plan is ready. Summary:
+
+**Goal**: Create shared `internal/display` package to consolidate:
+- `getTypeEmoji()` - duplicated in ci/summary.go and show/data.go
+- `truncateText()` - duplicated in show/data.go and ci/html.go
+- `formatToolName()` - show/data.go has incomplete copy of note/metadata.go
+
+**Key changes**:
+1. Create `internal/display/display.go` with `GetTypeEmoji()` and `TruncateText()`
+2. Update show/data.go to use `display.GetTypeEmoji()` and `note.FormatToolName()`
+3. Update ci/summary.go to use `display.GetTypeEmoji()`
+4. Update ci/html.go to use `display.TruncateText()`</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:08</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Deduplicate Emoji and Formatting Code\n\n## Overview\n\nConsolidate duplicated emoji mappings and formatting utilities between `ci-summary` and `show` commands.\n\n## Duplications ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Deduplicate Emoji and Formatting Code
+
+## Overview
+
+Consolidate duplicated emoji mappings and formatting utilities between `ci-summary` and `show` commands.
+
+## Duplications Found
+
+### 1. Emoji Mappings (HIGH PRIORITY)
+- `internal/ci/summary.go:816-834` - `getTypeEmoji()`
+- `internal/show/data.go:191-210` - `getTypeEmoji()` (duplicate)
+
+Both map entry types (PROMPT, TOOL_USE, etc.) to emojis. Minor differences:
+- `show/data.go` has TOOL_RESULT   📤
+- `ci/summary.go` uses 📝 as default, `show/data.go` uses •
+
+### 2. Tool Name Formatting (MEDIUM PRIORITY)
+- `internal/note/metadata.go:91-105` - `FormatToolName()` (canonical)
+- `internal/show/data.go:227-234` - `formatToolName()` (incomplete duplicate)
+
+`show/data.go` is missing &#34;claude-cloud&#34;, &#34;cursor&#34;, &#34;codex&#34; mappings.
+
+### 3. Text Truncation (LOW PRIORITY)
+- `internal/show/data.go:212-225` - `truncateText()`
+- `internal/ci/html.go:64-69` - inline truncate lambda
+
+Similar functionality but different contexts.
+
+## Implementation Plan
+
+### Step 1: Create Shared Display Package
+Create `internal/display/display.go` with shared utilities:
+- `GetTypeEmoji(entryType string) string` - consolidated emoji mapping
+- `TruncateText(s string, maxLen int) string` - shared truncation
+
+### Step 2: Update ci/summary.go
+- Import `internal/display`
+- Replace local `getTypeEmoji()` with `display.GetTypeEmoji()`
+- Already uses `note.FormatToolName()` - no change needed
+
+### Step 3: Update show/data.go
+- Import `internal/display`
+- Remove local `getTypeEmoji()` - use `display.GetTypeEmoji()`
+- Remove local `formatToolName()` - use `note.FormatToolName()`
+- Remove local `truncateText()` - use `display.TruncateText()`
+
+### Step 4: Update ci/html.go
+- Import `intern...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating shared display package&#34;,&#34;content&#34;:&#34;Create internal/display/display.go with shared utilities&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Creating display package tests&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">mkdir -p /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/display</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/display/display.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/display/display.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating shared display package&#34;,&#34;content&#34;:&#34;Create internal/display/display.go with shared utilities&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating display package tests&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/display/display_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/display/display_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/display/... -v</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestGetTypeEmoji
+=== RUN   TestGetTypeEmoji/PROMPT
+=== RUN   TestGetTypeEmoji/COMMAND
+=== RUN   TestGetTypeEmoji/TOOL_REJECT
+=== RUN   TestGetTypeEmoji/DECISION
+=== RUN   TestGetTypeEmoji/TOOL_USE
+=== RUN   TestGetTypeEmoji/ASSISTANT
+=== RUN   TestGetTypeEmoji/TOOL_RESULT
+=== RUN   TestGetTypeEmoji/UNKNOWN
+=== RUN   TestGetTypeEmoji/#00
+--- PASS: TestGetTypeEmoji (0.00s)
+    --- PASS: TestGetTypeEmoji/PROMPT (0.00s)
+    --- PASS: TestGetTypeEmoji/COMMAND (0.00s)
+    --- PASS: TestGetTypeEmoji/TOOL_REJECT (0.00s)
+    --- PASS: TestGetTypeEmoji/DECISION (0.00s)
+    --- PASS: TestGetTypeEmoji/TOOL_USE (0.00s)
+    --- PASS: TestGetTypeEmoji/ASSISTANT (0.00s)
+    --- PASS: TestGetTypeEmoji/TOOL_RESULT (0.00s)
+    --- PASS: TestGetTypeEmoji/UNKNOWN (0.00s)
+    --- PASS: TestGetTypeEmoji/#00 (0.00s)
+=== RUN   TestTruncateText
+=== RUN   TestTruncateText/short_text_unchanged
+=== RUN   TestTruncateText/exact_length_unchanged
+=== RUN   TestTruncateText/long_text_truncated
+=== RUN   TestTruncateText/newline_replaced_with_space
+=== RUN   TestTruncateText/carriage_return_replaced
+=== RUN   TestTruncateText/empty_string
+=== RUN   TestTruncateText/truncate_with_newlines
+--- PASS: TestTruncateText (0.00s)
+    --- PASS: TestTruncateText/short_text_unchanged (0.00s)
+    --- PASS: TestTruncateText/exact_length_unchanged (0.00s)
+    --- PASS: TestTruncateText/long_text_truncated (0.00s)
+    --- PASS: TestTruncateText/newline_replaced_with_space (0.00s)
+    --- PASS: TestTruncateText/carriage_return_replaced (0.00s)
+    --- PASS: TestTruncateText/empty_string (0.00s)
+    --- PASS: TestTruncateText/truncate_with_newlines (0.00s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	0.208s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating shared display package&#34;,&#34;content&#34;:&#34;Create internal/display/display.go with shared utilities&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating display package tests&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">getTypeEmoji</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">816:// getTypeEmoji returns an emoji for the entry type
+817:func getTypeEmoji(entryType string) string {
+949:	emoji := getTypeEmoji(entry.Type)
+1032:	emoji := getTypeEmoji(entry.Type)
+1076:	emoji := getTypeEmoji(entry.Type)
+1146:	emoji := getTypeEmoji(entry.Type)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;html&#34;
+     7 	&#34;sort&#34;
+     8 	&#34;strings&#34;
+     9 	&#34;time&#34;
+    10 
+    11 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/display&#34;
+    12 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    13 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    14 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    15 )
+    16 
+    17 const (
+    18 	// Size limits for markdown output to stay under GitHub&#39;s 65KB comment limit
+    19 	maxUserPromptsSize = 20000 // Budget for user prompts section</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. All occurrences of &#39;getTypeEmoji(entry.Type)&#39; were successfully replaced with &#39;display.GetTypeEmoji(entry.Type)&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   810 	sb.WriteString(&#34;\n&#34;)
+   811 
+   812 	sb.WriteString(fmt.Sprintf(&#34;---\n*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story) %s*\n&#34;, version))
+   813 
+   814 	return sb.String()
+   815 }
+   816 
+   817 // Format modes for renderTimeline
+   818 const (
+   819 	formatRegular     = &#34;regular&#34;     // Truncated display (100 chars) - for &#34;All Steps&#34;
+   820 	formatCollapsible = &#34;collapsible&#34; // &lt;details&gt; tags for long prompts - for user prompts with some long
+   821 	formatSimple      = &#34;simple&#34;      // Full text, no details - for user prompts when all short</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating shared display package&#34;,&#34;content&#34;:&#34;Create internal/display/display.go with shared utilities&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating display package tests&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">getTypeEmoji|formatToolName|truncateText</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">110:	toolName := formatToolName(s.Tool)
+147:	emoji := getTypeEmoji(u.entry.Type)
+149:	text := truncateText(u.entry.Text, 25)
+176:	emoji := getTypeEmoji(s.entry.Type)
+181:		input := truncateText(s.entry.ToolInput, 20)
+185:	text := truncateText(s.entry.Text, 25)
+191:func getTypeEmoji(entryType string) string {
+212:func truncateText(s string, maxLen int) string {
+227:func formatToolName(tool string) string {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package show
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;time&#34;
+     6 
+     7 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/ci&#34;
+     8 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/display&#34;
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    10 )
+    11 
+    12 // NodeType represents the type of node in the tree
+    13 type NodeType int
+    14 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   107 func (s *SessionNode) Type() NodeType      { return NodeTypeSession }
+   108 func (s *SessionNode) IsExpandable() bool  { return true }
+   109 func (s *SessionNode) Time() time.Time     { return s.Start }
+   110 
+   111 func (s *SessionNode) Label() string {
+   112 	toolName := note.FormatToolName(s.Tool)
+   113 	return fmt.Sprintf(&#34;Session: %s (%s)&#34;, toolName, s.ShortID)
+   114 }
+   115 
+   116 // UserActionNode represents a user action (PROMPT, COMMAND, TOOL_REJECT, DECISION)
+   117 type UserActionNode struct {
+   118 	BaseNode</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   144 	}
+   145 	return nodes
+   146 }
+   147 
+   148 func (u *UserActionNode) Label() string {
+   149 	emoji := display.GetTypeEmoji(u.entry.Type)
+   150 	timeStr := u.entry.Time.Local().Format(&#34;15:04&#34;)
+   151 	text := display.TruncateText(u.entry.Text, 25)
+   152 	return fmt.Sprintf(&#34;%s %s %s&#34;, emoji, timeStr, text)
+   153 }
+   154 
+   155 // StepNode represents an individual step (TOOL_USE, ASSISTANT, etc.)
+   156 type StepNode struct {
+   157 	BaseNode</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   173 func (s *StepNode) IsExpandable() bool    { return false }
+   174 func (s *StepNode) Entry() *ci.PromptEntry { return &amp;s.entry }
+   175 func (s *StepNode) Time() time.Time       { return s.entry.Time }
+   176 
+   177 func (s *StepNode) Label() string {
+   178 	emoji := display.GetTypeEmoji(s.entry.Type)
+   179 	timeStr := s.entry.Time.Local().Format(&#34;15:04&#34;)
+   180 
+   181 	// For tool uses, show tool name and truncated input
+   182 	if s.entry.Type == &#34;TOOL_USE&#34; &amp;&amp; s.entry.ToolName != &#34;&#34; {
+   183 		input := display.TruncateText(s.entry.ToolInput, 20)
+   184 		return fmt.Sprintf(&#34;%s %s %s: %s&#34;, emoji, timeStr, s.entry.ToolName, input)
+   185 	}
+   186 
+   187 	text := display.TruncateText(s.entry.Text, 25)
+   188 	return fmt.Sprintf(&#34;%s %s %s&#34;, emoji, timeStr, text)
+   189 }
+   190 
+   191 // Helper functions
+   192 
+   193 func getTypeEmoji(entryType string) string {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   184 		return fmt.Sprintf(&#34;%s %s %s: %s&#34;, emoji, timeStr, s.entry.ToolName, input)
+   185 	}
+   186 
+   187 	text := display.TruncateText(s.entry.Text, 25)
+   188 	return fmt.Sprintf(&#34;%s %s %s&#34;, emoji, timeStr, text)
+   189 }
+   190 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">getTypeEmoji|formatToolName|truncateText</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/show/tui.go:276:		sb.WriteString(fmt.Sprintf(&#34;Session: %s\n&#34;, formatToolName(n.Tool)))
+internal/show/tui.go:290:		sb.WriteString(fmt.Sprintf(&#34;Type: %s %s\n&#34;, getTypeEmoji(entry.Type), entry.Type))
+internal/show/tui.go:317:				emoji := getTypeEmoji(stepEntry.Type)
+internal/show/tui.go:320:					input := truncateText(stepEntry.ToolInput, width-20)
+internal/show/tui.go:323:					text := truncateText(stepEntry.Text, width-12)
+internal/show/tui.go:333:		sb.WriteString(fmt.Sprintf(&#34;Type: %s %s\n&#34;, getTypeEmoji(entry.Type), entry.Type))
+internal/show/data_test.go:28:			result := getTypeEmoji(tt.entryType)
+internal/show/data_test.go:30:				t.Errorf(&#34;getTypeEmoji(%q) = %q, want %q&#34;, tt.entryType, result, tt.expected)
+internal/show/data_test.go:89:			result := truncateText(tt.input, tt.maxLen)
+internal/show/data_test.go:91:				t.Errorf(&#34;truncateText(%q, %d) = %q, want %q&#34;, tt.input, tt.maxLen, result, tt.expected)
+internal/show/data_test.go:109:			result := formatToolName(tt.tool)
+internal/show/data_test.go:111:				t.Errorf(&#34;formatToolName(%q) = %q, want %q&#34;, tt.tool, result, tt.expected)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package show
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;strings&#34;
+     6 
+     7 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/display&#34;
+     8 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+     9 	&#34;github.com/charmbracelet/bubbletea&#34;
+    10 	&#34;github.com/charmbracelet/lipgloss&#34;
+    11 )
+    12 
+    13 // Styles
+    14 var (
+    15 	// Panel styles</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go has been updated. All occurrences of &#39;formatToolName(&#39; were successfully replaced with &#39;note.FormatToolName(&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go has been updated. All occurrences of &#39;getTypeEmoji(&#39; were successfully replaced with &#39;display.GetTypeEmoji(&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go has been updated. All occurrences of &#39;truncateText(&#39; were successfully replaced with &#39;display.TruncateText(&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating shared display package&#34;,&#34;content&#34;:&#34;Create internal/display/display.go with shared utilities&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating display package tests&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/html.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">getTypeEmoji</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No matches found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating shared display package&#34;,&#34;content&#34;:&#34;Create internal/display/display.go with shared utilities&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating display package tests&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package show
+     2 
+     3 import (
+     4 	&#34;testing&#34;
+     5 	&#34;time&#34;
+     6 
+     7 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/ci&#34;
+     8 )
+     9 
+    10 // Note: Tests for GetTypeEmoji and TruncateText are in internal/display/display_test.go
+    11 // Note: Tests for FormatToolName are in internal/note/metadata_test.go
+    12 
+    13 func TestNewCommitNode(t *testing.T) {
+    14 	cs := ci.CommitSummary{
+    15 		SHA:      &#34;abc123def456&#34;,
+    16 		ShortSHA: &#34;abc123d&#34;,
+    17 		Subject:  &#34;Fix bug in authentication&#34;,</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build ./... 2&gt;&amp;1</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/... -v 2&gt;&amp;1 | tail -60</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestMessage_GetTextContent_StringContent
+--- PASS: TestMessage_GetTextContent_StringContent (0.00s)
+=== RUN   TestMessage_GetTextContent_ArrayContent
+--- PASS: TestMessage_GetTextContent_ArrayContent (0.00s)
+=== RUN   TestMessage_GetTextContent_EmptyContent
+--- PASS: TestMessage_GetTextContent_EmptyContent (0.00s)
+=== RUN   TestMessage_GetTextContent_NoTextParts
+--- PASS: TestMessage_GetTextContent_NoTextParts (0.00s)
+=== RUN   TestMessage_GetTextContent_NilMessage
+--- PASS: TestMessage_GetTextContent_NilMessage (0.00s)
+=== RUN   TestParseMessages_GitBranch
+--- PASS: TestParseMessages_GitBranch (0.00s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	0.454s
+=== RUN   TestNewCommitNode
+--- PASS: TestNewCommitNode (0.00s)
+=== RUN   TestNewSessionNode
+--- PASS: TestNewSessionNode (0.00s)
+=== RUN   TestNewUserActionNode
+--- PASS: TestNewUserActionNode (0.00s)
+=== RUN   TestNewStepNode
+--- PASS: TestNewStepNode (0.00s)
+=== RUN   TestCommitNodeLabel
+=== RUN   TestCommitNodeLabel/short_subject
+=== RUN   TestCommitNodeLabel/long_subject_truncated
+--- PASS: TestCommitNodeLabel (0.00s)
+    --- PASS: TestCommitNodeLabel/short_subject (0.00s)
+    --- PASS: TestCommitNodeLabel/long_subject_truncated (0.00s)
+=== RUN   TestNodeExpandCollapse
+--- PASS: TestNodeExpandCollapse (0.00s)
+=== RUN   TestBuildActionNodes_Empty
+--- PASS: TestBuildActionNodes_Empty (0.00s)
+=== RUN   TestBuildActionNodes_OnlyUserActions
+--- PASS: TestBuildActionNodes_OnlyUserActions (0.00s)
+=== RUN   TestBuildActionNodes_WithSteps
+--- PASS: TestBuildActionNodes_WithSteps (0.00s)
+=== RUN   TestBuildActionNodes_StepsBeforeFirstAction
+--- PASS: TestBuildActionNodes_StepsBeforeFirstAction (0.00s)
+=== RUN   TestFlattenVisible_CollapsedTree
+--- PASS: TestFlattenVisible_CollapsedTree (0.00s)
+=== RUN   TestFlattenVisible_ExpandedAction
+--- PASS: TestFlattenVisible_ExpandedAction (0.00s)
+=== RUN   TestTreeExpandCollapse
+--- PASS: TestTreeExpandCollapse (0.00s)
+=== RUN   TestTreeToggleExpan...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+# github.com/QuesmaOrg/git-prompt-story/internal/ci [github.com/QuesmaOrg/git-prompt-story/internal/ci.test]
+internal/ci/summary_test.go:28:14: undefined: getTypeEmoji
+internal/ci/summary_test.go:53:14: undefined: isUserAction
+internal/ci/summary_test.go:883:6: undefined: isUserAction
+internal/ci/summary_test.go:901:15: undefined: getTypeEmoji
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/ci [build failed]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	0.177s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	0.339s
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	0.488s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;strings&#34;
+     6 	&#34;testing&#34;
+     7 	&#34;time&#34;
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/display&#34;
+    10 )
+    11 
+    12 func TestGetTypeEmoji(t *testing.T) {
+    13 	tests := []struct {
+    14 		entryType string</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/display&#34;
+    10 )
+    11 
+    12 // Note: Tests for GetTypeEmoji are in internal/display/display_test.go
+    13 
+    14 func TestIsUserAction(t *testing.T) {
+    15 	tests := []struct {
+    16 		entryType string
+    17 		expected  bool
+    18 	}{
+    19 		{&#34;PROMPT&#34;, true},
+    20 		{&#34;COMMAND&#34;, true},
+    21 		{&#34;TOOL_REJECT&#34;, true},
+    22 		{&#34;DECISION&#34;, true},
+    23 		{&#34;ASSISTANT&#34;, false},
+    24 		{&#34;TOOL_USE&#34;, false},
+    25 		{&#34;TOOL_RESULT&#34;, false},
+    26 		{&#34;OTHER&#34;, false},
+    27 		{&#34;&#34;, false},
+    28 	}
+    29 
+    30 	for _, tt := range tests {
+    31 		t.Run(tt.entryType, func(t *testing.T) {
+    32 			result := IsUserAction(tt.entryType)
+    33 			if result != tt.expected {
+    34 				t.Errorf(&#34;IsUserAction(%q) = %v, want %v&#34;, tt.entryType, result, tt.expected)
+    35 			}
+    36 		})
+    37 	}
+    38 }
+    39 
+    40 func TestCountUserPrompts(t *testing.T) {
+    41 	tests := []struct {
+    42 		name     string</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">isUserAction|getTypeEmoji</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">862:		if isUserAction(p.Type) {
+880:		if emoji := getTypeEmoji(entryType); emoji != expectedEmoji {
+881:			t.Errorf(&#34;getTypeEmoji(%q) = %q, want %q&#34;, entryType, emoji, expectedEmoji)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   855 		{Type: &#34;TOOL_REJECT&#34;, Text: &#34;Please run only the unit tests, not integration tests&#34;, Time: now.Add(2 * time.Minute)},
+   856 		{Type: &#34;DECISION&#34;, Text: &#34;Which test package should I run?&#34;, DecisionAnswer: &#34;Only ci package&#34;, Time: now.Add(3 * time.Minute)},
+   857 	}
+   858 
+   859 	// Verify all are recognized as user actions
+   860 	userActionCount := 0
+   861 	for _, p := range prompts {
+   862 		if IsUserAction(p.Type) {
+   863 			userActionCount&#43;&#43;
+   864 		}
+   865 	}
+   866 
+   867 	if userActionCount != 4 {
+   868 		t.Errorf(&#34;Expected 4 user actions, got %d&#34;, userActionCount)
+   869 	}
+   870 
+   871 	// Verify emojis are correct
+   872 	expectedEmojis := map[string]string{
+   873 		&#34;PROMPT&#34;:      &#34;💬&#34;,
+   874 		&#34;COMMAND&#34;:     &#34;📋&#34;,
+   875 		&#34;TOOL_REJECT&#34;: &#34;❌&#34;,
+   876 		&#34;DECISION&#34;:    &#34;❓&#34;,
+   877 	}
+   878 
+   879 	for entryType, expectedEmoji := range expectedEmojis {
+   880 		if emoji := display.GetTypeEmoji(entryType); emoji != expectedEmoji {
+   881 			t.Errorf(&#34;display.GetTypeEmoji(%q) = %q, want %q&#34;, entryType, emoji, expectedEmoji)
+   882 		}
+   883 	}
+   884 }
+   885 
+   886 func TestRenderMarkdown_AllUserActionTypes(t *testing.T) {
+   887 	// Test that markdown output includes all user action types with correct formatting
+   888 	// Note: queue-operation entries become PROMPT type after parsing</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+--- FAIL: TestFormatMarkdownEntry (0.00s)
+    --- FAIL: TestFormatMarkdownEntry/unknown_type_shows_type_name (0.00s)
+        summary_test.go:325: formatMarkdownEntry() = &#34;- 09:30 • CUSTOM_TYPE: Some content\n&#34;, should contain &#34;📝&#34;
+FAIL
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.348s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   309 			name:     &#34;long text truncation&#34;,
+   310 			entry:    PromptEntry{Type: &#34;PROMPT&#34;, Text: strings.Repeat(&#34;a&#34;, 150), Time: now},
+   311 			contains: []string{&#34;09:30&#34;, &#34;💬&#34;, &#34;...&#34;},
+   312 		},
+   313 		{
+   314 			name:     &#34;unknown type shows type name&#34;,
+   315 			entry:    PromptEntry{Type: &#34;CUSTOM_TYPE&#34;, Text: &#34;Some content&#34;, Time: now},
+   316 			contains: []string{&#34;09:30&#34;, &#34;•&#34;, &#34;CUSTOM_TYPE:&#34;, &#34;Some content&#34;},
+   317 		},
+   318 	}
+   319 
+   320 	for _, tt := range tests {
+   321 		t.Run(tt.name, func(t *testing.T) {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.209s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating shared display package&#34;,&#34;content&#34;:&#34;Create internal/display/display.go with shared utilities&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating display package tests&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch improve-show
+Your branch is up to date with &#39;origin/improve-show&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   internal/ci/summary.go
+	modified:   internal/ci/summary_test.go
+	modified:   internal/show/data.go
+	modified:   internal/show/data_test.go
+	modified:   internal/show/tui.go
+
+Untracked files:
+  (use &#34;git add &lt;file&gt;...&#34; to include in what will be committed)
+	internal/display/
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Deduplication complete. All tests pass.
+
+**Summary of changes:**
+
+| File | Change |
+|------|--------|
+| `internal/display/display.go` | **NEW** - Shared `GetTypeEmoji()` and `TruncateText()` |
+| `internal/display/display_test.go` | **NEW** - Tests for display utilities |
+| `internal/ci/summary.go` | Removed local `getTypeEmoji()`, uses `display.GetTypeEmoji()` |
+| `internal/ci/summary_test.go` | Updated tests to use exported functions |
+| `internal/show/data.go` | Removed 3 local functions, uses `display.*` and `note.FormatToolName()` |
+| `internal/show/data_test.go` | Removed duplicate tests (moved to display package) |
+| `internal/show/tui.go` | Uses `display.*` and `note.FormatToolName()` |
+
+**Behavior change:** Default emoji for unknown types is now `•` (was `📝` in ci-summary)
+
+Would you like me to commit these changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Yes please</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git diff --cached --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> internal/ci/summary.go           |  29 &#43;&#43;---------
+ internal/ci/summary_test.go      |  41 &#43;&#43;&#43;&#43;-----------
+ internal/display/display.go      |  39 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/display/display_test.go |  90 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/show/data.go            |  61 &#43;&#43;&#43;-------------------
+ internal/show/data_test.go       | 108 &#43;--------------------------------------
+ internal/show/tui.go             |  14 &#43;&#43;---
+ 7 files changed, 162 insertions(&#43;), 220 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">709a47f Add comprehensive tests for show command TUI
+fd9824c Simplify TUI: remove StepGroupNode, show steps directly under user actions
+78a522c Add interactive TUI for show command with collapsible hierarchy</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Deduplicate emoji and formatting code into shared display package
+
+- Create internal/display package with GetTypeEmoji() and TruncateText()
+- Remove duplicate getTypeEmoji() from ci/summary.go and show/data.go
+- Remove duplicate truncateText() and formatToolName() from show/data.go
+- Update show/tui.go to use display.* and note.FormatToolName()
+- Consolidate tests into display/display_test.go
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-07 11:06 - 2026-01-07 11:07 | <span class="session-count">26</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">11:06</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Find all emoji definitions and display formatting code that might be duplicated between:
+1. The ci-summary command (likely in internal/ci/)
+2. The show command TUI (in internal/show/)
+
+Look for:
+- Emoji mappings for entry types (PROMPT, TOOL_USE, COMMAND, etc.)
+- Text truncation functions
+- Tool name formatting (e.g., &#34;claude-code&#34; -&gt; &#34;Claude Code&#34;)
+- Any other display/formatting utilities that appear in both places
+
+Report the exact file paths and line numbers where these duplications exist.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll help you find emoji definitions and display formatting code that might be duplicated between the ci-summary command and the show command TUI. Let me start by exploring the relevant directories.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/internal/ci/**</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/html.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/templates/commit.html.tmpl
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/templates/index.html.tmpl
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/templates/styles.css
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/internal/show/**</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree_test.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me search for emoji definitions and formatting code in both locations:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">(?:emoji|Emoji|\U0001F|:\\w&#43;:)</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No matches found
+
+[Showing results with pagination = limit: 100, offset: 0]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">(?:emoji|Emoji|\U0001F|:\\w&#43;:)</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No matches found
+
+[Showing results with pagination = limit: 100, offset: 0]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">PROMPT|TOOL_USE|COMMAND</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/hooks/pre_push.go:15:const prePushEnvVar = &#34;GIT_PROMPT_STORY_PUSHING_NOTES&#34;
+internal/hooks/post_commit.go:21:	pendingFile := filepath.Join(gitDir, &#34;PENDING-PROMPT-STORY&#34;)
+internal/show/data.go:114:// UserActionNode represents a user action (PROMPT, COMMAND, TOOL_REJECT, DECISION)
+internal/show/data.go:153:// StepNode represents an individual step (TOOL_USE, ASSISTANT, etc.)
+internal/show/data.go:180:	if s.entry.Type == &#34;TOOL_USE&#34; &amp;&amp; s.entry.ToolName != &#34;&#34; {
+internal/show/data.go:193:	case &#34;PROMPT&#34;:
+internal/show/data.go:195:	case &#34;COMMAND&#34;:
+internal/show/data.go:201:	case &#34;TOOL_USE&#34;:
+internal/hooks/prepare_commit_msg.go:80:	pendingFile := filepath.Join(gitDir, &#34;PENDING-PROMPT-STORY&#34;)
+internal/hooks/prepare_commit_msg.go:89:		// Create PII scrubber (disabled via GIT_PROMPT_STORY_NO_SCRUB=1)
+internal/hooks/prepare_commit_msg.go:91:		if os.Getenv(&#34;GIT_PROMPT_STORY_NO_SCRUB&#34;) != &#34;1&#34; {
+internal/show/tree_test.go:33:		{Type: &#34;PROMPT&#34;, Text: &#34;First prompt&#34;, Time: time.Now()},
+internal/show/tree_test.go:34:		{Type: &#34;COMMAND&#34;, Text: &#34;/compact&#34;, Time: time.Now()},
+internal/show/tree_test.go:35:		{Type: &#34;PROMPT&#34;, Text: &#34;Second prompt&#34;, Time: time.Now()},
+internal/show/tree_test.go:58:		{Type: &#34;PROMPT&#34;, Text: &#34;Do something&#34;, Time: time.Now()},
+internal/show/tree_test.go:59:		{Type: &#34;TOOL_USE&#34;, ToolName: &#34;Bash&#34;, ToolInput: &#34;ls&#34;, Time: time.Now()},
+internal/show/tree_test.go:60:		{Type: &#34;TOOL_USE&#34;, ToolName: &#34;Read&#34;, ToolInput: &#34;file.go&#34;, Time: time.Now()},
+internal/show/tree_test.go:61:		{Type: &#34;PROMPT&#34;, Text: &#34;Next prompt&#34;, Time: time.Now()},
+internal/show/tree_test.go:62:		{Type: &#34;TOOL_USE&#34;, ToolName: &#34;Edit&#34;, Time: time.Now()},
+internal/show/tree_test.go:93:		{Type: &#34;TOOL_USE&#34;, ToolName: &#34;Bash&#34;, Time: time.Now()}, // Should be ignored
+internal/show/tree_test.go:95:		{Type: &#34;PROMPT&#34;, Text: &#34;First prompt&#34;, Time: time.Now()},
+internal/show/tree_test.go:96:		{Type: &#34;TOOL_USE&#34;, ToolName: &#34;Read&#34;, Time: time.Now()},
+internal/show/tree_test.go:122:	action := NewUserActionNo...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good! I found references to emoji mappings. Now let me read the actual code files to find the exact definitions and duplications:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now let me search for more specific formatting functions in both files:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me continue reading the tui.go file and also check if there&#39;s a note package with formatting functions:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tui.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">FormatToolName|formatToolName</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/show/data.go:110:	toolName := formatToolName(s.Tool)
+internal/show/data.go:227:func formatToolName(tool string) string {
+internal/show/tui.go:276:		sb.WriteString(fmt.Sprintf(&#34;Session: %s\n&#34;, formatToolName(n.Tool)))
+internal/show/data_test.go:97:func TestFormatToolName(t *testing.T) {
+internal/show/data_test.go:109:			result := formatToolName(tt.tool)
+internal/show/data_test.go:111:				t.Errorf(&#34;formatToolName(%q) = %q, want %q&#34;, tt.tool, result, tt.expected)
+internal/ci/summary.go:783:			tools[note.FormatToolName(sess.Tool)] = true
+internal/ci/summary.go:904:			toolName := note.FormatToolName(sess.Tool)
+internal/ci/html.go:63:		&#34;formatToolName&#34;: note.FormatToolName,
+internal/ci/html.go:123:			tools[note.FormatToolName(sess.Tool)] = true
+internal/note/metadata.go:79:		toolNames = append(toolNames, FormatToolName(t))
+internal/note/metadata.go:91:// FormatToolName converts a tool ID to its display name
+internal/note/metadata.go:92:func FormatToolName(tool string) string {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Excellent! I found a reference to `note.FormatToolName`. Let me check that file:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/metadata.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now let me check for any text truncation or wrapping functions in the ci package:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">truncate|wrapText|Truncate</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/ci/summary_test.go:486:		t.Error(&#34;Summary should be truncated with ...&#34;)
+internal/ci/summary_test.go:674:		result, truncated := renderUserTimelineWithTruncation(entries, 10000)
+internal/ci/summary_test.go:676:		if truncated != 0 {
+internal/ci/summary_test.go:677:			t.Errorf(&#34;Expected 0 truncated, got %d&#34;, truncated)
+internal/ci/summary_test.go:679:		if strings.Contains(result, &#34;truncated&#34;) {
+internal/ci/summary_test.go:687:	t.Run(&#34;truncates when over limit&#34;, func(t *testing.T) {
+internal/ci/summary_test.go:695:		result, truncated := renderUserTimelineWithTruncation(entries, 200)
+internal/ci/summary_test.go:697:		if truncated == 0 {
+internal/ci/summary_test.go:698:			t.Error(&#34;Expected some entries to be truncated&#34;)
+internal/ci/summary_test.go:700:		if !strings.Contains(result, &#34;truncated&#34;) {
+internal/ci/summary_test.go:746:	t.Run(&#34;truncates sessions when over limit&#34;, func(t *testing.T) {
+internal/ci/summary_test.go:782:		if !strings.Contains(result, &#34;truncated&#34;) {
+internal/ci/summary.go:27:	Truncated    bool      `json:&#34;truncated,omitempty&#34;`
+internal/ci/summary.go:309:						pe.Truncated = true
+internal/ci/summary.go:378:							pe.Truncated = true
+internal/ci/summary.go:395:						pe.Truncated = true
+internal/ci/summary.go:423:					pe.Truncated = true
+internal/ci/summary.go:796:		// Truncate subject for table
+internal/ci/summary.go:838:	formatRegular     = &#34;regular&#34;     // Truncated display (100 chars) - for &#34;All Steps&#34;
+internal/ci/summary.go:876:// Returns the rendered string and count of truncated sessions/steps
+internal/ci/summary.go:879:	truncatedSessions := 0
+internal/ci/summary.go:880:	truncatedSteps := 0
+internal/ci/summary.go:895:				truncatedSessions&#43;&#43;
+internal/ci/summary.go:896:				truncatedSteps &#43;= len(sess.Prompts)
+internal/ci/summary.go:912:				truncatedSessions&#43;&#43;
+internal/ci/summary.go:913:				truncatedSteps &#43;= len(sess.Prompts)
+internal/ci/summary.go:924:					truncatedSteps&#43;&#43;
+internal/ci/summary.go:934:	if truncatedSessions &gt; 0 || truncatedSt...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">truncate|wrapText|Truncate</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/show/data.go:149:	text := truncateText(u.entry.Text, 25)
+internal/show/data.go:179:	// For tool uses, show tool name and truncated input
+internal/show/data.go:181:		input := truncateText(s.entry.ToolInput, 20)
+internal/show/data.go:185:	text := truncateText(s.entry.Text, 25)
+internal/show/data.go:212:func truncateText(s string, maxLen int) string {
+internal/show/tui.go:241:	// Truncate if needed
+internal/show/tui.go:307:			sb.WriteString(wrapText(entry.Text, width-2))
+internal/show/tui.go:320:					input := truncateText(stepEntry.ToolInput, width-20)
+internal/show/tui.go:323:					text := truncateText(stepEntry.Text, width-12)
+internal/show/tui.go:341:				sb.WriteString(wrapText(entry.ToolInput, width-2))
+internal/show/tui.go:345:				sb.WriteString(wrapText(entry.ToolOutput, width-2))
+internal/show/tui.go:349:			sb.WriteString(wrapText(entry.Text, width-2))
+internal/show/tui.go:361:	// Truncate to height
+internal/show/tui.go:411:func wrapText(s string, width int) string {
+internal/show/data_test.go:36:func TestTruncateText(t *testing.T) {
+internal/show/data_test.go:56:			name:     &#34;long text truncated&#34;,
+internal/show/data_test.go:80:			name:     &#34;truncate with newlines&#34;,
+internal/show/data_test.go:89:			result := truncateText(tt.input, tt.maxLen)
+internal/show/data_test.go:91:				t.Errorf(&#34;truncateText(%q, %d) = %q, want %q&#34;, tt.input, tt.maxLen, result, tt.expected)
+internal/show/data_test.go:258:			name:     &#34;long subject truncated&#34;,
+internal/show/show.go:217:		lines, truncated := wrapAndTruncate(de.text, 80, 3)
+internal/show/show.go:223:		if truncated {
+internal/show/show.go:229:// wrapAndTruncate wraps text to maxWidth chars per line and limits to maxLines.
+internal/show/show.go:231:func wrapAndTruncate(s string, maxWidth, maxLines int) ([]string, bool) {
+internal/show/show.go:237:	truncated := false
+internal/show/show.go:244:			truncated = true
+internal/show/show.go:272:			truncated = true
+internal/show/show.go:276:	// Mark last line as truncated if n...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Excellent! Now let me check the ci/html.go file to see the truncate function:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/html.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me check the show/show.go file to see the wrapAndTruncate function:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">11:07</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now I have all the information I need. Let me create a comprehensive summary of the duplications I found.
+
+## Summary: Emoji Definitions and Display Formatting Code Duplication
+
+I&#39;ve identified significant duplication between the `ci-summary` command and the `show` command TUI. Here are the exact duplications:
+
+### 1. EMOJI MAPPINGS FOR ENTRY TYPES
+
+**internal/ci/summary.go: `getTypeEmoji()` function**
+- Location: **Lines 816-834**
+- Mapping:
+  - PROMPT → 💬
+  - TOOL_USE → 🔧
+  - ASSISTANT → 🤖
+  - TOOL_REJECT → ❌
+  - COMMAND → 📋
+  - DECISION → ❓
+  - Default → 📝
+
+**internal/show/data.go: `getTypeEmoji()` function**
+- Location: **Lines 191-210**
+- Mapping:
+  - PROMPT → 💬
+  - COMMAND → 📋
+  - TOOL_REJECT → ❌
+  - DECISION → ❓
+  - TOOL_USE → 🔧
+  - ASSISTANT → 🤖
+  - TOOL_RESULT → 📤 (only here)
+  - Default → •
+
+**Status**: DUPLICATED - Both functions are identical except that `show/data.go` includes `TOOL_RESULT → 📤` while `ci/summary.go` uses 📝 as default instead of •
+
+---
+
+### 2. TEXT TRUNCATION FUNCTIONS
+
+**internal/show/data.go: `truncateText()` function**
+- Location: **Lines 212-225**
+- Functionality: Replaces newlines with spaces, then truncates to `maxLen` with &#34;...&#34;
+- Used by: `UserActionNode.Label()` (line 149) and `StepNode.Label()` (lines 181, 185)
+
+**internal/show/tui.go: Uses `truncateText()`**
+- Location: Lines 320, 323
+- Same usage pattern
+
+**internal/ci/html.go: Anonymous truncate function in template**
+- Location: **Lines 64-69**
+- Functionality: Inline lambda that truncates string to n chars with &#34;...&#34;
+```go
+&#34;truncate&#34;: func(s string, n int) string {
+    if len(s) &lt;= n {
+        return s
+    }
+    return s[:n-3] &#43; &#34;...&#34;
+}
+```
+
+**internal/show/show.go: `wrapAndTruncate()` function**
+- Location: **Lines 231-287**
+- Functionality: More sophisticated - wraps to maxWidth per line and limits to maxLines
+- Different from simple truncate but serves similar purpose
+
+**Status**: PARTIALLY DUPLICATED - `show/data.go` has `truncateText()` which is simpler than `show/show.go`&#39;s `wrapAndTruncate()`, but both are used in similar contexts
+
+---
+
+### 3. TOOL NAME FORMATTING
+
+**internal/note/metadata.go: `FormatToolName()` function**
+- Location: **Lines 91-105**
+- Mapping:
+  - &#34;claude-code&#34; → &#34;Claude Code&#34;
+  - &#34;claude-cloud&#34; → &#34;Claude Cloud&#34;
+  - &#34;cursor&#34; → &#34;Cursor&#34;
+  - &#34;codex&#34; → &#34;Codex&#34;
+  - Default → tool (as-is)
+
+**internal/show/data.go: `formatToolName()` function**
+- Location: **Lines 227-234**
+- Mapping:
+  - &#34;claude-code&#34; → &#34;Claude Code&#34;
+  - Default → tool (as-is)
+- **Note**: This is a DUPLICATE but INCOMPLETE version
+
+**internal/ci/summary.go: Uses `note.FormatToolName()`**
+- Location: Lines 783, 904
+- Uses the centralized version from note package
+
+**internal/ci/html.go: Uses `note.FormatToolName()`**
+- Location: Lines 63, 123
+- Uses the centralized version from note package
+
+**Status**: DUPLICATED - `show/data.go` has a duplicate that&#39;s missing support for &#34;claude-cloud&#34;, &#34;cursor&#34;, and &#34;codex&#34;
+
+---
+
+### Summary of Findings
+
+| Item | ci/ Location | show/ Location | Status |
+|------|-------------|----------------|--------|
+| Emoji mapping | summary.go:816-834 | data.go:191-210 | DUPLICATED |
+| Simple text truncation | html.go:64-69 (inline) | data.go:212-225 | DUPLICATED |
+| Advanced text wrapping | N/A | show.go:231-287 | Only in show |
+| Tool name formatting | Note: Uses note.FormatToolName | data.go:227-234 (incomplete) | DUPLICATED &amp; INCOMPLETE |
+
+The most impactful duplication is the `formatToolName()` function in `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data.go` which is an incomplete copy of the centralized version in `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/metadata.go`. This could lead to inconsistent tool name display across the TUI.</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
   
   <div class="commit-card">
     <div class="commit-header">
@@ -2049,6 +5308,13 @@ Also fixes double-counting bug in countAllSteps function.
 EOF
 )&#34;</div>
             
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[improve-show 709a47f] Add comprehensive tests for show command TUI
+ 4 files changed, 738 insertions(&#43;), 7 deletions(-)
+ create mode 100755 e2e/tests/18-show-interactive-flag.sh
+ create mode 100644 internal/show/data_test.go
+ create mode 100644 internal/show/tree_test.go</div>
             
           </details>
           
