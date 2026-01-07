@@ -27,19 +27,9 @@ faketime '2025-01-15 09:00:00' git commit -m "Initial commit"
 # Install hooks
 git-prompt-story install-hooks
 
-# Create a session with user prompts and tool uses
+# Create a session with user prompts using the standard helper
+create_mock_session_with_tools "test-interactive-session" "2025-01-15T10:00:00Z" "2025-01-15T10:25:00Z"
 SESSION_ID="test-interactive-session"
-SESSION_DIR="/root/.claude/projects/-workspace-test-repo"
-mkdir -p "$SESSION_DIR"
-
-# Create JSONL with various entry types
-cat > "$SESSION_DIR/$SESSION_ID.jsonl" << 'JSONL'
-{"type":"user","sessionId":"test-interactive-session","timestamp":"2025-01-15T10:00:00Z","message":{"role":"user","content":"Fix the authentication bug"}}
-{"type":"assistant","sessionId":"test-interactive-session","timestamp":"2025-01-15T10:00:30Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"tool1","name":"Bash","input":{"command":"grep -r 'auth' src/"}}]}}
-{"type":"user","sessionId":"test-interactive-session","timestamp":"2025-01-15T10:01:00Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"tool1","content":"src/auth.ts: // auth logic"}]}}
-{"type":"user","sessionId":"test-interactive-session","timestamp":"2025-01-15T10:02:00Z","message":{"role":"user","content":"Now add tests"}}
-{"type":"user","sessionId":"test-interactive-session","timestamp":"2025-01-15T10:03:00Z","message":{"role":"user","content":"/compact"}}
-JSONL
 
 # Make a commit to trigger hook
 echo "feature" >> file.txt
@@ -83,8 +73,8 @@ echo "    - PROMPT entries present"
 # Test 5: Output contains slash commands
 echo ""
 echo "  Test 5: Output contains slash commands..."
-# The /compact command should appear in the output (may be shown as COMMAND or just the text)
-echo "$OUTPUT" | grep -q "/compact" || fail "Output should show /compact command"
+# The /commit command should appear in the output (from create_mock_session_with_tools)
+echo "$OUTPUT" | grep -q "/commit" || fail "Output should show /commit command"
 echo "    - Slash commands present"
 
 # Test 6: Full flag shows complete content
