@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/QuesmaOrg/git-prompt-story/internal/display"
+	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 	"github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -273,7 +275,7 @@ func (m model) renderDetail(width, height int) string {
 		sb.WriteString(fmt.Sprintf("Sessions: %d\n", len(n.Sessions)))
 
 	case *SessionNode:
-		sb.WriteString(fmt.Sprintf("Session: %s\n", formatToolName(n.Tool)))
+		sb.WriteString(fmt.Sprintf("Session: %s\n", note.FormatToolName(n.Tool)))
 		sb.WriteString(fmt.Sprintf("ID: %s\n", n.ID))
 		if n.IsAgent {
 			sb.WriteString("Type: Agent session\n")
@@ -287,7 +289,7 @@ func (m model) renderDetail(width, height int) string {
 
 	case *UserActionNode:
 		entry := n.Entry()
-		sb.WriteString(fmt.Sprintf("Type: %s %s\n", getTypeEmoji(entry.Type), entry.Type))
+		sb.WriteString(fmt.Sprintf("Type: %s %s\n", display.GetTypeEmoji(entry.Type), entry.Type))
 		sb.WriteString(fmt.Sprintf("Time: %s\n", entry.Time.Local().Format("2006-01-02 15:04:05")))
 		sb.WriteString(fmt.Sprintf("Session: %s\n", n.SessionID[:min(8, len(n.SessionID))]))
 		sb.WriteString("\n")
@@ -314,13 +316,13 @@ func (m model) renderDetail(width, height int) string {
 			sb.WriteString(fmt.Sprintf("\nFollowing steps (%d) - press 'e' to expand:\n", len(n.FollowingSteps)))
 			for _, step := range n.FollowingSteps {
 				stepEntry := step.Entry()
-				emoji := getTypeEmoji(stepEntry.Type)
+				emoji := display.GetTypeEmoji(stepEntry.Type)
 				timeStr := stepEntry.Time.Local().Format("15:04")
 				if stepEntry.Type == "TOOL_USE" && stepEntry.ToolName != "" {
-					input := truncateText(stepEntry.ToolInput, width-20)
+					input := display.TruncateText(stepEntry.ToolInput, width-20)
 					sb.WriteString(fmt.Sprintf("%s %s %s: %s\n", emoji, timeStr, stepEntry.ToolName, input))
 				} else {
-					text := truncateText(stepEntry.Text, width-12)
+					text := display.TruncateText(stepEntry.Text, width-12)
 					sb.WriteString(fmt.Sprintf("%s %s %s\n", emoji, timeStr, text))
 				}
 			}
@@ -330,7 +332,7 @@ func (m model) renderDetail(width, height int) string {
 
 	case *StepNode:
 		entry := n.Entry()
-		sb.WriteString(fmt.Sprintf("Type: %s %s\n", getTypeEmoji(entry.Type), entry.Type))
+		sb.WriteString(fmt.Sprintf("Type: %s %s\n", display.GetTypeEmoji(entry.Type), entry.Type))
 		sb.WriteString(fmt.Sprintf("Time: %s\n", entry.Time.Local().Format("2006-01-02 15:04:05")))
 		sb.WriteString("\n")
 

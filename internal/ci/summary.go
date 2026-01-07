@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/QuesmaOrg/git-prompt-story/internal/display"
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
@@ -813,26 +814,6 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 	return sb.String()
 }
 
-// getTypeEmoji returns an emoji for the entry type
-func getTypeEmoji(entryType string) string {
-	switch entryType {
-	case "PROMPT":
-		return "💬"
-	case "TOOL_USE":
-		return "🔧"
-	case "ASSISTANT":
-		return "🤖"
-	case "TOOL_REJECT":
-		return "❌"
-	case "COMMAND":
-		return "📋"
-	case "DECISION":
-		return "❓"
-	default:
-		return "📝" // Unknown type
-	}
-}
-
 // Format modes for renderTimeline
 const (
 	formatRegular     = "regular"     // Truncated display (100 chars) - for "All Steps"
@@ -946,7 +927,7 @@ func renderAllSteps(commits []CommitSummary, maxSize int, pagesURL string) (stri
 // formatMarkdownEntryIndented formats a single entry with indentation for session grouping
 func formatMarkdownEntryIndented(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
-	emoji := getTypeEmoji(entry.Type)
+	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	if len(text) > 100 {
 		text = text[:97] + "..."
@@ -1029,7 +1010,7 @@ func renderUserTimelineWithTruncation(entries []TimelineEntry, maxSize int) (str
 // formatMarkdownEntry formats a single entry for markdown display
 func formatMarkdownEntry(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
-	emoji := getTypeEmoji(entry.Type)
+	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	if len(text) > 100 {
 		text = text[:97] + "..."
@@ -1073,7 +1054,7 @@ func formatMarkdownEntry(entry PromptEntry) string {
 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
-	emoji := getTypeEmoji(entry.Type)
+	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 
 	// DECISION entries: always show in full with answer
@@ -1143,7 +1124,7 @@ func allPromptsShort(entries []TimelineEntry) bool {
 // formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
 func formatMarkdownEntrySimple(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
-	emoji := getTypeEmoji(entry.Type)
+	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	text = html.EscapeString(text)
 

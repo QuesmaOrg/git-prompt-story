@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/ci"
+	"github.com/QuesmaOrg/git-prompt-story/internal/display"
+	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 )
 
 // NodeType represents the type of node in the tree
@@ -107,7 +109,7 @@ func (s *SessionNode) IsExpandable() bool  { return true }
 func (s *SessionNode) Time() time.Time     { return s.Start }
 
 func (s *SessionNode) Label() string {
-	toolName := formatToolName(s.Tool)
+	toolName := note.FormatToolName(s.Tool)
 	return fmt.Sprintf("Session: %s (%s)", toolName, s.ShortID)
 }
 
@@ -144,9 +146,9 @@ func (u *UserActionNode) Children() []Node {
 }
 
 func (u *UserActionNode) Label() string {
-	emoji := getTypeEmoji(u.entry.Type)
+	emoji := display.GetTypeEmoji(u.entry.Type)
 	timeStr := u.entry.Time.Local().Format("15:04")
-	text := truncateText(u.entry.Text, 25)
+	text := display.TruncateText(u.entry.Text, 25)
 	return fmt.Sprintf("%s %s %s", emoji, timeStr, text)
 }
 
@@ -173,62 +175,15 @@ func (s *StepNode) Entry() *ci.PromptEntry { return &s.entry }
 func (s *StepNode) Time() time.Time       { return s.entry.Time }
 
 func (s *StepNode) Label() string {
-	emoji := getTypeEmoji(s.entry.Type)
+	emoji := display.GetTypeEmoji(s.entry.Type)
 	timeStr := s.entry.Time.Local().Format("15:04")
 
 	// For tool uses, show tool name and truncated input
 	if s.entry.Type == "TOOL_USE" && s.entry.ToolName != "" {
-		input := truncateText(s.entry.ToolInput, 20)
+		input := display.TruncateText(s.entry.ToolInput, 20)
 		return fmt.Sprintf("%s %s %s: %s", emoji, timeStr, s.entry.ToolName, input)
 	}
 
-	text := truncateText(s.entry.Text, 25)
+	text := display.TruncateText(s.entry.Text, 25)
 	return fmt.Sprintf("%s %s %s", emoji, timeStr, text)
-}
-
-// Helper functions
-
-func getTypeEmoji(entryType string) string {
-	switch entryType {
-	case "PROMPT":
-		return "💬"
-	case "COMMAND":
-		return "📋"
-	case "TOOL_REJECT":
-		return "❌"
-	case "DECISION":
-		return "❓"
-	case "TOOL_USE":
-		return "🔧"
-	case "ASSISTANT":
-		return "🤖"
-	case "TOOL_RESULT":
-		return "📤"
-	default:
-		return "•"
-	}
-}
-
-func truncateText(s string, maxLen int) string {
-	// Replace newlines with spaces
-	text := s
-	for i := 0; i < len(text); i++ {
-		if text[i] == '\n' || text[i] == '\r' {
-			text = text[:i] + " " + text[i+1:]
-		}
-	}
-
-	if len(text) <= maxLen {
-		return text
-	}
-	return text[:maxLen-3] + "..."
-}
-
-func formatToolName(tool string) string {
-	switch tool {
-	case "claude-code":
-		return "Claude Code"
-	default:
-		return tool
-	}
 }
