@@ -32,8 +32,9 @@ type PromptEntry struct {
 	ToolInput    string    `json:"tool_input,omitempty"`  // For TOOL_USE: the tool input/command
 	ToolOutput   string    `json:"tool_output,omitempty"` // For TOOL_RESULT: the tool output
 	// For DECISION entries (AskUserQuestion)
-	DecisionHeader string `json:"decision_header,omitempty"` // Question header (e.g., "Version")
-	DecisionAnswer string `json:"decision_answer,omitempty"` // User's selected answer
+	DecisionHeader            string `json:"decision_header,omitempty"`             // Question header (e.g., "Version")
+	DecisionAnswer            string `json:"decision_answer,omitempty"`             // User's selected answer
+	DecisionAnswerDescription string `json:"decision_answer_description,omitempty"` // Description of selected option
 }
 
 // SessionSummary represents a summarized session within a commit
@@ -199,6 +200,10 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 	// Key is tool ID, value is slice of indices into ss.Prompts for the DECISION entries
 	askUserQuestionEntries := make(map[string][]int)
 
+	// Map to track options for each question (for looking up answer descriptions)
+	// Key is question text, value is slice of options
+	questionOptions := make(map[string][]AskUserQuestionOption)
+
 	for _, entry := range entries {
 		// Get timestamp
 		ts := entry.Timestamp
@@ -286,6 +291,15 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 										question := ss.Prompts[idx].Text
 										if answer, found := entry.ToolUseResult.Answers[question]; found {
 											ss.Prompts[idx].DecisionAnswer = answer
+											// Look up description for the selected answer
+											if opts, hasOpts := questionOptions[question]; hasOpts {
+												for _, opt := range opts {
+													if opt.Label == answer {
+														ss.Prompts[idx].DecisionAnswerDescription = opt.Description
+														break
+													}
+												}
+											}
 										}
 									}
 								}
@@ -356,6 +370,10 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 									if inWorkPeriod {
 										ss.Prompts = append(ss.Prompts, pe)
 										indices = append(indices, len(ss.Prompts)-1)
+									}
+									// Store options for this question to look up answer descriptions later
+									if len(q.Options) > 0 {
+										questionOptions[q.Question] = q.Options
 									}
 								}
 								if len(indices) > 0 {
@@ -514,11 +532,18 @@ type ToolUseInfo struct {
 	RawInput json.RawMessage // Raw input JSON for AskUserQuestion parsing
 }
 
+// AskUserQuestionOption represents a single option in AskUserQuestion
+type AskUserQuestionOption struct {
+	Label       string `json:"label"`
+	Description string `json:"description"`
+}
+
 // AskUserQuestionInput represents the input to AskUserQuestion tool
 type AskUserQuestionInput struct {
 	Questions []struct {
-		Header   string `json:"header"`
-		Question string `json:"question"`
+		Header   string                  `json:"header"`
+		Question string                  `json:"question"`
+		Options  []AskUserQuestionOption `json:"options"`
 	} `json:"questions"`
 }
 
@@ -956,7 +981,12 @@ func formatMarkdownEntryIndented(entry PromptEntry) string {
 			answer = "(no answer)"
 		}
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("  - %s %s %s: %s → %s\n", timeStr, emoji, header, text, answer)
+		// Include description in italic if available
+		desc := ""
+		if entry.DecisionAnswerDescription != "" {
+			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
+		}
+		return fmt.Sprintf("  - %s %s %s: %s → %s%s\n", timeStr, emoji, header, text, answer, desc)
 	default:
 		if entry.Type == "PROMPT" || entry.Type == "ASSISTANT" || entry.Type == "COMMAND" || entry.Type == "TOOL_REJECT" {
 			return fmt.Sprintf("  - %s %s %s\n", timeStr, emoji, text)
@@ -1040,7 +1070,12 @@ func formatMarkdownEntry(entry PromptEntry) string {
 			answer = "(no answer)"
 		}
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("- %s %s %s: %s → %s\n", timeStr, emoji, header, text, answer)
+		// Include description in italic if available
+		desc := ""
+		if entry.DecisionAnswerDescription != "" {
+			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
+		}
+		return fmt.Sprintf("- %s %s %s: %s → %s%s\n", timeStr, emoji, header, text, answer, desc)
 	default:
 		// For known types (PROMPT, ASSISTANT), just show emoji + text
 		// For unknown types, show emoji + type + text
@@ -1070,8 +1105,13 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		// Escape HTML
 		text = html.EscapeString(text)
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("- <details open><summary>%s %s %s: %s → %s</summary></details>\n\n",
-			timeStr, emoji, header, text, answer)
+		// Include description in italic if available
+		desc := ""
+		if entry.DecisionAnswerDescription != "" {
+			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
+		}
+		return fmt.Sprintf("- <details open><summary>%s %s %s: %s → %s%s</summary></details>\n\n",
+			timeStr, emoji, header, text, answer, desc)
 	}
 
 	// Short prompts (≤250 chars): <details open> (expanded by default)
@@ -1139,7 +1179,12 @@ func formatMarkdownEntrySimple(entry PromptEntry) string {
 			answer = "(no answer)"
 		}
 		answer = html.EscapeString(answer)
-		return fmt.Sprintf("- %s %s %s: %s → %s\n", timeStr, emoji, header, text, answer)
+		// Include description in italic if available
+		desc := ""
+		if entry.DecisionAnswerDescription != "" {
+			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
+		}
+		return fmt.Sprintf("- %s %s %s: %s → %s%s\n", timeStr, emoji, header, text, answer, desc)
 	}
 
 	return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
