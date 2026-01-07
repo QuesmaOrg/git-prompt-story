@@ -1,0 +1,2711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>36a183b - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>36a183b</code></h1>
+    <p class="meta">Add CLI flags for redaction and e2e test</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">61</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>36a183b0f50c41a9409f4e3a63e4072508635656</code><br>
+    <strong>Work period:</strong> 2026-01-07 13:25 - 2026-01-07 13:59
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">a291e289-359e-4ccd-850d-49c02439a586</code> |
+        2026-01-06 18:01 - 2026-01-07 13:58 | <span class="session-count">34</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status &amp;&amp; git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch add-redaction
+Your branch is ahead of &#39;origin/main&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+nothing to commit, working tree clean
+1433f8e Add redaction and session deletion to show command TUI
+ef2aba4 Merge pull request #35 from QuesmaOrg/improve-show
+f5fda47 Fix e2e test 18: use standard create_mock_session_with_tools helper</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed as `1433f8e`. The branch `add-redaction` is ready to push or create a PR.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Ok, please now adds tests, expecially e2e for that.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the e2e test structure in this codebase. I need to understand:
+1. How e2e tests are organ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Perfect! Now I have a comprehensive understanding. Let me create a detailed exploration report for you:
+
+## E2E Test Structure Exploration Report
+
+I&#39;ve thoroughly explored the e2e test structure in your codebase. Here&#39;s a comprehensive breakdown:
+
+### 1. Directory Organization
+
+```
+/e2e/
+├── run-tests.sh          # Main entry point - builds Docker image and runs all tests
+├── Dockerfile            # Alpine-based Go environment with dependencies
+├── lib/
+│   ├── helpers.sh        # Reusable helper functions (438 lines)
+│   └── runner.sh         # Test suite orchestrator
+└── tests/
+    ├── 01-basic-flow.sh
+    ├── 02-session-detection.sh
+    ├── 03-amend-flow.sh
+    ├── 04-multiple-sessions.sh
+    ├── 05-no-sessions.sh
+    ├── 06-no-user-messages.sh
+    ├── 07-show-ranges.sh
+    ├── 08-cloud-integration.sh
+    ├── 09-pii-scrubbing.sh
+    ├── 10-ci-commands.sh
+    ├── 11-squash-flow.sh
+    ├── 12-repair-command.sh
+    ├── 13-hook-installation.sh
+    ├── 14-pre-push-hook.sh
+    ├── 15-agent-sessions.sh
+    ├── 16-generate-workflow.sh
+    ├── 17-rebase-flow.sh
+    ├── 18-show-interactive-flag.sh
+    └── 18-subfolder-detection.sh
+```
+
+### 2. Test Environment (Dockerfile)
+
+The tests run in an Alpine Linux Docker container with:
+- Go 1.24
+- Git, Bash, jq (for JSON parsing)
+- libfaketime (for time manipulation in tests)
+- socat (for mock API servers)
+- Pre-built git-prompt-story binary in /usr/local/bin/
+
+Key environment setup:
+- Global git user configured: `&lt;EMAIL&gt; / Test User`
+- Default branch: `main`
+- Working directory: `/workspace`
+- Test library mounted at: `/e2e`
+
+### 3. Helper Functions Library (`/e2e/lib/helpers.sh`)
+
+#### Session Creation Helpers:
+
+**`create_mock_session &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;`**
+- Creates basic JSONL session files in `~/.claude/projects/[encoded-path]/`
+- Format: user message, th...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:27</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me update the plan for adding tests:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Add Tests for Redaction/Deletion Feature
+     2 
+     3 ## Overview
+     4 
+     5 Add comprehensive tests for the redaction/deletion feature:
+     6 1. E2E test for redaction and session clearing
+     7 2. Additional unit tests for edge cases
+     8 
+     9 ## Challenge: TUI is Interactive
+    10 
+    11 The redaction feature is accessed via interactive TUI (press `r` or `D`). E2E tests run without a TTY, so we need CLI flags for non-interactive testing.
+    12 
+    13 ## Implementation Plan
+    14 
+    15 ### 1. Add CLI Flags for Non-Interactive Redaction
+    16 
+    17 **File: `cmd/show.go`**
+    18 
+    19 Add new flags:
+    20 ```go
+    21 --redact-session &lt;session-id&gt;    # Clear entire session
+    22 --redact-message &lt;session-id&gt; &lt;timestamp&gt;  # Redact specific message
+    23 ```
+    24 
+    25 These bypass the TUI and call the redaction functions directly.
+    26 
+    27 ### 2. Create E2E Test: `19-redaction.sh`
+    28 
+    29 **File: `e2e/tests/19-redaction.sh`**
+    30 
+    31 Test scenarios:
+    32 1. **Session clearing**: Create session, clear it, verify transcript is empty
+    33 2. **Message redaction**: Create session with multiple messages, redact one, verify others intact
+    34 3. **Verify placeholder**: Check `&lt;REDACTED BY USER&gt;` appears in output
+    35 4. **Local file update**: Verify ~/.claude/projects/ file is also modified
+    36 5. **Multiple sessions**: Clear one session, verify others untouched
+    37 
+    38 ### 3. Add Helper Function
+    39 
+    40 **File: `e2e/lib/helpers.sh`**
+    41 
+    42 Add `verify_transcript_content()` helper to check transcript blob content.
+    43 
+    44 ## Files to Create/Modify
+    45 
+    46 | File | Action |
+    47 |------|--------|
+    48 | `cmd/show.go` | Add `--redact-session` and `--redact-message` flags |
+    49 | `e2e/tests/19-redactio...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">13:28</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(CLI flags)</span>
+          <span class="prompt-text">The TUI is interactive (press r/D), but e2e tests have no TTY. Should I add CLI flags for non-interactive redaction?</span>
+          <span class="decision-answer">→ Yes, add --redact-session and --redact-message flags</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    11 The redaction feature is accessed via interactive TUI (press `r` or `D`). E2E tests run without a TTY, so we need CLI flags for non-interactive testing.
+    12 
+    13 ## Implementation Plan
+    14 
+    15 ### 1. Add CLI Flags for Non-Interactive Redaction
+    16 
+    17 **File: `cmd/show.go`**
+    18 
+    19 Add new flags:
+    20 ```go
+    21 var (
+    22     clearSessionFlag  string  // --clear-session &lt;tool/session-id&gt;
+    23     redactMessageFlag string  // --redact-message &lt;tool/session-id@timestamp&gt;
+    24 )
+    25 ```
+    26 
+    27 Usage:
+    28 ```bash
+    29 git-prompt-story show --clear-session &#34;claude-code/abc123&#34;
+    30 git-prompt-story show --redact-message &#34;claude-code/abc123@2025-01-15T10:00:00Z&#34;
+    31 ```
+    32 
+    33 Implementation in Run function:
+    34 ```go
+    35 if clearSessionFlag != &#34;&#34; {
+    36     // Parse tool/sessionID
+    37     // Call show.DeleteSession(tool, sessionID)
+    38     return
+    39 }
+    40 if redactMessageFlag != &#34;&#34; {
+    41     // Parse tool/sessionID@timestamp
+    42     // Call show.RedactMessage(tool, sessionID, timestamp)
+    43     return
+    44 }
+    45 ```
+    46 
+    47 ### 2. Create E2E Test: `19-redaction.sh`
+    48 
+    49 **File: `e2e/tests/19-redaction.sh`**</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    43     return
+    44 }
+    45 ```
+    46 
+    47 ### 2. Create E2E Test: `19-redaction.sh`
+    48 
+    49 **File: `e2e/tests/19-redaction.sh`**
+    50 
+    51 ```bash
+    52 #!/bin/bash
+    53 set -euo pipefail
+    54 source /e2e/lib/helpers.sh
+    55 
+    56 echo &#34;[19] Show Command - Redaction and Session Clearing&#34;
+    57 
+    58 # Setup
+    59 cleanup_sessions
+    60 init_test_repo
+    61 git-prompt-story install-hooks
+    62 create_mock_session_with_tools &#34;test-session&#34; &#34;2025-01-15T10:00:00Z&#34; &#34;2025-01-15T10:25:00Z&#34;
+    63 
+    64 # Create commit
+    65 echo &#34;feature&#34; &gt;&gt; file.txt &amp;&amp; git add file.txt
+    66 faketime &#39;2025-01-15 10:30:00&#39; git commit -m &#34;Add feature&#34;
+    67 COMMIT=$(git rev-parse HEAD)
+    68 
+    69 # Test 1: Session exists before clearing
+    70 TRANSCRIPT=$(git cat-file -p &#34;refs/notes/prompt-story-transcripts:claude-code/test-session.jsonl&#34;)
+    71 echo &#34;$TRANSCRIPT&#34; | grep -q &#34;Fix the bug&#34; || fail &#34;Session should have content&#34;
+    72 
+    73 # Test 2: Clear session
+    74 git-prompt-story show --clear-session &#34;claude-code/test-session&#34;
+    75 TRANSCRIPT=$(git cat-file -p &#34;refs/notes/prompt-story-transcripts:claude-code/test-session.jsonl&#34;)
+    76 [ -z &#34;$TRANSCRIPT&#34; ] || fail &#34;Session should be empty after clearing&#34;
+    77 
+    78 # Test 3: Local file also cleared
+    79 LOCAL_FILE=&#34;$HOME/.claude/projects/-workspace-test-repo/test-session.jsonl&#34;
+    80 [ ! -s &#34;$LOCAL_FILE&#34; ] || fail &#34;Local file should be empty&#34;
+    81 
+    82 # Test 4: Message redaction (create new session)
+    83 create_mock_session &#34;redact-test&#34; &#34;2025-01-15T10:00:00Z&#34; &#34;2025-01-15T10:05:00Z&#34;
+    84 # ... redact and verify placeholder
+    85 
+    86 echo &#34;All assertions passed!&#34;
+    87 ```
+    88 
+    89 ## Files to Create/Modify
+    90 
+    91 | File | Action |</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The plan is ready. Summary:
+
+1. **Add CLI flags** to `cmd/show.go`:
+   - `--clear-session &#34;tool/session-id&#34;` - Clear entire session
+   - `--redact-message &#34;tool/session-id@timestamp&#34;` - Redact specific message
+
+2. **Create e2e test** `e2e/tests/19-redaction.sh`:
+   - Test session clearing and verify transcript is empty
+   - Test local file is also cleared
+   - Test message redaction with placeholder verification</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Add Tests for Redaction/Deletion Feature\n\n## Overview\n\nAdd comprehensive tests for the redaction/deletion feature:\n1. E2E test for redaction and session clearing\n2. Additiona...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Add Tests for Redaction/Deletion Feature
+
+## Overview
+
+Add comprehensive tests for the redaction/deletion feature:
+1. E2E test for redaction and session clearing
+2. Additional unit tests for edge cases
+
+## Challenge: TUI is Interactive
+
+The redaction feature is accessed via interactive TUI (press `r` or `D`). E2E tests run without a TTY, so we need CLI flags for non-interactive testing.
+
+## Implementation Plan
+
+### 1. Add CLI Flags for Non-Interactive Redaction
+
+**File: `cmd/show.go`**
+
+Add new flags:
+```go
+var (
+    clearSessionFlag  string  // --clear-session &lt;tool/session-id&gt;
+    redactMessageFlag string  // --redact-message &lt;tool/session-id@timestamp&gt;
+)
+```
+
+Usage:
+```bash
+git-prompt-story show --clear-session &#34;claude-code/abc123&#34;
+git-prompt-story show --redact-message &#34;claude-code/abc123@2025-01-15T10:00:00Z&#34;
+```
+
+Implementation in Run function:
+```go
+if clearSessionFlag != &#34;&#34; {
+    // Parse tool/sessionID
+    // Call show.DeleteSession(tool, sessionID)
+    return
+}
+if redactMessageFlag != &#34;&#34; {
+    // Parse tool/sessionID@timestamp
+    // Call show.RedactMessage(tool, sessionID, timestamp)
+    return
+}
+```
+
+### 2. Create E2E Test: `19-redaction.sh`
+
+**File: `e2e/tests/19-redaction.sh`**
+
+```bash
+#!/bin/bash
+set -euo pipefail
+source /e2e/lib/helpers.sh
+
+echo &#34;[19] Show Command - Redaction and Session Clearing&#34;
+
+# Setup
+cleanup_sessions
+init_test_repo
+git-prompt-story install-hooks
+create_mock_session_with_tools &#34;test-session&#34; &#34;2025-01-15T10:00:00Z&#34; &#34;2025-01-15T10:25:00Z&#34;
+
+# Create commit
+echo &#34;feature&#34; &gt;&gt; file.txt &amp;&amp; git add file.txt
+faketime &#39;2025-01-15 10:30:00&#39; git commit -m &#34;Add feature&#34;
+COMMIT=$(git rev-parse HEAD)
+
+# Test 1: Session exists before clearing
+TRANSCRIPT=$(git cat-file -p &#34;...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding CLI flags&#34;,&#34;content&#34;:&#34;Add --clear-session and --redact-message flags to cmd/show.go&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Creating e2e test&#34;,&#34;content&#34;:&#34;Create e2e ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package cmd
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;os&#34;
+     6 	&#34;strings&#34;
+     7 	&#34;time&#34;
+     8 
+     9 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/show&#34;
+    10 	&#34;github.com/mattn/go-isatty&#34;
+    11 	&#34;github.com/spf13/cobra&#34;
+    12 )
+    13 
+    14 var (
+    15 	fullFlag          bool
+    16 	interactiveFlag   bool
+    17 	noInteractiveFlag bool
+    18 	clearSessionFlag  string
+    19 	redactMessageFlag string
+    20 )
+    21 
+    22 var showCmd = &amp;cobra.Command{
+    23 	Use:   &#34;show [commit]&#34;,
+    24 	Short: &#34;Show prompts for a commit&#34;,</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    31 Examples:
+    32   git-prompt-story show                # Show prompts for HEAD
+    33   git-prompt-story show abc123         # Show prompts for specific commit
+    34   git-prompt-story show HEAD~5..HEAD   # Show prompts for commit range`,
+    35 	Args: cobra.MaximumNArgs(1),
+    36 	Run: func(cmd *cobra.Command, args []string) {
+    37 		// Handle redaction flags (non-interactive operations)
+    38 		if clearSessionFlag != &#34;&#34; {
+    39 			if err := handleClearSession(clearSessionFlag); err != nil {
+    40 				fmt.Fprintf(os.Stderr, &#34;git-prompt-story: %v\n&#34;, err)
+    41 				os.Exit(1)
+    42 			}
+    43 			return
+    44 		}
+    45 		if redactMessageFlag != &#34;&#34; {
+    46 			if err := handleRedactMessage(redactMessageFlag); err != nil {
+    47 				fmt.Fprintf(os.Stderr, &#34;git-prompt-story: %v\n&#34;, err)
+    48 				os.Exit(1)
+    49 			}
+    50 			return
+    51 		}
+    52 
+    53 		commit := &#34;HEAD&#34;
+    54 		if len(args) &gt; 0 {
+    55 			commit = args[0]
+    56 		}
+    57 
+    58 		// Determine if we should use interactive mode
+    59 		isTTY := isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd())
+    60 		useInteractive := (interactiveFlag || isTTY) &amp;&amp; !noInteractiveFlag
+    61 
+    62 		if useInteractive {
+    63 			if err := show.RunTUI(commit, fullFlag); err != nil {
+    64 				fmt.Fprintf(os.Stderr, &#34;git-prompt-story: %v\n&#34;, err)
+    65 				os.Exit(1)
+    66 			}
+    67 		} else {
+    68 			if err := show.ShowPrompts(commit, fullFlag); err != nil {
+    69 				fmt.Fprintf(os.Stderr, &#34;git-prompt-story: %v\n&#34;, err)
+    70 				os.Exit(1)
+    71 			}
+    72 		}
+    73 	},
+    74 }
+    75 
+    76 // handleClearSession parses &#34;tool/session-id&#34; and clears the session
+    77 func handleClearSession(spec string) error {
+    78 	parts := strings.SplitN(spec, &#34;/&#34;, 2)
+    79 	if len(parts) != 2 {
+    80 ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   127 	}
+   128 	return nil
+   129 }
+   130 
+   131 func init() {
+   132 	showCmd.Flags().BoolVar(&amp;fullFlag, &#34;full&#34;, false, &#34;Show full message content&#34;)
+   133 	showCmd.Flags().BoolVarP(&amp;interactiveFlag, &#34;interactive&#34;, &#34;i&#34;, false, &#34;Force interactive TUI mode&#34;)
+   134 	showCmd.Flags().BoolVar(&amp;noInteractiveFlag, &#34;no-interactive&#34;, false, &#34;Disable interactive TUI, use plain text output&#34;)
+   135 	showCmd.Flags().StringVar(&amp;clearSessionFlag, &#34;clear-session&#34;, &#34;&#34;, &#34;Clear session content (format: tool/session-id)&#34;)
+   136 	showCmd.Flags().StringVar(&amp;redactMessageFlag, &#34;redact-message&#34;, &#34;&#34;, &#34;Redact message (format: tool/session-id@timestamp)&#34;)
+   137 	rootCmd.AddCommand(showCmd)
+   138 }
+   139 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build ./...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding CLI flags&#34;,&#34;content&#34;:&#34;Add --clear-session and --redact-message flags to cmd/show.go&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating e2e test&#34;,&#34;content&#34;:&#34;Create e2e te...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">create_mock_session\(\)</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">13:create_mock_session() {
+14-    local session_id=&#34;$1&#34;
+15-    local start_time=&#34;$2&#34;
+16-    local end_time=&#34;$3&#34;
+17-
+18-    local repo_path=$(pwd)
+19-    local encoded_path=$(echo &#34;$repo_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+20-    local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+21-
+22-    mkdir -p &#34;$session_dir&#34;
+23-
+24-    cat &gt; &#34;$session_dir/$session_id.jsonl&#34; &lt;&lt; EOF
+25-{&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;How do I implement feature X?&#34;}}
+26-{&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;Here&#39;s how to implement feature X...&#34;}]}}
+27-EOF
+28-
+29-    echo &#34;  Created mock session: $session_dir/$session_id.jsonl&#34;
+30-}
+31-
+32-# Create a mock Claude Code session with a long user prompt (&gt;250 chars)
+33-# Usage: create_mock_session_with_long_prompt &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;
+34-create_mock_session_with_long_prompt() {
+35-    local session_id=&#34;$1&#34;
+36-    local start_time=&#34;$2&#34;
+37-    local end_time=&#34;$3&#34;
+38-
+39-    local repo_path=$(pwd)
+40-    local encoded_path=$(echo &#34;$repo_path&#34; | tr &#39;/&#39; &#39;-&#39;)
+41-    local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+42-
+43-    mkdir -p &#34;$session_dir&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/19-redaction.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/19-redaction.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">chmod &#43;x /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/19-redaction.sh</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding CLI flags&#34;,&#34;content&#34;:&#34;Add --clear-session and --redact-message flags to cmd/show.go&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating e2e test&#34;,&#34;content&#34;:&#34;Create e2e te...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -100</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  Test 2: Output contains session info...
+    - Session info present
+
+  Test 3: Output contains timestamps...
+    - Timestamps present
+
+  Test 4: Output contains PROMPT entries...
+    - PROMPT entries present
+
+  Test 5: Output contains slash commands...
+    - Slash commands present
+
+  Test 6: --full flag shows complete content...
+    - Normal output length: 234
+    - Full output length: 231
+    - --full flag works
+
+  Test 7: Empty commit (no notes) handling...
+    - Empty commit handled gracefully
+
+  Test 8: Invalid commit handling...
+    - Invalid commit handled (exit code non-zero or error shown)
+
+  All assertions passed!
+
+Running: 18-subfolder-detection
+[18] Subfolder Session Detection
+  Step 1: Creating test repo...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Step 2: Creating initial commit at 09:00...
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Step 4: Creating mock sessions...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-root.jsonl
+  Created mock session for subfolder src: /root/.claude/projects/-workspace-test-repo-src/session-subfolder.jsonl
+  Created mock session for parent dir /workspace writing to /workspace/test-repo: /root/.claude/projects/-workspace/session-parent.jsonl
+  Created mock session for /workspace/test-repo-v2: /root/.claude/projects/-workspace-test-repo-v2/session-other-repo.jsonl
+  Session directories created:
+drwxr-xr-x    2 root     root          4096 Jan  7 13:56 -workspace
+drwxr-xr-x    2 root     root          4096 Jan  7 13:56 -workspace-test-repo
+drwxr-xr-x    2 root     root          4096 Jan  7 13:56 -workspace-test-repo-src
+drwxr-xr-x    2 root     root          4096 Jan  7 13:56 -workspace-test-repo-v2
+  Step 5: Creating feature commit at 10:30...
+[main d19b228] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Step 6: Verifying results...
+    Checking commit...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:57</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The test failed because the new session wasn&#39;t picked up by the second commit. Let me fix the test to use an already-stored session for redaction:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/19-redaction.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/19-redaction.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    80     fail &#34;Local file should be empty after clearing&#34;
+    81 fi
+    82 echo &#34;    - Local file is empty&#34;
+    83 
+    84 # Test 6: Message redaction (use session-to-keep which is already stored)
+    85 echo &#34;&#34;
+    86 echo &#34;  Test 6: Message redaction...&#34;
+    87 
+    88 # Verify session exists before redaction
+    89 TRANSCRIPT3=$(git cat-file -p &#34;refs/notes/prompt-story-transcripts:claude-code/session-to-keep.jsonl&#34; 2&gt;/dev/null) || fail &#34;session-to-keep should exist&#34;
+    90 echo &#34;$TRANSCRIPT3&#34; | grep -q &#34;How do I implement feature X&#34; || fail &#34;session-to-keep should have original content&#34;
+    91 
+    92 # Redact the user message (timestamp is 2025-01-15T10:05:00Z from session creation)
+    93 git-prompt-story show --redact-message &#34;claude-code/session-to-keep@2025-01-15T10:05:00Z&#34;
+    94 echo &#34;    - redact-message command succeeded&#34;
+    95 
+    96 # Verify message is redacted
+    97 TRANSCRIPT3=$(git cat-file -p &#34;refs/notes/prompt-story-transcripts:claude-code/session-to-keep.jsonl&#34; 2&gt;/dev/null) || fail &#34;session should still exist&#34;
+    98 # JSON escapes &lt; and &gt; as \u003c and \u003e
+    99 if echo &#34;$TRANSCRIPT3&#34; | grep -q &#34;How do I implement feature X&#34;; then
+   100     fail &#34;Original message should be redacted&#34;
+   101 fi
+   102 if ! echo &#34;$TRANSCRIPT3&#34; | grep -qE &#39;(REDACTED BY USER|\\u003cREDACTED BY USER\\u003e)&#39;; then
+   103     fail &#34;Redaction placeholder should be present&#34;
+   104 fi
+   105 echo &#34;    - Message redacted with placeholder&#34;
+   106 
+   107 # Test 7: Assistant message should be untouched
+   108 echo &#34;&#34;
+   109 echo &#34;  Test 7: Verify assistant message is untouched...&#34;
+   110 echo &#34;$TRANSCRIPT3&#34; | grep -q &#34;Here&#39;s how to implement feature X&#34; || fail &#34;Assistant message should be untouched&#34;
+   111 echo &#34;    - Assistant message preserved&#34;
+   112 
+   113 echo &#34;&#34;
+   114 echo &#34;  All assertions pas...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | grep -A 100 &#34;Running: 19-redaction&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Running: 19-redaction
+[19] Show Command - Redaction and Session Clearing
+  Step 1: Creating test repo with sessions...
+Initialized empty Git repository in /workspace/test-repo/.git/
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+Hooks installed to .git/hooks
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-to-clear.jsonl
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-to-keep.jsonl
+[main 8655e9d] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Created commit: 8655e9dd3eb873986849c5bf0c8437078d94dd1f
+
+  Test 1: Verify sessions exist before clearing...
+    - Both sessions have content
+
+  Test 2: Clear session...
+Session cleared
+    - clear-session command succeeded
+
+  Test 3: Verify cleared session is empty...
+    - Cleared session is empty in git notes
+
+  Test 4: Verify other session is untouched...
+    - Other session still has content
+
+  Test 5: Verify local file is cleared...
+    - Local file is empty
+
+  Test 6: Message redaction...
+Message redacted
+    - redact-message command succeeded
+    - Message redacted with placeholder
+
+  Test 7: Verify assistant message is untouched...
+    - Assistant message preserved
+
+  All assertions passed!
+
+=== 20/20 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:57</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All 20 tests pass. Let me update todos and run all unit tests too:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... -count=1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.210s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	0.425s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	0.620s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	0.834s
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	1.022s
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	1.150s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Adding CLI flags&#34;,&#34;content&#34;:&#34;Add --clear-session and --redact-message flags to cmd/show.go&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating e2e test&#34;,&#34;content&#34;:&#34;Create e2e te...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:58</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass (20/20 e2e &#43; unit tests). Here&#39;s the summary:
+
+**Added CLI flags** (`cmd/show.go`):
+- `--clear-session &#34;tool/session-id&#34;` - Clear entire session
+- `--redact-message &#34;tool/session-id@timestamp&#34;` - Redact specific message
+
+**New e2e test** (`e2e/tests/19-redaction.sh`):
+- Tests session clearing (git notes &#43; local file)
+- Tests message redaction with `&lt;REDACTED BY USER&gt;` placeholder
+- Verifies other sessions/messages are untouched
+
+Would you like me to commit these changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">13:58</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please commit</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch add-redaction
+Your branch is ahead of &#39;origin/main&#39; by 1 commit.
+  (use &#34;git push&#34; to publish your local commits)
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   cmd/show.go
+
+Untracked files:
+  (use &#34;git add &lt;file&gt;...&#34; to include in what will be committed)
+	e2e/tests/19-redaction.sh
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> cmd/show.go | 77 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ 1 file changed, 77 insertions(&#43;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add cmd/show.go e2e/tests/19-redaction.sh &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add CLI flags for redaction and e2e test
+
+- Add --clear-session flag to clear session content non-interactively
+- Add --redact-message flag to redact specific message by timestamp
+- Add e2e test 19-redaction.sh covering session clearing and message redaction
+
+Usage:
+  git-prompt-story show --clear-session &#34;claude-code/session-id&#34;
+  git-prompt-story show --redact-message &#34;claude-code/session-id@2025-01-15T10:00:00Z&#34;
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[add-redaction 36a183b] Add CLI flags for redaction and e2e test
+ 2 files changed, 191 insertions(&#43;)
+ create mode 100755 e2e/tests/19-redaction.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card agent-session" data-is-agent="true">
+    <div class="commit-header">
+      <h3>
+        <span class="badge agent">Agent</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">agent-a624412</code> |
+        2026-01-07 13:25 - 2026-01-07 13:26 | <span class="session-count">27</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Explore the e2e test structure in this codebase. I need to understand:
+1. How e2e tests are organized (look at e2e/ directory)
+2. What helpers are available (e2e/lib/helpers.sh)
+3. How existing tests create mock sessions and test the show command
+4. Look at test 18 specifically (18-show-interactive-flag.sh) as a reference
+
+Focus on understanding the patterns so we can add a new e2e test for redaction/deletion functionality.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the e2e test structure for you. Let me start by examining the directory layout and then dive into the specific areas you mentioned.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">find /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e -type f -name &#34;*.sh&#34; | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/run-tests.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/15-agent-sessions.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/16-generate-workflow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/05-no-sessions.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/04-multiple-sessions.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/17-rebase-flow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/03-amend-flow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/01-basic-flow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-subfolder-detection.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/07-show-ranges.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/08-cloud-integration.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/12-repair-command.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/09-pii-scrubbing.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/06-no-user-messages.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/13-hook-installation.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/11-squash-flow.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/10-ci-commands.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/02-session-detection.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/14-pre-push-hook.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the e2e directory structure and read the key files:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ls -la /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">total 16
+drwxr-xr-x@  6 jacek  staff  192 Dec 31 14:36 .
+drwxr-xr-x@ 17 jacek  staff  544 Jan  6 20:34 ..
+-rw-r--r--@  1 jacek  staff  470 Dec 31 14:36 Dockerfile
+drwxr-xr-x@  4 jacek  staff  128 Jan  7 14:27 lib
+-rwxr-xr-x@  1 jacek  staff  235 Dec 31 14:36 run-tests.sh
+drwxr-xr-x@ 21 jacek  staff  672 Jan  7 14:27 tests</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me look at a couple more tests to understand the patterns better:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/01-basic-flow.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/09-pii-scrubbing.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/run-tests.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me look at the Dockerfile to understand the testing environment, and examine a few more test patterns:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/Dockerfile</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/lib/*.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/lib/runner.sh
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/lib/helpers.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me check the runner script and look at a few more test examples to understand deletion/redaction patterns:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/lib/runner.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ls -1 /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/ | sort</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">01-basic-flow.sh
+02-session-detection.sh
+03-amend-flow.sh
+04-multiple-sessions.sh
+05-no-sessions.sh
+06-no-user-messages.sh
+07-show-ranges.sh
+08-cloud-integration.sh
+09-pii-scrubbing.sh
+10-ci-commands.sh
+11-squash-flow.sh
+12-repair-command.sh
+13-hook-installation.sh
+14-pre-push-hook.sh
+15-agent-sessions.sh
+16-generate-workflow.sh
+17-rebase-flow.sh
+18-show-interactive-flag.sh
+18-subfolder-detection.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me look at a couple more representative tests to understand patterns for more complex operations:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/12-repair-command.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/04-multiple-sessions.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now let me look at one more test that might have delete/redaction patterns:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">grep -r &#34;delete\|redact\|remove&#34; /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/ --include=&#34;*.sh&#34; -l</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests//09-pii-scrubbing.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Excellent! Now let me create a comprehensive summary document for you. Let me also check the structure of the main codebase to understand commands better:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">find /&lt;REDACTED&gt;/git/git-prompt-story-tests -maxdepth 2 -type f -name &#34;*.go&#34; | head -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/install_hooks.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/annotate_cloud.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/prepare_commit_msg.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/ci_html.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/post_rewrite.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">func.*show|func.*delete|func.*redact</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 4 files
+internal/show/redact.go
+internal/explain/explain.go
+internal/show/show.go
+internal/scrubber/scrubber.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Perfect! Now I have a comprehensive understanding. Let me create a detailed exploration report for you:
+
+## E2E Test Structure Exploration Report
+
+I&#39;ve thoroughly explored the e2e test structure in your codebase. Here&#39;s a comprehensive breakdown:
+
+### 1. Directory Organization
+
+```
+/e2e/
+├── run-tests.sh          # Main entry point - builds Docker image and runs all tests
+├── Dockerfile            # Alpine-based Go environment with dependencies
+├── lib/
+│   ├── helpers.sh        # Reusable helper functions (438 lines)
+│   └── runner.sh         # Test suite orchestrator
+└── tests/
+    ├── 01-basic-flow.sh
+    ├── 02-session-detection.sh
+    ├── 03-amend-flow.sh
+    ├── 04-multiple-sessions.sh
+    ├── 05-no-sessions.sh
+    ├── 06-no-user-messages.sh
+    ├── 07-show-ranges.sh
+    ├── 08-cloud-integration.sh
+    ├── 09-pii-scrubbing.sh
+    ├── 10-ci-commands.sh
+    ├── 11-squash-flow.sh
+    ├── 12-repair-command.sh
+    ├── 13-hook-installation.sh
+    ├── 14-pre-push-hook.sh
+    ├── 15-agent-sessions.sh
+    ├── 16-generate-workflow.sh
+    ├── 17-rebase-flow.sh
+    ├── 18-show-interactive-flag.sh
+    └── 18-subfolder-detection.sh
+```
+
+### 2. Test Environment (Dockerfile)
+
+The tests run in an Alpine Linux Docker container with:
+- Go 1.24
+- Git, Bash, jq (for JSON parsing)
+- libfaketime (for time manipulation in tests)
+- socat (for mock API servers)
+- Pre-built git-prompt-story binary in /usr/local/bin/
+
+Key environment setup:
+- Global git user configured: `&lt;EMAIL&gt; / Test User`
+- Default branch: `main`
+- Working directory: `/workspace`
+- Test library mounted at: `/e2e`
+
+### 3. Helper Functions Library (`/e2e/lib/helpers.sh`)
+
+#### Session Creation Helpers:
+
+**`create_mock_session &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;`**
+- Creates basic JSONL session files in `~/.claude/projects/[encoded-path]/`
+- Format: user message, then assistant response
+- Encodes repo path by replacing `/` with `-`
+- Example: `/workspace/test-repo` → `~/.claude/projects/-workspace-test-repo/`
+
+**`create_mock_session_with_long_prompt &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;`**
+- Creates session with prompt &gt;250 characters (triggers &#34;skip details&#34; logic)
+- Used to test summary vs. full content display
+
+**`create_mock_session_with_tools &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;`**
+- Creates realistic session with tool use events
+- Includes: Read tool, Edit tool, /commit command
+- Tests PR comment generation and tool-use handling
+
+**`create_mock_session_with_pii &lt;session_id&gt; &lt;start_time&gt; &lt;end_time&gt;`**
+- Creates session with sensitive data:
+  - Email addresses
+  - User paths
+  - API keys (AWS, Anthropic, OpenRouter, GitHub)
+  - Credit cards
+  - Passwords
+  - Google keys
+- Used for PII scrubbing tests
+
+**`create_mock_agent_session &lt;agent_suffix&gt; &lt;start_time&gt; &lt;end_time&gt;`**
+- Creates session with &#34;agent-&#34; prefix in session ID
+- Tests agent vs. user session distinction
+
+**`create_mock_session_for_path`, `create_mock_session_for_subfolder`, `create_mock_session_for_parent_dir`**
+- Specialized helpers for testing path detection
+- Tests subfolder detection and parent directory scenarios
+
+**`create_stale_session &lt;session_id&gt; &lt;user_msg_time&gt; &lt;assistant_time&gt;`**
+- User messages before work period, assistant response during work period
+- Tests &#34;stale session&#34; detection logic
+
+#### Cleanup &amp; Initialization:
+
+**`cleanup_sessions()`**
+- Removes all mock sessions: `rm -rf &#34;$HOME/.claude/projects&#34;`
+
+**`init_test_repo [path]`**
+- Creates fresh git repo at specified path (default: `/workspace/test-repo`)
+
+#### Cloud API Mocking (for integration tests):
+
+**`setup_mock_credentials()`**
+- Creates fake security command returning mock credentials
+- Creates fake ~/.claude.json with org UUID
+
+**`create_mock_cloud_session &lt;session_id&gt; &lt;title&gt; &lt;branch&gt; [created] [updated]`**
+- Creates mock API response files in `/tmp/mock-api/`
+
+**`start_mock_api [port]`**
+- Starts socat-based HTTP server on specified port (default: 9999)
+- Routes requests to appropriate mock response files
+- Sets `CLAUDE_API_URL` environment variable
+
+**`stop_mock_api()` &amp; `cleanup_mock_cloud()`**
+- Cleanup for API mocking
+
+### 4. Reference Test: 18-show-interactive-flag.sh
+
+**Pattern Overview:**
+```bash
+#!/bin/bash
+set -euo pipefail
+source /e2e/lib/helpers.sh
+
+echo &#34;[test-number/total] Test Title&#34;
+```
+
+**Typical Test Flow:**
+
+1. **Cleanup phase:**
+   - `cleanup_sessions` - Clear any previous sessions
+   - `rm -rf /workspace/test-repo` - Fresh test repo
+   - `mkdir -p /workspace/test-repo &amp;&amp; cd /workspace/test-repo`
+
+2. **Setup phase:**
+   - `git init` - Initialize repo
+   - Create initial commit with controlled timestamp using `faketime`
+   - Install hooks: `git-prompt-story install-hooks`
+   - Create mock session(s): `create_mock_session_with_tools &#34;test-id&#34; &#34;start-time&#34; &#34;end-time&#34;`
+
+3. **Action phase:**
+   - Create feature branch/commits with controlled timestamps
+   - Use `faketime` &#43; git environment variables for time control:
+     ```bash
+     export GIT_AUTHOR_DATE=&#34;2025-01-15T10:30:00Z&#34;
+     export GIT_COMMITTER_DATE=&#34;2025-01-15T10:30:00Z&#34;
+     faketime &#39;2025-01-15 10:30:00&#39; git commit -m &#34;message&#34;
+     unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
+     ```
+
+4. **Verification phase:**
+   - Run command under test (e.g., `git-prompt-story show &#34;$COMMIT&#34; --no-interactive`)
+   - Verify output contains expected content
+   - Check note existence/format: `git notes --ref=refs/notes/prompt-story show HEAD`
+   - Parse note as JSON: `git notes --ref=refs/notes/prompt-story show HEAD | jq ...`
+   - Check transcript storage: `git cat-file -e &#34;refs/notes/prompt-story-transcripts:...&#34;`
+
+5. **Assertions:**
+   - `fail &#34;message&#34;` - Fail with error (exits with code 1)
+   - `echo &#34;msg&#34; | grep -q &#34;pattern&#34;` - Content verification
+   - `jq -e &#39;.field | condition&#39;` - JSON validation
+
+### 5. Test Patterns for Your Redaction/Deletion Test
+
+Based on the structure, here are the patterns you should follow:
+
+**A. Session Creation for Redaction Test:**
+- Create a session with content you want to test redaction on
+- Mix of normal content and sensitive data
+- Multiple messages to test partial redaction
+
+**B. Command Execution &amp; Verification:**
+- Get the commit SHA: `COMMIT=$(git rev-parse HEAD)`
+- Call the redaction command: `git-prompt-story [command-name] &#34;$COMMIT&#34;`
+- Capture output: `OUTPUT=$(...)`
+
+**C. Specific Checks for Redaction/Deletion:**
+- Verify original data is removed: `! echo &#34;$OUTPUT&#34; | grep -q &#34;sensitive-data&#34;`
+- Verify redaction markers present: `echo &#34;$OUTPUT&#34; | grep -q &#34;&lt;REDACTED&gt;&#34;`
+- Verify note is updated: `git notes --ref=refs/notes/prompt-story show HEAD`
+- Verify transcript changes:
+  ```bash
+  TRANSCRIPT=$(git cat-file -p &#34;refs/notes/prompt-story-transcripts:...&#34;)
+  ! echo &#34;$TRANSCRIPT&#34; | grep -q &#34;original-data&#34;
+  echo &#34;$TRANSCRIPT&#34; | grep -q &#34;replacement-marker&#34;
+  ```
+
+### 6. PII Scrubbing Test (Reference: 09-pii-scrubbing.sh)
+
+This is the closest existing pattern to what you need:
+
+**Key assertions from PII test:**
+```bash
+# Retrieve transcript
+TRANSCRIPT=$(git cat-file -p &#34;refs/notes/prompt-story-transcripts:claude-code/pii-session.jsonl&#34;)
+
+# Verify original is gone
+! echo &#34;$TRANSCRIPT&#34; | grep -q &#34;&lt;EMAIL&gt;&#34;
+
+# Verify replacement is present
+echo &#34;$TRANSCRIPT&#34; | grep -qE &#39;(&lt;EMAIL&gt;|\\u003cEMAIL\\u003e)&#39;
+
+# Validate JSONL structure
+while IFS= read -r line; do
+    echo &#34;$line&#34; | jq -e . &gt; /dev/null 2&gt;&amp;1 || fail &#34;Invalid JSON&#34;
+done &lt;&lt;&lt; &#34;$TRANSCRIPT&#34;
+```
+
+### 7. Multiple Sessions Test (Reference: 04-multiple-sessions.sh)
+
+Shows how to:
+- Create multiple overlapping sessions
+- Verify all are captured in a single commit&#39;s note
+- Check that all transcripts are stored separately
+
+**Key pattern:**
+```bash
+# Create multiple sessions
+create_mock_session &#34;session-1&#34; &#34;2025-01-15T09:15:00Z&#34; &#34;2025-01-15T10:00:00Z&#34;
+create_mock_session &#34;session-2&#34; &#34;2025-01-15T09:30:00Z&#34; &#34;2025-01-15T10:15:00Z&#34;
+create_mock_session &#34;session-3&#34; &#34;2025-01-15T09:45:00Z&#34; &#34;2025-01-15T10:20:00Z&#34;
+
+# Verify count
+SESSION_COUNT=$(echo &#34;$NOTE&#34; | jq &#39;.sessions | length&#39;)
+
+# Verify each one
+echo &#34;$NOTE&#34; | jq -e &#39;.sessions[] | select(.id == &#34;session-1&#34;)&#39; &gt; /dev/null
+```
+
+### 8. Repair Command Test (Reference: 12-repair-command.sh)
+
+Advanced pattern showing:
+- `--dry-run` flag behavior
+- `--force` flag to overwrite
+- `--scan` mode to find broken references
+- Range-based operations (commit ranges)
+
+This demonstrates more complex command patterns you might need for deletion workflows.
+
+### 9. Key Testing Principles
+
+1. **Deterministic timestamps** - Use faketime and GIT_*_DATE variables
+2. **Isolated sessions** - `cleanup_sessions` between tests to avoid cross-contamination
+3. **Incremental verification** - Build up from basic creation to complex scenarios
+4. **JSON validation** - Always parse JSON output with jq for robust testing
+5. **File storage testing** - Verify both metadata notes and transcript storage
+6. **Error cases** - Test invalid inputs, missing data, edge cases
+
+### 10. Command Files to Reference
+
+For understanding what commands exist:
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/cmd/show.go` - Show command implementation
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/redact.go` - Redaction logic
+- `/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/scrubber/scrubber.go` - PII scrubbing implementation
+
+---
+
+## Summary
+
+The e2e test framework is well-structured for adding a redaction/deletion test. The closest existing reference is **09-pii-scrubbing.sh**, which tests data modification and verification. Your new test should:
+
+1. Follow the standard test structure (setup, action, verify)
+2. Use `create_mock_session_with_*` helpers to set up test data
+3. Capture command output and transcript after operation
+4. Verify both presence of redaction markers and absence of original data
+5. Validate JSON/JSONL structure integrity
+6. Test multiple scenarios (single commit, multiple sessions, edge cases)</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>f066d24 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>f066d24</code></h1>
+    <p class="meta">Update README with redaction documentation</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">12</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>f066d240d2c80a4fbefc6df9bf0509d43cbb0549</code><br>
+    <strong>Work period:</strong> 2026-01-07 13:59 - 2026-01-07 14:02
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">a291e289-359e-4ccd-850d-49c02439a586</code> |
+        2026-01-06 18:01 - 2026-01-07 14:02 | <span class="session-count">12</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">36a183b Add CLI flags for redaction and e2e test
+1433f8e Add redaction and session deletion to show command TUI
+ef2aba4 Merge pull request #35 from QuesmaOrg/improve-show</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:59</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed as `36a183b`. The branch `add-redaction` now has 2 commits:
+- `1433f8e` - TUI redaction feature
+- `36a183b` - CLI flags and e2e test
+
+Ready to push or create a PR.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">14:00</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please now also upgrade Readme.md where to delete sessions and redact them.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">14:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">14:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   187 # Local pretty-print
+   188 git-prompt-story show HEAD
+   189 ```
+   190 
+   191 ## Privacy &amp; Curation
+   192 
+   193 Notes are local until you push them. Before sharing:
+   194 
+   195 ```bash
+   196 # Review what you&#39;re about to push
+   197 git-prompt-story review
+   198 
+   199 # Interactive viewer - browse sessions and messages
+   200 git-prompt-story show HEAD
+   201 ```
+   202 
+   203 ### Redacting Content
+   204 
+   205 Use the interactive TUI or CLI flags to redact sensitive content:
+   206 
+   207 ```bash
+   208 # Interactive: press &#39;r&#39; on a message to redact, &#39;D&#39; to clear a session
+   209 git-prompt-story show HEAD
+   210 
+   211 # CLI: Clear entire session (replaces content with empty file)
+   212 git-prompt-story show --clear-session &#34;claude-code/session-id&#34;
+   213 
+   214 # CLI: Redact specific message by timestamp
+   215 git-prompt-story show --redact-message &#34;claude-code/session-id@2025-01-15T10:00:00Z&#34;
+   216 ```
+   217 
+   218 Redacted messages show `&lt;REDACTED BY USER&gt;` placeholder. Both git notes and local `~/.claude/projects/` files are updated.
+   219 
+   220 **If notes were already pushed**, you&#39;ll need to force push:
+   221 ```bash
+   222 git push -f origin refs/notes/prompt-story refs/notes/prompt-story-transcripts
+   223 ```
+   224 
+   225 Notes live in separate refs and can be explicitly pushed (unless you use `--auto-push`):
+   226 
+   227 ```bash
+   228 git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts
+   229 ```
+   230 
+   231 ## Roadmap
+   232 
+   233 - [x] Claude Code support</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">14:01</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">This session is being continued from a previous conversation that ran out of context. The conversation is summarized below:
+Analysis:
+Let me chronologically analyze the conversation:
+
+1. **Initial Context**: This is a continuation of previous work on `git-prompt-story`. The user had previously merged the `improve-show` branch and wanted to add redaction/deletion features to the TUI.
+
+2. **First User Request**: The user asked to use `&lt;REDACTED BY USER&gt;` instead of `[REDACTED]`, update confirmation messages to mention both JSONL and git notes, offer force push if notes were already pushed, and keep empty files instead of deleting.
+
+3. **Planning Phase**: I explored how to detect if notes were pushed by comparing local vs remote refs using `git ls-remote`.
+
+4. **Implementation of Refinements**:
+   - Changed placeholder from `[REDACTED]` to `&lt;REDACTED BY USER&gt;`
+   - Updated confirmation prompts to mention &#34;JSONL and git notes&#34;
+   - Added `GetRemoteRef()` function in `git/refs.go`
+   - Added `WasNotesPushed()` function in `redact.go`
+   - Updated success messages with smart push detection
+   - Changed `deleteLocalSessionFile` to `updateLocalSessionFile` with empty content
+   - Fixed tests - JSON marshaling escapes `&lt;` and `&gt;` as `\u003c` and `\u003e`
+
+5. **First Commit**: Committed as `1433f8e`
+
+6. **User Request for Tests**: User asked to add tests, especially e2e tests.
+
+7. **Planning for Tests**: Since TUI is interactive and e2e tests have no TTY, I planned to add CLI flags for non-interactive testing.
+
+8. **User Confirmation**: User approved adding `--clear-session` and `--redact-message` flags.
+
+9. **Implementation of CLI flags and e2e test**:
+   - Added flags to `cmd/show.go`
+   - Created `e2e/tests/19-redaction.sh`
+   - Fixed test failure (new session wasn&#39;t picked up, changed to use already-stored session)
+
+10. **Second Commit**: Committed as `36a183b`
+
+11. **User Request for README Update**: User asked to update README.md to document the redaction features.
+
+12. **README Update**: Updated the &#34;Privacy &amp; Curation&#34; section with documentation for redacting content.
+
+Summary:
+1. Primary Request and Intent:
+   - Add redaction/deletion capabilities to the `show` command TUI for `git-prompt-story`
+   - Use `&lt;REDACTED BY USER&gt;` placeholder instead of `[REDACTED]`
+   - Update confirmation messages to clarify both JSONL files AND git notes are affected
+   - Offer force push suggestion if notes were already pushed to remote
+   - Keep empty files instead of deleting for session removal
+   - Add CLI flags for non-interactive redaction (for scripting and e2e testing)
+   - Create e2e tests for the redaction feature
+   - Update README.md with documentation for redaction features
+
+2. Key Technical Concepts:
+   - Bubble Tea TUI framework for Go
+   - Git notes refs (`refs/notes/prompt-story` and `refs/notes/prompt-story-transcripts`)
+   - JSONL file format for transcripts
+   - Detecting pushed notes by comparing local vs remote refs via `git ls-remote`
+   - JSON marshaling escapes `&lt;` and `&gt;` as `\u003c` and `\u003e`
+   - E2e testing with Docker, faketime, and mock sessions
+
+3. Files and Code Sections:
+
+   - **`internal/show/redact.go`** - Core redaction logic
+     - Changed placeholder: `const redactedPlaceholder = &#34;&lt;REDACTED BY USER&gt;&#34;`
+     - Changed `DeleteSession` to use empty file instead of delete
+     - Added `WasNotesPushed()` function:
+     ```go
+     func WasNotesPushed() bool {
+         local, err := git.GetRef(note.TranscriptsRef)
+         if err != nil || local == &#34;&#34; {
+             return false
+         }
+         remote, err := git.GetRemoteRef(&#34;origin&#34;, note.TranscriptsRef)
+         if err != nil || remote == &#34;&#34; {
+             return false
+         }
+         return local == remote
+     }
+     ```
+
+   - **`internal/git/refs.go`** - Added remote ref lookup
+     ```go
+     func GetRemoteRef(remote, ref string) (string, error) {
+         cmd := exec.Command(&#34;git&#34;, &#34;ls-remote&#34;, remote, ref)
+         out, err := cmd.Output()
+         if err != nil {
+             return &#34;&#34;, nil
+         }
+         line := strings.TrimSpace(string(out))
+         if line == &#34;&#34; {
+             return &#34;&#34;, nil
+         }
+         parts := strings.Fields(line)
+         if len(parts) &gt;= 1 {
+             return parts[0], nil
+         }
+         return &#34;&#34;, nil
+     }
+     ```
+
+   - **`internal/show/tui.go`** - Updated TUI with smart push detection
+     - Updated confirmation prompts to mention &#34;JSONL and git notes&#34;
+     - Updated success messages to check `WasNotesPushed()` before operation
+
+   - **`cmd/show.go`** - Added CLI flags for non-interactive redaction
+     ```go
+     var (
+         clearSessionFlag  string
+         redactMessageFlag string
+     )
+     
+     func handleClearSession(spec string) error {
+         parts := strings.SplitN(spec, &#34;/&#34;, 2)
+         if len(parts) != 2 {
+             return fmt.Errorf(&#34;invalid session spec: %s (expected tool/session-id)&#34;, spec)
+         }
+         tool, sessionID := parts[0], parts[1]
+         if err := show.DeleteSession(tool, sessionID); err != nil {
+             return err
+         }
+         if show.WasNotesPushed() {
+             fmt.Println(&#34;Session cleared. Force push needed: git push -f origin refs/notes/*&#34;)
+         } else {
+             fmt.Println(&#34;Session cleared&#34;)
+         }
+         return nil
+     }
+     
+     func handleRedactMessage(spec string) error {
+         atIdx := strings.LastIndex(spec, &#34;@&#34;)
+         if atIdx == -1 {
+             return fmt.Errorf(&#34;invalid redact spec: %s (expected tool/session-id@timestamp)&#34;, spec)
+         }
+         sessionSpec := spec[:atIdx]
+         timestampStr := spec[atIdx&#43;1:]
+         parts := strings.SplitN(sessionSpec, &#34;/&#34;, 2)
+         if len(parts) != 2 {
+             return fmt.Errorf(&#34;invalid session spec: %s (expected tool/session-id)&#34;, sessionSpec)
+         }
+         tool, sessionID := parts[0], parts[1]
+         timestamp, err := time.Parse(time.RFC3339, timestampStr)
+         if err != nil {
+             return fmt.Errorf(&#34;invalid timestamp: %s (expected RFC3339 format)&#34;, timestampStr)
+         }
+         if err := show.RedactMessage(tool, sessionID, timestamp); err != nil {
+             return err
+         }
+         if show.WasNotesPushed() {
+             fmt.Println(&#34;Message redacted. Force push needed: git push -f origin refs/notes/*&#34;)
+         } else {
+             fmt.Println(&#34;Message redacted&#34;)
+         }
+         return nil
+     }
+     ```
+
+   - **`e2e/tests/19-redaction.sh`** - New e2e test for redaction
+     - Tests session clearing (git notes &#43; local file)
+     - Tests message redaction with placeholder verification
+     - Verifies other sessions/messages are untouched
+
+   - **`internal/show/redact_test.go`** - Updated tests for new placeholder
+     - Added `containsRedacted()` helper to handle JSON escaping:
+     ```go
+     func containsRedacted(s string) bool {
+         return strings.Contains(s, &#34;&lt;REDACTED BY USER&gt;&#34;) ||
+             strings.Contains(s, `\u003cREDACTED BY USER\u003e`)
+     }
+     ```
+
+   - **`README.md`** - Added documentation for redaction features in &#34;Privacy &amp; Curation&#34; section
+
+4. Errors and Fixes:
+   - **JSON escaping issue**: Tests failed because Go&#39;s `json.Marshal` escapes `&lt;` and `&gt;` as `\u003c` and `\u003e`. Fixed by adding `containsRedacted()` helper that checks for both formats.
+   - **E2e test failure**: New session created after first commit wasn&#39;t picked up by second commit. Fixed by using an already-stored session (`session-to-keep`) for the redaction test instead of creating a new one.
+
+5. Problem Solving:
+   - Solved the challenge of e2e testing interactive TUI by adding CLI flags `--clear-session` and `--redact-message`
+   - Implemented smart push detection by comparing local vs remote refs before modification
+
+6. All User Messages:
+   - &#34;Please use marker &lt;REDACTED BY USER&gt; instead of [REMOVED]. Please in confirmation say you remove it both from JSONL files as well as note, please offer to force push if note was already send. For removing notes, please keep an empty file instead.&#34;
+   - &#34;Is there a way to check if note was pushed?&#34;
+   - &#34;Please commit&#34;
+   - &#34;Ok, please now adds tests, expecially e2e for that.&#34;
+   - &#34;Yes, add --redact-session and --redact-message flags&#34; (response to question)
+   - &#34;Please commit&#34;
+   - &#34;Please now also upgrade Readme.md where to delete sessions and redact them.&#34;
+
+7. Pending Tasks:
+   - Commit the README.md update
+
+8. Current Work:
+   The user&#39;s most recent request was: &#34;Please now also upgrade Readme.md where to delete sessions and redact them.&#34;
+   
+   I updated the README.md file, specifically the &#34;Privacy &amp; Curation&#34; section, adding documentation for:
+   - Interactive TUI redaction (press &#39;r&#39; for message, &#39;D&#39; for session)
+   - CLI flags (`--clear-session` and `--redact-message`)
+   - The `&lt;REDACTED BY USER&gt;` placeholder
+   - Force push instructions if notes were already pushed
+
+9. Optional Next Step:
+   Commit the README.md changes. The file has been modified but not yet committed. The user&#39;s pattern has been to request a commit after each set of changes..
+Please continue the conversation from where we left it off without asking the user any further questions. Continue with the last task that you were asked to work on.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">14:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Based on the conversation summary, I updated the README.md with redaction documentation, but it wasn&#39;t committed yet. Let me check the current state and commit the changes.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">14:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch add-redaction
+Your branch is ahead of &#39;origin/main&#39; by 2 commits.
+  (use &#34;git push&#34; to publish your local commits)
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   README.md
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">14:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The README.md changes are ready. Let me check the diff and commit:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">14:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">diff --git a/README.md b/README.md
+index ecf49de..10ee55e 100644
+--- a/README.md
+&#43;&#43;&#43; b/README.md
+@@ -196,11 &#43;196,30 @@ Notes are local until you push them. Before sharing:
+ # Review what you&#39;re about to push
+ git-prompt-story review
+ 
+-# Remove sensitive notes
+-git-prompt-story remove &lt;commit&gt;
+&#43;# Interactive viewer - browse sessions and messages
+&#43;git-prompt-story show HEAD
+&#43;```
+&#43;
+&#43;### Redacting Content
+&#43;
+&#43;Use the interactive TUI or CLI flags to redact sensitive content:
+&#43;
+&#43;```bash
+&#43;# Interactive: press &#39;r&#39; on a message to redact, &#39;D&#39; to clear a session
+&#43;git-prompt-story show HEAD
+&#43;
+&#43;# CLI: Clear entire session (replaces content with empty file)
+&#43;git-prompt-story show --clear-session &#34;claude-code/session-id&#34;
+&#43;
+&#43;# CLI: Redact specific message by timestamp
+&#43;git-prompt-story show --redact-message &#34;claude-code/session-id@2025-01-15T10:00:00Z&#34;
+&#43;```
+&#43;
+&#43;Redacted messages show `&lt;REDACTED BY USER&gt;` placeholder. Both git notes and local `~/.claude/projects/` files are updated.
+ 
+-# Edit to redact content
+-git-prompt-story edit &lt;commit&gt;
+&#43;**If notes were already pushed**, you&#39;ll need to force push:
+&#43;```bash
+&#43;git push -f origin refs/notes/prompt-story refs/notes/prompt-story-transcripts
+ ```
+ 
+ Notes live in separate refs and can be explicitly pushed (unless you use `--auto-push`):</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">14:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The README changes document the new redaction features. Let me commit:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">14:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add README.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Update README with redaction documentation
+
+Document the new privacy controls in the show command:
+- Interactive TUI: &#39;r&#39; to redact message, &#39;D&#39; to clear session
+- CLI flags: --clear-session and --redact-message
+- &lt;REDACTED BY USER&gt; placeholder behavior
+- Force push instructions when notes already pushed
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
