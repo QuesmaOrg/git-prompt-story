@@ -528,14 +528,14 @@ pre {
       <div class="stat-label">Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">41</div>
+      <div class="stat-value" id="visible-count">54</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
 
   <div class="commit-meta" style="margin-bottom: 24px;">
     <strong>Full SHA:</strong> <code>c8109cab5e80397e56a8ef93a9d902844e14103f</code><br>
-    <strong>Work period:</strong> 2026-01-07 12:14 - 2026-01-07 13:07
+    <strong>Work period:</strong> 2026-01-07 12:10 - 2026-01-07 13:07
   </div>
 
   
@@ -547,11 +547,291 @@ pre {
       </h3>
       <div class="commit-meta">
         <code class="session-id">f26c2b56-b0e8-45c5-bc64-6a923238a38c</code> |
-        2026-01-07 12:10 - 2026-01-07 12:30 | <span class="session-count">41</span> entries
+        2026-01-07 12:10 - 2026-01-07 13:17 | <span class="session-count">54</span> entries
       </div>
     </div>
     <div class="session">
       <ul class="prompt-list">
+        
+        <li class="prompt-item COMMAND"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:10</span>
+          <span class="prompt-type">COMMAND</span>
+          
+          <span class="prompt-text">/clear</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:11</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Ok, while looking at user prompts answering question, I see in Claude Code subtitle explaing different options, but don&#39;t see that in transcript:
+ Cleanup type: Which cleanup approach would you prefer? → On PR close &#43; delay
+
+Can you check JSONL files or git notes and see if we can add them there.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:11</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand how JSONL files and git notes handle user question/answer data, and where the subtitle/explanation text might be captured or missing.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore how JSONL files are structured in this codebase. Look for:
+1. How user prompts and answer...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore how git notes are used in this codebase. Look for:
+1. How data is stored in git notes
+2. ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Perfect! Now I have a comprehensive understanding. Let me compile the detailed exploration report:
+
+## Git Notes Usage in git-prompt-story - Comprehensive Exploration Report
+
+I&#39;ve thoroughly explored how git notes are used in this codebase. Here&#39;s the complete breakdown:
+
+### 1. **Git Notes References and Structure**
+
+**Location**: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/refs.go`
+
+The codebase uses two distinct git notes refs:
+
+```go
+const (
+    NotesRef = &#34;refs/notes/prompt-story&#34;           // Primary metadata ref
+    TranscriptsRef = &#34;refs/notes/prompt-story-transcripts&#34;  // Transcript tree storage ref
+)
+```
+
+### 2. **What Data Is Stored in Git Notes**
+
+#### **A. Commit Metadata Notes (refs/notes/prompt-story)**
+
+**Structure** (`internal/note/metadata.go`):
+```go
+type PromptStoryNote struct {
+    Version   int            `json:&#34;v&#34;`
+    StartWork time.Time      `json:&#34;start_work&#34;`
+    Sessions  []SessionEntry `json:&#34;sessions&#34;`
+}
+
+type SessionEntry struct {
+    Tool     string    `json:&#34;tool&#34;`      // &#34;claude-code&#34;
+    ID       string    `json:&#34;id&#34;`        // Session UUID
+    Path     string    `json:&#34;path&#34;`      // Path in transcript tree
+    Created  time.Time `json:&#34;created&#34;`   // Session creation timestamp
+    Modified time.Time `json:&#34;modified&#34;`  // Session last modification
+}
+```
+
+Each commit gets a JSON note containing:
+- Version number
+- Work period start time
+- References to all Claude Code sessions involved in that commit
+- Session metadata (IDs, timestamps, paths to full transcripts)
+
+#### **B. Transcript Tree Storage (refs/notes/prompt-story-transcripts)**
+
+**Location**: `/&lt;REDACTED&gt;/git/git-prompt-story/internal/note/transcript.go`
+
+The transcripts are stored as a git tree structure (not individual notes):
+```
+refs/notes/prompt-story-transcripts (root tree)
+└── claude-code/ (subtree)
+    ├── &lt;session-id-1&gt;.jsonl (blob)
+    ├── &lt;session-id-2&gt;.jsonl (blob)
+    └── ...
+```
+
+Each `.jsonl` file contains the full session tra...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:12</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see the structure now. The issue is that AskUserQuestion options include both `label` and `description` fields, but currently only the `label` (the answer) is being captured in the transcript. Let me read the relevant code to understand exactly what&#39;s being stored and displayed.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/session/types.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:13</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand the issue. Let me check how `ToolUseResult` is preserved in the scrubber:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/scrubber/scrubber.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:13</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I have a complete understanding of the issue. Let me summarize:
+
+**Problem**: When AskUserQuestion is called, Claude Code shows the selected option with its description (subtitle), but the transcript only captures the answer `label`, not the `description`. For example:
+- Claude Code shows: `Cleanup type: Which cleanup approach would you prefer? → On PR close &#43; delay`
+- But the description like &#34;Clean up after PR is closed with a 24 hour delay&#34; is not shown
+
+**Root Cause**: The `AskUserQuestionInput` struct in `summary.go:517-522` only parses `header` and `question`, not the `options` array which contains `label` and `description` for each choice.
+
+Let me write the implementation plan:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/cozy-prancing-quail.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/.claude/plans/cozy-prancing-quail.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">12:13</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Display format)</span>
+          <span class="prompt-text">How would you like the option description to be displayed in the transcript?</span>
+          <span class="decision-answer">→ Italic after arrow</span>
+          
+        </li>
         
         <li class="prompt-item ASSISTANT"
             data-entry-type="assistant"
@@ -1838,6 +2118,10 @@ Changes:
 EOF
 )&#34;</div>
             
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/askuserquestion-option-descriptions c8109ca] Add option descriptions to AskUserQuestion DECISION entries
+ 1 file changed, 54 insertions(&#43;), 9 deletions(-)</div>
             
           </details>
           
