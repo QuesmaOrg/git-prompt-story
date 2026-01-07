@@ -35,11 +35,8 @@ type SessionDiscoverer interface {
 	PromptTool() string
 
 	// DiscoverSessions finds sessions for the given repo within the time range.
-	// Returns tool-specific Session implementations.
+	// Returns only sessions with user activity in the work period.
 	DiscoverSessions(repoPath string, startWork, endWork time.Time, trace *TraceContext) ([]Session, error)
-
-	// FilterByUserMessages filters to sessions with user activity in time range
-	FilterByUserMessages(sessions []Session, startWork, endWork time.Time, trace *TraceContext) []Session
 
 	// CountUserActions counts user actions (prompts, commands, etc.) in time range
 	CountUserActions(sessions []Session, startWork, endWork time.Time) int

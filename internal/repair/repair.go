@@ -64,14 +64,11 @@ func RepairCommit(sha string, opts Options) (*RepairResult, error) {
 		return nil, fmt.Errorf("failed to get work period: %w", err)
 	}
 
-	// Find sessions from all registered prompt tools (includes time filtering)
+	// Find sessions from all registered prompt tools (includes time and user message filtering)
 	sessions, err := session.FindAllSessions(repoRoot, startWork, endWork, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find sessions: %w", err)
 	}
-
-	// Filter by user messages
-	sessions = session.FilterAllByUserMessages(sessions, startWork, endWork, nil)
 
 	result.SessionsFound = len(sessions)
 

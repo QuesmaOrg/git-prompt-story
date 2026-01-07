@@ -86,32 +86,6 @@ func FindAllSessions(repoPath string, startWork, endWork time.Time, trace *Trace
 	return allSessions, nil
 }
 
-// FilterAllByUserMessages filters sessions using tool-specific logic.
-// Groups sessions by prompt tool, filters each group, then combines results.
-func FilterAllByUserMessages(sessions []Session, startWork, endWork time.Time, trace *TraceContext) []Session {
-	// Group sessions by prompt tool
-	byTool := make(map[string][]Session)
-	for _, s := range sessions {
-		byTool[s.GetPromptTool()] = append(byTool[s.GetPromptTool()], s)
-	}
-
-	var result []Session
-	for toolName, toolSessions := range byTool {
-		d := GetDiscoverer(toolName)
-		if d != nil {
-			filtered := d.FilterByUserMessages(toolSessions, startWork, endWork, trace)
-			result = append(result, filtered...)
-		}
-	}
-
-	// Sort by modified time (most recent first)
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].GetModified().After(result[j].GetModified())
-	})
-
-	return result
-}
-
 // CountAllUserActions counts user actions across all sessions using tool-specific logic.
 func CountAllUserActions(sessions []Session, startWork, endWork time.Time) int {
 	// Group sessions by prompt tool

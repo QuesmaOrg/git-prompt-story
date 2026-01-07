@@ -57,20 +57,9 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		debugLog.log("FindAllSessions error: %v", err)
 		sessions = nil
 	}
-	debugLog.log("FindAllSessions returned %d sessions", len(sessions))
+	debugLog.log("FindAllSessions returned %d sessions (with user messages)", len(sessions))
 	for _, s := range sessions {
 		debugLog.log("  - %s [%s]: created=%s, modified=%s", s.GetID(), s.GetPromptTool(), s.GetCreated().UTC().Format(time.RFC3339), s.GetModified().UTC().Format(time.RFC3339))
-	}
-
-	// Filter to only sessions with actual user messages in work period
-	if len(sessions) > 0 {
-		beforeMsgFilter := len(sessions)
-		sessions = session.FilterAllByUserMessages(sessions, startWork, endWork, nil)
-		debugLog.log("FilterAllByUserMessages: %d -> %d sessions", beforeMsgFilter, len(sessions))
-
-		for _, s := range sessions {
-			debugLog.log("  - kept: %s", s.GetID())
-		}
 	}
 
 	pendingFile := filepath.Join(gitDir, "PENDING-PROMPT-STORY")

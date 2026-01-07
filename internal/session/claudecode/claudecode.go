@@ -12,6 +12,75 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
+const (
+	// PromptToolName is the identifier for Claude Code sessions
+	PromptToolName = "claude-code"
+
+	// TranscriptVersion is the current version of Claude Code transcript format.
+	// Bump this when the transcript format changes.
+	TranscriptVersion = "v1"
+)
+
+// TranscriptPath returns the relative path for storing a session transcript.
+// Format: claude-code/v1/<session-id>.jsonl
+func TranscriptPath(sessionID string) string {
+	return filepath.Join(PromptToolName, TranscriptVersion, sessionID+".jsonl")
+}
+
+func init() {
+	session.RegisterDiscoverer(NewDiscoverer())
+	session.RegisterParser(NewParser())
+}
+
+// ClaudeCodeSession represents a discovered Claude Code session.
+// Implements the session.Session interface.
+type ClaudeCodeSession struct {
+	id       string    // Session UUID (filename without .jsonl)
+	path     string    // Full path to JSONL file
+	created  time.Time // First timestamp in file
+	modified time.Time // Last timestamp in file
+}
+
+// NewSession creates a new ClaudeCodeSession.
+func NewSession(id, path string, created, modified time.Time) *ClaudeCodeSession {
+	return &ClaudeCodeSession{
+		id:       id,
+		path:     path,
+		created:  created,
+		modified: modified,
+	}
+}
+
+// GetID returns the session UUID.
+func (s *ClaudeCodeSession) GetID() string {
+	return s.id
+}
+
+// GetPath returns the full path to the session JSONL file.
+func (s *ClaudeCodeSession) GetPath() string {
+	return s.path
+}
+
+// GetPromptTool returns "claude-code".
+func (s *ClaudeCodeSession) GetPromptTool() string {
+	return PromptToolName
+}
+
+// GetCreated returns when the session was created.
+func (s *ClaudeCodeSession) GetCreated() time.Time {
+	return s.created
+}
+
+// GetModified returns when the session was last modified.
+func (s *ClaudeCodeSession) GetModified() time.Time {
+	return s.modified
+}
+
+// ReadContent reads the raw session content from the JSONL file.
+func (s *ClaudeCodeSession) ReadContent() ([]byte, error) {
+	return os.ReadFile(s.path)
+}
+
 // Discoverer implements session.SessionDiscoverer for Claude Code.
 type Discoverer struct{}
 
@@ -26,6 +95,7 @@ func (d *Discoverer) PromptTool() string {
 }
 
 // DiscoverSessions finds Claude Code sessions for the given repo within the time range.
+// Returns only sessions with user messages in the work period.
 func (d *Discoverer) DiscoverSessions(repoPath string, startWork, endWork time.Time, trace *session.TraceContext) ([]session.Session, error) {
 	absPath, err := filepath.Abs(repoPath)
 	if err != nil {
@@ -117,8 +187,6 @@ func (d *Discoverer) DiscoverSessions(repoPath string, startWork, endWork time.T
 			continue
 		}
 
-		sessions = append(sessions, NewSession(id, f, created, modified))
-
 		// Initialize session trace
 		if trace != nil {
 			st := trace.FindOrCreateSessionTrace(id)
@@ -127,6 +195,34 @@ func (d *Discoverer) DiscoverSessions(repoPath string, startWork, endWork time.T
 			st.Modified = modified
 			st.TimeFilterPassed = true
 			st.TimeFilterReason = "PASS (overlaps work period)"
+		}
+
+		// Filter by user messages - only include sessions with user activity
+		hasMessages, count, err := countUserMessagesInRangeForSession(f, startWork, endWork)
+		if err != nil || !hasMessages {
+			if trace != nil {
+				st := trace.FindOrCreateSessionTrace(id)
+				st.UserMsgPassed = false
+				st.UserMsgCount = count
+				if strings.HasPrefix(id, "agent-") {
+					st.UserMsgReason = "FAIL (agent session)"
+				} else {
+					st.UserMsgReason = "FAIL (no user messages in range)"
+				}
+				st.FinalReason = st.UserMsgReason
+			}
+			continue
+		}
+
+		sessions = append(sessions, NewSession(id, f, created, modified))
+
+		if trace != nil {
+			st := trace.FindOrCreateSessionTrace(id)
+			st.UserMsgPassed = true
+			st.UserMsgCount = count
+			st.UserMsgReason = "PASS"
+			st.Included = true
+			st.FinalReason = "included"
 		}
 	}
 
@@ -141,38 +237,6 @@ func (d *Discoverer) DiscoverSessions(repoPath string, startWork, endWork time.T
 	})
 
 	return sessions, nil
-}
-
-// FilterByUserMessages filters to sessions with user messages in time range.
-func (d *Discoverer) FilterByUserMessages(sessions []session.Session, startWork, endWork time.Time, trace *session.TraceContext) []session.Session {
-	var filtered []session.Session
-	for _, s := range sessions {
-		hasMessages, count, err := countUserMessagesInRangeForSession(s.GetPath(), startWork, endWork)
-		if err == nil && hasMessages {
-			filtered = append(filtered, s)
-			if trace != nil {
-				st := trace.FindOrCreateSessionTrace(s.GetID())
-				st.UserMsgPassed = true
-				st.UserMsgCount = count
-				st.UserMsgReason = "PASS"
-				st.Included = true
-				st.FinalReason = "included"
-			}
-		} else {
-			if trace != nil {
-				st := trace.FindOrCreateSessionTrace(s.GetID())
-				st.UserMsgPassed = false
-				st.UserMsgCount = count
-				if strings.HasPrefix(s.GetID(), "agent-") {
-					st.UserMsgReason = "FAIL (agent session)"
-				} else {
-					st.UserMsgReason = "FAIL (no user messages in range)"
-				}
-				st.FinalReason = st.UserMsgReason
-			}
-		}
-	}
-	return filtered
 }
 
 // CountUserActions counts user actions across all sessions within the time range.
