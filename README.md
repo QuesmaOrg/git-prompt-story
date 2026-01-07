@@ -196,11 +196,30 @@ Notes are local until you push them. Before sharing:
 # Review what you're about to push
 git-prompt-story review
 
-# Remove sensitive notes
-git-prompt-story remove <commit>
+# Interactive viewer - browse sessions and messages
+git-prompt-story show HEAD
+```
 
-# Edit to redact content
-git-prompt-story edit <commit>
+### Redacting Content
+
+Use the interactive TUI or CLI flags to redact sensitive content:
+
+```bash
+# Interactive: press 'r' on a message to redact, 'D' to clear a session
+git-prompt-story show HEAD
+
+# CLI: Clear entire session (replaces content with empty file)
+git-prompt-story show --clear-session "claude-code/session-id"
+
+# CLI: Redact specific message by timestamp
+git-prompt-story show --redact-message "claude-code/session-id@2025-01-15T10:00:00Z"
+```
+
+Redacted messages show `<REDACTED BY USER>` placeholder. Both git notes and local `~/.claude/projects/` files are updated.
+
+**If notes were already pushed**, you'll need to force push:
+```bash
+git push -f origin refs/notes/prompt-story refs/notes/prompt-story-transcripts
 ```
 
 Notes live in separate refs and can be explicitly pushed (unless you use `--auto-push`):
