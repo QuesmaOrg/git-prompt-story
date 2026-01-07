@@ -20,17 +20,24 @@ type PromptStoryNote struct {
 
 // SessionEntry describes one LLM session referenced by the note
 type SessionEntry struct {
-	Tool     string    `json:"tool"`
-	ID       string    `json:"id"`
-	Path     string    `json:"path"`
-	Created  time.Time `json:"created"`
-	Modified time.Time `json:"modified"`
+	// PromptTool is the identifier of the prompt tool (e.g., "claude-code", "gemini-cli").
+	// JSON tag is "tool" for backward compatibility with existing notes.
+	PromptTool string    `json:"tool"`
+	ID         string    `json:"id"`
+	Path       string    `json:"path"`
+	Created    time.Time `json:"created"`
+	Modified   time.Time `json:"modified"`
 }
 
-// NewPromptStoryNote creates a new note from discovered sessions
+// Tool is an alias for PromptTool for backward compatibility.
+// Deprecated: Use PromptTool instead.
+func (s SessionEntry) Tool() string { return s.PromptTool }
+
+// NewPromptStoryNote creates a new note from discovered sessions.
+// Accepts sessions implementing the session.Session interface.
 // isAmend should be true when amending a commit (affects start_work calculation)
 // Optional startTime can be provided to use an explicit start time instead of calculating from git
-func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool, startTime ...time.Time) *PromptStoryNote {
+func NewPromptStoryNote(sessions []session.Session, isAmend bool, startTime ...time.Time) *PromptStoryNote {
 	n := &PromptStoryNote{
 		Version:  1,
 		Sessions: make([]SessionEntry, 0, len(sessions)),
@@ -44,16 +51,28 @@ func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool, startTim
 	}
 
 	for _, s := range sessions {
+		promptTool := s.GetPromptTool()
 		n.Sessions = append(n.Sessions, SessionEntry{
-			Tool:     "claude-code",
-			ID:       s.ID,
-			Path:     GetTranscriptPath("claude-code", s.ID),
-			Created:  s.Created,
-			Modified: s.Modified,
+			PromptTool: promptTool,
+			ID:         s.GetID(),
+			Path:       GetTranscriptPath(promptTool, s.GetID()),
+			Created:    s.GetCreated(),
+			Modified:   s.GetModified(),
 		})
 	}
 
 	return n
+}
+
+// NewPromptStoryNoteFromClaudeSessions creates a new note from Claude Code sessions.
+// Deprecated: Use NewPromptStoryNote with session.Session interface instead.
+func NewPromptStoryNoteFromClaudeSessions(sessions []session.ClaudeSession, isAmend bool, startTime ...time.Time) *PromptStoryNote {
+	// Convert to Session interface
+	sessionInterfaces := make([]session.Session, len(sessions))
+	for i, s := range sessions {
+		sessionInterfaces[i] = s
+	}
+	return NewPromptStoryNote(sessionInterfaces, isAmend, startTime...)
 }
 
 // ToJSON serializes the note to JSON
@@ -68,15 +87,15 @@ func (n *PromptStoryNote) GenerateSummary(promptCount int) string {
 		return "Prompt-Story: none"
 	}
 
-	// Build tool list
+	// Build prompt tool list
 	tools := make(map[string]bool)
 	for _, s := range n.Sessions {
-		tools[s.Tool] = true
+		tools[s.PromptTool] = true
 	}
 
 	var toolNames []string
 	for t := range tools {
-		toolNames = append(toolNames, FormatToolName(t))
+		toolNames = append(toolNames, FormatPromptToolName(t))
 	}
 	sort.Strings(toolNames) // Consistent ordering
 
@@ -88,18 +107,24 @@ func GetTranscriptPath(tool, sessionID string) string {
 	return fmt.Sprintf("%s/%s.jsonl", tool, sessionID)
 }
 
-// FormatToolName converts a tool ID to its display name
-func FormatToolName(tool string) string {
-	switch tool {
+// FormatPromptToolName converts a prompt tool ID to its display name.
+func FormatPromptToolName(promptTool string) string {
+	switch promptTool {
 	case "claude-code":
 		return "Claude Code"
-	case "claude-cloud":
-		return "Claude Cloud"
+	case "gemini-cli":
+		return "Gemini CLI"
 	case "cursor":
 		return "Cursor"
 	case "codex":
 		return "Codex"
 	default:
-		return tool
+		return promptTool
 	}
+}
+
+// FormatToolName is an alias for FormatPromptToolName for backward compatibility.
+// Deprecated: Use FormatPromptToolName instead.
+func FormatToolName(tool string) string {
+	return FormatPromptToolName(tool)
 }
