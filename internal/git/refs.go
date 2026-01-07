@@ -26,3 +26,22 @@ func GetRef(ref string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
+// GetRemoteRef returns the SHA of a ref on the remote, or empty if not exists
+func GetRemoteRef(remote, ref string) (string, error) {
+	cmd := exec.Command("git", "ls-remote", remote, ref)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", nil
+	}
+	// Output format: "SHA\tref"
+	line := strings.TrimSpace(string(out))
+	if line == "" {
+		return "", nil
+	}
+	parts := strings.Fields(line)
+	if len(parts) >= 1 {
+		return parts[0], nil
+	}
+	return "", nil
+}
+

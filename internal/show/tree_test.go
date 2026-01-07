@@ -119,8 +119,8 @@ func TestFlattenVisible_CollapsedTree(t *testing.T) {
 	session := NewSessionNode(ci.SessionSummary{Tool: "claude-code", ID: "sess1"}, "abc1234", 1)
 
 	// User action with steps
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT", Text: "Test"}, "sess1", "abc1234", 2)
-	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE", ToolName: "Bash"}, "sess1", "abc1234", 3)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT", Text: "Test"}, "claude-code", "sess1", "abc1234", 2)
+	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE", ToolName: "Bash"}, "claude-code", "sess1", "abc1234", 3)
 	action.FollowingSteps = []*StepNode{step}
 
 	session.children = []Node{action}
@@ -150,9 +150,9 @@ func TestFlattenVisible_CollapsedTree(t *testing.T) {
 func TestFlattenVisible_ExpandedAction(t *testing.T) {
 	tree := &Tree{}
 
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT", Text: "Test"}, "sess1", "abc1234", 0)
-	step1 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE", ToolName: "Bash"}, "sess1", "abc1234", 1)
-	step2 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE", ToolName: "Read"}, "sess1", "abc1234", 1)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT", Text: "Test"}, "claude-code", "sess1", "abc1234", 0)
+	step1 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE", ToolName: "Bash"}, "claude-code", "sess1", "abc1234", 1)
+	step2 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE", ToolName: "Read"}, "claude-code", "sess1", "abc1234", 1)
 	action.FollowingSteps = []*StepNode{step1, step2}
 	action.SetExpanded(true)
 
@@ -169,8 +169,8 @@ func TestFlattenVisible_ExpandedAction(t *testing.T) {
 func TestTreeExpandCollapse(t *testing.T) {
 	tree := &Tree{}
 
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "sess1", "abc1234", 0)
-	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "sess1", "abc1234", 1)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "claude-code", "sess1", "abc1234", 0)
+	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "claude-code", "sess1", "abc1234", 1)
 	action.FollowingSteps = []*StepNode{step}
 
 	tree.Roots = []Node{action}
@@ -199,8 +199,8 @@ func TestTreeExpandCollapse(t *testing.T) {
 func TestTreeToggleExpand(t *testing.T) {
 	tree := &Tree{}
 
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "sess1", "abc1234", 0)
-	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "sess1", "abc1234", 1)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "claude-code", "sess1", "abc1234", 0)
+	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "claude-code", "sess1", "abc1234", 1)
 	action.FollowingSteps = []*StepNode{step}
 
 	tree.Roots = []Node{action}
@@ -224,8 +224,8 @@ func TestTreeExpandAll(t *testing.T) {
 	tree := &Tree{}
 
 	commit := NewCommitNode(ci.CommitSummary{ShortSHA: "abc"}, 0)
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "sess1", "abc", 1)
-	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "sess1", "abc", 2)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "claude-code", "sess1", "abc", 1)
+	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "claude-code", "sess1", "abc", 2)
 	action.FollowingSteps = []*StepNode{step}
 	commit.children = []Node{action}
 	tree.Roots = []Node{commit}
@@ -250,8 +250,8 @@ func TestTreeCollapseAll(t *testing.T) {
 	tree := &Tree{}
 
 	commit := NewCommitNode(ci.CommitSummary{ShortSHA: "abc"}, 0)
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "sess1", "abc", 1)
-	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "sess1", "abc", 2)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "claude-code", "sess1", "abc", 1)
+	step := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "claude-code", "sess1", "abc", 2)
 	action.FollowingSteps = []*StepNode{step}
 	action.SetExpanded(true)
 	commit.children = []Node{action}
@@ -272,8 +272,8 @@ func TestCountUserActions(t *testing.T) {
 	commit := NewCommitNode(ci.CommitSummary{ShortSHA: "abc"}, 0)
 	session := NewSessionNode(ci.SessionSummary{ID: "sess1"}, "abc", 1)
 
-	action1 := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "sess1", "abc", 2)
-	action2 := NewUserActionNode(ci.PromptEntry{Type: "COMMAND"}, "sess1", "abc", 2)
+	action1 := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "claude-code", "sess1", "abc", 2)
+	action2 := NewUserActionNode(ci.PromptEntry{Type: "COMMAND"}, "claude-code", "sess1", "abc", 2)
 
 	session.children = []Node{action1, action2}
 	commit.children = []Node{session}
@@ -285,9 +285,9 @@ func TestCountUserActions(t *testing.T) {
 }
 
 func TestCountAllSteps(t *testing.T) {
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "sess1", "abc", 0)
-	step1 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "sess1", "abc", 1)
-	step2 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "sess1", "abc", 1)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "claude-code", "sess1", "abc", 0)
+	step1 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "claude-code", "sess1", "abc", 1)
+	step2 := NewStepNode(ci.PromptEntry{Type: "TOOL_USE"}, "claude-code", "sess1", "abc", 1)
 	action.FollowingSteps = []*StepNode{step1, step2}
 
 	// Action counts as 1, plus 2 steps = 3 total
@@ -299,7 +299,7 @@ func TestCountAllSteps(t *testing.T) {
 
 func TestExpandCollapseOutOfBounds(t *testing.T) {
 	tree := &Tree{}
-	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "sess1", "abc", 0)
+	action := NewUserActionNode(ci.PromptEntry{Type: "PROMPT"}, "claude-code", "sess1", "abc", 0)
 	tree.Roots = []Node{action}
 
 	visible := tree.FlattenVisible()

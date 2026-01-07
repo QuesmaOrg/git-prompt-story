@@ -117,15 +117,17 @@ func (s *SessionNode) Label() string {
 type UserActionNode struct {
 	BaseNode
 	entry          ci.PromptEntry
+	Tool           string
 	SessionID      string
 	CommitSHA      string
 	FollowingSteps []*StepNode // Steps that follow this user action (shown in detail panel)
 }
 
-func NewUserActionNode(entry ci.PromptEntry, sessionID, commitSHA string, depth int) *UserActionNode {
+func NewUserActionNode(entry ci.PromptEntry, tool, sessionID, commitSHA string, depth int) *UserActionNode {
 	return &UserActionNode{
 		BaseNode:  BaseNode{depth: depth, expanded: false},
 		entry:     entry,
+		Tool:      tool,
 		SessionID: sessionID,
 		CommitSHA: commitSHA,
 	}
@@ -156,14 +158,16 @@ func (u *UserActionNode) Label() string {
 type StepNode struct {
 	BaseNode
 	entry     ci.PromptEntry
+	Tool      string
 	SessionID string
 	CommitSHA string
 }
 
-func NewStepNode(entry ci.PromptEntry, sessionID, commitSHA string, depth int) *StepNode {
+func NewStepNode(entry ci.PromptEntry, tool, sessionID, commitSHA string, depth int) *StepNode {
 	return &StepNode{
 		BaseNode:  BaseNode{depth: depth, expanded: false},
 		entry:     entry,
+		Tool:      tool,
 		SessionID: sessionID,
 		CommitSHA: commitSHA,
 	}

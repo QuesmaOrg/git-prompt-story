@@ -84,12 +84,12 @@ func buildActionNodes(sess ci.SessionSummary, commitSHA string, depth int) []Nod
 	for _, entry := range sess.Prompts {
 		if ci.IsUserAction(entry.Type) {
 			// Create a new user action node
-			actionNode := NewUserActionNode(entry, sess.ID, commitSHA, depth)
+			actionNode := NewUserActionNode(entry, sess.Tool, sess.ID, commitSHA, depth)
 			nodes = append(nodes, actionNode)
 			currentAction = actionNode
 		} else if currentAction != nil {
 			// This is a step (TOOL_USE, ASSISTANT, etc.) - attach to current action
-			stepNode := NewStepNode(entry, sess.ID, commitSHA, depth+1)
+			stepNode := NewStepNode(entry, sess.Tool, sess.ID, commitSHA, depth+1)
 			currentAction.FollowingSteps = append(currentAction.FollowingSteps, stepNode)
 		}
 		// Steps before the first user action are ignored
