@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>778231e - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>778231e</code></h1>
+    <p class="meta">Merge workflow command into install --workflow flag</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">17</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>778231ee9ee6416febcd3e9a42d6755e1c314998</code><br>
+    <strong>Work period:</strong> 2026-01-07 17:20 - 2026-01-07 17:24
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">d3a059c7-753e-4b85-8215-37f5f8a5c5bb</code> |
+        2026-01-07 16:17 - 2026-01-07 17:23 | <span class="session-count">17</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Committing command restructure&#34;,&#34;content&#34;:&#34;Commit current command restructure changes&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding --workflow flag&#34;,&#34;content&#34;:&#34;Add --workflo...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/cmd/install.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package cmd
+     2 
+     3 import (
+     4 	&#34;fmt&#34;
+     5 	&#34;os&#34;
+     6 
+     7 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/hooks&#34;
+     8 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/workflow&#34;
+     9 	&#34;github.com/spf13/cobra&#34;
+    10 )
+    11 
+    12 var (
+    13 	installGlobalFlag   bool
+    14 	installAutoPushFlag bool
+    15 	installWorkflowFlag bool
+    16 )
+    17 
+    18 var installCmd = &amp;cobra.Command{
+    19 	Use:   &#34;install&#34;,
+    20 	Short: &#34;Install git hooks and optionally GitHub Actions workflow&#34;,
+    21 	Long: `Install git hooks to automatically capture LLM sessions on commit.
+    22 
+    23 By default, installs hooks in the current repository.
+    24 Use --global to install hooks globally for all repositories.
+    25 Use --auto-push to also install a pre-push hook that syncs notes.
+    26 Use --workflow to also generate a GitHub Actions workflow for PR summaries.`,
+    27 	Run: func(cmd *cobra.Command, args []string) {
+    28 		opts := hooks.InstallOptions{
+    29 			Global:   installGlobalFlag,
+    30 			AutoPush: installAutoPushFlag,
+    31 		}
+    32 		if err := hooks.InstallHooks(opts); err != nil {
+    33 			fmt.Fprintf(os.Stderr, &#34;Error: %v\n&#34;, err)
+    34 			os.Exit(1)
+    35 		}
+    36 
+    37 		if installWorkflowFlag {
+    38 			fmt.Println() // Blank line between hooks and workflow output
+    39 			if err := workflow.Generate(); err != nil {
+    40 				fmt.Fprintf(os.Stderr, &#34;Error generating workflow: %v\n&#34;, err)
+    41 				os.Exit(1)
+    42 			}
+    43 		}
+    44 	},
+    45 }
+    46 
+    47 func init() {
+    48 	installCmd.Flags().BoolVar(&amp;installGlobalFlag, &#34;global&#34;, false, &#34;Install hooks globally&#34;)
+    49 	installCmd.Flags().BoolVar(&amp;installAutoPushFlag, &#34;auto-push&#34;, false, &#34;Install pre-push hook to auto-sync notes&#34;)
+    50 	installCmd.Flags().BoolVar(&amp;installWorkflowFlag, &#34;workfl...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Committing command restructure&#34;,&#34;content&#34;:&#34;Commit current command restructure changes&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding --workflow flag&#34;,&#34;content&#34;:&#34;Add --workflo...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">rm cmd/workflow.go &amp;&amp; rm cmd/generate_github_workflow.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Committing command restructure&#34;,&#34;content&#34;:&#34;Commit current command restructure changes&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding --workflow flag&#34;,&#34;content&#34;:&#34;Add --workflo...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    30 - **Privacy scrubbing** - Credentials, PII, and Read tool outputs redacted before storage ([configurable](docs/PII_SCRUBBING.md))
+    31 - **Review before push** - Curate or redact notes before sharing
+    32 - **Prompt tracking** - Commit messages show which tools and how many prompts were used
+    33 
+    34 ## Setup
+    35 
+    36 ### Individual Developer
+    37 
+    38 Set up git-prompt-story on your machine to capture LLM sessions in all your repos.
+    39 
+    40 ```bash
+    41 # 1. Install
+    42 go install github.com/QuesmaOrg/git-prompt-story@latest
+    43 
+    44 # 2. Install git hooks globally
+    45 # Add --auto-push to install pre-push hook that syncs notes automatically
+    46 # Without --auto-push, push notes manually with:
+    47 #   git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts
+    48 git-prompt-story install --global --auto-push
+    49 ```
+    50 
+    51 That&#39;s it. Future commits will automatically capture active LLM sessions.
+    52 
+    53 ### Repository CI Integration
+    54 
+    55 To add GitHub Action integration for your repository:
+    56 
+    57 ```bash
+    58 git-prompt-story install --workflow
+    59 ```
+    60 
+    61 This interactively generates a workflow file that posts PR summaries and optionally deploys full transcripts to GitHub Pages.
+    62 
+    63 You can combine all options for a full setup:
+    64 
+    65 ```bash
+    66 git-prompt-story install --global --auto-push --workflow
+    67 ```
+    68 
+    69 ## How It Works
+    70 
+    71 ```</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story install --help</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Install git hooks to automatically capture LLM sessions on commit.
+
+By default, installs hooks in the current repository.
+Use --global to install hooks globally for all repositories.
+Use --auto-push to also install a pre-push hook that syncs notes.
+Use --workflow to also generate a GitHub Actions workflow for PR summaries.
+
+Usage:
+  git-prompt-story install [flags]
+
+Flags:
+      --auto-push   Install pre-push hook to auto-sync notes
+      --global      Install hooks globally
+  -h, --help        help for install
+      --workflow    Generate GitHub Actions workflow for PR summaries</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story --help</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story captures LLM sessions (Claude Code, Cursor, etc.)
+and stores them as git notes attached to your commits.
+
+When called without a subcommand, shows prompts for the specified commit (or HEAD).
+
+Examples:
+  git-prompt-story                    # Show prompts for HEAD
+  git-prompt-story HEAD~5             # Show prompts for specific commit
+  git-prompt-story show HEAD~5..HEAD  # Show prompts for commit range
+
+Usage:
+  git-prompt-story [commit] [flags]
+  git-prompt-story [command]
+
+Available Commands:
+  add                Add a session to a commit
+  completion         Generate the autocompletion script for the specified shell
+  explain            Explain session discovery and filtering decisions
+  help               Help about any command
+  install            Install git hooks and optionally GitHub Actions workflow
+  list               List available sessions
+  pages              Generate HTML transcript pages
+  repair             Repair missing prompt-story notes from local sessions
+  show               Show prompts for a commit
+  summary            Generate summary for commits
+
+Flags:
+  -h, --help      help for git-prompt-story
+  -v, --version   version for git-prompt-story
+
+Use &#34;git-prompt-story [command] --help&#34; for more information about a command.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Committing command restructure&#34;,&#34;content&#34;:&#34;Commit current command restructure changes&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding --workflow flag&#34;,&#34;content&#34;:&#34;Add --workflo...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I need to update the e2e test for workflow generation:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 #!/bin/bash
+     2 set -euo pipefail
+     3 source /e2e/lib/helpers.sh
+     4 
+     5 echo &#34;[16/16] Install --workflow Flag&#34;
+     6 
+     7 # ============================================
+     8 # Test 1: Generate workflow with Pages enabled (default)
+     9 # ============================================
+    10 echo &#34;  Test 1: Generate workflow with Pages enabled (default)...&#34;
+    11 
+    12 rm -rf /workspace/test-repo
+    13 mkdir -p /workspace/test-repo
+    14 cd /workspace/test-repo
+    15 git init
+    16 
+    17 # Verify no workflow exists yet
+    18 [ ! -f .github/workflows/prompt-story.yml ] || fail &#34;workflow should not exist yet&#34;
+    19 
+    20 # Run command with Enter (default = yes for Pages)
+    21 echo &#34;&#34; | git-prompt-story install --workflow
+    22 
+    23 # Verify workflow created
+    24 [ -f .github/workflows/prompt-story.yml ] || fail &#34;workflow not created&#34;
+    25 
+    26 # Verify deploy-pages is true
+    27 grep -q &#34;deploy-pages: true&#34; .github/workflows/prompt-story.yml || fail &#34;deploy-pages should be true&#34;
+    28 
+    29 # Verify essential workflow content
+    30 grep -q &#34;name: Prompt Story&#34; .github/workflows/prompt-story.yml || fail &#34;missing workflow name&#34;
+    31 grep -q &#34;pull_request:&#34; .github/workflows/prompt-story.yml || fail &#34;missing pull_request trigger&#34;
+    32 grep -q &#34;QuesmaOrg/git-prompt-story&#34; .github/workflows/prompt-story.yml || fail &#34;missing action reference&#34;
+    33 grep -q &#34;github-token:&#34; .github/workflows/prompt-story.yml || fail &#34;missing github-token&#34;
+    34 
+    35 echo &#34;    - Workflow created with Pages enabled&#34;
+    36 
+    37 # ============================================
+    38 # Test 2: Generate workflow with Pages disabled
+    39 # ============================================
+    40 echo &#34;  Test 2: Generate workflow with Pages disabled...&#34;
+    41 
+    42 rm...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    - session-subfolder (src/) detected
+    - session-parent (/workspace writing to repo) detected
+    - session-other-repo (test-repo-v2) correctly NOT detected
+
+  All assertions passed!
+
+Running: 19-redaction
+[19] Show Command - Redaction and Session Clearing
+  Step 1: Creating test repo with sessions...
+Initialized empty Git repository in /workspace/test-repo/.git/
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+Command &#34;install-hooks&#34; is deprecated, use &#39;git-prompt-story install&#39; instead
+Hooks installed to .git/hooks
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-to-clear.jsonl
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-to-keep.jsonl
+Command &#34;prepare-commit-msg&#34; is deprecated, use &#39;git-prompt-story hook prepare-commit-msg&#39; instead
+Command &#34;post-commit&#34; is deprecated, use &#39;git-prompt-story hook post-commit&#39; instead
+[main 8655e9d] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Created commit: 8655e9dd3eb873986849c5bf0c8437078d94dd1f
+
+  Test 1: Verify sessions exist before clearing...
+    - Both sessions have content
+
+  Test 2: Clear session...
+Session cleared
+    - clear-session command succeeded
+
+  Test 3: Verify cleared session is empty...
+    - Cleared session is empty in git notes
+
+  Test 4: Verify other session is untouched...
+    - Other session still has content
+
+  Test 5: Verify local file is cleared...
+    - Local file is empty
+
+  Test 6: Message redaction...
+Message redacted
+    - redact-message command succeeded
+    - Message redacted with placeholder
+
+  Test 7: Verify assistant message is untouched...
+    - Assistant message preserved
+
+  All assertions passed!
+
+=== 20/20 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Let me commit this change:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Merge workflow command into install --workflow flag
+
+- Add --workflow flag to install command
+- Remove standalone workflow command (no backward compat)
+- Update e2e test to use new flag
+- Update README with combined setup instructions
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/command-restructure 778231e] Merge workflow command into install --workflow flag
+ 5 files changed, 27 insertions(&#43;), 64 deletions(-)
+ delete mode 100644 cmd/generate_github_workflow.go
+ delete mode 100644 cmd/workflow.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
