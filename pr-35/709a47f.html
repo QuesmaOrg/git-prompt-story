@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>709a47f - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>709a47f</code></h1>
+    <p class="meta">Add comprehensive tests for show command TUI</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">45</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>709a47fca0023216f36370781db8b0714e343406</code><br>
+    <strong>Work period:</strong> 2026-01-06 18:37 - 2026-01-07 08:02
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">a291e289-359e-4ccd-850d-49c02439a586</code> |
+        2026-01-06 18:01 - 2026-01-07 08:00 | <span class="session-count">45</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">fd9824c Simplify TUI: remove StepGroupNode, show steps directly under user actions
+78a522c Add interactive TUI for show command with collapsible hierarchy
+4b0de0a Merge pull request #31 from QuesmaOrg/add-user-actions-test-constant</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:38</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed `fd9824c`:
+
+```
+Simplify TUI: remove StepGroupNode, show steps directly under user actions
+
+3 files changed, 51 insertions(&#43;), 109 deletions(-)
+```
+
+Branch `improve-show` now has 2 commits ahead of main:
+1. `78a522c` - Add interactive TUI
+2. `fd9824c` - Simplify (remove intermediate layer)</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">07:44</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please add some test fcan you give few examples of usage so I can try this show and see how it works? I mean multisession or multi-commit example too.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me find some good examples in your repo:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=refs/notes/prompt-story list 2&gt;&amp;1 | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">16c47a35e5cac542b282b28b03f3c6a65976143b 007991e8753bab40e75aa3e2c08c931a1cd32ce0
+957981d8e0e3c5dc22df775034112dc90401b916 01b837ce44dac8b17a9a36072269d88c3bf4fe89
+fabebc8c0d5fd0c07c7b3545091e9587ac8dbd89 0210587c6f9b68319f851cd50bf79e9580b1a5bb
+136374bd7bf3ab99946e800156a127d62880c3a2 0404c3b11c7f9e6591296ef65f475394ded82467
+6f611645b9f63858586dcb595e1fec21e880d61b 059fcc48d944226b50efce76d3f989d38574ff09
+2794fddaebc33d1e45d9bfbe6ae9b8f7f659b684 067557b154904b31c9e9dde46ddbdd8aab67f2e2
+17a6672f00013802a31d7ff68d244fb55ec6592f 06c93d887a8bf86ac52140a8b05f902107279635
+a593454e60c178bce2a27c1965ca2574ae1a3f23 10335b20d111426922e7737775d9a3ab3b6061d0
+0b2e9872e45b73ea6c239f8782fd2e8149a0e116 145be0fd28e224113d3bb52c344044ae4b0482e2
+c574f29b91659743d5a3c8d07e674711c4edf2ab 14ab5120d9262dbc1f9d8f98b90c3d3d38ad0e86
+32c9181b8da6c7bbdb6935082ae6cb56a5a979ae 16ab6d7ecbb7e4fcbbf5d41abc4db046a86da349
+cc97967c2778bbdeec139b7ce987b346deb81293 18424adb49a6c90988600551ecb34e21e745f304
+f8be2625a1a77074eb0223f961ac68b1fc9f4df7 18baa02351cb042a9f3c3d9097ce8a46a7ee86e4
+c2ddda14f871806354e3f33542a99d729a59d38a 1d17ce8573c292eafdacb06606f4fe9b6d33a842
+f39f7d5c88a5f8dc7c9fc10f74ce46cb6218f8ca 1db428a9f9ab36809cb28be474bc7ab300bf6e24
+e14b37d91201f46b2a783fcb463306a884f4c3ad 1e332ff55d9a307f3beda6ac5798a209b4abe2e0
+5b3f7a64a66c3be7c0ff9eaecd17840bbed405b9 1e7848d749d112278debb0352e6452bbe1509190
+f76faff5878a056af83a3933c2832af074330854 1f5f63708e8bdbd52bf91dd6ae9a0971b37092c9
+14a89a192ca47bbf7f5090b9aa5b060ba14872ec 20cb5d246605b81a7bd45975e937a7feaae7b245
+7b29fa2bf5cf9eb06eba2d0f6837027cf49ec973 2233e2a079ae1ff9c54f2d21af339dff832b5b95</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input"># Find commits with multiple sessions
+for sha in 007991e 01b837c 0210587 0404c3b; do
+  echo &#34;=== $sha ===&#34;
+  git notes --ref=refs/notes/prompt-story show $sha 2&gt;/dev/null | head -20
+  echo &#34;&#34;
+done</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== 007991e ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-05T17:45:43Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;95d2cad1-0f79-4d1b-89cc-9a422379b8b9&#34;,
+      &#34;path&#34;: &#34;claude-code/95d2cad1-0f79-4d1b-89cc-9a422379b8b9.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-05T17:33:57.923Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-05T17:47:01.264Z&#34;
+    }
+  ]
+}
+=== 01b837c ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-05T15:33:03Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;cc90e5ff-af8a-4c7f-98e8-6ef096b91848&#34;,
+      &#34;path&#34;: &#34;claude-code/cc90e5ff-af8a-4c7f-98e8-6ef096b91848.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-05T15:19:32.036Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-05T15:41:49.489Z&#34;
+    }
+  ]
+}
+=== 0210587 ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-04T15:11:54Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;fe914ab8-41bf-4c8a-8373-515697eefcf1&#34;,
+      &#34;path&#34;: &#34;claude-code/fe914ab8-41bf-4c8a-8373-515697eefcf1.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-04T14:08:12.126Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-04T15:46:53.089Z&#34;
+    },
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;agent-ab80455&#34;,
+      &#34;path&#34;: &#34;claude-code/agent-ab80455.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-04T15:29:55.783Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-04T15:30:48.666Z&#34;
+    },
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+
+=== 0404c3b ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-04T14:39:36Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;fe914ab8-41bf-4c8a-8373-515697eefcf1&#34;,
+      &#34;path&#34;: &#34;claude-code/fe914ab8-41bf-4c8a-8373-515697eefcf1.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-04T14:08:12.126Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-04T14:47:19.097Z&#34;
+    }
+  ]
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:45</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Here are examples to try:
+
+## Single commit, single session
+```bash
+./git-prompt-story show 007991e
+```
+
+## Single commit, multiple sessions (with agent sessions)
+```bash
+./git-prompt-story show 0210587
+```
+
+## Commit range (multiple commits)
+```bash
+./git-prompt-story show 0404c3b..0210587
+```
+
+## Recent commits range
+```bash
+./git-prompt-story show HEAD~10..HEAD
+```
+(Will only show commits that have prompt-story notes)
+
+## Non-interactive mode (for piping)
+```bash
+./git-prompt-story show 0210587 --no-interactive
+```
+
+**Keybindings in TUI:**
+- `j/k` - navigate up/down
+- `e/Enter` - expand user action to show steps
+- `c` - collapse
+- `E/C` - expand/collapse all
+- `J/K` - scroll detail pane
+- `q` - quit</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">07:47</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">You are the best! Please commit your changes and then brainstorm how to test it really well, because it&#39;s absolutely terrific job of yours </span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check if there are uncommitted changes first:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch improve-show
+Your branch and &#39;origin/main&#39; have diverged,
+and have 2 and 10 different commits each, respectively.
+  (use &#34;git pull&#34; to merge the remote branch into yours)
+
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All changes are already committed (2 commits on `improve-show` branch). Now let me create a testing plan:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Testing Strategy for Interactive TUI Show Command
+     2 
+     3 ## Overview
+     4 
+     5 The new `show` command has an interactive TUI with:
+     6 - Hierarchical tree (commits   sessions   user actions   steps)
+     7 - Dual-pane layout (tree &#43; detail)
+     8 - Expand/collapse functionality
+     9 - Keyboard navigation
+    10 
+    11 ## Testing Approaches
+    12 
+    13 ### 1. Unit Tests for Data Layer
+    14 
+    15 **File: `internal/show/data_test.go`**
+    16 
+    17 Test node creation and properties:
+    18 - `TestNewCommitNode` - correct fields, expandable
+    19 - `TestNewSessionNode` - correct fields, expandable
+    20 - `TestNewUserActionNode` - correct fields, expandable when has steps
+    21 - `TestNewStepNode` - correct fields, not expandable
+    22 - `TestGetTypeEmoji` - all entry types return correct emoji
+    23 - `TestTruncateText` - handles newlines, truncation, edge cases
+    24 
+    25 ### 2. Unit Tests for Tree Building
+    26 
+    27 **File: `internal/show/tree_test.go`**
+    28 
+    29 Test tree construction:
+    30 - `TestLoadTree_SingleCommitSingleSession` - actions at root
+    31 - `TestLoadTree_SingleCommitMultipleSessions` - sessions at root
+    32 - `TestLoadTree_MultipleCommits` - commits at root
+    33 - `TestBuildActionNodes_WithSteps` - steps attached to user actions
+    34 - `TestBuildActionNodes_NoSteps` - user actions without steps
+    35 - `TestFlattenVisible_Collapsed` - only shows top-level
+    36 - `TestFlattenVisible_Expanded` - includes children
+    37 - `TestExpandCollapse` - toggle works correctly
+    38 
+    39 ### 3. Integration Tests with Real Data
+    40 
+    41 **File: `internal/show/integration_test.go`**
+    42 
+    43 Use test fixtures (JSONL files) to test full flow:
+    44 - Create mock git notes and transcripts
+    45 - Test `LoadTree` produce...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Here&#39;s my testing brainstorm. The key areas are:
+
+**Unit Tests:**
+- `data_test.go` - Node creation, emoji mapping, text truncation
+- `tree_test.go` - Tree building, flatten visible, expand/collapse
+
+**E2E Tests:**
+- Add show command tests to existing `e2e/run-tests.sh`
+
+**Manual Checklist:**
+- All keybindings, edge cases (small terminal, empty commits)</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Test Focus)</span>
+          <span class="prompt-text">Which testing approach would you like me to implement first?</span>
+          <span class="decision-answer">→ Both</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:53</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Testing Strategy for Interactive TUI Show Command\n\n## Overview\n\nThe new `show` command has an interactive TUI with:\n- Hierarchical tree (commits → sessions → user actions ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/reactive-nibbling-walrus.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Testing Strategy for Interactive TUI Show Command
+
+## Overview
+
+The new `show` command has an interactive TUI with:
+- Hierarchical tree (commits   sessions   user actions   steps)
+- Dual-pane layout (tree &#43; detail)
+- Expand/collapse functionality
+- Keyboard navigation
+
+## Testing Approaches
+
+### 1. Unit Tests for Data Layer
+
+**File: `internal/show/data_test.go`**
+
+Test node creation and properties:
+- `TestNewCommitNode` - correct fields, expandable
+- `TestNewSessionNode` - correct fields, expandable
+- `TestNewUserActionNode` - correct fields, expandable when has steps
+- `TestNewStepNode` - correct fields, not expandable
+- `TestGetTypeEmoji` - all entry types return correct emoji
+- `TestTruncateText` - handles newlines, truncation, edge cases
+
+### 2. Unit Tests for Tree Building
+
+**File: `internal/show/tree_test.go`**
+
+Test tree construction:
+- `TestLoadTree_SingleCommitSingleSession` - actions at root
+- `TestLoadTree_SingleCommitMultipleSessions` - sessions at root
+- `TestLoadTree_MultipleCommits` - commits at root
+- `TestBuildActionNodes_WithSteps` - steps attached to user actions
+- `TestBuildActionNodes_NoSteps` - user actions without steps
+- `TestFlattenVisible_Collapsed` - only shows top-level
+- `TestFlattenVisible_Expanded` - includes children
+- `TestExpandCollapse` - toggle works correctly
+
+### 3. Integration Tests with Real Data
+
+**File: `internal/show/integration_test.go`**
+
+Use test fixtures (JSONL files) to test full flow:
+- Create mock git notes and transcripts
+- Test `LoadTree` produces expected structure
+- Verify counts (TotalActions, TotalSteps)
+
+### 4. Golden File Tests for Rendering
+
+**File: `internal/show/render_test.go`**
+
+Capture expected output and compare:
+- `TestRenderTreeL...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating data_test.go&#34;,&#34;content&#34;:&#34;Create unit tests for data.go (nodes, emoji, truncation)&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Creating tree_test.go&#34;,&#34;content&#34;:&#34;Create ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/show/... -v 2&gt;&amp;1 | head -80</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestGetTypeEmoji
+=== RUN   TestGetTypeEmoji/PROMPT
+=== RUN   TestGetTypeEmoji/COMMAND
+=== RUN   TestGetTypeEmoji/TOOL_REJECT
+=== RUN   TestGetTypeEmoji/DECISION
+=== RUN   TestGetTypeEmoji/TOOL_USE
+=== RUN   TestGetTypeEmoji/ASSISTANT
+=== RUN   TestGetTypeEmoji/TOOL_RESULT
+=== RUN   TestGetTypeEmoji/UNKNOWN
+=== RUN   TestGetTypeEmoji/#00
+--- PASS: TestGetTypeEmoji (0.00s)
+    --- PASS: TestGetTypeEmoji/PROMPT (0.00s)
+    --- PASS: TestGetTypeEmoji/COMMAND (0.00s)
+    --- PASS: TestGetTypeEmoji/TOOL_REJECT (0.00s)
+    --- PASS: TestGetTypeEmoji/DECISION (0.00s)
+    --- PASS: TestGetTypeEmoji/TOOL_USE (0.00s)
+    --- PASS: TestGetTypeEmoji/ASSISTANT (0.00s)
+    --- PASS: TestGetTypeEmoji/TOOL_RESULT (0.00s)
+    --- PASS: TestGetTypeEmoji/UNKNOWN (0.00s)
+    --- PASS: TestGetTypeEmoji/#00 (0.00s)
+=== RUN   TestTruncateText
+=== RUN   TestTruncateText/short_text_unchanged
+=== RUN   TestTruncateText/exact_length_unchanged
+=== RUN   TestTruncateText/long_text_truncated
+=== RUN   TestTruncateText/newline_replaced_with_space
+=== RUN   TestTruncateText/carriage_return_replaced
+=== RUN   TestTruncateText/empty_string
+=== RUN   TestTruncateText/truncate_with_newlines
+--- PASS: TestTruncateText (0.00s)
+    --- PASS: TestTruncateText/short_text_unchanged (0.00s)
+    --- PASS: TestTruncateText/exact_length_unchanged (0.00s)
+    --- PASS: TestTruncateText/long_text_truncated (0.00s)
+    --- PASS: TestTruncateText/newline_replaced_with_space (0.00s)
+    --- PASS: TestTruncateText/carriage_return_replaced (0.00s)
+    --- PASS: TestTruncateText/empty_string (0.00s)
+    --- PASS: TestTruncateText/truncate_with_newlines (0.00s)
+=== RUN   TestFormatToolName
+=== RUN   TestFormatToolName/claude-code
+=== RUN   TestFormatToolName/other-tool
+=== RUN   TestFormatToolName/#00
+--- PASS: TestFormatToolName (0.00s)
+    --- PASS: TestFormatToolName/claude-code (0.00s)
+    --- PASS: TestFormatToolName/other-tool (0.00s)
+    --- PASS: TestFormatToolName/#00 (0.00s)
+=== RUN   TestNewCommit...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/data_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   253 			name:     &#34;short subject&#34;,
+   254 			subject:  &#34;Fix bug&#34;,
+   255 			expected: &#34;Commit: abc1234 - Fix bug&#34;,
+   256 		},
+   257 		{
+   258 			name:     &#34;long subject truncated&#34;,
+   259 			subject:  &#34;This is a very long commit message that exceeds the limit&#34;,
+   260 			expected: &#34;Commit: abc1234 - This is a very long commit ...&#34;,
+   261 		},
+   262 	}
+   263 
+   264 	for _, tt := range tests {
+   265 		t.Run(tt.name, func(t *testing.T) {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/show/... -v 2&gt;&amp;1 | tail -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    --- PASS: TestFormatToolName/other-tool (0.00s)
+    --- PASS: TestFormatToolName/#00 (0.00s)
+=== RUN   TestNewCommitNode
+--- PASS: TestNewCommitNode (0.00s)
+=== RUN   TestNewSessionNode
+--- PASS: TestNewSessionNode (0.00s)
+=== RUN   TestNewUserActionNode
+--- PASS: TestNewUserActionNode (0.00s)
+=== RUN   TestNewStepNode
+--- PASS: TestNewStepNode (0.00s)
+=== RUN   TestCommitNodeLabel
+=== RUN   TestCommitNodeLabel/short_subject
+=== RUN   TestCommitNodeLabel/long_subject_truncated
+--- PASS: TestCommitNodeLabel (0.00s)
+    --- PASS: TestCommitNodeLabel/short_subject (0.00s)
+    --- PASS: TestCommitNodeLabel/long_subject_truncated (0.00s)
+=== RUN   TestNodeExpandCollapse
+--- PASS: TestNodeExpandCollapse (0.00s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	0.203s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating data_test.go&#34;,&#34;content&#34;:&#34;Create unit tests for data.go (nodes, emoji, truncation)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating tree_test.go&#34;,&#34;content&#34;:&#34;Create un...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/show/... -v 2&gt;&amp;1 | tail -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">--- PASS: TestFormatToolName (0.00s)
+    --- PASS: TestFormatToolName/claude-code (0.00s)
+    --- PASS: TestFormatToolName/other-tool (0.00s)
+    --- PASS: TestFormatToolName/#00 (0.00s)
+=== RUN   TestNewCommitNode
+--- PASS: TestNewCommitNode (0.00s)
+=== RUN   TestNewSessionNode
+--- PASS: TestNewSessionNode (0.00s)
+=== RUN   TestNewUserActionNode
+--- PASS: TestNewUserActionNode (0.00s)
+=== RUN   TestNewStepNode
+--- PASS: TestNewStepNode (0.00s)
+=== RUN   TestCommitNodeLabel
+=== RUN   TestCommitNodeLabel/short_subject
+=== RUN   TestCommitNodeLabel/long_subject_truncated
+--- PASS: TestCommitNodeLabel (0.00s)
+    --- PASS: TestCommitNodeLabel/short_subject (0.00s)
+    --- PASS: TestCommitNodeLabel/long_subject_truncated (0.00s)
+=== RUN   TestNodeExpandCollapse
+--- PASS: TestNodeExpandCollapse (0.00s)
+=== RUN   TestBuildActionNodes_Empty
+--- PASS: TestBuildActionNodes_Empty (0.00s)
+=== RUN   TestBuildActionNodes_OnlyUserActions
+--- PASS: TestBuildActionNodes_OnlyUserActions (0.00s)
+=== RUN   TestBuildActionNodes_WithSteps
+--- PASS: TestBuildActionNodes_WithSteps (0.00s)
+=== RUN   TestBuildActionNodes_StepsBeforeFirstAction
+--- PASS: TestBuildActionNodes_StepsBeforeFirstAction (0.00s)
+=== RUN   TestFlattenVisible_CollapsedTree
+--- PASS: TestFlattenVisible_CollapsedTree (0.00s)
+=== RUN   TestFlattenVisible_ExpandedAction
+--- PASS: TestFlattenVisible_ExpandedAction (0.00s)
+=== RUN   TestTreeExpandCollapse
+--- PASS: TestTreeExpandCollapse (0.00s)
+=== RUN   TestTreeToggleExpand
+--- PASS: TestTreeToggleExpand (0.00s)
+=== RUN   TestTreeExpandAll
+--- PASS: TestTreeExpandAll (0.00s)
+=== RUN   TestTreeCollapseAll
+--- PASS: TestTreeCollapseAll (0.00s)
+=== RUN   TestCountUserActions
+--- PASS: TestCountUserActions (0.00s)
+=== RUN   TestCountAllSteps
+    tree_test.go:296: Expected 3 total steps, got 5
+--- FAIL: TestCountAllSteps (0.00s)
+=== RUN   TestExpandCollapseOutOfBounds
+--- PASS: TestExpandCollapseOutOfBounds (0.00s)
+FAIL
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/s...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">There&#39;s a bug in `countAllSteps` - it&#39;s double-counting steps. Let me fix it:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/tree.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   200 	}
+   201 	return count
+   202 }
+   203 
+   204 func countAllSteps(n Node) int {
+   205 	count := 0
+   206 	switch n.Type() {
+   207 	case NodeTypeUserAction, NodeTypeStep:
+   208 		count = 1
+   209 	}
+   210 	// Recursively count children (includes FollowingSteps for UserActionNode)
+   211 	for _, child := range n.Children() {
+   212 		count &#43;= countAllSteps(child)
+   213 	}
+   214 	return count
+   215 }
+   216 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./internal/show/... -v 2&gt;&amp;1 | tail -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestFlattenVisible_CollapsedTree
+--- PASS: TestFlattenVisible_CollapsedTree (0.00s)
+=== RUN   TestFlattenVisible_ExpandedAction
+--- PASS: TestFlattenVisible_ExpandedAction (0.00s)
+=== RUN   TestTreeExpandCollapse
+--- PASS: TestTreeExpandCollapse (0.00s)
+=== RUN   TestTreeToggleExpand
+--- PASS: TestTreeToggleExpand (0.00s)
+=== RUN   TestTreeExpandAll
+--- PASS: TestTreeExpandAll (0.00s)
+=== RUN   TestTreeCollapseAll
+--- PASS: TestTreeCollapseAll (0.00s)
+=== RUN   TestCountUserActions
+--- PASS: TestCountUserActions (0.00s)
+=== RUN   TestCountAllSteps
+--- PASS: TestCountAllSteps (0.00s)
+=== RUN   TestExpandCollapseOutOfBounds
+--- PASS: TestExpandCollapseOutOfBounds (0.00s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	0.301s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating data_test.go&#34;,&#34;content&#34;:&#34;Create unit tests for data.go (nodes, emoji, truncation)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating tree_test.go&#34;,&#34;content&#34;:&#34;Create un...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    Total commits: 3
+
+  All rebase flow assertions passed!
+
+=== 17/17 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ls -la e2e/</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">total 16
+drwxr-xr-x@  6 jacek  staff  192 Dec 31 14:36 .
+drwxr-xr-x@ 17 jacek  staff  544 Jan  6 20:34 ..
+-rw-r--r--@  1 jacek  staff  470 Dec 31 14:36 Dockerfile
+drwxr-xr-x@  4 jacek  staff  128 Jan  5 20:26 lib
+-rwxr-xr-x@  1 jacek  staff  235 Dec 31 14:36 run-tests.sh
+drwxr-xr-x@ 19 jacek  staff  608 Jan  5 21:03 tests</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ls e2e/tests/</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">01-basic-flow.sh
+02-session-detection.sh
+03-amend-flow.sh
+04-multiple-sessions.sh
+05-no-sessions.sh
+06-no-user-messages.sh
+07-show-ranges.sh
+08-cloud-integration.sh
+09-pii-scrubbing.sh
+10-ci-commands.sh
+11-squash-flow.sh
+12-repair-command.sh
+13-hook-installation.sh
+14-pre-push-hook.sh
+15-agent-sessions.sh
+16-generate-workflow.sh
+17-rebase-flow.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/07-show-ranges.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The existing `07-show-ranges.sh` covers show command ranges. Let me add tests for the `--no-interactive` flag and output format:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">chmod &#43;x /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">eb05fd6 Add features B and C (squashed)
+9f8e1c1 Add feature A
+be63992 Initial commit
+    Total commits: 3
+
+  All rebase flow assertions passed!
+
+Running: 18-show-interactive-flag
+[18/18] Show Command - Interactive Flag and Output Format
+  Step 1: Creating test repo with session...
+Initialized empty Git repository in /workspace/test-repo/.git/
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+Hooks installed to .git/hooks
+[main 9b37b35] Fix authentication
+ 1 file changed, 1 insertion(&#43;)
+  Created commit: 9b37b35969049e66bb9a5ca3e6d50ca8493bd641
+
+  Test 1: --no-interactive flag works...
+    - --no-interactive produces output
+
+  Test 2: Output contains session info...
+    - Session info present
+
+  Test 3: Output contains timestamps...
+FAIL: Output should contain timestamps in [HH:MM] format
+  FAILED: 18-show-interactive-flag
+
+=== 17/18 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story show HEAD --no-interactive 2&gt;&amp;1 | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Commit: fd9824c
+Work period: 2026-01-06 20:25 - 2026-01-06 20:37
+
+Session: claude-code/a291e289-359e-4ccd-850d-49c02439a586
+Duration: 2026-01-06 20:01 - 2026-01-06 20:37
+
+[20:27] PROMPT:
+  I want to simplify, Just have user prompts -&gt; other steps. Please remove middle
+  layer X steps in tree view. Instead show those steps in right panel on user
+  prompt action....
+  (170 chars total)
+[20:33] PROMPT:
+  No the user prompt should still exapand/collapse in tree on show list of steps.
+  Now after the change it doesn&#39;t
+[20:37] PROMPT:
+  Amazing work commit please</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    67 echo &#34;$OUTPUT&#34; | grep -q &#34;Session:&#34; || fail &#34;Output should contain &#39;Session:&#39;&#34;
+    68 echo &#34;$OUTPUT&#34; | grep -q &#34;$SESSION_ID&#34; || fail &#34;Output should contain session ID&#34;
+    69 echo &#34;    - Session info present&#34;
+    70 
+    71 # Test 3: Output contains timestamps
+    72 echo &#34;&#34;
+    73 echo &#34;  Test 3: Output contains timestamps...&#34;
+    74 echo &#34;$OUTPUT&#34; | grep -qE &#34;\[..:..\]&#34; || fail &#34;Output should contain timestamps in [HH:MM] format&#34;
+    75 echo &#34;    - Timestamps present&#34;
+    76 
+    77 # Test 4: Output contains PROMPT entries
+    78 echo &#34;&#34;
+    79 echo &#34;  Test 4: Output contains PROMPT entries...&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Running: 18-show-interactive-flag
+[18/18] Show Command - Interactive Flag and Output Format
+  Step 1: Creating test repo with session...
+Initialized empty Git repository in /workspace/test-repo/.git/
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+Hooks installed to .git/hooks
+[main 9b37b35] Fix authentication
+ 1 file changed, 1 insertion(&#43;)
+  Created commit: 9b37b35969049e66bb9a5ca3e6d50ca8493bd641
+
+  Test 1: --no-interactive flag works...
+    - --no-interactive produces output
+
+  Test 2: Output contains session info...
+    - Session info present
+
+  Test 3: Output contains timestamps...
+    - Timestamps present
+
+  Test 4: Output contains PROMPT entries...
+    - PROMPT entries present
+
+  Test 5: Output contains COMMAND entries...
+FAIL: Output should contain COMMAND entries
+  FAILED: 18-show-interactive-flag
+
+=== 17/18 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/e2e/tests/18-show-interactive-flag.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    79 echo &#34;  Test 4: Output contains PROMPT entries...&#34;
+    80 echo &#34;$OUTPUT&#34; | grep -q &#34;PROMPT&#34; || fail &#34;Output should contain PROMPT entries&#34;
+    81 echo &#34;    - PROMPT entries present&#34;
+    82 
+    83 # Test 5: Output contains slash commands
+    84 echo &#34;&#34;
+    85 echo &#34;  Test 5: Output contains slash commands...&#34;
+    86 # The /compact command should appear in the output (may be shown as COMMAND or just the text)
+    87 echo &#34;$OUTPUT&#34; | grep -q &#34;/compact&#34; || fail &#34;Output should show /compact command&#34;
+    88 echo &#34;    - Slash commands present&#34;
+    89 
+    90 # Test 6: Full flag shows complete content
+    91 echo &#34;&#34;
+    92 echo &#34;  Test 6: --full flag shows complete content...&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  Test 1: --no-interactive flag works...
+    - --no-interactive produces output
+
+  Test 2: Output contains session info...
+    - Session info present
+
+  Test 3: Output contains timestamps...
+    - Timestamps present
+
+  Test 4: Output contains PROMPT entries...
+    - PROMPT entries present
+
+  Test 5: Output contains slash commands...
+    - Slash commands present
+
+  Test 6: --full flag shows complete content...
+    - Normal output length: 262
+    - Full output length: 258
+    - --full flag works
+
+  Test 7: Empty commit (no notes) handling...
+    - Empty commit handled gracefully
+
+  Test 8: Invalid commit handling...
+    - Invalid commit handled (exit code non-zero or error shown)
+
+  All assertions passed!
+
+=== 18/18 tests passed ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:59</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All 18 tests pass. Let me update the todos and commit:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating data_test.go&#34;,&#34;content&#34;:&#34;Create unit tests for data.go (nodes, emoji, truncation)&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Creating tree_test.go&#34;,&#34;content&#34;:&#34;Create un...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch improve-show
+Your branch and &#39;origin/main&#39; have diverged,
+and have 2 and 10 different commits each, respectively.
+  (use &#34;git pull&#34; to merge the remote branch into yours)
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   internal/show/tree.go
+
+Untracked files:
+  (use &#34;git add &lt;file&gt;...&#34; to include in what will be committed)
+	e2e/tests/18-show-interactive-flag.sh
+	internal/show/data_test.go
+	internal/show/tree_test.go
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add internal/show/data_test.go internal/show/tree_test.go internal/show/tree.go e2e/tests/18-show-interactive-flag.sh &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add comprehensive tests for show command TUI
+
+Unit tests:
+- data_test.go: Node types, emoji mapping, text truncation, labels
+- tree_test.go: Tree building, flatten visible, expand/collapse
+
+E2E test:
+- 18-show-interactive-flag.sh: --no-interactive flag, output format
+
+Also fixes double-counting bug in countAllSteps function.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
