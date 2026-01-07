@@ -204,15 +204,10 @@ func countUserActions(n Node) int {
 func countAllSteps(n Node) int {
 	count := 0
 	switch n.Type() {
-	case NodeTypeUserAction:
-		count = 1
-		// Also count following steps stored in UserActionNode
-		if ua, ok := n.(*UserActionNode); ok {
-			count += len(ua.FollowingSteps)
-		}
-	case NodeTypeStep:
+	case NodeTypeUserAction, NodeTypeStep:
 		count = 1
 	}
+	// Recursively count children (includes FollowingSteps for UserActionNode)
 	for _, child := range n.Children() {
 		count += countAllSteps(child)
 	}
