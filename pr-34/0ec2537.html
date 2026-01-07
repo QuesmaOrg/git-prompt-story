@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prompt Story - PR #34</title>
+  <title>0ec2537 - Prompt Story</title>
   <style>:root {
   --bg-primary: #ffffff;
   --bg-secondary: #f6f8fa;
@@ -495,52 +495,14 @@ pre {
 </style>
 </head>
 <body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
   <div class="header">
-    <h1>Prompt Story</h1>
-    <p class="meta">PR #34 | 1 commit(s) with LLM sessions</p>
+    <h1><code>0ec2537</code></h1>
+    <p class="meta">Add PR preview cleanup and reorganize into prompt-story folder</p>
   </div>
-
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-value">2</div>
-      <div class="stat-label">Commits Analyzed</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">1</div>
-      <div class="stat-label">With Sessions</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="visible-count">130</div>
-      <div class="stat-label">Entries</div>
-    </div>
-  </div>
-
-  
-  <h2>Commits</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Commit</th>
-        <th>Subject</th>
-        <th>Tool</th>
-        <th>Entries</th>
-        <th>Details</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      <tr>
-        <td><code>0ec2537</code></td>
-        <td>Add PR preview cleanup and reorganize into prom...</td>
-        <td>Claude Code</td>
-        <td>130</td>
-        <td><a href="0ec2537.html">View transcript</a></td>
-      </tr>
-      
-    </tbody>
-  </table>
-
-  <h2>Session Details</h2>
 
   <div class="filter-controls">
     <label class="toggle-label">
@@ -553,21 +515,42 @@ pre {
       <span class="toggle-switch"></span>
       <span>Show whole session</span>
     </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">3</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">130</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>0ec2537faa732345731bde687548057ecdbe0df8</code><br>
+    <strong>Work period:</strong> 2026-01-06 18:38 - 2026-01-07 08:55
   </div>
 
   
-  <div class="commit-card">
+  <div class="commit-card" data-is-agent="false">
     <div class="commit-header">
-      <h3><code>0ec2537</code> Add PR preview cleanup and reorganize into prompt-story folder</h3>
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
       <div class="commit-meta">
-        Work period: 2026-01-06 18:38 - 2026-01-07 08:55
+        <code class="session-id">1c57348e-3d19-41ca-b516-6dccbb1e65b8</code> |
+        2026-01-07 07:56 - 2026-01-07 08:54 | <span class="session-count">47</span> entries
       </div>
     </div>
-    
     <div class="session">
-      <div class="session-header">
-        Claude Code | 2026-01-07 07:56 - 2026-01-07 08:54 | <span class="session-count">47</span> entries
-      </div>
       <ul class="prompt-list">
         
         <li class="prompt-item COMMAND"
@@ -1966,11 +1949,20 @@ EOF
         
       </ul>
     </div>
-    
-    <div class="session">
-      <div class="session-header">
-        Claude Code | 2026-01-07 07:57 - 2026-01-07 07:59 | <span class="session-count">70</span> entries
+  </div>
+  
+  <div class="commit-card agent-session" data-is-agent="true">
+    <div class="commit-header">
+      <h3>
+        <span class="badge agent">Agent</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">agent-ae423c3</code> |
+        2026-01-07 07:57 - 2026-01-07 07:59 | <span class="session-count">70</span> entries
       </div>
+    </div>
+    <div class="session">
       <ul class="prompt-list">
         
         <li class="prompt-item PROMPT"
@@ -3842,11 +3834,20 @@ This architecture elegantly balances automation, privacy (notes stay local until
         
       </ul>
     </div>
-    
-    <div class="session">
-      <div class="session-header">
-        Claude Code | 2026-01-05 18:58 - 2026-01-07 07:55 | <span class="session-count">13</span> entries
+  </div>
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 3: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">b9c8bfca-1da3-4823-af43-44643f61cf5b</code> |
+        2026-01-05 18:58 - 2026-01-07 07:55 | <span class="session-count">13</span> entries
       </div>
+    </div>
+    <div class="session">
       <ul class="prompt-list">
         
         <li class="prompt-item PROMPT"
@@ -4157,9 +4158,7 @@ ci-summary generates output correctly.</span>
         
       </ul>
     </div>
-    
   </div>
-  
   
 
   <div class="footer">
@@ -4170,16 +4169,33 @@ ci-summary generates output correctly.</span>
   (function() {
     const toggleAllEntries = document.getElementById('toggle-all-entries');
     const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
     const visibleCount = document.getElementById('visible-count');
-
-    if (!toggleAllEntries || !toggleWholeSession) return;
 
     function updateFilters() {
       const showAll = toggleAllEntries.checked;
       const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
       let count = 0;
 
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
       document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
         const isUser = el.dataset.entryType === 'user';
         const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
 
@@ -4197,15 +4213,16 @@ ci-summary generates output correctly.</span>
       visibleCount.textContent = count;
 
       
-      document.querySelectorAll('.session').forEach(session => {
-        const visible = session.querySelectorAll('.prompt-item:not(.hidden)').length;
-        const countEl = session.querySelector('.session-count');
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
         if (countEl) countEl.textContent = visible;
       });
     }
 
     toggleAllEntries.addEventListener('change', updateFilters);
     toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
 
     
     updateFilters();
