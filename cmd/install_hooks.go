@@ -9,22 +9,20 @@ import (
 )
 
 var (
-	globalFlag   bool
-	autoPushFlag bool
+	installHooksGlobalFlag   bool
+	installHooksAutoPushFlag bool
 )
 
+// Backward-compatible alias for "install"
 var installHooksCmd = &cobra.Command{
-	Use:   "install-hooks",
-	Short: "Install git hooks for prompt capture",
-	Long: `Install git hooks to automatically capture LLM sessions on commit.
-
-By default, installs hooks in the current repository.
-Use --global to install hooks globally for all repositories.
-Use --auto-push to also install a pre-push hook that syncs notes.`,
+	Use:        "install-hooks",
+	Short:      "Install git hooks for prompt capture",
+	Hidden:     true, // Hidden, use "install" instead
+	Deprecated: "use 'git-prompt-story install' instead",
 	Run: func(cmd *cobra.Command, args []string) {
 		opts := hooks.InstallOptions{
-			Global:   globalFlag,
-			AutoPush: autoPushFlag,
+			Global:   installHooksGlobalFlag,
+			AutoPush: installHooksAutoPushFlag,
 		}
 		if err := hooks.InstallHooks(opts); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -34,7 +32,7 @@ Use --auto-push to also install a pre-push hook that syncs notes.`,
 }
 
 func init() {
-	installHooksCmd.Flags().BoolVar(&globalFlag, "global", false, "Install hooks globally")
-	installHooksCmd.Flags().BoolVar(&autoPushFlag, "auto-push", false, "Install pre-push hook to auto-sync notes")
+	installHooksCmd.Flags().BoolVar(&installHooksGlobalFlag, "global", false, "Install hooks globally")
+	installHooksCmd.Flags().BoolVar(&installHooksAutoPushFlag, "auto-push", false, "Install pre-push hook to auto-sync notes")
 	rootCmd.AddCommand(installHooksCmd)
 }

@@ -13,18 +13,13 @@ var (
 	ciHTMLPRNumber  int
 )
 
+// Backward-compatible alias for "pages"
 var ciHTMLCmd = &cobra.Command{
-	Use:   "ci-html <commit-range>",
-	Short: "Generate HTML transcript pages",
-	Long: `Generate static HTML pages showing full transcripts for commits in a range.
-
-This command creates an index.html and individual commit pages suitable for
-deployment to GitHub Pages.
-
-Examples:
-  git-prompt-story ci-html HEAD~5..HEAD --output-dir=./pages
-  git-prompt-story ci-html main..feature --output-dir=./pr-42 --pr=42`,
-	Args: cobra.ExactArgs(1),
+	Use:        "ci-html <commit-range>",
+	Short:      "Generate HTML transcript pages",
+	Hidden:     true, // Hidden, use "pages" instead
+	Deprecated: "use 'git-prompt-story pages' instead",
+	Args:       cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		commitRange := args[0]
 

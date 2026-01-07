@@ -8,11 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Backward-compatible alias for "hook post-rewrite"
 var postRewriteCmd = &cobra.Command{
-	Use:    "post-rewrite [rebase|amend]",
-	Short:  "Hook: Transfer notes after rebase/amend",
-	Hidden: true, // Internal command for git hook
-	Args:   cobra.ExactArgs(1),
+	Use:        "post-rewrite [rebase|amend]",
+	Short:      "Hook: Transfer notes after rebase/amend",
+	Hidden:     true, // Internal command for git hook (use "hook post-rewrite" instead)
+	Deprecated: "use 'git-prompt-story hook post-rewrite' instead",
+	Args:       cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		rewriteType := args[0]
 		if err := hooks.PostRewrite(rewriteType, os.Stdin); err != nil {

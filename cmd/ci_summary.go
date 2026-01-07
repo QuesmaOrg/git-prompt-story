@@ -15,19 +15,13 @@ var (
 	ciSummaryOutput   string
 )
 
+// Backward-compatible alias for "summary"
 var ciSummaryCmd = &cobra.Command{
-	Use:   "ci-summary <commit-range>",
-	Short: "Generate CI summary for commits",
-	Long: `Generate a summary of LLM sessions for commits in a range.
-
-This command is designed for CI/CD pipelines to create PR comments or reports.
-Output formats: markdown (default) or json.
-
-Examples:
-  git-prompt-story ci-summary HEAD~5..HEAD
-  git-prompt-story ci-summary abc123..def456 --format=json
-  git-prompt-story ci-summary main..feature-branch --pages-url=https://example.github.io/repo/pr-42/`,
-	Args: cobra.ExactArgs(1),
+	Use:        "ci-summary <commit-range>",
+	Short:      "Generate CI summary for commits",
+	Hidden:     true, // Hidden, use "summary" instead
+	Deprecated: "use 'git-prompt-story summary' instead",
+	Args:       cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		commitRange := args[0]
 

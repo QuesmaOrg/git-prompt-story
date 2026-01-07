@@ -8,11 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Backward-compatible alias for "hook prepare-commit-msg"
 var prepareCommitMsgCmd = &cobra.Command{
-	Use:    "prepare-commit-msg <commit-msg-file> [source] [sha]",
-	Short:  "Hook: Prepare commit message with prompt info",
-	Hidden: true, // Internal command for git hook
-	Args:   cobra.MinimumNArgs(1),
+	Use:        "prepare-commit-msg <commit-msg-file> [source] [sha]",
+	Short:      "Hook: Prepare commit message with prompt info",
+	Hidden:     true, // Internal command for git hook (use "hook prepare-commit-msg" instead)
+	Deprecated: "use 'git-prompt-story hook prepare-commit-msg' instead",
+	Args:       cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		msgFile := args[0]
 		source := ""

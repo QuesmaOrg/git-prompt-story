@@ -45,7 +45,7 @@ go install github.com/QuesmaOrg/git-prompt-story@latest
 # Add --auto-push to install pre-push hook that syncs notes automatically
 # Without --auto-push, push notes manually with:
 #   git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
-git-prompt-story install-hooks --global --auto-push
+git-prompt-story install --global --auto-push
 ```
 
 That's it. Future commits will automatically capture active LLM sessions.
@@ -55,7 +55,7 @@ That's it. Future commits will automatically capture active LLM sessions.
 To add GitHub Action integration for your repository:
 
 ```bash
-git-prompt-story generate-github-workflow
+git-prompt-story workflow
 ```
 
 This interactively generates a workflow file that posts PR summaries and optionally deploys full transcripts to GitHub Pages.
@@ -184,7 +184,10 @@ Notes are JSON - view them anywhere:
 # Raw JSON
 git notes --ref=prompt-story show HEAD
 
-# Local pretty-print
+# Interactive TUI viewer (default action)
+git-prompt-story HEAD
+
+# Or explicitly
 git-prompt-story show HEAD
 ```
 
@@ -231,7 +234,7 @@ git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
 ## Roadmap
 
 - [x] Claude Code support
-- [x] Viewer (HTML export via `ci-html` and `ci-summary` commands)
+- [x] Viewer (HTML export via `pages` and `summary` commands)
 - [x] GitHub Action for PR summaries and transcript pages
 - [ ] Cursor integration
 - [ ] Codex integration

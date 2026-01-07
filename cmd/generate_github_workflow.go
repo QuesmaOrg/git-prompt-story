@@ -8,13 +8,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Backward-compatible alias for "workflow"
 var generateGitHubWorkflowCmd = &cobra.Command{
-	Use:   "generate-github-workflow",
-	Short: "Generate GitHub Action workflow for prompt-story",
-	Long: `Generate a GitHub Action workflow file that analyzes LLM sessions
-and posts summaries on pull requests.
-
-The command will prompt you to enable GitHub Pages for full transcripts.`,
+	Use:        "generate-github-workflow",
+	Short:      "Generate GitHub Action workflow for prompt-story",
+	Hidden:     true, // Hidden, use "workflow" instead
+	Deprecated: "use 'git-prompt-story workflow' instead",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := workflow.Generate(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
