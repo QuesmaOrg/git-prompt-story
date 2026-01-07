@@ -3,6 +3,7 @@ package show
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/display"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
@@ -50,8 +51,15 @@ type model struct {
 	width        int
 	height       int
 	commitSpec   string
+	full         bool
 	quitting     bool
 	err          error
+
+	// Edit mode state
+	editMode     bool      // true when showing confirmation dialog
+	pendingOp    string    // "redact" or "delete_session"
+	statusMsg    string    // Success/error message to display
+	statusExpiry time.Time // When to clear status message
 }
 
 // NewModel creates a new TUI model
@@ -66,6 +74,7 @@ func NewModel(commitSpec string, full bool) (tea.Model, error) {
 		visible:    tree.FlattenVisible(),
 		cursor:     0,
 		commitSpec: commitSpec,
+		full:       full,
 	}
 
 	return m, nil
@@ -78,8 +87,27 @@ func (m model) Init() tea.Cmd {
 
 // Update implements tea.Model
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Clear expired status message
+	if m.statusMsg != "" && time.Now().After(m.statusExpiry) {
+		m.statusMsg = ""
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		// Handle edit mode confirmation
+		if m.editMode {
+			switch msg.String() {
+			case "y", "Y":
+				m.executeOperation()
+				m.editMode = false
+				m.pendingOp = ""
+			case "n", "N", "escape", "esc":
+				m.editMode = false
+				m.pendingOp = ""
+			}
+			return m, nil
+		}
+
 		switch msg.String() {
 		case "q", "ctrl+c":
 			m.quitting = true
@@ -130,6 +158,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "C":
 			m.tree.CollapseAll()
 			m.visible = m.tree.FlattenVisible()
+
+		// Redaction operations
+		case "r":
+			if m.canRedact() {
+				m.editMode = true
+				m.pendingOp = "redact"
+			}
+		case "D":
+			if m.canDeleteSession() {
+				m.editMode = true
+				m.pendingOp = "delete_session"
+			}
 		}
 
 	case tea.WindowSizeMsg:
@@ -370,6 +410,23 @@ func (m model) renderDetail(width, height int) string {
 
 // renderStatusBar renders the status bar
 func (m model) renderStatusBar() string {
+	// Edit mode: show confirmation prompt
+	if m.editMode {
+		var prompt string
+		switch m.pendingOp {
+		case "redact":
+			prompt = "Redact message in JSONL and git notes? (y/n)"
+		case "delete_session":
+			prompt = "Clear session from JSONL and git notes? (y/n)"
+		}
+		return statusBarStyle.Width(m.width).Render(" " + prompt)
+	}
+
+	// Status message takes precedence
+	if m.statusMsg != "" && time.Now().Before(m.statusExpiry) {
+		return statusBarStyle.Width(m.width).Render(" " + m.statusMsg)
+	}
+
 	// Position info
 	position := fmt.Sprintf("%d/%d", m.cursor+1, len(m.visible))
 
@@ -382,7 +439,7 @@ func (m model) renderStatusBar() string {
 	}
 
 	// Keybindings help
-	help := "j/k:nav  e:expand  c:collapse  E/C:all  J/K:scroll  q:quit"
+	help := "j/k:nav  e:expand  r:redact  D:del session  q:quit"
 
 	// Build status bar
 	status := fmt.Sprintf(" %s | %s | %s", position, context, help)
@@ -428,6 +485,136 @@ func wrapText(s string, width int) string {
 	return strings.TrimSuffix(result.String(), "\n")
 }
 
+
+// Edit mode helpers
+
+// canRedact checks if the selected node can be redacted
+func (m model) canRedact() bool {
+	if m.cursor >= len(m.visible) {
+		return false
+	}
+	node := m.visible[m.cursor]
+	// Can redact UserActionNode or StepNode (nodes with entries)
+	switch node.(type) {
+	case *UserActionNode, *StepNode:
+		return true
+	}
+	return false
+}
+
+// canDeleteSession checks if a session can be deleted from the current selection
+func (m model) canDeleteSession() bool {
+	if m.cursor >= len(m.visible) {
+		return false
+	}
+	node := m.visible[m.cursor]
+	// Can delete if selected node is a session or a child of a session
+	switch node.(type) {
+	case *SessionNode, *UserActionNode, *StepNode:
+		return true
+	}
+	return false
+}
+
+// getSelectedSessionInfo returns (tool, sessionID) for the selected node
+func (m model) getSelectedSessionInfo() (string, string) {
+	if m.cursor >= len(m.visible) {
+		return "", ""
+	}
+	node := m.visible[m.cursor]
+	switch n := node.(type) {
+	case *SessionNode:
+		return n.Tool, n.ID
+	case *UserActionNode:
+		return n.Tool, n.SessionID
+	case *StepNode:
+		return n.Tool, n.SessionID
+	}
+	return "", ""
+}
+
+// executeOperation executes the pending redact or delete operation
+func (m *model) executeOperation() {
+	if m.cursor >= len(m.visible) {
+		return
+	}
+
+	node := m.visible[m.cursor]
+	var err error
+
+	// Check if notes were pushed BEFORE modifying (to determine if force push needed)
+	wasPushed := WasNotesPushed()
+
+	switch m.pendingOp {
+	case "redact":
+		// Get the entry to redact
+		entry := node.Entry()
+		if entry == nil {
+			m.statusMsg = "Error: No entry to redact"
+			m.statusExpiry = time.Now().Add(3 * time.Second)
+			return
+		}
+
+		var tool, sessionID string
+		switch n := node.(type) {
+		case *UserActionNode:
+			tool, sessionID = n.Tool, n.SessionID
+		case *StepNode:
+			tool, sessionID = n.Tool, n.SessionID
+		}
+
+		err = RedactMessage(tool, sessionID, entry.Time)
+		if err != nil {
+			m.statusMsg = fmt.Sprintf("Error: %v", err)
+		} else {
+			if wasPushed {
+				m.statusMsg = "Redacted. Force push: git push -f origin refs/notes/*"
+			} else {
+				m.statusMsg = "Redacted"
+			}
+			m.refreshTree()
+		}
+
+	case "delete_session":
+		tool, sessionID := m.getSelectedSessionInfo()
+		if sessionID == "" {
+			m.statusMsg = "Error: No session selected"
+			m.statusExpiry = time.Now().Add(3 * time.Second)
+			return
+		}
+
+		err = DeleteSession(tool, sessionID)
+		if err != nil {
+			m.statusMsg = fmt.Sprintf("Error: %v", err)
+		} else {
+			if wasPushed {
+				m.statusMsg = "Cleared. Force push: git push -f origin refs/notes/*"
+			} else {
+				m.statusMsg = "Session cleared"
+			}
+			m.refreshTree()
+		}
+	}
+
+	m.statusExpiry = time.Now().Add(3 * time.Second)
+}
+
+// refreshTree reloads the tree after modifications
+func (m *model) refreshTree() {
+	tree, err := LoadTree(m.commitSpec, m.full)
+	if err != nil {
+		m.statusMsg = fmt.Sprintf("Refresh error: %v", err)
+		m.statusExpiry = time.Now().Add(3 * time.Second)
+		return
+	}
+	m.tree = tree
+	m.visible = tree.FlattenVisible()
+
+	// Adjust cursor if it's out of bounds
+	if m.cursor >= len(m.visible) {
+		m.cursor = max(0, len(m.visible)-1)
+	}
+}
 
 // RunTUI starts the interactive TUI
 func RunTUI(commitSpec string, full bool) error {

@@ -80,7 +80,7 @@ func TestNewUserActionNode(t *testing.T) {
 		Time: time.Date(2025, 1, 15, 10, 30, 0, 0, time.UTC),
 	}
 
-	node := NewUserActionNode(entry, "session123", "commit123", 2)
+	node := NewUserActionNode(entry, "claude-code", "session123", "commit123", 2)
 
 	if node.Type() != NodeTypeUserAction {
 		t.Errorf("Type() = %v, want NodeTypeUserAction", node.Type())
@@ -98,7 +98,7 @@ func TestNewUserActionNode(t *testing.T) {
 
 	// Add following steps and check expandability
 	stepEntry := ci.PromptEntry{Type: "TOOL_USE", ToolName: "Bash"}
-	node.FollowingSteps = append(node.FollowingSteps, NewStepNode(stepEntry, "session123", "commit123", 3))
+	node.FollowingSteps = append(node.FollowingSteps, NewStepNode(stepEntry, "claude-code", "session123", "commit123", 3))
 
 	if !node.IsExpandable() {
 		t.Error("IsExpandable() = false after adding steps, want true")
@@ -116,7 +116,7 @@ func TestNewStepNode(t *testing.T) {
 		Time:      time.Date(2025, 1, 15, 10, 31, 0, 0, time.UTC),
 	}
 
-	node := NewStepNode(entry, "session123", "commit123", 3)
+	node := NewStepNode(entry, "claude-code", "session123", "commit123", 3)
 
 	if node.Type() != NodeTypeStep {
 		t.Errorf("Type() = %v, want NodeTypeStep", node.Type())
