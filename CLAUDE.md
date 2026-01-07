@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+## UI Library
+
+This project uses [Bubble Tea](https://github.com/charmbracelet/bubbletea) for rich terminal UI.
+
 ## Testing
 
 Run end-to-end tests with:

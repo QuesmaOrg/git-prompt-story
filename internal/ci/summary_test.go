@@ -5,33 +5,11 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/QuesmaOrg/git-prompt-story/internal/display"
 )
 
-func TestGetTypeEmoji(t *testing.T) {
-	tests := []struct {
-		entryType string
-		expected  string
-	}{
-		{"PROMPT", "💬"},
-		{"TOOL_USE", "🔧"},
-		{"ASSISTANT", "🤖"},
-		{"TOOL_REJECT", "❌"},
-		{"COMMAND", "📋"},
-		{"DECISION", "❓"},
-		{"UNKNOWN", "📝"},
-		{"", "📝"},
-		{"random_type", "📝"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.entryType, func(t *testing.T) {
-			result := getTypeEmoji(tt.entryType)
-			if result != tt.expected {
-				t.Errorf("getTypeEmoji(%q) = %q, want %q", tt.entryType, result, tt.expected)
-			}
-		})
-	}
-}
+// Note: Tests for GetTypeEmoji are in internal/display/display_test.go
 
 func TestIsUserAction(t *testing.T) {
 	tests := []struct {
@@ -41,6 +19,7 @@ func TestIsUserAction(t *testing.T) {
 		{"PROMPT", true},
 		{"COMMAND", true},
 		{"TOOL_REJECT", true},
+		{"DECISION", true},
 		{"ASSISTANT", false},
 		{"TOOL_USE", false},
 		{"TOOL_RESULT", false},
@@ -50,9 +29,9 @@ func TestIsUserAction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.entryType, func(t *testing.T) {
-			result := isUserAction(tt.entryType)
+			result := IsUserAction(tt.entryType)
 			if result != tt.expected {
-				t.Errorf("isUserAction(%q) = %v, want %v", tt.entryType, result, tt.expected)
+				t.Errorf("IsUserAction(%q) = %v, want %v", tt.entryType, result, tt.expected)
 			}
 		})
 	}
@@ -334,7 +313,7 @@ func TestFormatMarkdownEntry(t *testing.T) {
 		{
 			name:     "unknown type shows type name",
 			entry:    PromptEntry{Type: "CUSTOM_TYPE", Text: "Some content", Time: now},
-			contains: []string{"09:30", "📝", "CUSTOM_TYPE:", "Some content"},
+			contains: []string{"09:30", "•", "CUSTOM_TYPE:", "Some content"},
 		},
 	}
 
@@ -880,7 +859,7 @@ func TestAnalyzeSession_AllUserActionTypes(t *testing.T) {
 	// Verify all are recognized as user actions
 	userActionCount := 0
 	for _, p := range prompts {
-		if isUserAction(p.Type) {
+		if IsUserAction(p.Type) {
 			userActionCount++
 		}
 	}
@@ -898,8 +877,8 @@ func TestAnalyzeSession_AllUserActionTypes(t *testing.T) {
 	}
 
 	for entryType, expectedEmoji := range expectedEmojis {
-		if emoji := getTypeEmoji(entryType); emoji != expectedEmoji {
-			t.Errorf("getTypeEmoji(%q) = %q, want %q", entryType, emoji, expectedEmoji)
+		if emoji := display.GetTypeEmoji(entryType); emoji != expectedEmoji {
+			t.Errorf("display.GetTypeEmoji(%q) = %q, want %q", entryType, emoji, expectedEmoji)
 		}
 	}
 }
