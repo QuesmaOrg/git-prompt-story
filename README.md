@@ -55,10 +55,16 @@ That's it. Future commits will automatically capture active LLM sessions.
 To add GitHub Action integration for your repository:
 
 ```bash
-git-prompt-story workflow
+git-prompt-story install --workflow
 ```
 
 This interactively generates a workflow file that posts PR summaries and optionally deploys full transcripts to GitHub Pages.
+
+You can combine all options for a full setup:
+
+```bash
+git-prompt-story install --global --auto-push --workflow
+```
 
 ## How It Works
 
