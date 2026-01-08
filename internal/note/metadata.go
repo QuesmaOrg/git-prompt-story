@@ -62,10 +62,10 @@ func (n *PromptStoryNote) ToJSON() ([]byte, error) {
 }
 
 // GenerateSummary creates the commit message line
-// Returns: "Prompt-Story: Used Claude Code (N prompts)" or "Prompt-Story: none"
-func (n *PromptStoryNote) GenerateSummary(promptCount int) string {
+// Returns: "Prompt-Story: Used Claude Code (N prompts) [version]" or "Prompt-Story: none [version]"
+func (n *PromptStoryNote) GenerateSummary(promptCount int, version string) string {
 	if len(n.Sessions) == 0 {
-		return "Prompt-Story: none"
+		return fmt.Sprintf("Prompt-Story: none [%s]", version)
 	}
 
 	// Build tool list
@@ -80,7 +80,7 @@ func (n *PromptStoryNote) GenerateSummary(promptCount int) string {
 	}
 	sort.Strings(toolNames) // Consistent ordering
 
-	return fmt.Sprintf("Prompt-Story: Used %s (%d user prompts)", strings.Join(toolNames, ", "), promptCount)
+	return fmt.Sprintf("Prompt-Story: Used %s (%d user prompts) [%s]", strings.Join(toolNames, ", "), promptCount, version)
 }
 
 // GetTranscriptPath returns the path within the transcript tree for a session
