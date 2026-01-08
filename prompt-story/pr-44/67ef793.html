@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>67ef793 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>67ef793</code></h1>
+    <p class="meta">Add CI summary preview debugging technique to CLAUDE.md</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">40</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>67ef79318f7fa387826fd20858a9ac2dd8c4b9ea</code><br>
+    <strong>Work period:</strong> 2026-01-08 08:58 - 2026-01-08 15:36
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">a30273d0-e5fb-4fa9-9b68-86d1824dfcb8</code> |
+        2026-01-08 08:01 - 2026-01-08 15:59 | <span class="session-count">40</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">09:04</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text"> Merged, that tag at and release the branch</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">09:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin main &amp;&amp; git checkout main &amp;&amp; git pull origin main</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">09:04</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag --sort=-version:refname | head -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">v0.14.0
+v0.13.0
+v0.12.2
+v0.12.1
+v0.12.0
+v0.11.2
+v0.11.1
+v0.11.0
+v0.10.0
+v0.9.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">09:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag -a v0.15.0 -m &#34;Add version to commit message trailers for debugging&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_REJECT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">09:14</span>
+          <span class="prompt-type">TOOL_REJECT</span>
+          
+          <span class="prompt-text">Please check or new commits and do better release notes</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">09:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log v0.14.0..HEAD --oneline</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">d83e577 Merge pull request #41 from QuesmaOrg/feature/version-in-commit-message
+02981a8 Add version to commit message trailers for debugging
+56a28c6 Merge pull request #40 from QuesmaOrg/fix/disable-pages-by-default
+bad9b80 Use local action path for repo&#39;s own workflow
+4ffa777 Remove comment and summary-mode inputs from actions
+522423b Split GitHub Action into prompt-story and prompt-story-with-pages
+f96e957 Default to Pages disabled in workflow generator
+a109305 Disable GitHub Pages deployment by default</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">09:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log v0.14.0..HEAD --format=&#34;%s%n%b&#34; | head -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Merge pull request #41 from QuesmaOrg/feature/version-in-commit-message
+Add version to commit message trailers for debugging
+Add version to commit message trailers for debugging
+Appends the git-prompt-story version to the Prompt-Story trailer in commit
+messages, making it easier to debug issues by knowing which version was used.
+
+New format: &#34;Prompt-Story: Used Claude Code (N user prompts) [v0.12.0]&#34;
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+
+Prompt-Story: Used Claude Code (5 user prompts) [v0.14.1-0.20260108075454-bad9b804371b&#43;dirty]
+
+Merge pull request #40 from QuesmaOrg/fix/disable-pages-by-default
+Disable GitHub Pages deployment by default
+Use local action path for repo&#39;s own workflow
+Use ./.github/actions/prompt-story-with-pages instead of @main
+reference so the workflow works with the current checkout.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+
+Prompt-Story: Used Claude Code (2 user prompts)
+
+Remove comment and summary-mode inputs from actions
+Simplify both actions by:
+- Removing comment input (always post PR comments)
+- Removing summary-mode input (always use default ci-summary)
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+
+Prompt-Story: Used Claude Code (1 user prompts)
+
+Split GitHub Action into prompt-story and prompt-story-with-pages
+- prompt-story: Basic action for PR comments only (no Pages)
+- prompt-story-with-pages: Full action with GitHub Pages deployment
+
+The workflow generator now creates appropriate workflows:
+- Default (no Pages): Uses prompt-story action, simple workflow
+- With Pages: Uses prompt-story-with-pages action &#43; cleanup job
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+
+Prompt-Story: Used Claude Code (7 user prompts)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">09:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag -a v0.15.0 -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+v0.15.0 Release
+
+## New Features
+
+### Version tracking in commit trailers
+Commit message trailers now include the git-prompt-story version for easier debugging.
+- New format: `Prompt-Story: Used Claude Code (N user prompts) [v0.15.0]`
+
+### Split GitHub Actions
+- `prompt-story`: Basic action for PR comments only (lighter, no Pages setup required)
+- `prompt-story-with-pages`: Full action with GitHub Pages deployment for transcript viewing
+
+### Simplified action configuration
+- Removed `comment` and `summary-mode` inputs (always post PR comments with default summary)
+- Cleaner, more opinionated defaults
+
+## Changes
+
+- `generate-workflow` command now defaults to Pages disabled
+- Interactive prompt asks whether to enable GitHub Pages
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">09:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push origin v0.15.0</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new tag]         v0.15.0 -&gt; v0.15.0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">09:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Tag `v0.15.0` pushed. The release workflow should now be running.
+
+Check the release at: https://github.com/QuesmaOrg/git-prompt-story/releases/tag/v0.15.0</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please fetch and switch to branch feature/tool-use-summary</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin &amp;&amp; git checkout feature/tool-use-summary</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">branch &#39;feature/tool-use-summary&#39; set up to track &#39;origin/feature/tool-use-summary&#39;.
+From github.com:QuesmaOrg/git-prompt-story
+ * [new branch]      feature/tool-use-summary -&gt; origin/feature/tool-use-summary
+   fe13df8..9d4f6a9  gh-pages   -&gt; origin/gh-pages
+Switched to a new branch &#39;feature/tool-use-summary&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">13:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Switched to `feature/tool-use-summary`. What would you like me to do with this branch?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:27</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please run ci-summary on that PR and do pbcopy so I can test it or comment on PR with new output:
+https://github.com/QuesmaOrg/git-prompt-story/pull/42</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log origin/main..HEAD --oneline</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">5f12697 Show edited file paths in CI summary
+4ee9f14 Move tool counts to sub-bullet for cleaner display
+adeaef1 Simplify prompt display format in CI output
+fe70e25 Add tool use summary per prompt in CI output</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown | pbcopy &amp;&amp; echo &#34;Copied to clipboard!&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Copied to clipboard\!</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">pbpaste</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No prompt-story notes found in this PR.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">No notes found - they likely weren&#39;t pushed with the branch. Let me check if notes exist locally:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=refs/notes/prompt-story list</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">16c47a35e5cac542b282b28b03f3c6a65976143b 007991e8753bab40e75aa3e2c08c931a1cd32ce0
+957981d8e0e3c5dc22df775034112dc90401b916 01b837ce44dac8b17a9a36072269d88c3bf4fe89
+fabebc8c0d5fd0c07c7b3545091e9587ac8dbd89 0210587c6f9b68319f851cd50bf79e9580b1a5bb
+b2d323cbb252820107feccf207443d99ff934e9f 02981a8894fe35bb479438c4a2fe9a001fe7c09f
+136374bd7bf3ab99946e800156a127d62880c3a2 0404c3b11c7f9e6591296ef65f475394ded82467
+6f611645b9f63858586dcb595e1fec21e880d61b 059fcc48d944226b50efce76d3f989d38574ff09
+2794fddaebc33d1e45d9bfbe6ae9b8f7f659b684 067557b154904b31c9e9dde46ddbdd8aab67f2e2
+17a6672f00013802a31d7ff68d244fb55ec6592f 06c93d887a8bf86ac52140a8b05f902107279635
+8ea7ecdccd1689c803d06231bc3f558c9e69cfaa 0ec2537faa732345731bde687548057ecdbe0df8
+a593454e60c178bce2a27c1965ca2574ae1a3f23 10335b20d111426922e7737775d9a3ab3b6061d0
+22ac73bfe8fcdea79cb0b84774db3a8c3c8d6058 110b4ca560dd8ef99ce23e551aa66a014a417ae2
+a01180ef5421049569bb700675b4465b017316d9 1433f8eab6b45d11ab921c359880947b0658fc3a
+0b2e9872e45b73ea6c239f8782fd2e8149a0e116 145be0fd28e224113d3bb52c344044ae4b0482e2
+c574f29b91659743d5a3c8d07e674711c4edf2ab 14ab5120d9262dbc1f9d8f98b90c3d3d38ad0e86
+32c9181b8da6c7bbdb6935082ae6cb56a5a979ae 16ab6d7ecbb7e4fcbbf5d41abc4db046a86da349
+cc97967c2778bbdeec139b7ce987b346deb81293 18424adb49a6c90988600551ecb34e21e745f304
+f8be2625a1a77074eb0223f961ac68b1fc9f4df7 18baa02351cb042a9f3c3d9097ce8a46a7ee86e4
+c2ddda14f871806354e3f33542a99d729a59d38a 1d17ce8573c292eafdacb06606f4fe9b6d33a842
+f39f7d5c88a5f8dc7c9fc10f74ce46cb6218f8ca 1db428a9f9ab36809cb28be474bc7ab300bf6e24
+e14b37d91201f46b2a783fcb463306a884f4c3ad 1e332ff55d9a307f3beda6ac5798a209b4abe2e0
+5b3f7a64a66c3be7c0ff9eaecd17840bbed405b9 1e7848d749d112278debb0352e6452bbe1509190
+f76faff5878a056af83a3933c2832af074330854 1f5f63708e8bdbd52bf91dd6ae9a0971b37092c9
+14a89a192ca47bbf7f5090b9aa5b060ba14872ec 20cb5d246605b81a7bd45975e937a7feaae7b245
+7b29fa2bf5cf9eb06eba2d0f6837027cf49ec973 2233e2a079ae1ff9c54f2d21af339dff832b5b95
+d9120b27b6ebb959cc93a47ef8585...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Notes exist locally. Let me check if the PR commits have notes attached:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">for sha in 5f12697 4ee9f14 adeaef1 fe70e25; do echo -n &#34;$sha: &#34;; git notes --ref=refs/notes/prompt-story show $sha 2&gt;/dev/null &amp;&amp; echo &#34;&#34; || echo &#34;no note&#34;; done</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">5f12697: no note
+4ee9f14: no note
+adeaef1: no note
+fe70e25: no note</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">CAn you fetch notes?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin refs/notes/prompt-story:refs/notes/prompt-story refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+From github.com:QuesmaOrg/git-prompt-story
+ ! [rejected]        refs/notes/prompt-story -&gt; refs/notes/prompt-story  (non-fast-forward)
+ * [new ref]         refs/notes/prompt-story-transcripts -&gt; refs/notes/prompt-story-transcripts</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin &#43;refs/notes/prompt-story:refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts:refs/notes/prompt-story-transcripts 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">From github.com:QuesmaOrg/git-prompt-story
+ &#43; 07a37c9...9af990a refs/notes/prompt-story -&gt; refs/notes/prompt-story  (forced update)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">for sha in 5f12697 4ee9f14 adeaef1 fe70e25; do echo -n &#34;$sha: &#34;; git notes --ref=refs/notes/prompt-story show $sha 2&gt;/dev/null | head -1 || echo &#34;no note&#34;; done</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">: : : :</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=refs/notes/prompt-story show 5f12697 2&gt;&amp;1 || echo &#34;no note&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-08T12:50:54Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;f97c0ddd-1756-4853-8e70-bce0d8ab8453&#34;,
+      &#34;path&#34;: &#34;claude-code/f97c0ddd-1756-4853-8e70-bce0d8ab8453.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-08T09:58:13.624Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-08T12:57:21.841Z&#34;
+    }
+  ]
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Notes are there now. Let me run ci-summary:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown | pbcopy &amp;&amp; ./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"># 21 user prompts
+
+
+#### fe70e25: Add tool use summary per prompt in CI...
+
+- &lt;details&gt;&lt;summary&gt;11:58 💬 So, I have this tool. I used it for repo /&amp;lt;REDACTED&amp;gt;/my_repos/vibe_coding/hacker-news-cc and branch red.  Got in GiHub 9 user prompts 6654fa2: Style accent colors in red 19:06 💬 checkout main, pull 19:08 📋 /compact 19:09 💬 This session is...&lt;/summary&gt;... being continued from a previous conversation that ran out of context. The conversation is summarized below: Analysis: Let me chronologically analyze the conversation: 1. **Initial Request**: User asked to look at the repo and focu... 19:12 💬 Where to check the result? 09:29 📋 /exit 09:29 💬 &amp;lt;bash-notification&amp;gt; &amp;lt;shell-id&amp;gt;b25caf9&amp;lt;/shell-id&amp;gt; &amp;lt;output-file&amp;gt;/tmp/claude/-Users-pmigdal-my-repos-vibe-coding-hacker-news-cc/tasks/b25caf9.output&amp;lt;/output-file&amp;gt; &amp;lt;status&amp;gt;killed&amp;lt;/status&amp;gt; &amp;lt;summary&amp;gt;Background command &amp;#34;Start dev server&amp;#34; was killed.&amp;lt;/sum... 09:31 💬 create new branch &amp;#34;red&amp;#34;, style things in red, commit, push 09:32 📋 /login 09:32 💬 create new branch &amp;#34;red&amp;#34;, style things in red, commit, push  While the only actual prompt giving changes was: create new branch &amp;#34;red&amp;#34;, style things in red, commit, push  Investigate why.&lt;/details&gt;
+
+- &lt;details open&gt;&lt;summary&gt;12:01 ❓ Prompt count: What should &amp;#39;user prompts&amp;#39; mean in the summary?   I think you misunderstood. The questions is why it not ONE user prompts, but more. 19:06 💬 checkout main, pull - was NOT relevant for this repo. So it everything until - &amp;lt;details open&amp;gt;&amp;lt;summary&amp;gt;09:29 📋 /exit&amp;lt;/summary&amp;gt;&amp;lt;/details&amp;gt;. Investigate why - in the logics of matching prompts to commits.&lt;/summary&gt;&lt;/details&gt;
+
+- &lt;details&gt;&lt;summary&gt;12:10 💬 hacker-news-cc on  red is 📦 v0.1.0 via 🐍 v3.12.9 on ☁️  &amp;lt;EMAIL&amp;gt; ❯ git notes --ref=prompt-story show 6654fa2 | head -10 {   &amp;#34;v&amp;#34;: 1,   &amp;#34;start_work&amp;#34;: &amp;#34;2026-01-07T19:05:50Z...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! The ci-summary output has been copied to your clipboard. You can paste it in the PR comment or test it.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:31</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">It doesn&#39;t seem to show latest version can you rebuild first?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; go install .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown | pbcopy &amp;&amp; ./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"># 21 user prompts (29 file edits)
+
+
+#### fe70e25: Add tool use summary per prompt in CI...
+
+- &lt;details&gt;&lt;summary&gt;So, I have this tool. I used it for repo /&amp;lt;REDACTED&amp;gt;/my_repos/vibe_coding/hacker-news-cc and branch red.  Got in GiHub 9 user prompts 6654fa2: Style accent colors in red 19:06 💬 checkout main, pull 19:08 📋 /compact 19:09 💬 This session is...&lt;/summary&gt;... being continued from a previous conversation that ran out of context. The conversation is summarized below: Analysis: Let me chronologically analyze the conversation: 1. **Initial Request**: User asked to look at the repo and focu... 19:12 💬 Where to check the result? 09:29 📋 /exit 09:29 💬 &amp;lt;bash-notification&amp;gt; &amp;lt;shell-id&amp;gt;b25caf9&amp;lt;/shell-id&amp;gt; &amp;lt;output-file&amp;gt;/tmp/claude/-Users-pmigdal-my-repos-vibe-coding-hacker-news-cc/tasks/b25caf9.output&amp;lt;/output-file&amp;gt; &amp;lt;status&amp;gt;killed&amp;lt;/status&amp;gt; &amp;lt;summary&amp;gt;Background command &amp;#34;Start dev server&amp;#34; was killed.&amp;lt;/sum... 09:31 💬 create new branch &amp;#34;red&amp;#34;, style things in red, commit, push 09:32 📋 /login 09:32 💬 create new branch &amp;#34;red&amp;#34;, style things in red, commit, push  While the only actual prompt giving changes was: create new branch &amp;#34;red&amp;#34;, style things in red, commit, push  Investigate why.&lt;/details&gt;
+  - 3 Bash, 1 Glob, 10 Grep, 13 Read, 1 Task, 1 Edit
+- Prompt count: What should &amp;#39;user prompts&amp;#39; mean in the summary?   I think you misunderstood. The questions is why it not ONE user prompts, but more. 19:06 💬 checkout main, pull - was NOT relevant for this repo. So it everything until - &amp;lt;details open&amp;gt;&amp;lt;summary&amp;gt;09:29 📋 /exit&amp;lt;/summary&amp;gt;&amp;lt;/details&amp;gt;. Investigate why - in the logics of matching prompts to commits.
+  - 1 Glob, 2 Grep, 20 Read, 1 Task, 2 Edit
+- &lt;details&gt;&lt;summary&gt;hacker-news-cc on  red is 📦 v0.1.0 via 🐍 v3.12.9 on ☁️  &amp;lt;EMAIL&amp;gt; ❯ git notes --ref=prompt-story show 6654fa2 | head -10 {   &amp;#34;v&amp;#34;: 1,   &amp;#34;start_...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:31</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Rebuilt and copied to clipboard. The new format now shows:
+- Header: `# 21 user prompts (29 file edits)`
+- Per-prompt tool counts on sub-bullets: `3 Bash, 1 Glob, 10 Grep, 13 Read, 1 Task, 1 Edit`</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:32</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Ok, can you describe this debugging technique and add it to Claude.md It should read as something like this: If you ever modify CI summary, just run it locally against the comment from the latest build, author PB copy, and tell the user to copy-paste it as a comment to preview how it&#39;s looking. </span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/CLAUDE.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:33</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/CLAUDE.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/CLAUDE.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    23 ```
+    24 
+    25 Note: Local builds will show version &#34;dev&#34;. Release builds get version from git tags via GoReleaser.
+    26 
+    27 ## Previewing CI Summary Changes
+    28 
+    29 When modifying CI summary output (`internal/ci/summary.go`), preview changes locally before merging:
+    30 
+    31 1. Rebuild: `go build . &amp;&amp; go install .`
+    32 2. Fetch notes: `git fetch origin &#43;refs/notes/prompt-story:refs/notes/prompt-story`
+    33 3. Run against the PR branch: `./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown | pbcopy`
+    34 4. Paste as a PR comment to preview how the output will look in GitHub
+    35 
+    36 ## Git Workflow
+    37 
+    38 Don&#39;t push to main, use feature branches instead.
+    39 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Added to CLAUDE.md. The new section explains how to preview CI summary changes locally by rebuilding, fetching notes, running ci-summary, and pasting as a PR comment.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:35</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please commit</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status &amp;&amp; git diff</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/tool-use-summary
+Your branch is up to date with &#39;origin/feature/tool-use-summary&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   CLAUDE.md
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 82b76df..b7b4e18 100644
+--- a/CLAUDE.md
+&#43;&#43;&#43; b/CLAUDE.md
+@@ -24,6 &#43;24,14 @@ go install .
+ 
+ Note: Local builds will show version &#34;dev&#34;. Release builds get version from git tags via GoReleaser.
+ 
+&#43;## Previewing CI Summary Changes
+&#43;
+&#43;When modifying CI summary output (`internal/ci/summary.go`), offer to preview changes locally before merging:
+&#43;
+&#43;1. Rebuild: `go build .`
+&#43;2. Run against the PR branch: `./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown | pbcopy`
+&#43;3. Ask user paste as a GitHUB PR comment to preview how the output will look in GitHub
+&#43;
+ ## Git Workflow
+ 
+ Don&#39;t push to main, use feature branches instead.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add CLAUDE.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add CI summary preview debugging technique to CLAUDE.md
+
+Documents the workflow for previewing CI summary changes locally
+by rebuilding, running against the PR branch, and pasting output
+as a GitHub comment.
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/tool-use-summary 09032b2] Add CI summary preview debugging technique to CLAUDE.md
+ 1 file changed, 8 insertions(&#43;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
