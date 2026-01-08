@@ -21,7 +21,6 @@ jobs:
       - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story-with-pages@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment: true
 
   cleanup-old-previews:
     if: github.event.action == 'closed'
