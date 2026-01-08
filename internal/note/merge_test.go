@@ -23,7 +23,7 @@ func TestMergeNotes_Single(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)},
+			{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)},
 		},
 	}
 
@@ -41,7 +41,7 @@ func TestMergeNotes_TwoNotes(t *testing.T) {
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
 			{
-				Tool:     "claude-code",
+				PromptTool: "claude-code",
 				ID:       "session-A",
 				Path:     "claude-code/session-A.jsonl",
 				Created:  time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC),
@@ -55,7 +55,7 @@ func TestMergeNotes_TwoNotes(t *testing.T) {
 		StartWork: time.Date(2025, 1, 15, 9, 30, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
 			{
-				Tool:     "claude-code",
+				PromptTool: "claude-code",
 				ID:       "session-B",
 				Path:     "claude-code/session-B.jsonl",
 				Created:  time.Date(2025, 1, 15, 9, 45, 0, 0, time.UTC),
@@ -92,7 +92,7 @@ func TestMergeNotes_Deduplication(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)},
+			{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)},
 		},
 	}
 
@@ -100,8 +100,8 @@ func TestMergeNotes_Deduplication(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 9, 30, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)}, // Duplicate
-			{Tool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 9, 45, 0, 0, time.UTC)},
+			{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)}, // Duplicate
+			{PromptTool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 9, 45, 0, 0, time.UTC)},
 		},
 	}
 
@@ -129,13 +129,13 @@ func TestMergeNotes_EarliestStartWork(t *testing.T) {
 	note1 := &PromptStoryNote{
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC),
-		Sessions:  []SessionEntry{{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)}},
+		Sessions:  []SessionEntry{{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)}},
 	}
 
 	note2 := &PromptStoryNote{
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 8, 0, 0, 0, time.UTC), // Earlier
-		Sessions:  []SessionEntry{{Tool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 8, 15, 0, 0, time.UTC)}},
+		Sessions:  []SessionEntry{{PromptTool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 8, 15, 0, 0, time.UTC)}},
 	}
 
 	result := MergeNotes([]*PromptStoryNote{note1, note2})
@@ -150,13 +150,13 @@ func TestMergeNotes_LatestVersion(t *testing.T) {
 	note1 := &PromptStoryNote{
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
-		Sessions:  []SessionEntry{{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)}},
+		Sessions:  []SessionEntry{{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)}},
 	}
 
 	note2 := &PromptStoryNote{
 		Version:   2, // Higher version
 		StartWork: time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC),
-		Sessions:  []SessionEntry{{Tool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)}},
+		Sessions:  []SessionEntry{{PromptTool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)}},
 	}
 
 	result := MergeNotes([]*PromptStoryNote{note1, note2})
@@ -171,7 +171,7 @@ func TestMergeNotes_MultipleTools(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)},
+			{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)},
 		},
 	}
 
@@ -179,7 +179,7 @@ func TestMergeNotes_MultipleTools(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "cursor", ID: "session-B", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)},
+			{PromptTool: "cursor", ID: "session-B", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)},
 		},
 	}
 
@@ -192,7 +192,7 @@ func TestMergeNotes_MultipleTools(t *testing.T) {
 	// Verify both tools are present
 	tools := make(map[string]bool)
 	for _, s := range result.Sessions {
-		tools[s.Tool] = true
+		tools[s.PromptTool] = true
 	}
 	if !tools["claude-code"] || !tools["cursor"] {
 		t.Errorf("Expected both claude-code and cursor tools, got %v", tools)
@@ -203,19 +203,19 @@ func TestMergeNotes_ThreeNotes(t *testing.T) {
 	note1 := &PromptStoryNote{
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
-		Sessions:  []SessionEntry{{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)}},
+		Sessions:  []SessionEntry{{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC)}},
 	}
 
 	note2 := &PromptStoryNote{
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC),
-		Sessions:  []SessionEntry{{Tool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)}},
+		Sessions:  []SessionEntry{{PromptTool: "claude-code", ID: "session-B", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)}},
 	}
 
 	note3 := &PromptStoryNote{
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 11, 0, 0, 0, time.UTC),
-		Sessions:  []SessionEntry{{Tool: "claude-code", ID: "session-C", Created: time.Date(2025, 1, 15, 11, 15, 0, 0, time.UTC)}},
+		Sessions:  []SessionEntry{{PromptTool: "claude-code", ID: "session-C", Created: time.Date(2025, 1, 15, 11, 15, 0, 0, time.UTC)}},
 	}
 
 	result := MergeNotes([]*PromptStoryNote{note1, note2, note3})
@@ -237,7 +237,7 @@ func TestMergeNotes_PreservesAllMetadata(t *testing.T) {
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
 			{
-				Tool:     "claude-code",
+				PromptTool: "claude-code",
 				ID:       "session-A",
 				Path:     "claude-code/session-A.jsonl",
 				Created:  time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC),
@@ -251,7 +251,7 @@ func TestMergeNotes_PreservesAllMetadata(t *testing.T) {
 		StartWork: time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
 			{
-				Tool:     "claude-code",
+				PromptTool: "claude-code",
 				ID:       "session-B",
 				Path:     "claude-code/session-B.jsonl",
 				Created:  time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC),
@@ -267,7 +267,7 @@ func TestMergeNotes_PreservesAllMetadata(t *testing.T) {
 		if s.Path == "" {
 			t.Errorf("Session %s: Path should be preserved", s.ID)
 		}
-		if s.Tool == "" {
+		if s.PromptTool == "" {
 			t.Errorf("Session %s: Tool should be preserved", s.ID)
 		}
 		if s.Created.IsZero() {
@@ -290,7 +290,7 @@ func TestMergeNotes_EmptySessions(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)},
+			{PromptTool: "claude-code", ID: "session-A", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)},
 		},
 	}
 
@@ -376,7 +376,7 @@ func TestMergeNotes_ResultIsSerializable(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 9, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "claude-code", ID: "session-A", Path: "claude-code/session-A.jsonl", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC), Modified: time.Date(2025, 1, 15, 9, 25, 0, 0, time.UTC)},
+			{PromptTool: "claude-code", ID: "session-A", Path: "claude-code/session-A.jsonl", Created: time.Date(2025, 1, 15, 9, 15, 0, 0, time.UTC), Modified: time.Date(2025, 1, 15, 9, 25, 0, 0, time.UTC)},
 		},
 	}
 
@@ -384,7 +384,7 @@ func TestMergeNotes_ResultIsSerializable(t *testing.T) {
 		Version:   1,
 		StartWork: time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC),
 		Sessions: []SessionEntry{
-			{Tool: "claude-code", ID: "session-B", Path: "claude-code/session-B.jsonl", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC), Modified: time.Date(2025, 1, 15, 10, 25, 0, 0, time.UTC)},
+			{PromptTool: "claude-code", ID: "session-B", Path: "claude-code/session-B.jsonl", Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC), Modified: time.Date(2025, 1, 15, 10, 25, 0, 0, time.UTC)},
 		},
 	}
 
