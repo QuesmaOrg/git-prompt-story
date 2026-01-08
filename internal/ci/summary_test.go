@@ -670,8 +670,8 @@ func TestRenderUserTimelineWithTruncation(t *testing.T) {
 			{Entry: PromptEntry{Type: "PROMPT", Text: "Third prompt", Time: now.Add(2 * time.Minute)}, CommitSHA: "abc1234", CommitSubj: "Test", CommitIndex: 0},
 		}
 
-		// Very small limit to force truncation
-		result, truncated := renderUserTimelineWithTruncation(entries, 200)
+		// Very small limit to force truncation (reduced since format is now more compact)
+		result, truncated := renderUserTimelineWithTruncation(entries, 100)
 
 		if truncated == 0 {
 			t.Error("Expected some entries to be truncated")

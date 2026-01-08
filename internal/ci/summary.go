@@ -1141,10 +1141,14 @@ func formatMarkdownEntry(entry PromptEntry) string {
 
 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
-	timeStr := entry.Time.Local().Format("15:04")
-	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	toolCountsStr := formatToolCounts(entry.ToolCounts)
+
+	// COMMAND entries: format with backticks
+	if entry.Type == "COMMAND" {
+		text = html.EscapeString(text)
+		return fmt.Sprintf("- <details open><summary>`%s`%s</summary></details>\n\n", text, toolCountsStr)
+	}
 
 	// DECISION entries: always show in full with answer
 	if entry.Type == "DECISION" {
@@ -1164,16 +1168,15 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		if entry.DecisionAnswerDescription != "" {
 			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
 		}
-		return fmt.Sprintf("- <details open><summary>%s %s %s: %s → %s%s%s</summary></details>\n\n",
-			timeStr, emoji, header, text, answer, desc, toolCountsStr)
+		return fmt.Sprintf("- <details open><summary>%s: %s → %s%s%s</summary></details>\n\n",
+			header, text, answer, desc, toolCountsStr)
 	}
 
 	// Short prompts (≤250 chars): <details open> (expanded by default)
 	if len(text) <= 250 {
 		// Escape HTML to prevent breaking markdown structure
 		text = html.EscapeString(text)
-		return fmt.Sprintf("- <details open><summary>%s %s %s%s</summary></details>\n\n",
-			timeStr, emoji, text, toolCountsStr)
+		return fmt.Sprintf("- <details open><summary>%s%s</summary></details>\n\n", text, toolCountsStr)
 	}
 
 	// Long prompts: <details> (collapsed) with truncated summary
@@ -1184,8 +1187,8 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("- <details><summary>%s %s %s%s</summary>...%s</details>\n\n",
-		timeStr, emoji, summary, toolCountsStr, continuation)
+	return fmt.Sprintf("- <details><summary>%s%s</summary>...%s</details>\n\n",
+		summary, toolCountsStr, continuation)
 }
 
 // RenderJSON generates JSON output
@@ -1237,11 +1240,14 @@ func allPromptsShort(entries []TimelineEntry) bool {
 
 // formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
 func formatMarkdownEntrySimple(entry PromptEntry) string {
-	timeStr := entry.Time.Local().Format("15:04")
-	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	text = html.EscapeString(text)
 	toolCountsStr := formatToolCounts(entry.ToolCounts)
+
+	// COMMAND entries: format with backticks
+	if entry.Type == "COMMAND" {
+		return fmt.Sprintf("- `%s`%s\n", text, toolCountsStr)
+	}
 
 	// DECISION entries: show with answer
 	if entry.Type == "DECISION" {
@@ -1259,10 +1265,10 @@ func formatMarkdownEntrySimple(entry PromptEntry) string {
 		if entry.DecisionAnswerDescription != "" {
 			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
 		}
-		return fmt.Sprintf("- %s %s %s: %s → %s%s%s\n", timeStr, emoji, header, text, answer, desc, toolCountsStr)
+		return fmt.Sprintf("- %s: %s → %s%s%s\n", header, text, answer, desc, toolCountsStr)
 	}
 
-	return fmt.Sprintf("- %s %s %s%s\n", timeStr, emoji, text, toolCountsStr)
+	return fmt.Sprintf("- %s%s\n", text, toolCountsStr)
 }
 
 // countUserPrompts counts user action entries in a slice
