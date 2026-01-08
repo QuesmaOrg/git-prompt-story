@@ -41,12 +41,16 @@ func PrePush(remoteName, remoteURL string, stdin io.Reader) error {
 	}
 
 	// Build refspecs for existing note refs
+	// Force push both refs (+prefix) because notes can diverge when:
+	// - Commits are amended/rebased (old SHA keeps orphaned note)
+	// - Multiple machines work on same repo without syncing notes
+	// Force push is safe since notes are metadata - losing an orphaned
+	// note for a non-existent commit has no impact.
 	var refspecs []string
 	if hasNotesRef(note.NotesRef) {
-		refspecs = append(refspecs, note.NotesRef+":"+note.NotesRef)
+		refspecs = append(refspecs, "+"+note.NotesRef+":"+note.NotesRef)
 	}
 	if hasNotesRef(note.TranscriptsRef) {
-		// Force push for transcripts (they can be amended)
 		refspecs = append(refspecs, "+"+note.TranscriptsRef+":"+note.TranscriptsRef)
 	}
 
