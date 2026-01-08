@@ -12,25 +12,65 @@ const workflowTemplatePages = `name: Prompt Story
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, closed]
 
 permissions:
   contents: write
   pull-requests: write
+  pages: read
 
 jobs:
   prompt-story:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@main
+      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story-with-pages@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment: true
-          deploy-pages: true
+
+  cleanup-old-previews:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 1
+
+      - name: Remove old PR preview directories
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RETENTION_DAYS: 30
+        run: |
+          cd prompt-story 2>/dev/null || exit 0
+          for dir in pr-*; do
+            [ -d "$dir" ] || continue
+            pr_num="${dir#pr-}"
+
+            closed_at=$(gh pr view "$pr_num" --json closedAt -q '.closedAt' 2>/dev/null || echo "")
+            [ -z "$closed_at" ] && continue
+
+            closed_epoch=$(date -d "$closed_at" +%s)
+            now_epoch=$(date +%s)
+            age_days=$(( (now_epoch - closed_epoch) / 86400 ))
+
+            if [ "$age_days" -ge "$RETENTION_DAYS" ]; then
+              echo "Removing prompt-story/$dir (closed $age_days days ago)"
+              rm -rf "$dir"
+            fi
+          done
+
+      - name: Commit cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || git commit -m "Cleanup: remove old PR previews" && git push
 `
 
 const workflowTemplateNoPages = `name: Prompt Story
@@ -40,7 +80,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
 
 jobs:
@@ -55,7 +95,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment: true
-          deploy-pages: false
 `
 
 // Generate creates the GitHub workflow file with interactive prompts

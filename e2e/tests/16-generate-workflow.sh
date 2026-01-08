@@ -23,14 +23,17 @@ echo "" | git-prompt-story generate-github-workflow
 # Verify workflow created
 [ -f .github/workflows/prompt-story.yml ] || fail "workflow not created"
 
-# Verify deploy-pages is false
-grep -q "deploy-pages: false" .github/workflows/prompt-story.yml || fail "deploy-pages should be false"
+# Verify uses prompt-story action (not prompt-story-with-pages)
+grep -q "prompt-story@main" .github/workflows/prompt-story.yml || fail "should use prompt-story action"
+! grep -q "prompt-story-with-pages" .github/workflows/prompt-story.yml || fail "should not use prompt-story-with-pages action"
 
 # Verify essential workflow content
 grep -q "name: Prompt Story" .github/workflows/prompt-story.yml || fail "missing workflow name"
 grep -q "pull_request:" .github/workflows/prompt-story.yml || fail "missing pull_request trigger"
-grep -q "QuesmaOrg/git-prompt-story" .github/workflows/prompt-story.yml || fail "missing action reference"
 grep -q "github-token:" .github/workflows/prompt-story.yml || fail "missing github-token"
+
+# Verify no cleanup job (only needed for pages)
+! grep -q "cleanup-old-previews" .github/workflows/prompt-story.yml || fail "should not have cleanup job"
 
 echo "    - Workflow created with Pages disabled"
 
@@ -50,8 +53,14 @@ echo "y" | git-prompt-story generate-github-workflow
 # Verify workflow created
 [ -f .github/workflows/prompt-story.yml ] || fail "workflow not created"
 
-# Verify deploy-pages is true
-grep -q "deploy-pages: true" .github/workflows/prompt-story.yml || fail "deploy-pages should be true"
+# Verify uses prompt-story-with-pages action
+grep -q "prompt-story-with-pages@main" .github/workflows/prompt-story.yml || fail "should use prompt-story-with-pages action"
+
+# Verify cleanup job is present
+grep -q "cleanup-old-previews" .github/workflows/prompt-story.yml || fail "should have cleanup job"
+
+# Verify pages permission
+grep -q "pages: read" .github/workflows/prompt-story.yml || fail "should have pages permission"
 
 echo "    - Workflow created with Pages enabled"
 

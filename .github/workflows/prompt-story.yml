@@ -18,11 +18,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@main
+      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story-with-pages@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment: true
-          deploy-pages: true
 
   cleanup-old-previews:
     if: github.event.action == 'closed'
