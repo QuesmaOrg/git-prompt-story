@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>f96e957 - Prompt Story</title>
+  <title>4ffa777 - Prompt Story</title>
   <style>:root {
   --bg-primary: #ffffff;
   --bg-secondary: #f6f8fa;
@@ -500,8 +500,8 @@ pre {
   </nav>
 
   <div class="header">
-    <h1><code>f96e957</code></h1>
-    <p class="meta">Default to Pages disabled in workflow generator</p>
+    <h1><code>4ffa777</code></h1>
+    <p class="meta">Remove comment and summary-mode inputs from actions</p>
   </div>
 
   <div class="filter-controls">
@@ -528,14 +528,14 @@ pre {
       <div class="stat-label">Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">18</div>
+      <div class="stat-value" id="visible-count">23</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
 
   <div class="commit-meta" style="margin-bottom: 24px;">
-    <strong>Full SHA:</strong> <code>f96e9575c0b4d7c67ef300fce2743c842b60252b</code><br>
-    <strong>Work period:</strong> 2026-01-08 07:16 - 2026-01-08 07:21
+    <strong>Full SHA:</strong> <code>4ffa777f58c8971c79452ab61a579469cc792bc4</code><br>
+    <strong>Work period:</strong> 2026-01-08 07:44 - 2026-01-08 07:50
   </div>
 
   
@@ -547,7 +547,7 @@ pre {
       </h3>
       <div class="commit-meta">
         <code class="session-id">c80176df-4d61-48f2-bc57-edb29b513eb1</code> |
-        2026-01-08 07:09 - 2026-01-08 07:21 | <span class="session-count">18</span> entries
+        2026-01-08 07:09 - 2026-01-08 07:49 | <span class="session-count">23</span> entries
       </div>
     </div>
     <div class="session">
@@ -556,7 +556,7 @@ pre {
         <li class="prompt-item TOOL_USE"
             data-entry-type="tool"
             data-in-work-period="true">
-          <span class="prompt-time">07:16</span>
+          <span class="prompt-time">07:44</span>
           <span class="prompt-type">TOOL_USE</span>
           
           <span class="tool-name">Bash</span>
@@ -565,106 +565,13 @@ pre {
             <summary>Hide details</summary>
             
             <div class="tool-section-label">Input</div>
-            <div class="tool-input">git checkout main &amp;&amp; git pull origin main</div>
-            
-            
-            <div class="tool-section-label">Output</div>
-            <div class="tool-output">Your branch is up to date with &#39;origin/main&#39;.
-Already up to date.
-Switched to branch &#39;main&#39;
-From github.com:QuesmaOrg/git-prompt-story
- * branch            main       -&gt; FETCH_HEAD</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:17</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Bash</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">git checkout -b fix/disable-pages-by-default &amp;&amp; git cherry-pick 5fa7a47</div>
-            
-            
-            <div class="tool-section-label">Output</div>
-            <div class="tool-output">[fix/disable-pages-by-default a109305] Disable GitHub Pages deployment by default
- Date: Thu Jan 8 09:16:41 2026 &#43;0200
- 1 file changed, 1 insertion(&#43;), 1 deletion(-)
-Switched to a new branch &#39;fix/disable-pages-by-default&#39;</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:17</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Bash</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">git push -u origin fix/disable-pages-by-default</div>
+            <div class="tool-input">git push</div>
             
             
             <div class="tool-section-label">Output</div>
             <div class="tool-output">git-prompt-story: pushed notes to origin
-branch &#39;fix/disable-pages-by-default&#39; set up to track &#39;origin/fix/disable-pages-by-default&#39;.
-remote: 
-remote: Create a pull request for &#39;fix/disable-pages-by-default&#39; on GitHub by visiting:        
-remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/fix/disable-pages-by-default        
-remote: 
 To github.com:QuesmaOrg/git-prompt-story.git
- * [new branch]      fix/disable-pages-by-default -&gt; fix/disable-pages-by-default</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:17</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Bash</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">gh pr create --title &#34;Disable GitHub Pages deployment by default&#34; --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
-## Summary
-- Changes `deploy-pages` default from `&#39;true&#39;` to `&#39;false&#39;` in the GitHub Action
-- Prevents Pages API calls that fail with &#34;Resource not accessible by integration&#34; for repos without Pages enabled
-- Makes GitHub Pages deployment opt-in instead of opt-out
-
-## Test plan
-- [ ] Verify action works with `deploy-pages: false` (default) - no Pages API calls made
-- [ ] Verify action works with `deploy-pages: true` - Pages deployment and URL generation work as before
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-EOF
-)&#34;</div>
-            
-            
-            <div class="tool-section-label">Output</div>
-            <div class="tool-output">https://github.com/QuesmaOrg/git-prompt-story/pull/40</div>
+   f96e957..522423b  fix/disable-pages-by-default -&gt; fix/disable-pages-by-default</div>
             
           </details>
           
@@ -674,118 +581,76 @@ EOF
         <li class="prompt-item ASSISTANT"
             data-entry-type="assistant"
             data-in-work-period="true">
-          <span class="prompt-time">07:18</span>
+          <span class="prompt-time">07:45</span>
           <span class="prompt-type">ASSISTANT</span>
           
-          <span class="prompt-text">Done! PR created: https://github.com/QuesmaOrg/git-prompt-story/pull/40</span>
+          <span class="prompt-text">Done! Pushed to PR #40: https://github.com/QuesmaOrg/git-prompt-story/pull/40
+
+The PR now has 3 commits:
+1. Disable GitHub Pages deployment by default (action.yml default change)
+2. Default to Pages disabled in workflow generator
+3. Split GitHub Action into prompt-story and prompt-story-with-pages</span>
           
         </li>
         
         <li class="prompt-item PROMPT"
             data-entry-type="user"
             data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
+          <span class="prompt-time">07:47</span>
           <span class="prompt-type">PROMPT</span>
           
-          <span class="prompt-text">Can you also make sure when we use command to generate workflow or in Readme.md we also default to disable GitHub pages</span>
+          <span class="prompt-text">Seems over verbose &#34;summary-mode&#34; could be removed right? We should always post summary in another job, so no need for &#34;comment&#34;?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">You&#39;re right - we can simplify. Let me confirm:</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">07:47</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Summary mode)</span>
+          <span class="prompt-text">For summary-mode (brief vs full), which should be the default behavior?</span>
+          <span class="decision-answer">→ Don&#39;t understand just use ci-summary</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">07:47</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Comment input)</span>
+          <span class="prompt-text">Should we remove the comment input entirely (always post comments)?</span>
+          <span class="decision-answer">→ Remove it</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check how `summary-mode` is currently used to understand what `ci-summary` does:</span>
           
         </li>
         
         <li class="prompt-item TOOL_USE"
             data-entry-type="tool"
             data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Grep</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">deploy-pages</div>
-            
-            
-            <div class="tool-section-label">Output</div>
-            <div class="tool-output">.github/actions/prompt-story/action.yml:19:  deploy-pages:
-.github/actions/prompt-story/action.yml:90:      if: inputs.deploy-pages == &#39;true&#39; &amp;&amp; steps.analyze.outputs.commits-with-notes != &#39;0&#39;
-.github/actions/prompt-story/action.yml:102:      if: inputs.deploy-pages == &#39;true&#39; &amp;&amp; steps.analyze.outputs.commits-with-notes != &#39;0&#39;
-.github/actions/prompt-story/action.yml:112:      if: inputs.deploy-pages == &#39;true&#39; &amp;&amp; steps.analyze.outputs.commits-with-notes != &#39;0&#39;
-.github/actions/prompt-story/action.yml:133:        DEPLOY_PAGES: ${{ inputs.deploy-pages }}
-.github/workflows/prompt-story.yml:25:          deploy-pages: true
-e2e/tests/16-generate-workflow.sh:26:# Verify deploy-pages is true
-e2e/tests/16-generate-workflow.sh:27:grep -q &#34;deploy-pages: true&#34; .github/workflows/prompt-story.yml || fail &#34;deploy-pages should be true&#34;
-e2e/tests/16-generate-workflow.sh:53:# Verify deploy-pages is false
-e2e/tests/16-generate-workflow.sh:54:grep -q &#34;deploy-pages: false&#34; .github/workflows/prompt-story.yml || fail &#34;deploy-pages should be false&#34;
-internal/workflow/generator.go:33:          deploy-pages: true
-internal/workflow/generator.go:58:          deploy-pages: false</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Read</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/workflow/generator.go</div>
-            
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Grep</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">deploy-pages|GitHub Pages</div>
-            
-            
-            <div class="tool-section-label">Output</div>
-            <div class="tool-output">58-git-prompt-story generate-github-workflow
-59-```
-60-
-61:This interactively generates a workflow file that posts PR summaries and optionally deploys full transcripts to GitHub Pages.
-62-
-63-## How It Works
-64-
---
-174-
-175-- Run on Pull Requests
-176-- Adds message with markdown summary of prompts
-177:- Creates more detailed HTML transcript and saves it as GitHub Pages
-178-
-179-## Viewer Integration
-180-</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
+          <span class="prompt-time">07:48</span>
           <span class="prompt-type">TOOL_USE</span>
           
           <span class="tool-name">Read</span>
@@ -794,7 +659,7 @@ internal/workflow/generator.go:58:          deploy-pages: false</div>
             <summary>Hide details</summary>
             
             <div class="tool-section-label">Input</div>
-            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story/scripts/analyze.sh</div>
             
             
             <div class="tool-section-label">Output</div>
@@ -808,22 +673,389 @@ internal/workflow/generator.go:58:          deploy-pages: false</div>
         <li class="prompt-item ASSISTANT"
             data-entry-type="assistant"
             data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
+          <span class="prompt-time">07:48</span>
           <span class="prompt-type">ASSISTANT</span>
           
-          <span class="prompt-text">I found the places that need updating:
-
-1. **`internal/workflow/generator.go:66`** - The `askYesNo` defaults to `true`
-2. **`e2e/tests/16-generate-workflow.sh`** - Tests need to be updated for the new default
-
-Let me make these changes:</span>
+          <span class="prompt-text">Got it. So the plan is:
+1. Remove `comment` input (always post comments)
+2. Remove `summary-mode` input (just use `ci-summary` default behavior)</span>
           
         </li>
         
         <li class="prompt-item TOOL_USE"
             data-entry-type="tool"
             data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/whimsical-snuggling-brooks.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/whimsical-snuggling-brooks.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Simplify GitHub Action inputs
+     2 
+     3 ## Changes
+     4 
+     5 ### Remove from both actions (`prompt-story` and `prompt-story-with-pages`):
+     6 
+     7 1. **Remove `comment` input** - Always post PR comments
+     8    - Remove input definition
+     9    - Remove `if: inputs.comment == &#39;true&#39;` condition from &#34;Post PR comment&#34; step
+    10 
+    11 2. **Remove `summary-mode` input** - Always use default ci-summary behavior
+    12    - Remove input definition
+    13    - Update `analyze.sh` to remove `SUMMARY_MODE` / `--full` flag logic
+    14 
+    15 ## Files to modify
+    16 
+    17 - `.github/actions/prompt-story/action.yml` - Remove inputs, remove condition
+    18 - `.github/actions/prompt-story-with-pages/action.yml` - Remove inputs, remove condition
+    19 - `.github/actions/prompt-story/scripts/analyze.sh` - Remove SUMMARY_MODE logic
+    20 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Simplify GitHub Action inputs\n\n## Changes\n\n### Remove from both actions (`prompt-story` and `prompt-story-with-pages`):\n\n1. **Remove `comment` input** - Always post PR commen...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/whimsical-snuggling-brooks.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Simplify GitHub Action inputs
+
+## Changes
+
+### Remove from both actions (`prompt-story` and `prompt-story-with-pages`):
+
+1. **Remove `comment` input** - Always post PR comments
+   - Remove input definition
+   - Remove `if: inputs.comment == &#39;true&#39;` condition from &#34;Post PR comment&#34; step
+
+2. **Remove `summary-mode` input** - Always use default ci-summary behavior
+   - Remove input definition
+   - Update `analyze.sh` to remove `SUMMARY_MODE` / `--full` flag logic
+
+## Files to modify
+
+- `.github/actions/prompt-story/action.yml` - Remove inputs, remove condition
+- `.github/actions/prompt-story-with-pages/action.yml` - Remove inputs, remove condition
+- `.github/actions/prompt-story/scripts/analyze.sh` - Remove SUMMARY_MODE logic
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story/action.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story/action.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story/action.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 name: &#39;Prompt Story&#39;
+     2 description: &#39;Analyze and display LLM session transcripts from git-prompt-story notes&#39;
+     3 author: &#39;QuesmaOrg&#39;
+     4 branding:
+     5   icon: &#39;message-circle&#39;
+     6   color: &#39;purple&#39;
+     7 
+     8 inputs:
+     9   github-token:
+    10     description: &#39;GitHub token for PR comments&#39;
+    11     required: true
+    12     default: ${{ github.token }}
+    13 
+    14   fail-if-no-notes:
+    15     description: &#39;Fail the action if no prompt-story notes found&#39;
+    16     required: false
+    17     default: &#39;false&#39;
+    18 
+    19   version:
+    20     description: &#39;Version of git-prompt-story to use (default: latest)&#39;
+    21     required: false
+    22     default: &#39;latest&#39;
+    23 
+    24 outputs:
+    25   commits-analyzed:
+    26     description: &#39;Number of commits analyzed&#39;
+    27     value: ${{ steps.analyze.outputs.commits-analyzed }}
+    28 
+    29   commits-with-notes:
+    30     description: &#39;Number of commits with prompt-story notes&#39;
+    31     value: ${{ steps.analyze.outputs.commits-with-notes }}
+    32 
+    33   commits-with-markers:
+    34     description: &#39;Number of commits with prompt-story markers in messages&#39;
+    35     value: ${{ steps.analyze.outputs.commits-with-markers }}
+    36 
+    37   comment-id:
+    38     description: &#39;ID of the PR comment created&#39;
+    39     value: ${{ steps.comment.outputs.comment-id }}
+    40 
+    41 runs:
+    42   using: &#39;composite&#39;
+    43   steps:
+    44     - name: Fetch git notes
+    45       shell: bash
+    46       run: ${{ github.action_path }}/scripts/fetch-notes.sh
+    47 
+    48     - name: Download git-prompt-story
+    49       shell: bash
+    50       env:
+    51         VERSION: ${{ inputs.version }}
+    52         GITHUB_TOKEN: ${{ inputs.github-token }}
+    53       run: ${{ github.action_path }}/scripts/...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story-with-pages/action.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story-with-pages/action.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story-with-pages/action.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 name: &#39;Prompt Story with Pages&#39;
+     2 description: &#39;Analyze LLM session transcripts and deploy full transcripts to GitHub Pages&#39;
+     3 author: &#39;QuesmaOrg&#39;
+     4 branding:
+     5   icon: &#39;message-circle&#39;
+     6   color: &#39;purple&#39;
+     7 
+     8 inputs:
+     9   github-token:
+    10     description: &#39;GitHub token for PR comments and Pages deployment&#39;
+    11     required: true
+    12     default: ${{ github.token }}
+    13 
+    14   pages-branch:
+    15     description: &#39;Branch for GitHub Pages deployment&#39;
+    16     required: false
+    17     default: &#39;gh-pages&#39;
+    18 
+    19   fail-if-no-notes:
+    20     description: &#39;Fail the action if no prompt-story notes found&#39;
+    21     required: false
+    22     default: &#39;false&#39;
+    23 
+    24   version:
+    25     description: &#39;Version of git-prompt-story to use (default: latest)&#39;
+    26     required: false
+    27     default: &#39;latest&#39;
+    28 
+    29 outputs:
+    30   commits-analyzed:
+    31     description: &#39;Number of commits analyzed&#39;
+    32     value: ${{ steps.analyze.outputs.commits-analyzed }}
+    33 
+    34   commits-with-notes:
+    35     description: &#39;Number of commits with prompt-story notes&#39;
+    36     value: ${{ steps.analyze.outputs.commits-with-notes }}
+    37 
+    38   commits-with-markers:
+    39     description: &#39;Number of commits with prompt-story markers in messages&#39;
+    40     value: ${{ steps.analyze.outputs.commits-with-markers }}
+    41 
+    42   pages-url:
+    43     description: &#39;URL to the deployed GitHub Pages transcript&#39;
+    44     value: ${{ steps.pages-url.outputs.pages-url }}
+    45 
+    46   comment-id:
+    47     description: &#39;ID of the PR comment created&#39;
+    48     value: ${{ steps.comment.outputs.comment-id }}
+    49 
+    50 runs:
+    51   using: &#39;composite&#39;
+    52   steps:
+    53     - name: Fetc...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:49</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me update the analyze.sh script to remove the SUMMARY_MODE logic:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story/scripts/analyze.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.github/actions/prompt-story/scripts/analyze.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 #!/bin/bash
+     2 set -e
+     3 
+     4 echo &#34;Analyzing commits...&#34;
+     5 
+     6 # Use branch reference to get commits new on PR branch
+     7 COMMIT_RANGE=&#34;origin/${BASE_REF}..HEAD&#34;
+     8 echo &#34;  Range: $COMMIT_RANGE&#34;
+     9 
+    10 # Check if any commits have Prompt-Story markers in their messages
+    11 COMMITS_WITH_ANY_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c &#34;Prompt-Story:&#34; || echo &#34;0&#34;)
+    12 COMMITS_WITH_NONE_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c &#34;Prompt-Story: none&#34; || echo &#34;0&#34;)
+    13 # Only count markers that indicate actual AI usage (not &#34;none&#34;)
+    14 COMMITS_WITH_MARKERS=$((COMMITS_WITH_ANY_MARKERS - COMMITS_WITH_NONE_MARKERS))
+    15 echo &#34;  Commits with AI markers: $COMMITS_WITH_MARKERS (total: $COMMITS_WITH_ANY_MARKERS, none: $COMMITS_WITH_NONE_MARKERS)&#34;
+    16 
+    17 # Generate summary in JSON to extract stats
+    18 ./git-prompt-story ci-summary &#34;$COMMIT_RANGE&#34; --format=json --output=./prompt-story-stats.json
+    19 
+    20 # Extract stats from JSON
+    21 COMMITS_ANALYZED=$(jq -r &#39;.commits_analyzed&#39; ./prompt-story-stats.json)
+    22 COMMITS_WITH_NOTES=$(jq -r &#39;.commits_with_notes&#39; ./prompt-story-stats.json)
+    23 
+    24 echo &#34;  Commits analyzed: $COMMITS_ANALYZED&#34;
+    25 echo &#34;  Commits with notes: $COMMITS_WITH_NOTES&#34;
+    26 
+    27 # Set outputs
+    28 echo &#34;commits-analyzed=$COMMITS_ANALYZED&#34; &gt;&gt; $GITHUB_OUTPUT
+    29 echo &#34;commits-with-notes=$COMMITS_WITH_NOTES&#34; &gt;&gt; $GITHUB_OUTPUT
+    30 echo &#34;commits-with-markers=$COMMITS_WITH_MARKERS&#34; &gt;&gt; $GITHUB_OUTPUT
+    31 
+    32 # Check if we should fail
+    33 if [ &#34;$FAIL_IF_NO_NOTES&#34; = &#34;true&#34; ] &amp;&amp; [ &#34;$COMMITS_WITH_NOTES&#34; = &#34;0&#34; ]; then
+    34   echo &#34;Error: No prompt-story notes found and fail-if-no-notes is set&#34;
+    35   exit 1
+    36 fi
+    37 
+    38 # Generate markdown summar...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:49</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to update the workflow generator and this repo&#39;s workflow to remove `comment: true`:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:49</span>
           <span class="prompt-type">TOOL_USE</span>
           
           <span class="tool-name">Edit</span>
@@ -837,150 +1069,17 @@ Let me make these changes:</span>
             
             <div class="tool-section-label">Output</div>
             <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/workflow/generator.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
-    62 func Generate() error {
-    63 	fmt.Println(&#34;Generating GitHub Action workflow for prompt-story...&#34;)
-    64 	fmt.Println()
-    65 
-    66 	enablePages := askYesNo(&#34;Enable GitHub Pages for full transcripts?&#34;, false)
-    67 
-    68 	// Determine workflow content
-    69 	var content string
-    70 	if enablePages {</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Edit</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh</div>
-            
-            
-            <div class="tool-section-label">Output</div>
-            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
-     3 source /e2e/lib/helpers.sh
-     4 
-     5 echo &#34;[16/16] Generate GitHub Workflow&#34;
-     6 
-     7 # ============================================
-     8 # Test 1: Generate workflow with Pages disabled (default)
-     9 # ============================================
-    10 echo &#34;  Test 1: Generate workflow with Pages disabled (default)...&#34;
-    11 
-    12 rm -rf /workspace/test-repo
-    13 mkdir -p /workspace/test-repo
-    14 cd /workspace/test-repo
-    15 git init
-    16 
-    17 # Verify no workflow exists yet
-    18 [ ! -f .github/workflows/prompt-story.yml ] || fail &#34;workflow should not exist yet&#34;
-    19 
-    20 # Run command with Enter (default = no for Pages)
-    21 echo &#34;&#34; | git-prompt-story generate-github-workflow
-    22 
-    23 # Verify workflow created
-    24 [ -f .github/workflows/prompt-story.yml ] || fail &#34;workflow not created&#34;
-    25 
-    26 # Verify deploy-pages is false
-    27 grep -q &#34;deploy-pages: false&#34; .github/workflows/prompt-story.yml || fail &#34;deploy-pages should be false&#34;
-    28 
-    29 # Verify essential workflow content
-    30 grep -q &#34;name: Prompt Story&#34; .github/workflows/prompt-story.yml || fail &#34;missing workflow name&#34;
-    31 grep -q &#34;pull_request:&#34; .github/workflows/prompt-story.yml || fail &#34;missing pull_request trigger&#34;</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Edit</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh</div>
-            
-            
-            <div class="tool-section-label">Output</div>
-            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
-    31 grep -q &#34;pull_request:&#34; .github/workflows/prompt-story.yml || fail &#34;missing pull_request trigger&#34;
-    32 grep -q &#34;QuesmaOrg/git-prompt-story&#34; .github/workflows/prompt-story.yml || fail &#34;missing action reference&#34;
-    33 grep -q &#34;github-token:&#34; .github/workflows/prompt-story.yml || fail &#34;missing github-token&#34;
+    27       - uses: actions/checkout@v4
+    28         with:
+    29           fetch-depth: 0
+    30 
+    31       - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story-with-pages@main
+    32         with:
+    33           github-token: ${{ secrets.GITHUB_TOKEN }}
     34 
-    35 echo &#34;    - Workflow created with Pages disabled&#34;
-    36 
-    37 # ============================================
-    38 # Test 2: Generate workflow with Pages enabled
-    39 # ============================================
-    40 echo &#34;  Test 2: Generate workflow with Pages enabled...&#34;
-    41 
-    42 rm -rf /workspace/test-repo
-    43 mkdir -p /workspace/test-repo
-    44 cd /workspace/test-repo
-    45 git init
-    46 
-    47 # Run command with &#39;y&#39; to enable Pages
-    48 echo &#34;y&#34; | git-prompt-story generate-github-workflow
-    49 
-    50 # Verify workflow created
-    51 [ -f .github/workflows/prompt-story.yml ] || fail &#34;workflow not created&#34;
-    52 
-    53 # Verify deploy-pages is true
-    54 grep -q &#34;deploy-pages: true&#34; .github/workflows/prompt-story.yml || fail &#34;deploy-pages should be true&#34;
-    55 
-    56 echo &#34;    - Workflow created with Pages enabled&#34;
-    57 
-    58 # ============================================
-    59 # Test 3: Workflow directory creation
-    60 # ============================================</div>
-            
-          </details>
-          
-          
-        </li>
-        
-        <li class="prompt-item ASSISTANT"
-            data-entry-type="assistant"
-            data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
-          <span class="prompt-type">ASSISTANT</span>
-          
-          <span class="prompt-text">Let me verify the build works:</span>
-          
-        </li>
-        
-        <li class="prompt-item TOOL_USE"
-            data-entry-type="tool"
-            data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
-          <span class="prompt-type">TOOL_USE</span>
-          
-          <span class="tool-name">Bash</span>
-          
-          <details class="tool-details" open>
-            <summary>Hide details</summary>
-            
-            <div class="tool-section-label">Input</div>
-            <div class="tool-input">go build .</div>
-            
+    35   cleanup-old-previews:
+    36     if: github.event.action == &#39;closed&#39;
+    37     runs-on: ubuntu-latest</div>
             
           </details>
           
@@ -990,22 +1089,31 @@ Let me make these changes:</span>
         <li class="prompt-item TOOL_USE"
             data-entry-type="tool"
             data-in-work-period="true">
-          <span class="prompt-time">07:20</span>
+          <span class="prompt-time">07:49</span>
           <span class="prompt-type">TOOL_USE</span>
           
-          <span class="tool-name">Bash</span>
+          <span class="tool-name">Edit</span>
           
           <details class="tool-details" open>
             <summary>Hide details</summary>
             
             <div class="tool-section-label">Input</div>
-            <div class="tool-input">git diff --stat</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/workflow/generator.go</div>
             
             
             <div class="tool-section-label">Output</div>
-            <div class="tool-output"> e2e/tests/16-generate-workflow.sh | 26 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-------------
- internal/workflow/generator.go    |  2 &#43;-
- 2 files changed, 14 insertions(&#43;), 14 deletions(-)</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/workflow/generator.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    89       - uses: actions/checkout@v4
+    90         with:
+    91           fetch-depth: 0
+    92 
+    93       - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story@main
+    94         with:
+    95           github-token: ${{ secrets.GITHUB_TOKEN }}
+    96 `
+    97 
+    98 // Generate creates the GitHub workflow file with interactive prompts
+    99 func Generate() error {</div>
             
           </details>
           
@@ -1015,7 +1123,41 @@ Let me make these changes:</span>
         <li class="prompt-item TOOL_USE"
             data-entry-type="tool"
             data-in-work-period="true">
-          <span class="prompt-time">07:21</span>
+          <span class="prompt-time">07:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/workflows/prompt-story.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.github/workflows/prompt-story.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    17       - uses: actions/checkout@v4
+    18         with:
+    19           fetch-depth: 0
+    20 
+    21       - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story-with-pages@main
+    22         with:
+    23           github-token: ${{ secrets.GITHUB_TOKEN }}
+    24 
+    25   cleanup-old-previews:
+    26     if: github.event.action == &#39;closed&#39;
+    27     runs-on: ubuntu-latest</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:49</span>
           <span class="prompt-type">TOOL_USE</span>
           
           <span class="tool-name">Bash</span>
@@ -1024,20 +1166,52 @@ Let me make these changes:</span>
             <summary>Hide details</summary>
             
             <div class="tool-section-label">Input</div>
-            <div class="tool-input">git add internal/workflow/generator.go e2e/tests/16-generate-workflow.sh &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
-Default to Pages disabled in workflow generator
+            <div class="tool-input">go build . &amp;&amp; git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> .github/actions/prompt-story-with-pages/action.yml | 13 &#43;------------
+ .github/actions/prompt-story/action.yml            | 13 &#43;------------
+ .github/actions/prompt-story/scripts/analyze.sh    | 10 &#43;&#43;--------
+ .github/workflows/prompt-story.yml                 |  1 -
+ internal/workflow/generator.go                     |  2 --
+ 5 files changed, 4 insertions(&#43;), 35 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Remove comment and summary-mode inputs from actions
 
-Update generate-github-workflow command to default to no when asking
-about GitHub Pages. Update e2e tests to match the new default.
+Simplify both actions by:
+- Removing comment input (always post PR comments)
+- Removing summary-mode input (always use default ci-summary)
 
 🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
 EOF
-)&#34;</div>
+)&#34; &amp;&amp; git push</div>
             
             
             <div class="tool-section-label">Output</div>
-            <div class="tool-output">[fix/disable-pages-by-default f96e957] Default to Pages disabled in workflow generator
- 2 files changed, 14 insertions(&#43;), 14 deletions(-)</div>
+            <div class="tool-output">[fix/disable-pages-by-default 4ffa777] Remove comment and summary-mode inputs from actions
+ 5 files changed, 4 insertions(&#43;), 35 deletions(-)
+git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+   522423b..4ffa777  fix/disable-pages-by-default -&gt; fix/disable-pages-by-default</div>
             
           </details>
           
