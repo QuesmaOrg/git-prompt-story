@@ -32,9 +32,10 @@ type PromptEntry struct {
 	ToolInput    string    `json:"tool_input,omitempty"`  // For TOOL_USE: the tool input/command
 	ToolOutput   string    `json:"tool_output,omitempty"` // For TOOL_RESULT: the tool output
 	// For DECISION entries (AskUserQuestion)
-	DecisionHeader            string `json:"decision_header,omitempty"`             // Question header (e.g., "Version")
-	DecisionAnswer            string `json:"decision_answer,omitempty"`             // User's selected answer
-	DecisionAnswerDescription string `json:"decision_answer_description,omitempty"` // Description of selected option
+	DecisionHeader            string         `json:"decision_header,omitempty"`             // Question header (e.g., "Version")
+	DecisionAnswer            string         `json:"decision_answer,omitempty"`             // User's selected answer
+	DecisionAnswerDescription string         `json:"decision_answer_description,omitempty"` // Description of selected option
+	ToolCounts                map[string]int `json:"tool_counts,omitempty"`                 // For user prompts: counts of tool uses that followed
 }
 
 // SessionSummary represents a summarized session within a commit
@@ -65,14 +66,15 @@ type CommitSummary struct {
 
 // Summary represents the full analysis result
 type Summary struct {
-	Commits          []CommitSummary `json:"commits"`
-	TotalPrompts     int             `json:"total_prompts"`       // Kept for backward compatibility (equals TotalSteps)
-	TotalUserPrompts int             `json:"total_user_prompts"`  // Count of user actions in main sessions only
-	TotalAgentPrompts int            `json:"total_agent_prompts"` // Count of user actions in agent sessions
-	TotalSteps       int             `json:"total_steps"`         // Count of all entries
-	TotalAgentSessions int           `json:"total_agent_sessions"` // Count of agent sessions
-	CommitsWithNotes int             `json:"commits_with_notes"`
-	CommitsAnalyzed  int             `json:"commits_analyzed"`
+	Commits            []CommitSummary `json:"commits"`
+	TotalPrompts       int             `json:"total_prompts"`        // Kept for backward compatibility (equals TotalSteps)
+	TotalUserPrompts   int             `json:"total_user_prompts"`   // Count of user actions in main sessions only
+	TotalAgentPrompts  int             `json:"total_agent_prompts"`  // Count of user actions in agent sessions
+	TotalSteps         int             `json:"total_steps"`          // Count of all entries
+	TotalAgentSessions int             `json:"total_agent_sessions"` // Count of agent sessions
+	TotalFileEdits     int             `json:"total_file_edits"`     // Count of Write/Edit operations
+	CommitsWithNotes   int             `json:"commits_with_notes"`
+	CommitsAnalyzed    int             `json:"commits_analyzed"`
 }
 
 // GenerateSummary analyzes commits in a range and extracts prompt data
@@ -100,8 +102,10 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 			for _, sess := range cs.Sessions {
 				stepCount := len(sess.Prompts)
 				userPromptCount := countUserPrompts(sess.Prompts)
+				fileEditCount := countFileEdits(sess.Prompts)
 				summary.TotalSteps += stepCount
 				summary.TotalPrompts += stepCount // Keep for backward compatibility
+				summary.TotalFileEdits += fileEditCount
 
 				// Separate counts for main vs agent sessions
 				if sess.IsAgent {
@@ -738,16 +742,65 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 		}
 	}
 
+	// Sort fullTimeline chronologically to associate tool uses with prompts
+	sort.Slice(fullTimeline, func(i, j int) bool {
+		return fullTimeline[i].Entry.Time.Before(fullTimeline[j].Entry.Time)
+	})
+
+	// Associate tool uses with the preceding user prompt
+	// Build a map of user prompt indices in userTimeline for quick lookup
+	userTimelineIndices := make(map[int]int) // fullTimeline index -> userTimeline index
+	for i, te := range userTimeline {
+		for j, fte := range fullTimeline {
+			if te.Entry.Time.Equal(fte.Entry.Time) && te.Entry.Type == fte.Entry.Type && te.Entry.Text == fte.Entry.Text {
+				userTimelineIndices[j] = i
+				break
+			}
+		}
+	}
+
+	// Iterate through fullTimeline and count tool uses per user prompt
+	var lastUserPromptIdx = -1
+	for i, te := range fullTimeline {
+		if IsUserAction(te.Entry.Type) {
+			if idx, ok := userTimelineIndices[i]; ok {
+				lastUserPromptIdx = idx
+				// Initialize ToolCounts if nil
+				if userTimeline[lastUserPromptIdx].Entry.ToolCounts == nil {
+					userTimeline[lastUserPromptIdx].Entry.ToolCounts = make(map[string]int)
+				}
+			}
+		} else if te.Entry.Type == "TOOL_USE" && lastUserPromptIdx >= 0 {
+			// Add to the last user prompt's tool counts
+			toolName := te.Entry.ToolName
+			if toolName != "" {
+				userTimeline[lastUserPromptIdx].Entry.ToolCounts[toolName]++
+			}
+		}
+	}
+
 	// Sort userTimeline chronologically across all sessions
 	sort.Slice(userTimeline, func(i, j int) bool {
 		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
 	})
 
+	// Count file edits (Write/Edit operations) from fullTimeline
+	fileEditCount := 0
+	for _, te := range fullTimeline {
+		if te.Entry.Type == "TOOL_USE" && (te.Entry.ToolName == "Write" || te.Entry.ToolName == "Edit") {
+			fileEditCount++
+		}
+	}
+
 	// Render Prompts section - markdown header, show first 10, collapse rest
 	if len(userTimeline) == 0 {
 		sb.WriteString("*No user prompts in this PR*\n\n")
 	} else {
-		sb.WriteString(fmt.Sprintf("# %d user prompts\n\n", len(userTimeline)))
+		if fileEditCount > 0 {
+			sb.WriteString(fmt.Sprintf("# %d user prompts (%d file edits)\n\n", len(userTimeline), fileEditCount))
+		} else {
+			sb.WriteString(fmt.Sprintf("# %d user prompts\n\n", len(userTimeline)))
+		}
 
 		if len(userTimeline) <= 10 {
 			// Show all prompts
@@ -1091,6 +1144,7 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	timeStr := entry.Time.Local().Format("15:04")
 	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
+	toolCountsStr := formatToolCounts(entry.ToolCounts)
 
 	// DECISION entries: always show in full with answer
 	if entry.Type == "DECISION" {
@@ -1110,16 +1164,16 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		if entry.DecisionAnswerDescription != "" {
 			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
 		}
-		return fmt.Sprintf("- <details open><summary>%s %s %s: %s → %s%s</summary></details>\n\n",
-			timeStr, emoji, header, text, answer, desc)
+		return fmt.Sprintf("- <details open><summary>%s %s %s: %s → %s%s%s</summary></details>\n\n",
+			timeStr, emoji, header, text, answer, desc, toolCountsStr)
 	}
 
 	// Short prompts (≤250 chars): <details open> (expanded by default)
 	if len(text) <= 250 {
 		// Escape HTML to prevent breaking markdown structure
 		text = html.EscapeString(text)
-		return fmt.Sprintf("- <details open><summary>%s %s %s</summary></details>\n\n",
-			timeStr, emoji, text)
+		return fmt.Sprintf("- <details open><summary>%s %s %s%s</summary></details>\n\n",
+			timeStr, emoji, text, toolCountsStr)
 	}
 
 	// Long prompts: <details> (collapsed) with truncated summary
@@ -1130,13 +1184,33 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("- <details><summary>%s %s %s</summary>...%s</details>\n\n",
-		timeStr, emoji, summary, continuation)
+	return fmt.Sprintf("- <details><summary>%s %s %s%s</summary>...%s</details>\n\n",
+		timeStr, emoji, summary, toolCountsStr, continuation)
 }
 
 // RenderJSON generates JSON output
 func RenderJSON(summary *Summary) ([]byte, error) {
 	return json.MarshalIndent(summary, "", "  ")
+}
+
+// formatToolCounts formats tool counts as "(3 Bash, 5 Read, 9 Edit)"
+func formatToolCounts(counts map[string]int) string {
+	if len(counts) == 0 {
+		return ""
+	}
+
+	// Sort tool names for consistent output
+	var tools []string
+	for tool := range counts {
+		tools = append(tools, tool)
+	}
+	sort.Strings(tools)
+
+	var parts []string
+	for _, tool := range tools {
+		parts = append(parts, fmt.Sprintf("%d %s", counts[tool], tool))
+	}
+	return " (" + strings.Join(parts, ", ") + ")"
 }
 
 // IsUserAction returns true if the entry type represents a user action
@@ -1167,6 +1241,7 @@ func formatMarkdownEntrySimple(entry PromptEntry) string {
 	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	text = html.EscapeString(text)
+	toolCountsStr := formatToolCounts(entry.ToolCounts)
 
 	// DECISION entries: show with answer
 	if entry.Type == "DECISION" {
@@ -1184,10 +1259,10 @@ func formatMarkdownEntrySimple(entry PromptEntry) string {
 		if entry.DecisionAnswerDescription != "" {
 			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
 		}
-		return fmt.Sprintf("- %s %s %s: %s → %s%s\n", timeStr, emoji, header, text, answer, desc)
+		return fmt.Sprintf("- %s %s %s: %s → %s%s%s\n", timeStr, emoji, header, text, answer, desc, toolCountsStr)
 	}
 
-	return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
+	return fmt.Sprintf("- %s %s %s%s\n", timeStr, emoji, text, toolCountsStr)
 }
 
 // countUserPrompts counts user action entries in a slice
@@ -1195,6 +1270,17 @@ func countUserPrompts(prompts []PromptEntry) int {
 	count := 0
 	for _, p := range prompts {
 		if IsUserAction(p.Type) {
+			count++
+		}
+	}
+	return count
+}
+
+// countFileEdits counts Write/Edit tool uses in a slice
+func countFileEdits(prompts []PromptEntry) int {
+	count := 0
+	for _, p := range prompts {
+		if p.Type == "TOOL_USE" && (p.ToolName == "Write" || p.ToolName == "Edit") {
 			count++
 		}
 	}
