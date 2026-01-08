@@ -24,7 +24,7 @@ var prepareCommitMsgCmd = &cobra.Command{
 			sha = args[2]
 		}
 
-		if err := hooks.PrepareCommitMsg(msgFile, source, sha); err != nil {
+		if err := hooks.PrepareCommitMsg(msgFile, source, sha, GetVersion()); err != nil {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
 			// Don't exit with error to not block the commit
 		}

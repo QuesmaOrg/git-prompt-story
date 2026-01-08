@@ -14,7 +14,7 @@ import (
 )
 
 // PrepareCommitMsg implements the prepare-commit-msg hook logic
-func PrepareCommitMsg(msgFile, source, sha string) error {
+func PrepareCommitMsg(msgFile, source, sha, version string) error {
 	// Get repo root
 	repoRoot, err := git.GetRepoRoot()
 	if err != nil {
@@ -78,7 +78,7 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 	var summary string
 
 	if len(sessions) == 0 {
-		summary = "Prompt-Story: none"
+		summary = fmt.Sprintf("Prompt-Story: none [%s]", version)
 		// Clean up any stale pending file
 		os.Remove(pendingFile)
 	} else {
@@ -125,7 +125,7 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		endWork := time.Now().UTC()
 		promptCount := session.CountUserActionsInRange(sessions, startWork, endWork)
 
-		summary = psNote.GenerateSummary(promptCount)
+		summary = psNote.GenerateSummary(promptCount, version)
 	}
 
 	debugLog.log("Final summary: %s", summary)
