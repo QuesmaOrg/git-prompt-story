@@ -497,20 +497,20 @@ pre {
 <body>
   <div class="header">
     <h1>Prompt Story</h1>
-    <p class="meta">PR #38 | 2 commit(s) with LLM sessions</p>
+    <p class="meta">PR #38 | 3 commit(s) with LLM sessions</p>
   </div>
 
   <div class="stats">
     <div class="stat">
-      <div class="stat-value">3</div>
+      <div class="stat-value">4</div>
       <div class="stat-label">Commits Analyzed</div>
     </div>
     <div class="stat">
-      <div class="stat-value">2</div>
+      <div class="stat-value">3</div>
       <div class="stat-label">With Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">302</div>
+      <div class="stat-value" id="visible-count">340</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
@@ -528,6 +528,14 @@ pre {
       </tr>
     </thead>
     <tbody>
+      
+      <tr>
+        <td><code>c8ec752</code></td>
+        <td>Fix unit tests after Tool→PromptTool rename</td>
+        <td>Claude Code</td>
+        <td>38</td>
+        <td><a href="c8ec752.html">View transcript</a></td>
+      </tr>
       
       <tr>
         <td><code>6d23026</code></td>
@@ -563,6 +571,926 @@ pre {
     </label>
   </div>
 
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3><code>c8ec752</code> Fix unit tests after Tool→PromptTool rename</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-07 17:28 - 2026-01-08 07:12
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-07 16:19 - 2026-01-08 07:10 | <span class="session-count">38</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+   d4f688b..6d23026  feature/multi-tool-architecture -&gt; feature/multi-tool-architecture</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[]}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! PR #38 updated with simplifications:
+
+**Changes:**
+1. **Merged `FilterByUserMessages` into `DiscoverSessions`** - Since callers always used both in sequence, now `DiscoverSessions` directly returns only sessions with user messages
+
+2. **Consolidated claudecode package: 5 files → 2 files**
+   - `claudecode.go` - Discoverer &#43; Session &#43; constants &#43; init (renamed from discoverer.go)
+   - `parser.go` - parsing logic (kept separate)
+   - Deleted: `version.go`, `session.go`, `init.go`
+
+**Result:** -64 lines, simpler interface, fewer files.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Why Session had ReadContent(), we should remove that method, instead pass Session as argument instead of content to ParseSession and ParseMetadata</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good point. Let me check the current interface and usage:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ReadContent|ParseSession</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/session/parser.go:11:// ParseSessionMetadata extracts first/last timestamps and branch from JSONL
+internal/session/parser.go:12:func ParseSessionMetadata(sessionPath string) (created, modified time.Time, branch string, err error) {
+internal/session/types.go:33:// ReadContent reads the raw session content.
+internal/session/types.go:34:func (s ClaudeSession) ReadContent() ([]byte, error) {
+internal/session/parser_test.go:171:func TestParseSessionMetadata(t *testing.T) {
+internal/session/parser_test.go:184:	created, modified, branch, err := ParseSessionMetadata(sessionPath)
+internal/session/parser_test.go:186:		t.Fatalf(&#34;ParseSessionMetadata() error: %v&#34;, err)
+internal/session/parser_test.go:207:func TestParseSessionMetadata_EmptyFile(t *testing.T) {
+internal/session/parser_test.go:215:	created, modified, branch, err := ParseSessionMetadata(sessionPath)
+internal/session/parser_test.go:217:		t.Fatalf(&#34;ParseSessionMetadata() error: %v&#34;, err)
+internal/session/parser_test.go:232:func TestParseSessionMetadata_NonExistentFile(t *testing.T) {
+internal/session/parser_test.go:233:	_, _, _, err := ParseSessionMetadata(&#34;/non/existent/file.jsonl&#34;)
+internal/session/parser_test.go:239:func TestParseSessionMetadata_LargeFile(t *testing.T) {
+internal/session/parser_test.go:255:	created, modified, branch, err := ParseSessionMetadata(sessionPath)
+internal/session/parser_test.go:257:		t.Fatalf(&#34;ParseSessionMetadata() error: %v&#34;, err)
+internal/ci/summary.go:183:	prompts, err := parser.ParseSession(content, startWork, endWork, full)
+internal/note/transcript.go:26:		content, err := s.ReadContent()
+internal/session/claudecode/parser.go:26:	return session.ParseSessionMetadata(sessionPath)
+internal/session/claudecode/parser.go:29:// ParseSession converts Claude Code session content to common PromptEntry format.
+internal/session/claudecode/parser.go:30:func (p *Parser) ParseSession(content []byte, startWork, endWork time.Time, full bool) ([]session.PromptEntry, error) {
+internal/ses...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Looking at the usage, there&#39;s a complication: `ci/summary.go` calls `ParseSession` with content from **git blob storage** (stored transcripts), not from a live Session. So `ParseSession` needs to accept raw bytes.
+
+However, we can still simplify:
+1. Remove `ReadContent()` from `Session` interface
+2. Callers use `session.ReadSessionContent(s.GetPath())` instead
+
+Let me check how many places use `ReadContent()`:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/transcript.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see the complication: `ci/summary.go` parses transcripts from **git blob storage**, not live Session files. So `ParseSession` needs to accept raw bytes for that case.
+
+Let me update the plan with the options:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/eager-juggling-breeze.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/eager-juggling-breeze.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Simplify Multi-Tool Architecture
+     2 
+     3 ## ✅ Completed
+     4 - Merged FilterByUserMessages into DiscoverSessions
+     5 - Consolidated claudecode package (5 files   2 files)
+     6 
+     7 ## Current: Remove ReadContent from Session interface
+     8 
+     9 ### Problem
+    10 `Session.ReadContent()` is used in only 2 places:
+    11 1. `note/transcript.go:26` - storing transcripts
+    12 2. `claudecode/claudecode.go:251` - CountUserActions
+    13 
+    14 Meanwhile, `ParseSession(content []byte, ...)` requires callers to read content first.
+    15 
+    16 ### Complication
+    17 `ci/summary.go` calls `ParseSession` with content from **git blob storage** (stored transcripts), not from a live Session. So `ParseSession` must still accept raw bytes.
+    18 
+    19 ### Solution
+    20 1. **Remove `ReadContent()` from Session interface** - simplifies interface
+    21 2. **Change `ParseSession` to take Session** - for live sessions
+    22 3. **Add `ParseSessionContent(content []byte, ...)` ** - for ci/summary.go (git blob)
+    23 
+    24 Or simpler alternative:
+    25 1. **Remove `ReadContent()` from Session interface**
+    26 2. **Keep `ParseSession(content []byte, ...)`** - unchanged
+    27 3. **Callers use `session.ReadSessionContent(s.GetPath())`** - explicit read
+    28 
+    29 ### Files to modify
+    30 - `internal/session/interfaces.go` - remove ReadContent from Session
+    31 - `internal/session/claudecode/claudecode.go` - remove ReadContent method, update CountUserActions
+    32 - `internal/session/types.go` - remove ReadContent from ClaudeSession
+    33 - `internal/note/transcript.go` - use session.ReadSessionContent(s.GetPath())
+    34 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(ParseSession)</span>
+          <span class="prompt-text">ci/summary.go parses transcripts from git blob storage (not live Session files). How should we handle this case?</span>
+          <span class="decision-answer">→ </span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_REJECT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">TOOL_REJECT</span>
+          
+          <span class="prompt-text">User rejected tool call</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">[Request interrupted by user for tool use]</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:54</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please push</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status &amp;&amp; git log --oneline -2</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/multi-tool-architecture
+Your branch is up to date with &#39;origin/feature/multi-tool-architecture&#39;.
+
+nothing to commit, working tree clean
+6d23026 Simplify multi-tool architecture
+d4f688b Refactor session handling for multi-tool support</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:54</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Already pushed. PR #38 is up to date with both commits:
+- `d4f688b` - Refactor session handling for multi-tool support
+- `6d23026` - Simplify multi-tool architecture
+
+https://github.com/QuesmaOrg/git-prompt-story/pull/38</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:58</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">fix go unit tests</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+# github.com/QuesmaOrg/git-prompt-story/internal/note [github.com/QuesmaOrg/git-prompt-story/internal/note.test]
+internal/note/merge_test.go:26:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:44:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:58:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:95:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:103:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:104:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:132:30: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:138:30: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:153:30: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:159:30: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:159:30: too many errors
+?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+# github.com/QuesmaOrg/git-prompt-story/internal/show
+# [github.com/QuesmaOrg/git-prompt-story/internal/show]
+internal/show/show.go:195:2: fmt.Printf format %s arg sess.Tool is a func value, not called
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.218s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/note [build failed]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:58</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found two issues from the `Tool` → `PromptTool` rename. Let me update the plan and fix:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/eager-juggling-breeze.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/eager-juggling-breeze.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Fix Unit Tests
+     2 
+     3 ## Problem
+     4 Two files still use old `Tool` field instead of `PromptTool`:
+     5 
+     6 1. `internal/note/merge_test.go` - struct literals use `Tool:`
+     7 2. `internal/show/show.go:195` - `sess.Tool` is now a method, not field
+     8 
+     9 ## Fix
+    10 - `merge_test.go`: Change `Tool:` to `PromptTool:` in all struct literals
+    11 - `show.go:195`: Change `sess.Tool` to `sess.PromptTool`
+    12 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Fix Unit Tests\n\n## Problem\nTwo files still use old `Tool` field instead of `PromptTool`:\n\n1. `internal/note/merge_test.go` - struct literals use `Tool:`\n2. `internal/show/show.go:1...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/eager-juggling-breeze.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Fix Unit Tests
+
+## Problem
+Two files still use old `Tool` field instead of `PromptTool`:
+
+1. `internal/note/merge_test.go` - struct literals use `Tool:`
+2. `internal/show/show.go:195` - `sess.Tool` is now a method, not field
+
+## Fix
+- `merge_test.go`: Change `Tool:` to `PromptTool:` in all struct literals
+- `show.go:195`: Change `sess.Tool` to `sess.PromptTool`
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go has been updated. All occurrences of &#39;{Tool:&#39; were successfully replaced with &#39;{PromptTool:&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   266 	for _, s := range result.Sessions {
+   267 		if s.Path == &#34;&#34; {
+   268 			t.Errorf(&#34;Session %s: Path should be preserved&#34;, s.ID)
+   269 		}
+   270 		if s.PromptTool == &#34;&#34; {
+   271 			t.Errorf(&#34;Session %s: Tool should be preserved&#34;, s.ID)
+   272 		}
+   273 		if s.Created.IsZero() {
+   274 			t.Errorf(&#34;Session %s: Created should be preserved&#34;, s.ID)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   191 
+   192 	// Verify both tools are present
+   193 	tools := make(map[string]bool)
+   194 	for _, s := range result.Sessions {
+   195 		tools[s.PromptTool] = true
+   196 	}
+   197 	if !tools[&#34;claude-code&#34;] || !tools[&#34;cursor&#34;] {
+   198 		t.Errorf(&#34;Expected both claude-code and cursor tools, got %v&#34;, tools)
+   199 	}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:09</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/show/show.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   191 		return false, nil
+   192 	}
+   193 
+   194 	// Print session header
+   195 	fmt.Printf(&#34;Session: %s/%s\n&#34;, sess.PromptTool, sess.ID)
+   196 	fmt.Printf(&#34;Duration: %s - %s\n\n&#34;,
+   197 		sess.Created.Local().Format(&#34;2006-01-02 15:04&#34;),
+   198 		sess.Modified.Local().Format(&#34;2006-01-02 15:04&#34;))
+   199 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+# github.com/QuesmaOrg/git-prompt-story/internal/note [github.com/QuesmaOrg/git-prompt-story/internal/note.test]
+internal/note/merge_test.go:44:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:58:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:240:5: unknown field Tool in struct literal of type SessionEntry
+internal/note/merge_test.go:254:5: unknown field Tool in struct literal of type SessionEntry
+?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/note [build failed]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/session/claudecode	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	0.272s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">There are multi-line struct literals with `Tool:` on separate lines. Let me fix those:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go has been updated. All occurrences of &#39;Tool:     &#34;claude-code&#34;&#39; were successfully replaced with &#39;PromptTool: &#34;claude-code&#34;&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;String to replace not found in file.
+String: Tool:     &#34;cursor&#34;&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">grep -n &#34;cursor&#34; /&lt;REDACTED&gt;/git/git-prompt-story-tests/internal/note/merge_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">182:			{PromptTool: &#34;cursor&#34;, ID: &#34;session-B&#34;, Created: time.Date(2025, 1, 15, 10, 15, 0, 0, time.UTC)},
+197:	if !tools[&#34;claude-code&#34;] || !tools[&#34;cursor&#34;] {
+198:		t.Errorf(&#34;Expected both claude-code and cursor tools, got %v&#34;, tools)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	0.214s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/session/claudecode	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Let me commit and push:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:10</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix unit tests after Tool→PromptTool rename
+
+- Update merge_test.go struct literals to use PromptTool field
+- Update show.go to use sess.PromptTool instead of sess.Tool
+
+🤖 Generated with [Claude Code](https://&lt;CREDENTIALS&gt;@anthropic.com&gt;
+EOF
+)&#34; &amp;&amp; git push</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
   
   <div class="commit-card">
     <div class="commit-header">
@@ -1858,6 +2786,14 @@ Simplify multi-tool architecture
 EOF
 )&#34;</div>
             
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/multi-tool-architecture 6d23026] Simplify multi-tool architecture
+ 8 files changed, 101 insertions(&#43;), 165 deletions(-)
+ rename internal/session/claudecode/{discoverer.go =&gt; claudecode.go} (79%)
+ delete mode 100644 internal/session/claudecode/init.go
+ delete mode 100644 internal/session/claudecode/session.go
+ delete mode 100644 internal/session/claudecode/version.go</div>
             
           </details>
           
