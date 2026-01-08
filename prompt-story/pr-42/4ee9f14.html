@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4ee9f14 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>4ee9f14</code></h1>
+    <p class="meta">Move tool counts to sub-bullet for cleaner display</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">18</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>4ee9f144cc225313791d8b7ee53d0eea099097c0</code><br>
+    <strong>Work period:</strong> 2026-01-08 12:39 - 2026-01-08 12:50
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">f97c0ddd-1756-4853-8e70-bce0d8ab8453</code> |
+        2026-01-08 09:58 - 2026-01-08 12:50 | <span class="session-count">18</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:39</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. New format:
+
+**Before:**
+```markdown
+- 09:31 💬 create new branch &#34;red&#34;... (2 Bash, 5 Edit)
+- 09:32 📋 /login
+- 19:06 💬 checkout main, pull
+```
+
+**After:**
+```markdown
+- create new branch &#34;red&#34;... (2 Bash, 5 Edit)
+- `/login`
+- checkout main, pull
+```
+
+Cleaner, no emoji, no time, commands in backticks. Push?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:39</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">push</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:40</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: warning: pushing notes: To github.com:QuesmaOrg/git-prompt-story.git
+ &#43; ab8d19e...8c5399b refs/notes/prompt-story-transcripts -&gt; refs/notes/prompt-story-transcripts (forced update)
+ ! [rejected]        refs/notes/prompt-story -&gt; refs/notes/prompt-story (fetch first)
+error: failed to push some refs to &#39;github.com:QuesmaOrg/git-prompt-story.git&#39;
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., &#39;git pull ...&#39;) before pushing again.
+hint: See the &#39;Note about fast-forwards&#39; in &#39;git push --help&#39; for details.
+To github.com:QuesmaOrg/git-prompt-story.git
+   fe70e25..adeaef1  feature/tool-use-summary -&gt; feature/tool-use-summary</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Pushed. Branch updated with both commits:
+- `fe70e25` Add tool use summary per prompt in CI output
+- `adeaef1` Simplify prompt display format in CI output</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:47</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Show me how would it look now in GHA.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Here&#39;s how it would look in GitHub Actions:
+
+```markdown
+# 9 user prompts (3 file edits)
+
+- create new branch &#34;red&#34;, style things in red, commit, push (2 Bash, 5 Edit, 3 Read)
+- `/login`
+- create new branch &#34;red&#34;, style things in red, commit, push (1 Bash, 2 Edit, 1 Glob)
+- checkout main, pull
+- `/compact`
+- This session is being continued from a previous conversation that ran out of context...
+- Where to check the result?
+- `/exit`
+- &lt;bash-notification&gt;...
+```
+
+**Key features:**
+- Header shows total prompts and file edits
+- Prompts with tool activity show breakdown: `(2 Bash, 5 Edit, 3 Read)`
+- Commands in backticks: `` `/login` ``, `` `/exit` ``
+- Prompts without tool calls have no parentheses (those are the &#34;noise&#34; from old session)
+
+The user can immediately see:
+- First two prompts did actual work (edits)
+- Everything from &#34;checkout main, pull&#34; onwards had no tool activity - just context</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:49</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Is it possible, per GHA, that
+- (2 Bash, 5 Edit, 3 Read) is in a separate line, yet visible in collapsed mode (a subbullet or so)?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:49</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Yes! We can use a sub-bullet. Here&#39;s how it would look:
+
+```markdown
+# 9 user prompts (3 file edits)
+
+- create new branch &#34;red&#34;, style things in red, commit, push
+  - 2 Bash, 5 Edit, 3 Read
+- `/login`
+- create new branch &#34;red&#34;, style things in red, commit, push
+  - 1 Bash, 2 Edit, 1 Glob
+- checkout main, pull
+- `/compact`
+- This session is being continued from a previous conversation...
+- Where to check the result?
+- `/exit`
+```
+
+Let me implement this:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1195 func RenderJSON(summary *Summary) ([]byte, error) {
+  1196 	return json.MarshalIndent(summary, &#34;&#34;, &#34;  &#34;)
+  1197 }
+  1198 
+  1199 // formatToolCounts formats tool counts as &#34;3 Bash, 5 Read, 9 Edit&#34;
+  1200 func formatToolCounts(counts map[string]int) string {
+  1201 	if len(counts) == 0 {
+  1202 		return &#34;&#34;
+  1203 	}
+  1204 
+  1205 	// Sort tool names for consistent output
+  1206 	var tools []string
+  1207 	for tool := range counts {
+  1208 		tools = append(tools, tool)
+  1209 	}
+  1210 	sort.Strings(tools)
+  1211 
+  1212 	var parts []string
+  1213 	for _, tool := range tools {
+  1214 		parts = append(parts, fmt.Sprintf(&#34;%d %s&#34;, counts[tool], tool))
+  1215 	}
+  1216 	return strings.Join(parts, &#34;, &#34;)
+  1217 }
+  1218 
+  1219 // formatToolCountsSubBullet formats tool counts as a sub-bullet line
+  1220 func formatToolCountsSubBullet(counts map[string]int) string {
+  1221 	tc := formatToolCounts(counts)
+  1222 	if tc == &#34;&#34; {
+  1223 		return &#34;&#34;
+  1224 	}
+  1225 	return &#34;\n  - &#34; &#43; tc
+  1226 }
+  1227 
+  1228 // IsUserAction returns true if the entry type represents a user action
+  1229 // (PROMPT, COMMAND, TOOL_REJECT, DECISION) vs system/assistant actions.
+  1230 func IsUserAction(entryType string) bool {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1246 	}
+  1247 	return true
+  1248 }
+  1249 
+  1250 // formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
+  1251 func formatMarkdownEntrySimple(entry PromptEntry) string {
+  1252 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+  1253 	text = html.EscapeString(text)
+  1254 	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts)
+  1255 
+  1256 	// COMMAND entries: format with backticks
+  1257 	if entry.Type == &#34;COMMAND&#34; {
+  1258 		return fmt.Sprintf(&#34;- `%s`%s\n&#34;, text, toolCountsStr)
+  1259 	}
+  1260 
+  1261 	// DECISION entries: show with answer
+  1262 	if entry.Type == &#34;DECISION&#34; {
+  1263 		header := entry.DecisionHeader
+  1264 		if header == &#34;&#34; {
+  1265 			header = &#34;Question&#34;
+  1266 		}
+  1267 		answer := entry.DecisionAnswer
+  1268 		if answer == &#34;&#34; {
+  1269 			answer = &#34;(no answer)&#34;
+  1270 		}
+  1271 		answer = html.EscapeString(answer)
+  1272 		// Include description in italic if available
+  1273 		desc := &#34;&#34;
+  1274 		if entry.DecisionAnswerDescription != &#34;&#34; {
+  1275 			desc = &#34; *&#34; &#43; html.EscapeString(entry.DecisionAnswerDescription) &#43; &#34;*&#34;
+  1276 		}
+  1277 		return fmt.Sprintf(&#34;- %s: %s   %s%s%s\n&#34;, header, text, answer, desc, toolCountsStr)
+  1278 	}
+  1279 
+  1280 	return fmt.Sprintf(&#34;- %s%s\n&#34;, text, toolCountsStr)
+  1281 }
+  1282 
+  1283 // countUserPrompts counts user action entries in a slice
+  1284 func countUserPrompts(prompts []PromptEntry) int {
+  1285 	count := 0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1138 		return fmt.Sprintf(&#34;- %s %s %s: %s\n&#34;, timeStr, emoji, entry.Type, text)
+  1139 	}
+  1140 }
+  1141 
+  1142 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
+  1143 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
+  1144 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+  1145 	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts)
+  1146 
+  1147 	// COMMAND entries: format with backticks
+  1148 	if entry.Type == &#34;COMMAND&#34; {
+  1149 		text = html.EscapeString(text)
+  1150 		return fmt.Sprintf(&#34;- `%s`%s\n&#34;, text, toolCountsStr)
+  1151 	}
+  1152 
+  1153 	// DECISION entries: always show in full with answer
+  1154 	if entry.Type == &#34;DECISION&#34; {
+  1155 		header := entry.DecisionHeader
+  1156 		if header == &#34;&#34; {
+  1157 			header = &#34;Question&#34;
+  1158 		}
+  1159 		answer := entry.DecisionAnswer
+  1160 		if answer == &#34;&#34; {
+  1161 			answer = &#34;(no answer)&#34;
+  1162 		}
+  1163 		// Escape HTML
+  1164 		text = html.EscapeString(text)
+  1165 		answer = html.EscapeString(answer)
+  1166 		// Include description in italic if available
+  1167 		desc := &#34;&#34;
+  1168 		if entry.DecisionAnswerDescription != &#34;&#34; {
+  1169 			desc = &#34; *&#34; &#43; html.EscapeString(entry.DecisionAnswerDescription) &#43; &#34;*&#34;
+  1170 		}
+  1171 		return fmt.Sprintf(&#34;- %s: %s   %s%s%s\n&#34;, header, text, answer, desc, toolCountsStr)
+  1172 	}
+  1173 
+  1174 	// Short prompts (≤250 chars): simple bullet
+  1175 	if len(text) &lt;= 250 {
+  1176 		text = html.EscapeString(text)
+  1177 		return fmt.Sprintf(&#34;- %s%s\n&#34;, text, toolCountsStr)
+  1178 	}
+  1179 
+  1180 	// Long prompts: &lt;details&gt; (collapsed) with truncated summary
+  1181 	summary := text[:247] &#43; &#34;...&#34;
+  1182 	continuation := strings.ReplaceAll(entry.Text[247:], &#34;\n&#34;, &#34; &#34;)
+  1183 
+  1184 	// Escape HTML in both summary and continuation
+  1185 	summary...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build ./... &amp;&amp; go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+--- FAIL: TestFormatMarkdownEntryCollapsible_ShortText (0.00s)
+    summary_test.go:437: Short prompts should use &lt;details open&gt;
+--- FAIL: TestRenderUserTimelineWithTruncation (0.00s)
+    --- FAIL: TestRenderUserTimelineWithTruncation/truncates_when_over_limit (0.00s)
+        summary_test.go:677: Expected some entries to be truncated
+        summary_test.go:680: Should contain truncation notice
+FAIL
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.201s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	0.271s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   429 		Text: &#34;Short prompt text&#34;,
+   430 		Time: time.Date(2025, 1, 15, 9, 30, 0, 0, time.Local),
+   431 	}
+   432 
+   433 	result := formatMarkdownEntryCollapsible(entry)
+   434 
+   435 	// Short prompts should be simple bullets (no details tag)
+   436 	if strings.Contains(result, &#34;&lt;details&#34;) {
+   437 		t.Error(&#34;Short prompts should not use &lt;details&gt; tags&#34;)
+   438 	}
+   439 
+   440 	// Should contain the full text
+   441 	if !strings.Contains(result, &#34;Short prompt text&#34;) {
+   442 		t.Error(&#34;Should contain full text&#34;)
+   443 	}
+   444 
+   445 	// Should start with bullet
+   446 	if !strings.HasPrefix(result, &#34;- &#34;) {
+   447 		t.Error(&#34;Should start with bullet&#34;)
+   448 	}
+   449 }
+   450 
+   451 func TestFormatMarkdownEntryCollapsible_LongText(t *testing.T) {
+   452 	// Create entry with 300&#43; char text where CONTINUATION is past 247 chars
+   453 	// 260 &#39;a&#39;s &#43; &#34;CONTINUATION&#34; &#43; 50 &#39;b&#39;s = 322 chars total</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   674 			{Entry: PromptEntry{Type: &#34;PROMPT&#34;, Text: &#34;Second prompt&#34;, Time: now.Add(time.Minute)}, CommitSHA: &#34;abc1234&#34;, CommitSubj: &#34;Test&#34;, CommitIndex: 0},
+   675 			{Entry: PromptEntry{Type: &#34;PROMPT&#34;, Text: &#34;Third prompt&#34;, Time: now.Add(2 * time.Minute)}, CommitSHA: &#34;abc1234&#34;, CommitSubj: &#34;Test&#34;, CommitIndex: 0},
+   676 		}
+   677 
+   678 		// Very small limit to force truncation (reduced since format is now more compact)
+   679 		result, truncated := renderUserTimelineWithTruncation(entries, 50)
+   680 
+   681 		if truncated == 0 {
+   682 			t.Error(&#34;Expected some entries to be truncated&#34;)
+   683 		}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.317s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Let me commit.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:50</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Move tool counts to sub-bullet for cleaner display
+
+- Tool counts now appear as sub-bullets: &#34;- 2 Bash, 5 Edit&#34;
+- Removed &lt;details&gt; tags for short prompts (simpler format)
+- Long prompts still use &lt;details&gt; for collapse
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/tool-use-summary 4ee9f14] Move tool counts to sub-bullet for cleaner display
+ 2 files changed, 30 insertions(&#43;), 18 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>

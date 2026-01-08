@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5f12697 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>5f12697</code></h1>
+    <p class="meta">Show edited file paths in CI summary</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">20</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>5f12697acbceba02a30427f0c62ef530e65e1a4e</code><br>
+    <strong>Work period:</strong> 2026-01-08 12:50 - 2026-01-08 12:59
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">f97c0ddd-1756-4853-8e70-bce0d8ab8453</code> |
+        2026-01-08 09:58 - 2026-01-08 12:57 | <span class="session-count">20</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:51</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">New format with sub-bullets:
+
+```markdown
+# 9 user prompts (3 file edits)
+
+- create new branch &#34;red&#34;, style things in red, commit, push
+  - 2 Bash, 5 Edit, 3 Read
+- `/login`
+- create new branch &#34;red&#34;, style things in red, commit, push
+  - 1 Bash, 2 Edit, 1 Glob
+- checkout main, pull
+- `/compact`
+- This session is being continued from a previous conversation...
+- Where to check the result?
+- `/exit`
+```
+
+Tool counts are now on their own indented line under each prompt. Push?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:54</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">For edit, keep it last and with: `path/...` for  files changed (up to 3). make it smart, with there are common paths, do sth like `src/components/{index.ts,pressButton.ts}`</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:54</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">This requires tracking edited file paths. Let me implement:
+
+1. Add field to track edited files per prompt
+2. Parse file paths from Edit tool inputs
+3. Smart path formatting with common prefix detection
+4. Edit always last with file paths</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    34 	// For DECISION entries (AskUserQuestion)
+    35 	DecisionHeader            string         `json:&#34;decision_header,omitempty&#34;`             // Question header (e.g., &#34;Version&#34;)
+    36 	DecisionAnswer            string         `json:&#34;decision_answer,omitempty&#34;`             // User&#39;s selected answer
+    37 	DecisionAnswerDescription string         `json:&#34;decision_answer_description,omitempty&#34;` // Description of selected option
+    38 	ToolCounts                map[string]int `json:&#34;tool_counts,omitempty&#34;`                 // For user prompts: counts of tool uses that followed
+    39 	EditedFiles               []string       `json:&#34;edited_files,omitempty&#34;`                // For user prompts: list of files edited
+    40 }
+    41 
+    42 // SessionSummary represents a summarized session within a commit
+    43 type SessionSummary struct {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   759 			}
+   760 		}
+   761 	}
+   762 
+   763 	// Iterate through fullTimeline and count tool uses per user prompt
+   764 	var lastUserPromptIdx = -1
+   765 	for i, te := range fullTimeline {
+   766 		if IsUserAction(te.Entry.Type) {
+   767 			if idx, ok := userTimelineIndices[i]; ok {
+   768 				lastUserPromptIdx = idx
+   769 				// Initialize ToolCounts if nil
+   770 				if userTimeline[lastUserPromptIdx].Entry.ToolCounts == nil {
+   771 					userTimeline[lastUserPromptIdx].Entry.ToolCounts = make(map[string]int)
+   772 				}
+   773 			}
+   774 		} else if te.Entry.Type == &#34;TOOL_USE&#34; &amp;&amp; lastUserPromptIdx &gt;= 0 {
+   775 			// Add to the last user prompt&#39;s tool counts
+   776 			toolName := te.Entry.ToolName
+   777 			if toolName != &#34;&#34; {
+   778 				userTimeline[lastUserPromptIdx].Entry.ToolCounts[toolName]&#43;&#43;
+   779 
+   780 				// Track edited file paths for Edit/Write operations
+   781 				if toolName == &#34;Edit&#34; || toolName == &#34;Write&#34; {
+   782 					if filePath := extractFilePath(te.Entry.ToolInput); filePath != &#34;&#34; {
+   783 						userTimeline[lastUserPromptIdx].Entry.EditedFiles = append(
+   784 							userTimeline[lastUserPromptIdx].Entry.EditedFiles, filePath)
+   785 					}
+   786 				}
+   787 			}
+   788 		}
+   789 	}
+   790 
+   791 	// Sort userTimeline chronologically across all sessions
+   792 	sort.Slice(userTimeline, func(i, j int) bool {
+   793 		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:54</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me add the helper functions for extracting file paths and smart formatting.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1202 func RenderJSON(summary *Summary) ([]byte, error) {
+  1203 	return json.MarshalIndent(summary, &#34;&#34;, &#34;  &#34;)
+  1204 }
+  1205 
+  1206 // extractFilePath extracts file_path from tool input string
+  1207 func extractFilePath(toolInput string) string {
+  1208 	// Try to find file_path in the input (could be JSON or key-value format)
+  1209 	// Look for patterns like: &#34;file_path&#34;:&#34;/path/to/file&#34; or file_path: /path/to/file
+  1210 	patterns := []string{
+  1211 		`&#34;file_path&#34;\s*:\s*&#34;([^&#34;]&#43;)&#34;`,
+  1212 		`file_path[=:]\s*([^\s,}]&#43;)`,
+  1213 	}
+  1214 	for _, pattern := range patterns {
+  1215 		re := regexp.MustCompile(pattern)
+  1216 		if matches := re.FindStringSubmatch(toolInput); len(matches) &gt; 1 {
+  1217 			return matches[1]
+  1218 		}
+  1219 	}
+  1220 	return &#34;&#34;
+  1221 }
+  1222 
+  1223 // formatToolCountsWithFiles formats tool counts, with Edit last showing file paths
+  1224 func formatToolCountsWithFiles(counts map[string]int, editedFiles []string) string {
+  1225 	if len(counts) == 0 {
+  1226 		return &#34;&#34;
+  1227 	}
+  1228 
+  1229 	// Separate Edit from other tools
+  1230 	var otherTools []string
+  1231 	for tool := range counts {
+  1232 		if tool != &#34;Edit&#34; &amp;&amp; tool != &#34;Write&#34; {
+  1233 			otherTools = append(otherTools, tool)
+  1234 		}
+  1235 	}
+  1236 	sort.Strings(otherTools)
+  1237 
+  1238 	var parts []string
+  1239 	for _, tool := range otherTools {
+  1240 		parts = append(parts, fmt.Sprintf(&#34;%d %s&#34;, counts[tool], tool))
+  1241 	}
+  1242 
+  1243 	// Add Edit last with file paths
+  1244 	editCount := counts[&#34;Edit&#34;] &#43; counts[&#34;Write&#34;]
+  1245 	if editCount &gt; 0 {
+  1246 		editPart := fmt.Sprintf(&#34;%d Edit&#34;, editCount)
+  1247 		if len(editedFiles) &gt; 0 {
+  1248 			editPart &#43;= &#34;: &#34; &#43; formatFilePaths(editedFiles)
+  1249 		}
+  1250 		parts = append(parts, editPart)
+  1251 	}
+  1252 
+  1253 	return strings.J...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;html&#34;
+     7 	&#34;path/filepath&#34;
+     8 	&#34;regexp&#34;
+     9 	&#34;sort&#34;
+    10 	&#34;strings&#34;
+    11 	&#34;time&#34;
+    12 
+    13 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/display&#34;
+    14 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    15 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    16 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    17 )
+    18 
+    19 const (
+    20 	// Size limits for markdown output to stay under GitHub&#39;s 65KB comment limit
+    21 	maxUserPromptsSize = 20000 // Budget for user prompts section</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now update the calls to `formatToolCountsSubBullet` to pass `EditedFiles`.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1351 	}
+  1352 	return true
+  1353 }
+  1354 
+  1355 // formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
+  1356 func formatMarkdownEntrySimple(entry PromptEntry) string {
+  1357 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+  1358 	text = html.EscapeString(text)
+  1359 	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
+  1360 
+  1361 	// COMMAND entries: format with backticks
+  1362 	if entry.Type == &#34;COMMAND&#34; {
+  1363 		return fmt.Sprintf(&#34;- `%s`%s\n&#34;, text, toolCountsStr)
+  1364 	}
+  1365 
+  1366 	// DECISION entries: show with answer
+  1367 	if entry.Type == &#34;DECISION&#34; {
+  1368 		header := entry.DecisionHeader
+  1369 		if header == &#34;&#34; {
+  1370 			header = &#34;Question&#34;
+  1371 		}
+  1372 		answer := entry.DecisionAnswer
+  1373 		if answer == &#34;&#34; {
+  1374 			answer = &#34;(no answer)&#34;
+  1375 		}
+  1376 		answer = html.EscapeString(answer)
+  1377 		// Include description in italic if available
+  1378 		desc := &#34;&#34;
+  1379 		if entry.DecisionAnswerDescription != &#34;&#34; {
+  1380 			desc = &#34; *&#34; &#43; html.EscapeString(entry.DecisionAnswerDescription) &#43; &#34;*&#34;
+  1381 		}
+  1382 		return fmt.Sprintf(&#34;- %s: %s   %s%s%s\n&#34;, header, text, answer, desc, toolCountsStr)
+  1383 	}
+  1384 
+  1385 	return fmt.Sprintf(&#34;- %s%s\n&#34;, text, toolCountsStr)
+  1386 }
+  1387 
+  1388 // countUserPrompts counts user action entries in a slice
+  1389 func countUserPrompts(prompts []PromptEntry) int {
+  1390 	count := 0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1149 		return fmt.Sprintf(&#34;- %s %s %s: %s\n&#34;, timeStr, emoji, entry.Type, text)
+  1150 	}
+  1151 }
+  1152 
+  1153 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
+  1154 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
+  1155 	text := strings.ReplaceAll(entry.Text, &#34;\n&#34;, &#34; &#34;)
+  1156 	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
+  1157 
+  1158 	// COMMAND entries: format with backticks
+  1159 	if entry.Type == &#34;COMMAND&#34; {
+  1160 		text = html.EscapeString(text)
+  1161 		return fmt.Sprintf(&#34;- `%s`%s\n&#34;, text, toolCountsStr)
+  1162 	}
+  1163 
+  1164 	// DECISION entries: always show in full with answer
+  1165 	if entry.Type == &#34;DECISION&#34; {
+  1166 		header := entry.DecisionHeader
+  1167 		if header == &#34;&#34; {
+  1168 			header = &#34;Question&#34;
+  1169 		}
+  1170 		answer := entry.DecisionAnswer
+  1171 		if answer == &#34;&#34; {
+  1172 			answer = &#34;(no answer)&#34;
+  1173 		}
+  1174 		// Escape HTML
+  1175 		text = html.EscapeString(text)
+  1176 		answer = html.EscapeString(answer)
+  1177 		// Include description in italic if available
+  1178 		desc := &#34;&#34;
+  1179 		if entry.DecisionAnswerDescription != &#34;&#34; {
+  1180 			desc = &#34; *&#34; &#43; html.EscapeString(entry.DecisionAnswerDescription) &#43; &#34;*&#34;
+  1181 		}
+  1182 		return fmt.Sprintf(&#34;- %s: %s   %s%s%s\n&#34;, header, text, answer, desc, toolCountsStr)
+  1183 	}
+  1184 
+  1185 	// Short prompts (≤250 chars): simple bullet
+  1186 	if len(text) &lt;= 250 {
+  1187 		text = html.EscapeString(text)
+  1188 		return fmt.Sprintf(&#34;- %s%s\n&#34;, text, toolCountsStr)
+  1189 	}
+  1190 
+  1191 	// Long prompts: &lt;details&gt; (collapsed) with truncated summary
+  1192 	summary := text[:247] &#43; &#34;...&#34;
+  1193 	continuation := strings.ReplaceAll(entry.Text[247:], &#34;\n&#34;, &#34; &#34;)
+  1194 
+  1195 	// Escape HTML in both summary and continuat...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build ./... &amp;&amp; go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.202s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	0.260s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">12:57</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">This session is being continued from a previous conversation that ran out of context. The conversation is summarized below:
+Analysis:
+Let me analyze this conversation chronologically:
+
+1. **Initial Request**: User asked to investigate why their git-prompt-story tool showed &#34;9 user prompts&#34; when only one prompt actually made changes for their hacker-news-cc repo on branch &#34;red&#34;.
+
+2. **Investigation Phase**: I explored the codebase and found:
+   - The issue was that an old long-running session (`bb2702e7`) spanning from Jan 7 to Jan 8 was included
+   - The session filtering logic includes sessions that overlap with work period based on time, not actual activity
+   - Prompts from 19:06-19:12 on Day 1 were being attributed to a commit made on Day 2
+
+3. **Root Cause**: The session `bb2702e7` passed the time filter because `modified &gt;= startWork`, even though it was created before the branch switch and contained unrelated work.
+
+4. **User&#39;s Preferred Solution**: Instead of filtering, user chose a &#34;transparency approach&#34; - show tool counts per prompt so users can see which prompts actually did work.
+
+5. **Implementation Phase 1**: Added tool use summary per prompt
+   - Added `TotalFileEdits` and `ToolCounts` to structs
+   - Header shows &#34;9 user prompts (3 file edits)&#34;
+   - Each prompt shows tool breakdown: `(2 Bash, 5 Edit, 3 Read)`
+
+6. **User Feedback 1**: User wanted:
+   - No emoji
+   - No time
+   - Commands in backticks `/exit`
+
+7. **Implementation Phase 2**: Simplified format
+   - Removed emoji and time from output
+   - Added backticks for commands
+
+8. **User Feedback 2**: User wanted tool counts on a separate line as sub-bullet
+
+9. **Implementation Phase 3**: Moved tool counts to sub-bullets
+
+10. **User Feedback 3**: User wanted Edit to be last, with file paths shown smartly (up to 3 files, common path grouping like `src/components/{index.ts,pressButton.ts}`)
+
+11. **Implementation Phase 4**: Added smart file path formatting
+   - Added `EditedFiles` field to track edited files
+   - Added `extractFilePath` to parse file paths from tool input
+   - Added `formatFilePaths` with smart common directory grouping
+   - Edit always shown last with file paths
+
+Summary:
+1. Primary Request and Intent:
+   - User wanted to investigate why git-prompt-story showed &#34;9 user prompts&#34; when only one prompt contributed to code changes
+   - Root cause: Old session spanning branch switch was included, bringing in irrelevant prompts
+   - Solution: Add transparency by showing tool use counts per prompt so users can see which prompts did actual work
+   - Formatting requirements evolved: no emoji, no time, commands in backticks, tool counts as sub-bullets, Edit last with file paths
+
+2. Key Technical Concepts:
+   - Git notes for storing prompt-story metadata
+   - Session filtering based on time overlap with work period
+   - Work period calculation: `max(previousCommitTime, branchSwitchTime)`
+   - JSONL session files from Claude Code
+   - Tool use tracking (Bash, Read, Edit, Write, etc.)
+   - Smart path formatting with common prefix detection
+
+3. Files and Code Sections:
+   - **`internal/ci/summary.go`** - Main file modified
+     - Added `TotalFileEdits` to Summary struct
+     - Added `ToolCounts` and `EditedFiles` fields to PromptEntry:
+     ```go
+     ToolCounts                map[string]int `json:&#34;tool_counts,omitempty&#34;`
+     EditedFiles               []string       `json:&#34;edited_files,omitempty&#34;`
+     ```
+     - Added imports for `regexp` and `path/filepath`
+     - Added tool counting logic in RenderMarkdown:
+     ```go
+     // Track edited file paths for Edit/Write operations
+     if toolName == &#34;Edit&#34; || toolName == &#34;Write&#34; {
+         if filePath := extractFilePath(te.Entry.ToolInput); filePath != &#34;&#34; {
+             userTimeline[lastUserPromptIdx].Entry.EditedFiles = append(
+                 userTimeline[lastUserPromptIdx].Entry.EditedFiles, filePath)
+         }
+     }
+     ```
+     - Added `extractFilePath` function to parse file paths from tool input
+     - Added `formatToolCountsWithFiles` to format with Edit last and file paths
+     - Added `formatFilePaths` for smart path grouping:
+     ```go
+     func formatFilePaths(files []string) string {
+         // Deduplicate, limit to 3, check common directory
+         if allSame &amp;&amp; commonDir != &#34;.&#34; &amp;&amp; commonDir != &#34;/&#34; {
+             return fmt.Sprintf(&#34;`%s/{%s}`&#34;, shortDir, strings.Join(names, &#34;,&#34;))
+         }
+         // No common directory, show shortened paths
+     }
+     ```
+     - Added `shortenPath` to keep last 2-3 path components
+     - Updated `formatToolCountsSubBullet` signature to accept editedFiles
+     - Updated `formatMarkdownEntrySimple` and `formatMarkdownEntryCollapsible` - removed emoji/time, added backticks for commands
+
+   - **`internal/ci/summary_test.go`** - Test adjustments
+     - Updated truncation test limit from 200 to 100 to 50 (format became more compact)
+     - Updated `TestFormatMarkdownEntryCollapsible_ShortText` to not expect `&lt;details&gt;` tags
+
+4. Errors and fixes:
+   - **Test failure `TestRenderUserTimelineWithTruncation`**: Format became more compact after removing time/emoji, so the 200-byte limit didn&#39;t cause truncation. Fixed by reducing limit to 50.
+   - **Test failure `TestFormatMarkdownEntryCollapsible_ShortText`**: Test expected `&lt;details open&gt;` but we changed to simple bullets for short prompts. Fixed by updating test to expect no `&lt;details&gt;` tags.
+
+5. Problem Solving:
+   - Identified that session `bb2702e7` (created Jan 7 15:37, modified Jan 8 09:29) passed time filter because it overlapped work period
+   - Chose transparency approach over filtering - show tool counts so users can identify which prompts did work
+   - Iteratively refined output format based on user feedback
+
+6. All user messages:
+   - &#34;So, I have this tool. I used it for repo /&lt;REDACTED&gt;/my_repos/vibe_coding/hacker-news-cc and branch red... While the only actual prompt giving changes was: create new branch &#39;red&#39;... Investigate why.&#34;
+   - &#34;I think you misunderstood. The questions is why it not ONE user prompts, but more. 19:06 💬 checkout main, pull - was NOT relevant for this repo.&#34;
+   - &#34;Check for actual repo activity&#34; (chosen fix approach)
+   - &#34;Let&#39;s look differently. Maybe: make it clear that it is prompts after last edit... for edits, you need to track how many operations are after&#34;
+   - &#34;For EACH prompt, after tools calls with number (e.g. 3 Bash, 5 Read, 9 Edit)&#34;
+   - &#34;I run go install . Show me how it is going to look&#34;
+   - &#34;create branch - tool use summary&#34;
+   - &#34;push&#34;
+   - &#34;Now, focus on better messages for this GHActions. * no emoji * no time * command in backtick `/exit`&#34;
+   - &#34;push&#34;
+   - &#34;Show me how would it look now in GHA.&#34;
+   - &#34;Is it possible, per GHA, that (2 Bash, 5 Edit, 3 Read) is in a separate line, yet visible in collapsed mode (a subbullet or so)?&#34;
+   - &#34;push&#34;
+   - &#34;For edit, keep it last and with: `path/...` for files changed (up to 3). make it smart, with there are common paths, do sth like `src/components/{index.ts,pressButton.ts}`&#34;
+
+7. Pending Tasks:
+   - Commit and push the smart file path formatting changes
+   - Show user the new format with file paths
+
+8. Current Work:
+   Implementing smart file path display for Edit operations. Just completed:
+   - Added `EditedFiles []string` field to PromptEntry
+   - Added `extractFilePath()` to parse file paths from tool input using regex
+   - Added `formatToolCountsWithFiles()` that puts Edit last with file paths
+   - Added `formatFilePaths()` with smart common directory grouping
+   - Added `shortenPath()` to keep last 2-3 path components
+   - Updated both formatting functions to pass EditedFiles
+   - All tests pass
+
+   Expected output format:
+   ```markdown
+   - create new branch &#34;red&#34;, style things in red, commit, push
+     - 2 Bash, 3 Read, 5 Edit: `src/components/{index.ts,Button.tsx,App.tsx}`
+   ```
+
+9. Optional Next Step:
+   Commit and push the file path formatting changes. User&#39;s last request was: &#34;For edit, keep it last and with: `path/...` for files changed (up to 3). make it smart, with there are common paths, do sth like `src/components/{index.ts,pressButton.ts}`&#34;
+   
+   The implementation is complete and tests pass. Next: `git add -A &amp;&amp; git commit` then `git push`..
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-git-prompt-story/f97c0ddd-1756-4853-8e70-bce0d8ab8453.jsonl
+Please continue the conversation from where we left it off without asking the user any further questions. Continue with the last task that you were asked to work on.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">12:57</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll commit and push the file path formatting changes that were just completed.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"> internal/ci/summary.go | 129 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-----
+ 1 file changed, 118 insertions(&#43;), 11 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -3</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">4ee9f14 Move tool counts to sub-bullet for cleaner display
+adeaef1 Simplify prompt display format in CI output
+fe70e25 Add tool use summary per prompt in CI output</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">12:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Show edited file paths in CI summary
+
+- Extract file paths from Edit/Write tool inputs
+- Format paths smartly with common directory grouping
+  e.g., `src/components/{index.ts,Button.tsx}`
+- Limit to 3 files, show &#34;&#43;N more&#34; if exceeded
+- Edit operations shown last with file paths
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
