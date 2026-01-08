@@ -1142,12 +1142,12 @@ func formatMarkdownEntry(entry PromptEntry) string {
 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
-	toolCountsStr := formatToolCounts(entry.ToolCounts)
+	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts)
 
 	// COMMAND entries: format with backticks
 	if entry.Type == "COMMAND" {
 		text = html.EscapeString(text)
-		return fmt.Sprintf("- <details open><summary>`%s`%s</summary></details>\n\n", text, toolCountsStr)
+		return fmt.Sprintf("- `%s`%s\n", text, toolCountsStr)
 	}
 
 	// DECISION entries: always show in full with answer
@@ -1168,27 +1168,25 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		if entry.DecisionAnswerDescription != "" {
 			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
 		}
-		return fmt.Sprintf("- <details open><summary>%s: %s → %s%s%s</summary></details>\n\n",
-			header, text, answer, desc, toolCountsStr)
+		return fmt.Sprintf("- %s: %s → %s%s%s\n", header, text, answer, desc, toolCountsStr)
 	}
 
-	// Short prompts (≤250 chars): <details open> (expanded by default)
+	// Short prompts (≤250 chars): simple bullet
 	if len(text) <= 250 {
-		// Escape HTML to prevent breaking markdown structure
 		text = html.EscapeString(text)
-		return fmt.Sprintf("- <details open><summary>%s%s</summary></details>\n\n", text, toolCountsStr)
+		return fmt.Sprintf("- %s%s\n", text, toolCountsStr)
 	}
 
 	// Long prompts: <details> (collapsed) with truncated summary
 	summary := text[:247] + "..."
-	continuation := strings.ReplaceAll(entry.Text[247:], "\n", " ") // Remove newlines to avoid nested details issues
+	continuation := strings.ReplaceAll(entry.Text[247:], "\n", " ")
 
 	// Escape HTML in both summary and continuation
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("- <details><summary>%s%s</summary>...%s</details>\n\n",
-		summary, toolCountsStr, continuation)
+	return fmt.Sprintf("- <details><summary>%s</summary>...%s</details>%s\n",
+		summary, continuation, toolCountsStr)
 }
 
 // RenderJSON generates JSON output
@@ -1196,7 +1194,7 @@ func RenderJSON(summary *Summary) ([]byte, error) {
 	return json.MarshalIndent(summary, "", "  ")
 }
 
-// formatToolCounts formats tool counts as "(3 Bash, 5 Read, 9 Edit)"
+// formatToolCounts formats tool counts as "3 Bash, 5 Read, 9 Edit"
 func formatToolCounts(counts map[string]int) string {
 	if len(counts) == 0 {
 		return ""
@@ -1213,7 +1211,16 @@ func formatToolCounts(counts map[string]int) string {
 	for _, tool := range tools {
 		parts = append(parts, fmt.Sprintf("%d %s", counts[tool], tool))
 	}
-	return " (" + strings.Join(parts, ", ") + ")"
+	return strings.Join(parts, ", ")
+}
+
+// formatToolCountsSubBullet formats tool counts as a sub-bullet line
+func formatToolCountsSubBullet(counts map[string]int) string {
+	tc := formatToolCounts(counts)
+	if tc == "" {
+		return ""
+	}
+	return "\n  - " + tc
 }
 
 // IsUserAction returns true if the entry type represents a user action
@@ -1242,7 +1249,7 @@ func allPromptsShort(entries []TimelineEntry) bool {
 func formatMarkdownEntrySimple(entry PromptEntry) string {
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	text = html.EscapeString(text)
-	toolCountsStr := formatToolCounts(entry.ToolCounts)
+	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts)
 
 	// COMMAND entries: format with backticks
 	if entry.Type == "COMMAND" {

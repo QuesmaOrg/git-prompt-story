@@ -432,14 +432,19 @@ func TestFormatMarkdownEntryCollapsible_ShortText(t *testing.T) {
 
 	result := formatMarkdownEntryCollapsible(entry)
 
-	// Short prompts should use <details open>
-	if !strings.Contains(result, "<details open>") {
-		t.Error("Short prompts should use <details open>")
+	// Short prompts should be simple bullets (no details tag)
+	if strings.Contains(result, "<details") {
+		t.Error("Short prompts should not use <details> tags")
 	}
 
-	// Should contain the full text in summary
+	// Should contain the full text
 	if !strings.Contains(result, "Short prompt text") {
 		t.Error("Should contain full text")
+	}
+
+	// Should start with bullet
+	if !strings.HasPrefix(result, "- ") {
+		t.Error("Should start with bullet")
 	}
 }
 
@@ -671,7 +676,7 @@ func TestRenderUserTimelineWithTruncation(t *testing.T) {
 		}
 
 		// Very small limit to force truncation (reduced since format is now more compact)
-		result, truncated := renderUserTimelineWithTruncation(entries, 100)
+		result, truncated := renderUserTimelineWithTruncation(entries, 50)
 
 		if truncated == 0 {
 			t.Error("Expected some entries to be truncated")
