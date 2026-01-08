@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -36,6 +38,7 @@ type PromptEntry struct {
 	DecisionAnswer            string         `json:"decision_answer,omitempty"`             // User's selected answer
 	DecisionAnswerDescription string         `json:"decision_answer_description,omitempty"` // Description of selected option
 	ToolCounts                map[string]int `json:"tool_counts,omitempty"`                 // For user prompts: counts of tool uses that followed
+	EditedFiles               []string       `json:"edited_files,omitempty"`                // For user prompts: list of files edited
 }
 
 // SessionSummary represents a summarized session within a commit
@@ -775,6 +778,14 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 			toolName := te.Entry.ToolName
 			if toolName != "" {
 				userTimeline[lastUserPromptIdx].Entry.ToolCounts[toolName]++
+
+				// Track edited file paths for Edit/Write operations
+				if toolName == "Edit" || toolName == "Write" {
+					if filePath := extractFilePath(te.Entry.ToolInput); filePath != "" {
+						userTimeline[lastUserPromptIdx].Entry.EditedFiles = append(
+							userTimeline[lastUserPromptIdx].Entry.EditedFiles, filePath)
+					}
+				}
 			}
 		}
 	}
@@ -1142,7 +1153,7 @@ func formatMarkdownEntry(entry PromptEntry) string {
 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
-	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts)
+	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
 
 	// COMMAND entries: format with backticks
 	if entry.Type == "COMMAND" {
@@ -1194,29 +1205,125 @@ func RenderJSON(summary *Summary) ([]byte, error) {
 	return json.MarshalIndent(summary, "", "  ")
 }
 
-// formatToolCounts formats tool counts as "3 Bash, 5 Read, 9 Edit"
-func formatToolCounts(counts map[string]int) string {
+// extractFilePath extracts file_path from tool input string
+func extractFilePath(toolInput string) string {
+	// Try to find file_path in the input (could be JSON or key-value format)
+	// Look for patterns like: "file_path":"/path/to/file" or file_path: /path/to/file
+	patterns := []string{
+		`"file_path"\s*:\s*"([^"]+)"`,
+		`file_path[=:]\s*([^\s,}]+)`,
+	}
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		if matches := re.FindStringSubmatch(toolInput); len(matches) > 1 {
+			return matches[1]
+		}
+	}
+	return ""
+}
+
+// formatToolCountsWithFiles formats tool counts, with Edit last showing file paths
+func formatToolCountsWithFiles(counts map[string]int, editedFiles []string) string {
 	if len(counts) == 0 {
 		return ""
 	}
 
-	// Sort tool names for consistent output
-	var tools []string
+	// Separate Edit from other tools
+	var otherTools []string
 	for tool := range counts {
-		tools = append(tools, tool)
+		if tool != "Edit" && tool != "Write" {
+			otherTools = append(otherTools, tool)
+		}
 	}
-	sort.Strings(tools)
+	sort.Strings(otherTools)
 
 	var parts []string
-	for _, tool := range tools {
+	for _, tool := range otherTools {
 		parts = append(parts, fmt.Sprintf("%d %s", counts[tool], tool))
 	}
+
+	// Add Edit last with file paths
+	editCount := counts["Edit"] + counts["Write"]
+	if editCount > 0 {
+		editPart := fmt.Sprintf("%d Edit", editCount)
+		if len(editedFiles) > 0 {
+			editPart += ": " + formatFilePaths(editedFiles)
+		}
+		parts = append(parts, editPart)
+	}
+
 	return strings.Join(parts, ", ")
 }
 
+// formatFilePaths formats file paths smartly with common prefix grouping
+func formatFilePaths(files []string) string {
+	if len(files) == 0 {
+		return ""
+	}
+
+	// Deduplicate files
+	seen := make(map[string]bool)
+	var unique []string
+	for _, f := range files {
+		if !seen[f] {
+			seen[f] = true
+			unique = append(unique, f)
+		}
+	}
+	files = unique
+
+	// Limit to 3 files
+	if len(files) > 3 {
+		files = files[:3]
+	}
+
+	// Extract just filenames for display
+	var names []string
+	var dirs []string
+	for _, f := range files {
+		dir := filepath.Dir(f)
+		name := filepath.Base(f)
+		names = append(names, name)
+		dirs = append(dirs, dir)
+	}
+
+	// Check if all files share a common directory
+	if len(dirs) > 1 {
+		commonDir := dirs[0]
+		allSame := true
+		for _, d := range dirs[1:] {
+			if d != commonDir {
+				allSame = false
+				break
+			}
+		}
+		if allSame && commonDir != "." && commonDir != "/" {
+			// Format as dir/{file1,file2,file3}
+			shortDir := shortenPath(commonDir)
+			return fmt.Sprintf("`%s/{%s}`", shortDir, strings.Join(names, ","))
+		}
+	}
+
+	// No common directory, just show shortened paths
+	var shortened []string
+	for _, f := range files {
+		shortened = append(shortened, "`"+shortenPath(f)+"`")
+	}
+	return strings.Join(shortened, ", ")
+}
+
+// shortenPath shortens a path for display (keeps last 2-3 components)
+func shortenPath(p string) string {
+	parts := strings.Split(filepath.Clean(p), string(filepath.Separator))
+	if len(parts) <= 3 {
+		return strings.Join(parts, "/")
+	}
+	return strings.Join(parts[len(parts)-3:], "/")
+}
+
 // formatToolCountsSubBullet formats tool counts as a sub-bullet line
-func formatToolCountsSubBullet(counts map[string]int) string {
-	tc := formatToolCounts(counts)
+func formatToolCountsSubBullet(counts map[string]int, editedFiles []string) string {
+	tc := formatToolCountsWithFiles(counts, editedFiles)
 	if tc == "" {
 		return ""
 	}
@@ -1249,7 +1356,7 @@ func allPromptsShort(entries []TimelineEntry) bool {
 func formatMarkdownEntrySimple(entry PromptEntry) string {
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	text = html.EscapeString(text)
-	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts)
+	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
 
 	// COMMAND entries: format with backticks
 	if entry.Type == "COMMAND" {
