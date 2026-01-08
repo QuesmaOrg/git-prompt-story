@@ -192,7 +192,7 @@ git-prompt-story show HEAD
 
 # Preview how it will look in GitHub Actions PR comment
 git-prompt-story ci-preview              # Last commit
-git-prompt-story ci-preview HEAD~5..HEAD # Range of commits
+git-prompt-story ci-preview main..HEAD   # Current branch vs main (PR style)
 ```
 
 ## Privacy & Curation
