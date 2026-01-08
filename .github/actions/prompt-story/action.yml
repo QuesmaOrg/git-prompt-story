@@ -19,7 +19,7 @@ inputs:
   deploy-pages:
     description: 'Deploy full transcripts to GitHub Pages'
     required: false
-    default: 'true'
+    default: 'false'
 
   pages-branch:
     description: 'Branch for GitHub Pages deployment'
