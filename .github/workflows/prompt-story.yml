@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: QuesmaOrg/git-prompt-story/.github/actions/prompt-story-with-pages@main
+      - uses: ./.github/actions/prompt-story-with-pages
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
