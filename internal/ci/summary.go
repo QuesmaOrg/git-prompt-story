@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -32,9 +34,11 @@ type PromptEntry struct {
 	ToolInput    string    `json:"tool_input,omitempty"`  // For TOOL_USE: the tool input/command
 	ToolOutput   string    `json:"tool_output,omitempty"` // For TOOL_RESULT: the tool output
 	// For DECISION entries (AskUserQuestion)
-	DecisionHeader            string `json:"decision_header,omitempty"`             // Question header (e.g., "Version")
-	DecisionAnswer            string `json:"decision_answer,omitempty"`             // User's selected answer
-	DecisionAnswerDescription string `json:"decision_answer_description,omitempty"` // Description of selected option
+	DecisionHeader            string         `json:"decision_header,omitempty"`             // Question header (e.g., "Version")
+	DecisionAnswer            string         `json:"decision_answer,omitempty"`             // User's selected answer
+	DecisionAnswerDescription string         `json:"decision_answer_description,omitempty"` // Description of selected option
+	ToolCounts                map[string]int `json:"tool_counts,omitempty"`                 // For user prompts: counts of tool uses that followed
+	EditedFiles               []string       `json:"edited_files,omitempty"`                // For user prompts: list of files edited
 }
 
 // SessionSummary represents a summarized session within a commit
@@ -65,14 +69,15 @@ type CommitSummary struct {
 
 // Summary represents the full analysis result
 type Summary struct {
-	Commits          []CommitSummary `json:"commits"`
-	TotalPrompts     int             `json:"total_prompts"`       // Kept for backward compatibility (equals TotalSteps)
-	TotalUserPrompts int             `json:"total_user_prompts"`  // Count of user actions in main sessions only
-	TotalAgentPrompts int            `json:"total_agent_prompts"` // Count of user actions in agent sessions
-	TotalSteps       int             `json:"total_steps"`         // Count of all entries
-	TotalAgentSessions int           `json:"total_agent_sessions"` // Count of agent sessions
-	CommitsWithNotes int             `json:"commits_with_notes"`
-	CommitsAnalyzed  int             `json:"commits_analyzed"`
+	Commits            []CommitSummary `json:"commits"`
+	TotalPrompts       int             `json:"total_prompts"`        // Kept for backward compatibility (equals TotalSteps)
+	TotalUserPrompts   int             `json:"total_user_prompts"`   // Count of user actions in main sessions only
+	TotalAgentPrompts  int             `json:"total_agent_prompts"`  // Count of user actions in agent sessions
+	TotalSteps         int             `json:"total_steps"`          // Count of all entries
+	TotalAgentSessions int             `json:"total_agent_sessions"` // Count of agent sessions
+	TotalFileEdits     int             `json:"total_file_edits"`     // Count of Write/Edit operations
+	CommitsWithNotes   int             `json:"commits_with_notes"`
+	CommitsAnalyzed    int             `json:"commits_analyzed"`
 }
 
 // GenerateSummary analyzes commits in a range and extracts prompt data
@@ -100,8 +105,10 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 			for _, sess := range cs.Sessions {
 				stepCount := len(sess.Prompts)
 				userPromptCount := countUserPrompts(sess.Prompts)
+				fileEditCount := countFileEdits(sess.Prompts)
 				summary.TotalSteps += stepCount
 				summary.TotalPrompts += stepCount // Keep for backward compatibility
+				summary.TotalFileEdits += fileEditCount
 
 				// Separate counts for main vs agent sessions
 				if sess.IsAgent {
@@ -738,16 +745,73 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 		}
 	}
 
+	// Sort fullTimeline chronologically to associate tool uses with prompts
+	sort.Slice(fullTimeline, func(i, j int) bool {
+		return fullTimeline[i].Entry.Time.Before(fullTimeline[j].Entry.Time)
+	})
+
+	// Associate tool uses with the preceding user prompt
+	// Build a map of user prompt indices in userTimeline for quick lookup
+	userTimelineIndices := make(map[int]int) // fullTimeline index -> userTimeline index
+	for i, te := range userTimeline {
+		for j, fte := range fullTimeline {
+			if te.Entry.Time.Equal(fte.Entry.Time) && te.Entry.Type == fte.Entry.Type && te.Entry.Text == fte.Entry.Text {
+				userTimelineIndices[j] = i
+				break
+			}
+		}
+	}
+
+	// Iterate through fullTimeline and count tool uses per user prompt
+	var lastUserPromptIdx = -1
+	for i, te := range fullTimeline {
+		if IsUserAction(te.Entry.Type) {
+			if idx, ok := userTimelineIndices[i]; ok {
+				lastUserPromptIdx = idx
+				// Initialize ToolCounts if nil
+				if userTimeline[lastUserPromptIdx].Entry.ToolCounts == nil {
+					userTimeline[lastUserPromptIdx].Entry.ToolCounts = make(map[string]int)
+				}
+			}
+		} else if te.Entry.Type == "TOOL_USE" && lastUserPromptIdx >= 0 {
+			// Add to the last user prompt's tool counts
+			toolName := te.Entry.ToolName
+			if toolName != "" {
+				userTimeline[lastUserPromptIdx].Entry.ToolCounts[toolName]++
+
+				// Track edited file paths for Edit/Write operations
+				if toolName == "Edit" || toolName == "Write" {
+					if filePath := extractFilePath(te.Entry.ToolInput); filePath != "" {
+						userTimeline[lastUserPromptIdx].Entry.EditedFiles = append(
+							userTimeline[lastUserPromptIdx].Entry.EditedFiles, filePath)
+					}
+				}
+			}
+		}
+	}
+
 	// Sort userTimeline chronologically across all sessions
 	sort.Slice(userTimeline, func(i, j int) bool {
 		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
 	})
 
+	// Count file edits (Write/Edit operations) from fullTimeline
+	fileEditCount := 0
+	for _, te := range fullTimeline {
+		if te.Entry.Type == "TOOL_USE" && (te.Entry.ToolName == "Write" || te.Entry.ToolName == "Edit") {
+			fileEditCount++
+		}
+	}
+
 	// Render Prompts section - markdown header, show first 10, collapse rest
 	if len(userTimeline) == 0 {
 		sb.WriteString("*No user prompts in this PR*\n\n")
 	} else {
-		sb.WriteString(fmt.Sprintf("# %d user prompts\n\n", len(userTimeline)))
+		if fileEditCount > 0 {
+			sb.WriteString(fmt.Sprintf("# %d user prompts (%d file edits)\n\n", len(userTimeline), fileEditCount))
+		} else {
+			sb.WriteString(fmt.Sprintf("# %d user prompts\n\n", len(userTimeline)))
+		}
 
 		if len(userTimeline) <= 10 {
 			// Show all prompts
@@ -1088,9 +1152,14 @@ func formatMarkdownEntry(entry PromptEntry) string {
 
 // formatMarkdownEntryCollapsible formats an entry, making long ones collapsible
 func formatMarkdownEntryCollapsible(entry PromptEntry) string {
-	timeStr := entry.Time.Local().Format("15:04")
-	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
+	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
+
+	// COMMAND entries: format with backticks
+	if entry.Type == "COMMAND" {
+		text = html.EscapeString(text)
+		return fmt.Sprintf("- `%s`%s\n", text, toolCountsStr)
+	}
 
 	// DECISION entries: always show in full with answer
 	if entry.Type == "DECISION" {
@@ -1110,33 +1179,155 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		if entry.DecisionAnswerDescription != "" {
 			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
 		}
-		return fmt.Sprintf("- <details open><summary>%s %s %s: %s → %s%s</summary></details>\n\n",
-			timeStr, emoji, header, text, answer, desc)
+		return fmt.Sprintf("- %s: %s → %s%s%s\n", header, text, answer, desc, toolCountsStr)
 	}
 
-	// Short prompts (≤250 chars): <details open> (expanded by default)
+	// Short prompts (≤250 chars): simple bullet
 	if len(text) <= 250 {
-		// Escape HTML to prevent breaking markdown structure
 		text = html.EscapeString(text)
-		return fmt.Sprintf("- <details open><summary>%s %s %s</summary></details>\n\n",
-			timeStr, emoji, text)
+		return fmt.Sprintf("- %s%s\n", text, toolCountsStr)
 	}
 
 	// Long prompts: <details> (collapsed) with truncated summary
 	summary := text[:247] + "..."
-	continuation := strings.ReplaceAll(entry.Text[247:], "\n", " ") // Remove newlines to avoid nested details issues
+	continuation := strings.ReplaceAll(entry.Text[247:], "\n", " ")
 
 	// Escape HTML in both summary and continuation
 	summary = html.EscapeString(summary)
 	continuation = html.EscapeString(continuation)
 
-	return fmt.Sprintf("- <details><summary>%s %s %s</summary>...%s</details>\n\n",
-		timeStr, emoji, summary, continuation)
+	return fmt.Sprintf("- <details><summary>%s</summary>...%s</details>%s\n",
+		summary, continuation, toolCountsStr)
 }
 
 // RenderJSON generates JSON output
 func RenderJSON(summary *Summary) ([]byte, error) {
 	return json.MarshalIndent(summary, "", "  ")
+}
+
+// extractFilePath extracts file_path from tool input string
+func extractFilePath(toolInput string) string {
+	// Try to find file_path in the input (could be JSON or key-value format)
+	// Look for patterns like: "file_path":"/path/to/file" or file_path: /path/to/file
+	patterns := []string{
+		`"file_path"\s*:\s*"([^"]+)"`,
+		`file_path[=:]\s*([^\s,}]+)`,
+	}
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		if matches := re.FindStringSubmatch(toolInput); len(matches) > 1 {
+			return matches[1]
+		}
+	}
+	return ""
+}
+
+// formatToolCountsWithFiles formats tool counts, with Edit last showing file paths
+func formatToolCountsWithFiles(counts map[string]int, editedFiles []string) string {
+	if len(counts) == 0 {
+		return ""
+	}
+
+	// Separate Edit from other tools
+	var otherTools []string
+	for tool := range counts {
+		if tool != "Edit" && tool != "Write" {
+			otherTools = append(otherTools, tool)
+		}
+	}
+	sort.Strings(otherTools)
+
+	var parts []string
+	for _, tool := range otherTools {
+		parts = append(parts, fmt.Sprintf("%d %s", counts[tool], tool))
+	}
+
+	// Add Edit last with file paths
+	editCount := counts["Edit"] + counts["Write"]
+	if editCount > 0 {
+		editPart := fmt.Sprintf("%d Edit", editCount)
+		if len(editedFiles) > 0 {
+			editPart += ": " + formatFilePaths(editedFiles)
+		}
+		parts = append(parts, editPart)
+	}
+
+	return strings.Join(parts, ", ")
+}
+
+// formatFilePaths formats file paths smartly with common prefix grouping
+func formatFilePaths(files []string) string {
+	if len(files) == 0 {
+		return ""
+	}
+
+	// Deduplicate files
+	seen := make(map[string]bool)
+	var unique []string
+	for _, f := range files {
+		if !seen[f] {
+			seen[f] = true
+			unique = append(unique, f)
+		}
+	}
+	files = unique
+
+	// Limit to 3 files
+	if len(files) > 3 {
+		files = files[:3]
+	}
+
+	// Extract just filenames for display
+	var names []string
+	var dirs []string
+	for _, f := range files {
+		dir := filepath.Dir(f)
+		name := filepath.Base(f)
+		names = append(names, name)
+		dirs = append(dirs, dir)
+	}
+
+	// Check if all files share a common directory
+	if len(dirs) > 1 {
+		commonDir := dirs[0]
+		allSame := true
+		for _, d := range dirs[1:] {
+			if d != commonDir {
+				allSame = false
+				break
+			}
+		}
+		if allSame && commonDir != "." && commonDir != "/" {
+			// Format as dir/{file1,file2,file3}
+			shortDir := shortenPath(commonDir)
+			return fmt.Sprintf("`%s/{%s}`", shortDir, strings.Join(names, ","))
+		}
+	}
+
+	// No common directory, just show shortened paths
+	var shortened []string
+	for _, f := range files {
+		shortened = append(shortened, "`"+shortenPath(f)+"`")
+	}
+	return strings.Join(shortened, ", ")
+}
+
+// shortenPath shortens a path for display (keeps last 2-3 components)
+func shortenPath(p string) string {
+	parts := strings.Split(filepath.Clean(p), string(filepath.Separator))
+	if len(parts) <= 3 {
+		return strings.Join(parts, "/")
+	}
+	return strings.Join(parts[len(parts)-3:], "/")
+}
+
+// formatToolCountsSubBullet formats tool counts as a sub-bullet line
+func formatToolCountsSubBullet(counts map[string]int, editedFiles []string) string {
+	tc := formatToolCountsWithFiles(counts, editedFiles)
+	if tc == "" {
+		return ""
+	}
+	return "\n  - " + tc
 }
 
 // IsUserAction returns true if the entry type represents a user action
@@ -1163,10 +1354,14 @@ func allPromptsShort(entries []TimelineEntry) bool {
 
 // formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
 func formatMarkdownEntrySimple(entry PromptEntry) string {
-	timeStr := entry.Time.Local().Format("15:04")
-	emoji := display.GetTypeEmoji(entry.Type)
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	text = html.EscapeString(text)
+	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
+
+	// COMMAND entries: format with backticks
+	if entry.Type == "COMMAND" {
+		return fmt.Sprintf("- `%s`%s\n", text, toolCountsStr)
+	}
 
 	// DECISION entries: show with answer
 	if entry.Type == "DECISION" {
@@ -1184,10 +1379,10 @@ func formatMarkdownEntrySimple(entry PromptEntry) string {
 		if entry.DecisionAnswerDescription != "" {
 			desc = " *" + html.EscapeString(entry.DecisionAnswerDescription) + "*"
 		}
-		return fmt.Sprintf("- %s %s %s: %s → %s%s\n", timeStr, emoji, header, text, answer, desc)
+		return fmt.Sprintf("- %s: %s → %s%s%s\n", header, text, answer, desc, toolCountsStr)
 	}
 
-	return fmt.Sprintf("- %s %s %s\n", timeStr, emoji, text)
+	return fmt.Sprintf("- %s%s\n", text, toolCountsStr)
 }
 
 // countUserPrompts counts user action entries in a slice
@@ -1195,6 +1390,17 @@ func countUserPrompts(prompts []PromptEntry) int {
 	count := 0
 	for _, p := range prompts {
 		if IsUserAction(p.Type) {
+			count++
+		}
+	}
+	return count
+}
+
+// countFileEdits counts Write/Edit tool uses in a slice
+func countFileEdits(prompts []PromptEntry) int {
+	count := 0
+	for _, p := range prompts {
+		if p.Type == "TOOL_USE" && (p.ToolName == "Write" || p.ToolName == "Edit") {
 			count++
 		}
 	}
