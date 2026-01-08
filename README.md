@@ -172,9 +172,12 @@ Single binary, no runtime dependencies. Install once, works everywhere.
 
 ### GitHub Action
 
-- Run on Pull Requests
-- Adds message with markdown summary of prompts
-- Creates more detailed HTML transcript and saves it as GitHub Pages
+Two actions are available:
+
+- **`prompt-story`** - Posts PR comment with markdown summary (default)
+- **`prompt-story-with-pages`** - Posts PR comment + deploys full HTML transcripts to GitHub Pages
+
+Both run on Pull Requests. Use `generate-github-workflow` to create the appropriate workflow.
 
 ## Viewer Integration
 

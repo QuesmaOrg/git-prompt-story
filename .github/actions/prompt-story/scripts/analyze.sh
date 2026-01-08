@@ -14,14 +14,8 @@ COMMITS_WITH_NONE_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "Promp
 COMMITS_WITH_MARKERS=$((COMMITS_WITH_ANY_MARKERS - COMMITS_WITH_NONE_MARKERS))
 echo "  Commits with AI markers: $COMMITS_WITH_MARKERS (total: $COMMITS_WITH_ANY_MARKERS, none: $COMMITS_WITH_NONE_MARKERS)"
 
-# Determine flags
-FULL_FLAG=""
-if [ "$SUMMARY_MODE" = "full" ]; then
-  FULL_FLAG="--full"
-fi
-
 # Generate summary in JSON to extract stats
-./git-prompt-story ci-summary "$COMMIT_RANGE" --format=json --output=./prompt-story-stats.json $FULL_FLAG
+./git-prompt-story ci-summary "$COMMIT_RANGE" --format=json --output=./prompt-story-stats.json
 
 # Extract stats from JSON
 COMMITS_ANALYZED=$(jq -r '.commits_analyzed' ./prompt-story-stats.json)
@@ -42,7 +36,7 @@ if [ "$FAIL_IF_NO_NOTES" = "true" ] && [ "$COMMITS_WITH_NOTES" = "0" ]; then
 fi
 
 # Generate markdown summary
-./git-prompt-story ci-summary "$COMMIT_RANGE" --format=markdown --output=./prompt-story-summary.md $FULL_FLAG
+./git-prompt-story ci-summary "$COMMIT_RANGE" --format=markdown --output=./prompt-story-summary.md
 
 echo "  Generated ./prompt-story-summary.md"
 echo "Done analyzing."
