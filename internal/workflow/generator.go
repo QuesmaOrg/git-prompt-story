@@ -63,7 +63,7 @@ func Generate() error {
 	fmt.Println("Generating GitHub Action workflow for prompt-story...")
 	fmt.Println()
 
-	enablePages := askYesNo("Enable GitHub Pages for full transcripts?", true)
+	enablePages := askYesNo("Enable GitHub Pages for full transcripts?", false)
 
 	// Determine workflow content
 	var content string
