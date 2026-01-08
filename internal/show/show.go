@@ -192,7 +192,7 @@ func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool
 	}
 
 	// Print session header
-	fmt.Printf("Session: %s/%s\n", sess.Tool, sess.ID)
+	fmt.Printf("Session: %s/%s\n", sess.PromptTool, sess.ID)
 	fmt.Printf("Duration: %s - %s\n\n",
 		sess.Created.Local().Format("2006-01-02 15:04"),
 		sess.Modified.Local().Format("2006-01-02 15:04"))

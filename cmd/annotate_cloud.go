@@ -141,11 +141,11 @@ func annotateCloudCommit(commitRef, sessionID string, autoDetect, noScrub bool) 
 		Version:   1,
 		StartWork: sess.CreatedAt,
 		Sessions: []note.SessionEntry{{
-			Tool:     "claude-cloud",
-			ID:       sess.ID,
-			Path:     note.GetTranscriptPath("claude-cloud", sess.ID),
-			Created:  sess.CreatedAt,
-			Modified: sess.UpdatedAt,
+			PromptTool: "claude-cloud",
+			ID:         sess.ID,
+			Path:       note.GetTranscriptPath("claude-cloud", sess.ID),
+			Created:    sess.CreatedAt,
+			Modified:   sess.UpdatedAt,
 		}},
 	}
 	noteJSON, err := json.MarshalIndent(psNote, "", "  ")

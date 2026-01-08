@@ -5,12 +5,34 @@ import (
 	"time"
 )
 
-// ClaudeSession represents a discovered Claude Code session
+// ClaudeSession represents a discovered Claude Code session.
+// This type is kept for backward compatibility.
+// It implements the Session interface.
 type ClaudeSession struct {
 	ID       string    // Session UUID (filename without .jsonl)
 	Path     string    // Full path to JSONL file
 	Created  time.Time // First timestamp in file
 	Modified time.Time // Last timestamp in file
+}
+
+// GetID returns the session ID.
+func (s ClaudeSession) GetID() string { return s.ID }
+
+// GetPath returns the session file path.
+func (s ClaudeSession) GetPath() string { return s.Path }
+
+// GetPromptTool returns the prompt tool identifier.
+func (s ClaudeSession) GetPromptTool() string { return "claude-code" }
+
+// GetCreated returns when the session was created.
+func (s ClaudeSession) GetCreated() time.Time { return s.Created }
+
+// GetModified returns when the session was last modified.
+func (s ClaudeSession) GetModified() time.Time { return s.Modified }
+
+// ReadContent reads the raw session content.
+func (s ClaudeSession) ReadContent() ([]byte, error) {
+	return ReadSessionContent(s.Path)
 }
 
 // MessageEntry represents a single JSONL line from Claude Code

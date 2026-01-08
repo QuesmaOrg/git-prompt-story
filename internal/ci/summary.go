@@ -12,6 +12,8 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+	// Import claudecode to register the parser
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/session/claudecode"
 )
 
 const (
@@ -20,22 +22,9 @@ const (
 	maxAllStepsSize    = 40000 // Budget for all steps section
 )
 
-// PromptEntry represents a single prompt or action in a session
-type PromptEntry struct {
-	Time         time.Time `json:"time"`
-	Type         string    `json:"type"` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT, DECISION
-	Text         string    `json:"text"`
-	Truncated    bool      `json:"truncated,omitempty"`
-	InWorkPeriod bool      `json:"in_work_period"` // true if within commit's work period
-	ToolID       string    `json:"tool_id,omitempty"`     // For TOOL_USE/TOOL_RESULT: links them together
-	ToolName     string    `json:"tool_name,omitempty"`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
-	ToolInput    string    `json:"tool_input,omitempty"`  // For TOOL_USE: the tool input/command
-	ToolOutput   string    `json:"tool_output,omitempty"` // For TOOL_RESULT: the tool output
-	// For DECISION entries (AskUserQuestion)
-	DecisionHeader            string `json:"decision_header,omitempty"`             // Question header (e.g., "Version")
-	DecisionAnswer            string `json:"decision_answer,omitempty"`             // User's selected answer
-	DecisionAnswerDescription string `json:"decision_answer_description,omitempty"` // Description of selected option
-}
+// PromptEntry is an alias for session.PromptEntry for backward compatibility.
+// Represents a single prompt or action in a session.
+type PromptEntry = session.PromptEntry
 
 // SessionSummary represents a summarized session within a commit
 type SessionSummary struct {
@@ -167,8 +156,20 @@ func analyzeCommit(sha string, full bool) (*CommitSummary, error) {
 	return cs, nil
 }
 
-// analyzeSession extracts all entries from a session, marking which are in work period
+// analyzeSession extracts all entries from a session, marking which are in work period.
+// Uses the parser registry to delegate parsing to the appropriate prompt tool parser.
 func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (*SessionSummary, error) {
+	// Get parser for this prompt tool
+	promptTool := sess.PromptTool
+	if promptTool == "" {
+		promptTool = "claude-code" // Legacy default
+	}
+
+	parser := session.GetParser(promptTool)
+	if parser == nil {
+		return nil, fmt.Errorf("no parser registered for prompt tool: %s", promptTool)
+	}
+
 	// Extract relative path from full ref path
 	relPath := strings.TrimPrefix(sess.Path, note.TranscriptsRef+"/")
 
@@ -178,504 +179,20 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 		return nil, fmt.Errorf("failed to fetch transcript: %w", err)
 	}
 
-	// Parse messages
-	entries, err := session.ParseMessages(content)
+	// Parse using the prompt tool-specific parser
+	prompts, err := parser.ParseSession(content, startWork, endWork, full)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse messages: %w", err)
+		return nil, fmt.Errorf("failed to parse session: %w", err)
 	}
 
-	ss := &SessionSummary{
-		Tool:    sess.Tool,
+	return &SessionSummary{
+		Tool:    sess.PromptTool,
 		ID:      sess.ID,
 		IsAgent: IsAgentSession(sess.ID),
 		Start:   sess.Created,
 		End:     sess.Modified,
-		Prompts: make([]PromptEntry, 0),
-	}
-
-	// Map to track tool use entries by ID for linking with results
-	toolUseEntries := make(map[string]*PromptEntry)
-
-	// Map to track AskUserQuestion entries by tool ID for linking with answers
-	// Key is tool ID, value is slice of indices into ss.Prompts for the DECISION entries
-	askUserQuestionEntries := make(map[string][]int)
-
-	// Map to track options for each question (for looking up answer descriptions)
-	// Key is question text, value is slice of options
-	questionOptions := make(map[string][]AskUserQuestionOption)
-
-	for _, entry := range entries {
-		// Get timestamp
-		ts := entry.Timestamp
-		if ts.IsZero() && entry.Snapshot != nil {
-			ts = entry.Snapshot.Timestamp
-		}
-
-		// Skip entries without timestamp
-		if ts.IsZero() {
-			continue
-		}
-
-		// Determine if in work period
-		inWorkPeriod := !ts.Before(startWork) && !ts.After(endWork)
-
-		switch entry.Type {
-		case "user":
-			if entry.Message != nil {
-				msgText := entry.Message.GetTextContent()
-
-				// Check for commands
-				if strings.HasPrefix(msgText, "<command-name>") {
-					start := strings.Index(msgText, "<command-name>") + len("<command-name>")
-					end := strings.Index(msgText, "</command-name>")
-					if end > start {
-						cmdName := msgText[start:end]
-						cmdName = strings.TrimPrefix(cmdName, "/")
-						pe := PromptEntry{
-							Time:         ts,
-							Type:         "COMMAND",
-							Text:         "/" + cmdName,
-							InWorkPeriod: inWorkPeriod,
-						}
-						if inWorkPeriod {
-							ss.Prompts = append(ss.Prompts, pe)
-						}
-						continue
-					}
-				}
-
-				// Skip local command output entries
-				if strings.HasPrefix(msgText, "<local-command-stdout>") {
-					continue
-				}
-
-				// Skip meta/system-injected messages
-				if entry.IsMeta {
-					continue
-				}
-
-				// Check for tool results
-				toolResults := parseToolResults(entry.Message.RawContent)
-				if len(toolResults) > 0 {
-					hasRejection := false
-					for _, tr := range toolResults {
-						// Check if this is a tool rejection (is_error=true with rejection message)
-						if tr.IsError && strings.Contains(tr.Content, "tool use was rejected") {
-							// Extract user's rejection message if present
-							text := "User rejected tool call"
-							if idx := strings.Index(tr.Content, "user said:\n"); idx != -1 {
-								text = strings.TrimSpace(tr.Content[idx+len("user said:\n"):])
-							}
-							pe := PromptEntry{
-								Time:         ts,
-								Type:         "TOOL_REJECT",
-								Text:         text,
-								InWorkPeriod: inWorkPeriod,
-							}
-							if inWorkPeriod {
-								ss.Prompts = append(ss.Prompts, pe)
-							}
-							hasRejection = true
-							continue
-						}
-						// Find and update the corresponding tool use entry
-						if toolUse, ok := toolUseEntries[tr.ToolUseID]; ok {
-							toolUse.ToolOutput = tr.Content
-						}
-						// Check if this is an answer to AskUserQuestion
-						if indices, ok := askUserQuestionEntries[tr.ToolUseID]; ok {
-							// Get answers from ToolUseResult (preserved by scrubber for decisions)
-							if entry.ToolUseResult != nil && entry.ToolUseResult.Answers != nil {
-								for _, idx := range indices {
-									if idx < len(ss.Prompts) {
-										question := ss.Prompts[idx].Text
-										if answer, found := entry.ToolUseResult.Answers[question]; found {
-											ss.Prompts[idx].DecisionAnswer = answer
-											// Look up description for the selected answer
-											if opts, hasOpts := questionOptions[question]; hasOpts {
-												for _, opt := range opts {
-													if opt.Label == answer {
-														ss.Prompts[idx].DecisionAnswerDescription = opt.Description
-														break
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					if !hasRejection {
-						continue
-					}
-				}
-
-				// Regular user prompt
-				if msgText != "" {
-					pe := PromptEntry{
-						Time:         ts,
-						Type:         "PROMPT",
-						Text:         msgText,
-						InWorkPeriod: inWorkPeriod,
-					}
-					if !full && len(pe.Text) > 2000 {
-						pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
-						pe.Truncated = true
-					}
-					if inWorkPeriod {
-						ss.Prompts = append(ss.Prompts, pe)
-					}
-				}
-			}
-
-		case "tool_reject":
-			text := "User rejected tool call"
-			if entry.Message != nil {
-				if t := entry.Message.GetTextContent(); t != "" {
-					text = t
-				}
-			}
-			pe := PromptEntry{
-				Time:         ts,
-				Type:         "TOOL_REJECT",
-				Text:         text,
-				InWorkPeriod: inWorkPeriod,
-			}
-			if inWorkPeriod {
-				ss.Prompts = append(ss.Prompts, pe)
-			}
-
-		case "assistant":
-			if entry.Message != nil {
-				entryType, text, toolUses := parseAssistantContent(entry.Message.RawContent)
-
-				if len(toolUses) > 0 {
-					// Create an entry for each tool use
-					for _, tool := range toolUses {
-						// Special handling for AskUserQuestion - create DECISION entries
-						if tool.Name == "AskUserQuestion" {
-							var askInput AskUserQuestionInput
-							if err := json.Unmarshal(tool.RawInput, &askInput); err == nil && len(askInput.Questions) > 0 {
-								var indices []int
-								for _, q := range askInput.Questions {
-									pe := PromptEntry{
-										Time:           ts,
-										Type:           "DECISION",
-										Text:           q.Question,
-										ToolID:         tool.ID,
-										DecisionHeader: q.Header,
-										InWorkPeriod:   inWorkPeriod,
-									}
-									if inWorkPeriod {
-										ss.Prompts = append(ss.Prompts, pe)
-										indices = append(indices, len(ss.Prompts)-1)
-									}
-									// Store options for this question to look up answer descriptions later
-									if len(q.Options) > 0 {
-										questionOptions[q.Question] = q.Options
-									}
-								}
-								if len(indices) > 0 {
-									askUserQuestionEntries[tool.ID] = indices
-								}
-								continue
-							}
-						}
-
-						pe := PromptEntry{
-							Time:         ts,
-							Type:         "TOOL_USE",
-							Text:         tool.Name,
-							ToolID:       tool.ID,
-							ToolName:     tool.Name,
-							ToolInput:    tool.Input,
-							InWorkPeriod: inWorkPeriod,
-						}
-						if !full && len(pe.ToolInput) > 500 {
-							pe.ToolInput = pe.ToolInput[:500] + "...[TRUNCATED]"
-							pe.Truncated = true
-						}
-						if inWorkPeriod {
-							ss.Prompts = append(ss.Prompts, pe)
-							// Track for linking with results
-							toolUseEntries[tool.ID] = &ss.Prompts[len(ss.Prompts)-1]
-						}
-					}
-				} else if entryType == "ASSISTANT" && text != "" {
-					pe := PromptEntry{
-						Time:         ts,
-						Type:         "ASSISTANT",
-						Text:         text,
-						InWorkPeriod: inWorkPeriod,
-					}
-					if !full && len(pe.Text) > 2000 {
-						pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
-						pe.Truncated = true
-					}
-					if inWorkPeriod {
-						ss.Prompts = append(ss.Prompts, pe)
-					}
-				}
-			}
-
-		case "queue-operation":
-			// Messages typed by user while Claude is working
-			// Only include "enqueue" operations with actual content
-			if entry.Operation == "enqueue" && entry.Content != "" {
-				// Skip system notifications (bash notifications, etc.)
-				if strings.HasPrefix(entry.Content, "<bash-notification>") {
-					continue
-				}
-				// Skip commands (they'll be processed as separate entries)
-				if strings.HasPrefix(entry.Content, "/") {
-					continue
-				}
-				pe := PromptEntry{
-					Time:         ts,
-					Type:         "PROMPT",
-					Text:         entry.Content,
-					InWorkPeriod: inWorkPeriod,
-				}
-				if !full && len(pe.Text) > 2000 {
-					pe.Text = pe.Text[:2000] + "...[TRUNCATED]"
-					pe.Truncated = true
-				}
-				if inWorkPeriod {
-					ss.Prompts = append(ss.Prompts, pe)
-				}
-			}
-		}
-	}
-
-	return ss, nil
-}
-
-// ToolResultInfo holds extracted tool result information
-type ToolResultInfo struct {
-	ToolUseID string
-	Content   string
-	IsError   bool
-}
-
-// parseToolResults extracts tool_result entries from user message content
-func parseToolResults(rawContent json.RawMessage) []ToolResultInfo {
-	if len(rawContent) == 0 {
-		return nil
-	}
-
-	// Tool results are typically in an array
-	var parts []struct {
-		Type       string `json:"type"`
-		ToolUseID  string `json:"tool_use_id"`
-		Content    any    `json:"content"`
-		IsError    bool   `json:"is_error,omitempty"`
-	}
-	if err := json.Unmarshal(rawContent, &parts); err != nil {
-		return nil
-	}
-
-	var results []ToolResultInfo
-	for _, part := range parts {
-		if part.Type == "tool_result" && part.ToolUseID != "" {
-			content := extractToolResultContent(part.Content)
-			if content != "" || part.IsError {
-				results = append(results, ToolResultInfo{
-					ToolUseID: part.ToolUseID,
-					Content:   content,
-					IsError:   part.IsError,
-				})
-			}
-		}
-	}
-
-	return results
-}
-
-// extractToolResultContent extracts text content from tool result
-func extractToolResultContent(content any) string {
-	if content == nil {
-		return ""
-	}
-
-	var result string
-
-	// Content could be a string
-	if s, ok := content.(string); ok {
-		result = s
-	} else if arr, ok := content.([]any); ok {
-		// Content could be an array of content blocks
-		var texts []string
-		for _, item := range arr {
-			if m, ok := item.(map[string]any); ok {
-				if m["type"] == "text" {
-					if text, ok := m["text"].(string); ok {
-						texts = append(texts, text)
-					}
-				}
-			}
-		}
-		result = strings.Join(texts, "\n")
-	}
-
-	// Clean up arrow characters from cat -n output format
-	result = strings.ReplaceAll(result, "→", " ")
-
-	return result
-}
-
-// ToolUseInfo holds extracted information about a tool use
-type ToolUseInfo struct {
-	ID       string
-	Name     string
-	Input    string          // Formatted input string (e.g., command for Bash)
-	RawInput json.RawMessage // Raw input JSON for AskUserQuestion parsing
-}
-
-// AskUserQuestionOption represents a single option in AskUserQuestion
-type AskUserQuestionOption struct {
-	Label       string `json:"label"`
-	Description string `json:"description"`
-}
-
-// AskUserQuestionInput represents the input to AskUserQuestion tool
-type AskUserQuestionInput struct {
-	Questions []struct {
-		Header   string                  `json:"header"`
-		Question string                  `json:"question"`
-		Options  []AskUserQuestionOption `json:"options"`
-	} `json:"questions"`
-}
-
-// parseAssistantContent parses assistant message content to determine type and text
-// Returns: entryType, text, and slice of tool use info
-func parseAssistantContent(rawContent json.RawMessage) (entryType, text string, toolUses []ToolUseInfo) {
-	if len(rawContent) == 0 {
-		return "", "", nil
-	}
-
-	// Try to parse as string first
-	var strContent string
-	if err := json.Unmarshal(rawContent, &strContent); err == nil {
-		if strContent != "" {
-			return "ASSISTANT", strContent, nil
-		}
-		return "", "", nil
-	}
-
-	// Try to parse as array of content parts
-	var parts []struct {
-		Type  string          `json:"type"`
-		Text  string          `json:"text,omitempty"`
-		ID    string          `json:"id,omitempty"`
-		Name  string          `json:"name,omitempty"`
-		Input json.RawMessage `json:"input,omitempty"`
-	}
-	if err := json.Unmarshal(rawContent, &parts); err == nil {
-		var textParts []string
-
-		for _, part := range parts {
-			switch part.Type {
-			case "text":
-				if part.Text != "" {
-					textParts = append(textParts, part.Text)
-				}
-			case "tool_use":
-				if part.Name != "" {
-					toolInfo := ToolUseInfo{
-						ID:       part.ID,
-						Name:     part.Name,
-						Input:    formatToolInput(part.Name, part.Input),
-						RawInput: part.Input,
-					}
-					toolUses = append(toolUses, toolInfo)
-				}
-			}
-		}
-
-		// If there are tool uses, report them
-		if len(toolUses) > 0 {
-			var names []string
-			for _, t := range toolUses {
-				names = append(names, t.Name)
-			}
-			return "TOOL_USE", strings.Join(names, ", "), toolUses
-		}
-
-		// Otherwise return text content
-		if len(textParts) > 0 {
-			return "ASSISTANT", textParts[0], nil
-		}
-	}
-
-	return "", "", nil
-}
-
-// formatToolInput extracts the most relevant input field for display
-func formatToolInput(toolName string, input json.RawMessage) string {
-	if len(input) == 0 {
-		return ""
-	}
-
-	// Parse input as map
-	var inputMap map[string]any
-	if err := json.Unmarshal(input, &inputMap); err != nil {
-		return ""
-	}
-
-	// Extract the most relevant field based on tool type
-	switch toolName {
-	case "Bash":
-		if cmd, ok := inputMap["command"].(string); ok {
-			return cmd
-		}
-	case "Read":
-		if path, ok := inputMap["file_path"].(string); ok {
-			return path
-		}
-	case "Write":
-		if path, ok := inputMap["file_path"].(string); ok {
-			return path
-		}
-	case "Edit":
-		if path, ok := inputMap["file_path"].(string); ok {
-			return path
-		}
-	case "Glob":
-		if pattern, ok := inputMap["pattern"].(string); ok {
-			return pattern
-		}
-	case "Grep":
-		if pattern, ok := inputMap["pattern"].(string); ok {
-			return pattern
-		}
-	case "Task":
-		if prompt, ok := inputMap["prompt"].(string); ok {
-			if len(prompt) > 100 {
-				return prompt[:97] + "..."
-			}
-			return prompt
-		}
-	case "WebFetch":
-		if url, ok := inputMap["url"].(string); ok {
-			return url
-		}
-	case "WebSearch":
-		if query, ok := inputMap["query"].(string); ok {
-			return query
-		}
-	default:
-		// For unknown tools, return JSON representation
-		if b, err := json.Marshal(inputMap); err == nil {
-			s := string(b)
-			if len(s) > 200 {
-				return s[:197] + "..."
-			}
-			return s
-		}
-	}
-
-	return ""
+		Prompts: prompts,
+	}, nil
 }
 
 // getCommitSubject gets the first line of a commit message

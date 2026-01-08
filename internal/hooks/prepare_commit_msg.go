@@ -49,28 +49,17 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 	endWork := time.Now().UTC()
 	debugLog.log("Work period: %s - %s (now)", startWork.UTC().Format(time.RFC3339), endWork.Format(time.RFC3339))
 
-	// Find Claude Code sessions for this repo (includes time filtering)
-	sessions, err := session.FindSessions(repoRoot, startWork, endWork, nil)
+	// Find sessions from all registered prompt tools for this repo (includes time filtering)
+	sessions, err := session.FindAllSessions(repoRoot, startWork, endWork, nil)
 	if err != nil {
 		// Don't fail the commit, just log
 		fmt.Fprintf(os.Stderr, "git-prompt-story: warning: %v\n", err)
-		debugLog.log("FindSessions error: %v", err)
+		debugLog.log("FindAllSessions error: %v", err)
 		sessions = nil
 	}
-	debugLog.log("FindSessions returned %d sessions", len(sessions))
+	debugLog.log("FindAllSessions returned %d sessions (with user messages)", len(sessions))
 	for _, s := range sessions {
-		debugLog.log("  - %s: created=%s, modified=%s", s.ID, s.Created.UTC().Format(time.RFC3339), s.Modified.UTC().Format(time.RFC3339))
-	}
-
-	// Filter to only sessions with actual user messages in work period
-	if len(sessions) > 0 {
-		beforeMsgFilter := len(sessions)
-		sessions = session.FilterSessionsByUserMessages(sessions, startWork, endWork, nil)
-		debugLog.log("FilterSessionsByUserMessages: %d -> %d sessions", beforeMsgFilter, len(sessions))
-
-		for _, s := range sessions {
-			debugLog.log("  - kept: %s", s.ID)
-		}
+		debugLog.log("  - %s [%s]: created=%s, modified=%s", s.GetID(), s.GetPromptTool(), s.GetCreated().UTC().Format(time.RFC3339), s.GetModified().UTC().Format(time.RFC3339))
 	}
 
 	pendingFile := filepath.Join(gitDir, "PENDING-PROMPT-STORY")
@@ -123,7 +112,7 @@ func PrepareCommitMsg(msgFile, source, sha string) error {
 		// Count user actions (prompts, commands, tool rejects) for the summary
 		startWork, _ := git.CalculateWorkStartTime(isAmend)
 		endWork := time.Now().UTC()
-		promptCount := session.CountUserActionsInRange(sessions, startWork, endWork)
+		promptCount := session.CountAllUserActions(sessions, startWork, endWork)
 
 		summary = psNote.GenerateSummary(promptCount)
 	}
