@@ -497,20 +497,20 @@ pre {
 <body>
   <div class="header">
     <h1>Prompt Story</h1>
-    <p class="meta">PR #46 | 4 commit(s) with LLM sessions</p>
+    <p class="meta">PR #46 | 5 commit(s) with LLM sessions</p>
   </div>
 
   <div class="stats">
     <div class="stat">
-      <div class="stat-value">5</div>
+      <div class="stat-value">6</div>
       <div class="stat-label">Commits Analyzed</div>
     </div>
     <div class="stat">
-      <div class="stat-value">4</div>
+      <div class="stat-value">5</div>
       <div class="stat-label">With Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">173</div>
+      <div class="stat-value" id="visible-count">272</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
@@ -528,6 +528,14 @@ pre {
       </tr>
     </thead>
     <tbody>
+      
+      <tr>
+        <td><code>7aa58c3</code></td>
+        <td>Fix CI summary to display Cursor sessions</td>
+        <td>Claude Code</td>
+        <td>99</td>
+        <td><a href="7aa58c3.html">View transcript</a></td>
+      </tr>
       
       <tr>
         <td><code>4487654</code></td>
@@ -582,6 +590,2768 @@ pre {
   
   <div class="commit-card">
     <div class="commit-header">
+      <h3><code>7aa58c3</code> Fix CI summary to display Cursor sessions</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-10 17:14 - 2026-01-10 19:03
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-10 14:47 - 2026-01-10 19:03 | <span class="session-count">99</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:15</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log -1 --format=&#34;%B&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Fix JSON formatting in README Cursor example
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+
+Prompt-Story: Used Claude Code (2 user prompts) [v0.15.2-0.20260110144518-f6a5c7ae3072&#43;dirty]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:15</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! Pushed to `feature/cursor-support`.
+
+Note: The commit shows &#34;Claude Code (2 user prompts)&#34; - the Cursor sessions from earlier today (14:04 and 17:37) are outside the work period for this commit, so they weren&#39;t included. The hook correctly captured the current Claude Code session.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:16</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">When I see https://github.com/QuesmaOrg/git-prompt-story/pull/46, i don&#39;t see any mentions of Cursor. Why?
+6 user prompts (35 file edits)
+6e43d71: Add Cursor IDE support for session di...
+Add branch &#34;cursor-support&#34;. It works for Claude Code. Make it works for Cursor as well. Investigate deeply what is neede. I already made some commits with Cursor AI to this (for branch README), so study that. Web search as much as you need.
+6 Bash, 5 Read, 1 Task, 4 WebFetch, 2 WebSearch, 1 Edit
+Branch: Should I work from the existing cursor-support branch (which has architecture docs but no implementation), or start fresh from main? → Read and evaluate idea, but start a new banch based on main.
+28 Bash, 1 ExitPlanMode, 1 Grep, 6 Read, 9 TodoWrite, 26 Edit
+241e41e: Fix Cursor provider to handle new bub...
+So, what you see for this repo?
+6 Bash
+Study if there wre some previous prompts in Cursor for this repo - tell me which (there were).
+12 Bash, 1 Read, 1 TodoWrite, 8 Edit
+4487654: Fix JSON formatting in README Cursor ...
+Now, check what are cursor promtps for THIS branch. There is one.
+4 Bash
+nice! comit, push
+3 Bash
+All 173 steps
+Show all...
+Commit    Subject    Tool(s)    User Prompts    Steps
+6e43d71    Add Cursor IDE support for session di...    Claude Code    2    120
+241e41e    Fix Cursor provider to handle new bub...    Claude Code    2    38
+7389bea    Docs: Add Cursor integration details    Claude Code    0    3
+4487654    Fix JSON formatting in README Cursor ...    Claude Code    2    12
+View full transcripts (available while open &#43; 30 days after close)
+
+</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:16</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">This session is being continued from a previous conversation that ran out of context. The conversation is summarized below:
+Analysis:
+Let me analyze the conversation chronologically to capture all technical details:
+
+1. **Initial Request**: User asked to add Cursor IDE support to git-prompt-story, which already works for Claude Code. They mentioned there were previous commits with Cursor AI on the branch README.
+
+2. **Exploration Phase**:
+   - Explored the codebase structure using Task agent
+   - Found cursor-support branch exists with documentation but no implementation
+   - Discovered existing architecture in `docs/CURSOR_SUPPORT.md` and `docs/MULTI_TOOL_ARCHITECTURE.md`
+   - Did web research on Cursor&#39;s SQLite storage format
+
+3. **Key Technical Discoveries**:
+   - Cursor stores data in SQLite at `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`
+   - Table: `cursorDiskKV` with key pattern `composerData:&lt;uuid&gt;`
+   - Conversations have bubbles with type 1 (user) and type 2 (AI)
+   - Workspace must be derived from file paths in codeBlocks
+
+4. **Implementation**:
+   - Created provider abstraction (`internal/provider/`)
+   - Created parser abstraction (`internal/parser/`)
+   - Implemented Claude Code provider wrapping existing code
+   - Implemented Cursor provider to read from SQLite
+   - Updated hooks, note, repair, and show packages
+
+5. **Bug Fix - New Cursor Format**:
+   - Initial implementation didn&#39;t find git-prompt-story sessions
+   - Discovered Cursor now stores bubbles separately as `bubbleId:composerId:bubbleId` keys
+   - File paths now in `originalFileStates` field instead of `conversation`
+   - Fixed provider to handle both old and new formats
+
+6. **Final State**:
+   - Found 2 Cursor sessions for git-prompt-story:
+     - `08c579f1`: &#34;The commit concept&#34; (README work, 16 prompts)
+     - `1c0a8a6e`: &#34;Checkpoint cursor integration...&#34; (cursor-support branch, 2 prompts)
+
+7. **Current Issue**: User is asking why the PR doesn&#39;t show Cursor mentions. Looking at the PR summary, it only shows &#34;Claude Code&#34; but not &#34;Cursor&#34; even though Cursor sessions were found.
+
+Summary:
+1. Primary Request and Intent:
+   - Add Cursor IDE support to git-prompt-story (which already works for Claude Code)
+   - Implement multi-tool architecture to discover and record sessions from both Claude Code and Cursor
+   - User mentioned there were previous Cursor commits on the README branch to study
+   - Current issue: PR #46 doesn&#39;t show any Cursor mentions despite implementation
+
+2. Key Technical Concepts:
+   - **Provider Pattern**: Interface for discovering sessions from different tools
+   - **Parser Pattern**: Interface for parsing transcripts from different formats
+   - **Cursor Storage**: SQLite database at `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`
+   - **Table**: `cursorDiskKV` with keys like `composerData:&lt;uuid&gt;` and `bubbleId:composerId:bubbleId`
+   - **New Cursor Format**: Bubbles stored separately, file paths in `originalFileStates`
+   - **Pure Go SQLite**: Using `modernc.org/sqlite` (no CGO)
+
+3. Files and Code Sections:
+   - **`internal/provider/provider.go`** - Provider interface definition
+     ```go
+     type Provider interface {
+         Name() string
+         DiscoverSessions(repoPath string, startWork, endWork time.Time) ([]RawSession, error)
+         ReadTranscript(session RawSession) ([]byte, error)
+         FileExtension() string
+     }
+     ```
+   
+   - **`internal/provider/cursor/cursor.go`** - Cursor provider implementation
+     - Reads SQLite database, extracts file paths from `originalFileStates`
+     - Fetches bubbles from separate `bubbleId:` keys
+     - Derives workspace from file paths using `findGitRoot()`
+   
+   - **`internal/parser/cursor/cursor.go`** - Cursor parser
+     - Handles both `conversation` array and `_bubbles` field
+     - Converts bubble type 1/2 to unified entries
+   
+   - **`internal/hooks/prepare_commit_msg.go`** - Updated to use provider registry
+     - Imports both providers and parsers
+     - Loops through all providers to discover sessions
+   
+   - **`internal/note/transcript.go`** - Updated with `StoreTranscriptsMulti` and `UpdateTranscriptTreeMulti`
+   
+   - **`internal/note/metadata.go`** - Updated with `NewPromptStoryNoteMulti`
+
+4. Errors and fixes:
+   - **Initial Cursor discovery returned 0 sessions for git-prompt-story**:
+     - Root cause: New Cursor format stores bubbles separately as `bubbleId:composerId:bubbleId` keys
+     - File paths now in `originalFileStates` instead of `conversation` array
+     - Fix: Added parsing of `originalFileStates` field and separate bubble fetching
+   
+   - **Internal package import error** when testing:
+     - Fix: Created tests inside the package directory instead of external test files
+
+5. Problem Solving:
+   - Successfully implemented multi-tool architecture
+   - Fixed Cursor provider to handle both old and new storage formats
+   - Found 2 Cursor sessions for git-prompt-story:
+     - `08c579f1`: &#34;The commit concept&#34; (14:04-15:21, 16 prompts about README)
+     - `1c0a8a6e`: &#34;Checkpoint cursor integration...&#34; (17:37-17:39, 2 prompts about cursor-support branch)
+
+6. All user messages:
+   - &#34;Add branch &#39;cursor-support&#39;. It works for Claude Code. Make it works for Cursor as well. Investigate deeply what is neede. I already made some commits with Cursor AI to this (for branch README), so study that. Web search as much as you need.&#34;
+   - &#34;Read and evaluate idea, but start a new banch based on main.&#34;
+   - &#34;So, what you see for this repo?&#34;
+   - &#34;Study if there wre some previous prompts in Cursor for this repo - tell me which (there were).&#34;
+   - &#34;Now, check what are cursor promtps for THIS branch. There is one.&#34;
+   - &#34;nice! comit, push&#34;
+   - &#34;When I see https://github.com/QuesmaOrg/git-prompt-story/pull/46, i don&#39;t see any mentions of Cursor. Why?&#34;
+
+7. Pending Tasks:
+   - Investigate why PR #46 doesn&#39;t show Cursor mentions despite implementation
+   - The Cursor sessions were discovered but the commit messages only show &#34;Claude Code&#34;
+
+8. Current Work:
+   User is asking why PR #46 doesn&#39;t show any Cursor mentions. Looking at the PR summary they provided:
+   ```
+   6 user prompts (35 file edits)
+   Tool(s): Claude Code
+   ```
+   
+   The implementation successfully discovers Cursor sessions, but the commits only recorded Claude Code sessions because:
+   - The Cursor sessions (from 14:04 and 17:37) were outside the work period when commits were made
+   - The work period is calculated from the previous commit timestamp to now
+   - Those Cursor sessions were from earlier in the day, not during the commit window
+
+9. Optional Next Step:
+   Investigate why Cursor sessions aren&#39;t appearing in the PR. The issue is likely that:
+   1. The Cursor sessions were created before the work period for each commit
+   2. Or there&#39;s an issue with how the CI summary displays multi-tool sessions
+   
+   User&#39;s exact question: &#34;When I see https://github.com/QuesmaOrg/git-prompt-story/pull/46, i don&#39;t see any mentions of Cursor. Why?&#34;.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-git-prompt-story/dfe3709f-e4ed-4768-b644-1d05b27563b6.jsonl
+Please continue the conversation from where we left it off without asking the user any further questions. Continue with the last task that you were asked to work on.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:16</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me investigate why PR #46 doesn&#39;t show Cursor mentions. I&#39;ll check the git notes attached to the commits in that PR.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin refs/notes/prompt-story:refs/notes/prompt-story 2&gt;/dev/null; git log origin/main..HEAD --oneline</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">4487654 Fix JSON formatting in README Cursor example
+7389bea Docs: Add Cursor integration details
+241e41e Fix Cursor provider to handle new bubble storage format
+6e43d71 Add Cursor IDE support for session discovery</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=prompt-story show HEAD 2&gt;/dev/null || echo &#34;No notes on HEAD&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-10T16:39:29Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;dfe3709f-e4ed-4768-b644-1d05b27563b6&#34;,
+      &#34;path&#34;: &#34;claude-code/dfe3709f-e4ed-4768-b644-1d05b27563b6.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-10T14:47:17.606Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-10T17:14:44.058Z&#34;
+    }
+  ]
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see! The git notes only contain Claude Code sessions, not Cursor. Let me check the work periods for all commits in the PR.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">for commit in 4487654 7389bea 241e41e 6e43d71; do echo &#34;=== Commit $commit ===&#34;; git notes --ref=prompt-story show $commit 2&gt;/dev/null | head -20 || echo &#34;No notes&#34;; done</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Commit 4487654 ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-10T16:39:29Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;dfe3709f-e4ed-4768-b644-1d05b27563b6&#34;,
+      &#34;path&#34;: &#34;claude-code/dfe3709f-e4ed-4768-b644-1d05b27563b6.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-10T14:47:17.606Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-10T17:14:44.058Z&#34;
+    }
+  ]
+}=== Commit 7389bea ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-10T16:26:24Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;dfe3709f-e4ed-4768-b644-1d05b27563b6&#34;,
+      &#34;path&#34;: &#34;claude-code/dfe3709f-e4ed-4768-b644-1d05b27563b6.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-10T14:47:17.606Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-10T16:28:58.76Z&#34;
+    }
+  ]
+}=== Commit 241e41e ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-10T15:52:23Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;dfe3709f-e4ed-4768-b644-1d05b27563b6&#34;,
+      &#34;path&#34;: &#34;claude-code/dfe3709f-e4ed-4768-b644-1d05b27563b6.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-10T14:47:17.606Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-10T16:23:09.589Z&#34;
+    }
+  ]
+}=== Commit 6e43d71 ===
+{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-10T14:45:18Z&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;dfe3709f-e4ed-4768-b644-1d05b27563b6&#34;,
+      &#34;path&#34;: &#34;claude-code/dfe3709f-e4ed-4768-b644-1d05b27563b6.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-10T14:47:17.606Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-10T15:50:00.251Z&#34;
+    }
+  ]
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand the issue. Let me verify when the Cursor sessions actually occurred.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run . show HEAD 2&gt;&amp;1 | head -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Commit: 4487654
+Work period: 2026-01-10 17:39 - 2026-01-10 18:14
+
+Session: claude-code/dfe3709f-e4ed-4768-b644-1d05b27563b6
+Duration: 2026-01-10 15:47 - 2026-01-10 18:14
+
+[17:40] PROMPT:
+  Now, check what are cursor promtps for THIS branch. There is one.
+[18:14] PROMPT:
+  nice! comit, push</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the Cursor sessions&#39; timestamps again.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v ./internal/provider/cursor/... -run TestDiscoverSessionsGitPromptStory 2&gt;&amp;1 | tail -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestDiscoverSessionsGitPromptStory
+    cursor_test.go:55: Found 2 Cursor sessions for git-prompt-story
+    cursor_test.go:57:   - 08c579f1: 2026-01-10 14:04 - 2026-01-10 15:21
+    cursor_test.go:57:   - 1c0a8a6e: 2026-01-10 17:37 - 2026-01-10 17:39
+--- PASS: TestDiscoverSessionsGitPromptStory (6.99s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	7.246s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --format=&#34;%h %ad %s&#34; --date=format:&#34;%H:%M&#34; origin/main..HEAD</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">4487654 18:14 Fix JSON formatting in README Cursor example
+7389bea 17:39 Docs: Add Cursor integration details
+241e41e 17:26 Fix Cursor provider to handle new bubble storage format
+6e43d71 16:52 Add Cursor IDE support for session discovery</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:23</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand. Here&#39;s what happened:
+
+**Timeline:**
+| Time | Event |
+|------|-------|
+| 14:04-15:21 | Cursor session `08c579f1` (README work on different branch) |
+| 16:52 | Commit: Add Cursor IDE support (not working yet) |
+| 17:26 | Commit: Fix Cursor bubble storage format |
+| 17:37-17:39 | Cursor session `1c0a8a6e` (cursor-support branch) |
+| 17:39 | Commit: Docs update |
+| 18:14 | Commit: Fix JSON formatting |
+
+**Why PR #46 doesn&#39;t show Cursor:**
+
+1. **The Cursor sessions were for OTHER branches** - Session `08c579f1` was for the README branch, session `1c0a8a6e` was for the `cursor-support` branch. Neither was for this `feature/cursor-ide-support` branch.
+
+2. **This feature branch was developed entirely with Claude Code** - All 4 commits were made during our Claude Code session, so only Claude Code appears in the notes.
+
+3. **The implementation works correctly** - The Cursor provider successfully discovers sessions matching the workspace path. Those Cursor sessions just weren&#39;t for this specific branch&#39;s development.
+
+To test the Cursor integration in a PR, you would need to:
+1. Open this repo in Cursor
+2. Have a conversation about changes
+3. Make a commit (the hooks will now capture both Claude Code AND Cursor sessions)
+
+The implementation is correct - there&#39;s no bug. The reason Cursor doesn&#39;t appear is because you used Claude Code (me) to develop the Cursor feature, not Cursor itself.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I DID change one thing (README) with Cursor. Exact prompt &#34;Mark that there is Cursor integration in checkpoints, and add in JSON data example with cursor.&#34;</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me investigate the timing more carefully. The Cursor session at 17:37-17:39 should have been captured.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">echo &#34;=== Commit 4487654 (JSON formatting fix) ===&#34; &amp;&amp; git notes --ref=prompt-story show 4487654 | jq -r &#39;.start_work&#39; &amp;&amp; echo &#34;&#34; &amp;&amp; echo &#34;=== Cursor session timestamps ===&#34; &amp;&amp; go run . 2&gt;/dev/null || true</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Commit 4487654 (JSON formatting fix) ===
+2026-01-10T16:39:29Z
+
+=== Cursor session timestamps ===
+git-prompt-story captures LLM sessions (Claude Code, Cursor, etc.)
+and stores them as git notes attached to your commits.
+
+Usage:
+  git-prompt-story [command]
+
+Available Commands:
+  annotate-cloud           Annotate a commit with a Claude Code Cloud session
+  ci-html                  Generate HTML transcript pages
+  ci-preview               Preview CI summary as rendered GitHub markdown
+  ci-summary               Generate CI summary for commits
+  completion               Generate the autocompletion script for the specified shell
+  explain                  Explain session discovery and filtering decisions
+  generate-github-workflow Generate GitHub Action workflow for prompt-story
+  help                     Help about any command
+  install-hooks            Install git hooks for prompt capture
+  list-cloud               List available Claude Code Cloud sessions
+  repair                   Repair missing prompt-story notes from local sessions
+  show                     Show prompts for a commit
+
+Flags:
+  -h, --help      help for git-prompt-story
+  -v, --version   version for git-prompt-story
+
+Use &#34;git-prompt-story [command] --help&#34; for more information about a command.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">TZ=UTC date &amp;&amp; date</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Sat Jan 10 17:25:52 UTC 2026
+Sat Jan 10 18:25:52 CET 2026</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I see the issue. You&#39;re in CET (UTC&#43;1). Let me check the exact Cursor session times in UTC.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v ./internal/provider/cursor/... -run TestDiscoverSessionsGitPromptStory 2&gt;&amp;1 | grep &#34;1c0a8a6e&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">    cursor_test.go:57:   - 1c0a8a6e: 2026-01-10 17:37 - 2026-01-10 17:39</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check what the Cursor provider actually sees for those timestamps (whether they&#39;re local or UTC).</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run -exec &#34;&#34; . explain HEAD 2&gt;&amp;1 | head -60</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session Discovery ===
+
+Repository: /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story
+Candidate directories: 38
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal--claude-skills-nano-banana-pro
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-CompileBench
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-anthropicing-taiga-compilebench
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-claude-daytona
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-gemini-claude-skills
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-git-prompt-story
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-harbor-experiments
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-harbor-studio
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-is-claude-ok
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-eval-analysis-public
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-harbor
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-llmday
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-llmday-llmday-astro
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-claude-skills
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code-octopodes-octopus1
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code-octopodes-octopus2
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code-octopodes-octopus3
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-test
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-vibe-co...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The `explain` command only shows Claude Code sessions. Let me check if the Cursor provider is integrated into the hooks properly.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">provider\.</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/hooks/prepare_commit_msg.go:60:	var allSessions []provider.RawSession
+internal/hooks/prepare_commit_msg.go:61:	for _, p := range provider.All() {
+internal/hooks/prepare_commit_msg.go:187:func countUserActions(sessions []provider.RawSession, startWork, endWork time.Time) int {
+internal/hooks/prepare_commit_msg.go:190:		p := provider.Get(sess.Tool)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cursor</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/hooks/prepare_commit_msg.go:18:	_ &#34;github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor&#34;
+internal/hooks/prepare_commit_msg.go:20:	_ &#34;github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me compare the installed binary vs current source to see if the Cursor provider is in the installed version.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">which git-prompt-story &amp;&amp; git-prompt-story --version 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/go/bin/git-prompt-story
+git-prompt-story version v0.15.2-0.20260110144518-f6a5c7ae3072&#43;dirty f6a5c7a 2026-01-10</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">echo &#34;=== Installed binary ===&#34; &amp;&amp; git-prompt-story explain HEAD 2&gt;&amp;1 | grep -E &#34;(Cursor|cursor|provider)&#34; | head -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Installed binary ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">echo &#34;=== Source code (go run .) ===&#34; &amp;&amp; go run . explain HEAD 2&gt;&amp;1 | grep -iE &#34;(cursor|provider)&#34; | head -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Source code (go run .) ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check the explain command implementation.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cursor|provider</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No matches found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! The installed binary version shows:
+```
+v0.15.2-0.20260110144518-f6a5c7ae3072&#43;dirty
+```
+
+The timestamp `20260110144518` means the binary was built at **14:45:18** - that&#39;s BEFORE all the Cursor provider commits were made!
+
+**The root cause**: When you committed, the git hooks ran the installed `git-prompt-story` binary which didn&#39;t have the Cursor provider code yet.
+
+To fix this:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go install . &amp;&amp; git-prompt-story --version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story version v0.15.2-0.20260110171449-4487654e273f 4487654 2026-01-10</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now the binary is updated. But the Cursor session at 17:37-17:39 is in the past. Let me try the `repair` command to re-discover sessions for the existing commit.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run . repair 7389bea --dry-run 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  7389bea: skipped (already has note)
+
+Dry run: 0 would be repaired, 1 skipped, 0 failed</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The repair skips commits with existing notes. Let me check if there&#39;s a force option or if we need to remove the note first.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run . repair --help 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Recreates notes for commits that have local Claude Code sessions
+but missing git notes. Useful when notes were lost or never pushed.
+
+Examples:
+  # Repair a single commit
+  git-prompt-story repair HEAD
+  git-prompt-story repair abc1234
+
+  # Repair a range of commits
+  git-prompt-story repair HEAD~5..HEAD
+
+  # Scan and repair all commits with Prompt-Story markers but no notes
+  git-prompt-story repair --scan
+
+  # Preview what would be repaired
+  git-prompt-story repair --dry-run HEAD
+
+Usage:
+  git-prompt-story repair [commit|range] [flags]
+
+Flags:
+      --dry-run    Preview without making changes
+      --force      Overwrite existing notes
+  -h, --help       help for repair
+      --no-scrub   Disable PII scrubbing
+      --scan       Scan for commits needing repair</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:35</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cursor|provider</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/repair/repair.go:10:	&#34;github.com/QuesmaOrg/git-prompt-story/internal/provider&#34;
+internal/repair/repair.go:13:	// Import providers to register them
+internal/repair/repair.go:14:	_ &#34;github.com/QuesmaOrg/git-prompt-story/internal/provider/claude&#34;
+internal/repair/repair.go:15:	_ &#34;github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor&#34;
+internal/repair/repair.go:71:	// Discover sessions from all providers
+internal/repair/repair.go:72:	var allSessions []provider.RawSession
+internal/repair/repair.go:73:	for _, p := range provider.All() {
+internal/repair/repair.go:76:			continue // Skip failed providers</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:36</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The repair command uses the Cursor provider. Here&#39;s the fix:
+
+**Root cause**: The installed `git-prompt-story` binary was from 14:45, before the Cursor provider existed. The commits at 17:39 and 18:14 used that old binary.
+
+**Solution**: I already reinstalled the binary. Now run repair with `--force` to re-discover sessions including Cursor:
+
+```bash
+git-prompt-story repair --force 7389bea
+git-prompt-story repair --force 4487654
+```
+
+Then force-push the notes:
+```bash
+git push -f origin refs/notes/prompt-story refs/notes/prompt-story-transcripts
+```
+
+And re-run the GitHub Action to regenerate the PR summary.
+
+Want me to exit plan mode and run these commands?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:37</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Do it</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story repair --force 7389bea 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  7389bea: created note (2 sessions, sha: 4e96ed8)
+
+Done: 1 repaired, 0 skipped, 0 failed
+
+Remember to push your notes:
+  git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story repair --force 4487654 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  4487654: created note (1 sessions, sha: 112e435)
+
+Done: 1 repaired, 0 skipped, 0 failed
+
+Remember to push your notes:
+  git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Commit 7389bea now has **2 sessions** (Claude Code &#43; Cursor). Let me verify and push.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=prompt-story show 7389bea | jq &#39;.sessions[] | {tool, id}&#39;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{
+  &#34;tool&#34;: &#34;claude-code&#34;,
+  &#34;id&#34;: &#34;dfe3709f-e4ed-4768-b644-1d05b27563b6&#34;
+}
+{
+  &#34;tool&#34;: &#34;cursor&#34;,
+  &#34;id&#34;: &#34;1c0a8a6e-8a5b-46ff-9da7-f20412e06a95&#34;
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now pushing the notes.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:38</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push origin refs/notes/prompt-story &#43;refs/notes/prompt-story-transcripts 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+ ! [remote rejected] refs/notes/prompt-story -&gt; refs/notes/prompt-story (cannot lock ref &#39;refs/notes/prompt-story&#39;: is at f2e39fc546642a69695664911218f9f094cc8ced but expected 2daed35056f0e85a8253af9f0b0927e55ecc3847)
+ ! [remote rejected] refs/notes/prompt-story-transcripts -&gt; refs/notes/prompt-story-transcripts (failed)
+error: failed to push some refs to &#39;github.com:QuesmaOrg/git-prompt-story.git&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">17:42</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Notes diverged on remote. Force pushing.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push -f origin refs/notes/prompt-story refs/notes/prompt-story-transcripts 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+Everything up-to-date</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin refs/notes/prompt-story:refs/notes/prompt-story-remote 2&gt;&amp;1 &amp;&amp; git notes --ref=prompt-story-remote show 7389bea 2&gt;&amp;1 | jq &#39;.sessions[] | .tool&#39; 2&gt;/dev/null || echo &#34;No note on remote&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">From github.com:QuesmaOrg/git-prompt-story
+ * [new ref]         refs/notes/prompt-story -&gt; refs/notes/prompt-story-remote
+&#34;claude-code&#34;
+&#34;cursor&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The remote already has both Claude Code and Cursor sessions. Let me preview what the PR will show now.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"># 6 user prompts (35 file edits)
+
+
+#### 6e43d71: Add Cursor IDE support for session di...
+
+- Add branch &amp;#34;cursor-support&amp;#34;. It works for Claude Code. Make it works for Cursor as well. Investigate deeply what is neede. I already made some commits with Cursor AI to this (for branch README), so study that. Web search as much as you need.
+  - 6 Bash, 5 Read, 1 Task, 4 WebFetch, 2 WebSearch, 1 Edit
+- Branch: Should I work from the existing cursor-support branch (which has architecture docs but no implementation), or start fresh from main?   Read and evaluate idea, but start a new banch based on main. 
+  - 28 Bash, 1 ExitPlanMode, 1 Grep, 6 Read, 9 TodoWrite, 26 Edit
+
+#### 241e41e: Fix Cursor provider to handle new bub...
+
+- So, what you see for this repo?
+  - 6 Bash
+- Study if there wre some previous prompts in Cursor for this repo - tell me which (there were).
+  - 12 Bash, 1 Read, 1 TodoWrite, 8 Edit
+
+#### 4487654: Fix JSON formatting in README Cursor ...
+
+- Now, check what are cursor promtps for THIS branch. There is one.
+  - 4 Bash
+- nice! comit, push
+  - 3 Bash
+# All 173 steps
+
+&lt;details&gt;&lt;summary&gt;Show all...&lt;/summary&gt;
+
+
+#### 6e43d71: Add Cursor IDE support for session di...
+
+**Session: Claude Code** (15:47-16:50, 120 steps)
+  - 15:47 💬 Add branch &amp;#34;cursor-support&amp;#34;. It works for Claude Code. Make it works for Cursor as well. Investig...
+  - 15:47 🤖 I&amp;#39;ll investigate what&amp;#39;s needed to add Cursor support to this project. Let me start by exploring t...
+  - 15:47 🔧 Task: Explore this Git-related project to understand: 1. What d...
+  - 15:47 🔧 Bash: git fetch origin &amp;amp;&amp;amp; git log origin/cursor-support --oneli...
+  - 15:47 🔧 Bash: git branch -a | head -20
+  - 15:48 🔧 Bash: git diff origin/main...origin/cursor-support --stat
+  - 15:48 🔧 Bash: git show origin/cursor-support:docs/CURSOR_SUPPORT.md 2&amp;gt;/...
+  - 15:48 🔧 Bash: git show origin/cursor-support:docs/MULTI_TOOL_ARCHITECTU...
+  - 15:48 🤖 Let me get more details and ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The CI summary still shows only Claude Code. Let me check the notes for 7389bea which should have both tools now.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git notes --ref=prompt-story show 7389bea</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">{
+  &#34;v&#34;: 1,
+  &#34;start_work&#34;: &#34;2026-01-10T17:26:24&#43;01:00&#34;,
+  &#34;sessions&#34;: [
+    {
+      &#34;tool&#34;: &#34;claude-code&#34;,
+      &#34;id&#34;: &#34;dfe3709f-e4ed-4768-b644-1d05b27563b6&#34;,
+      &#34;path&#34;: &#34;claude-code/dfe3709f-e4ed-4768-b644-1d05b27563b6.jsonl&#34;,
+      &#34;created&#34;: &#34;2026-01-10T14:47:17.606Z&#34;,
+      &#34;modified&#34;: &#34;2026-01-10T17:37:44.491Z&#34;
+    },
+    {
+      &#34;tool&#34;: &#34;cursor&#34;,
+      &#34;id&#34;: &#34;1c0a8a6e-8a5b-46ff-9da7-f20412e06a95&#34;,
+      &#34;path&#34;: &#34;cursor/1c0a8a6e-8a5b-46ff-9da7-f20412e06a95.json&#34;,
+      &#34;created&#34;: &#34;2026-01-10T17:37:43.217&#43;01:00&#34;,
+      &#34;modified&#34;: &#34;2026-01-10T17:39:18.776&#43;01:00&#34;
+    }
+  ]
+}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The note has both tools, but the CI summary table shows only &#34;Claude Code&#34;. Let me check the CI summary code.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Tool.*:</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/ci/html.go:63:		&#34;formatToolName&#34;: note.FormatToolName,
+internal/ci/summary_test.go:148:						Tool: &#34;claude-code&#34;,
+internal/ci/summary_test.go:152:							{Type: &#34;TOOL_USE&#34;, Text: &#34;Bash&#34;, ToolName: &#34;Bash&#34;, ToolInput: &#34;ls -la&#34;, Time: now},
+internal/ci/summary_test.go:210:						Tool: &#34;claude-code&#34;,
+internal/ci/summary_test.go:216:						Tool: &#34;cursor&#34;,
+internal/ci/summary_test.go:244:						Tool: &#34;claude-code&#34;,
+internal/ci/summary_test.go:271:						Tool: &#34;claude-code&#34;,
+internal/ci/summary_test.go:305:			entry:    PromptEntry{Type: &#34;TOOL_USE&#34;, ToolName: &#34;Bash&#34;, ToolInput: &#34;ls -la&#34;, Time: now},
+internal/ci/summary_test.go:359:						Tool: &#34;claude-code&#34;,
+internal/ci/summary_test.go:363:							{Type: &#34;TOOL_USE&#34;, Text: &#34;Bash&#34;, ToolName: &#34;Bash&#34;, ToolInput: &#34;ls&#34;, Time: time3},
+internal/ci/summary_test.go:374:						Tool: &#34;claude-code&#34;,
+internal/ci/summary_test.go:570:						Tool:    &#34;claude-code&#34;,
+internal/ci/summary_test.go:580:						Tool:    &#34;claude-code&#34;,
+internal/ci/summary_test.go:590:						Tool:    &#34;claude-code&#34;,
+internal/ci/summary_test.go:623:						Tool:    &#34;claude-code&#34;,
+internal/ci/summary_test.go:700:						Tool:  &#34;claude-code&#34;,
+internal/ci/summary_test.go:737:						Tool:  &#34;claude-code&#34;,
+internal/ci/summary_test.go:747:						Tool:  &#34;claude-code&#34;,
+internal/ci/summary_test.go:782:						Tool:    &#34;claude-code&#34;,
+internal/ci/summary_test.go:789:						Tool:    &#34;claude-code&#34;,
+internal/ci/summary_test.go:906:						Tool:  &#34;claude-code&#34;,
+internal/ci/summary_test.go:914:							{Type: &#34;TOOL_USE&#34;, Text: &#34;Bash&#34;, ToolName: &#34;Bash&#34;, Time: now.Add(90 * time.Second), InWorkPeriod: true},
+internal/ci/summary.go:32:	ToolID       string    `json:&#34;tool_id,omitempty&#34;`     // For TOOL_USE/TOOL_RESULT: links them together
+internal/ci/summary.go:33:	ToolName     string    `json:&#34;tool_name,omitempty&#34;`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
+internal/ci/summary.go:34:	ToolInput    string    `json:&#34;tool_input,omitempty&#34;`  // For TOOL_USE: the tool input/command
+internal/ci/summa...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Tool\(s\)|uniqueTools|toolNames</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/ci/summary_test.go:170:	if !strings.Contains(result, &#34;| Commit | Subject | Tool(s) | User Prompts | Steps |&#34;) {
+internal/ci/html.go:36:	ToolNames   string
+internal/ci/html.go:126:		var toolNames []string
+internal/ci/html.go:128:			toolNames = append(toolNames, t)
+internal/ci/html.go:130:		cvd.ToolNames = strings.Join(toolNames, &#34;, &#34;)
+internal/ci/summary.go:862:	sb.WriteString(&#34;| Commit | Subject | Tool(s) | User Prompts | Steps |\n&#34;)
+internal/ci/templates/index.html.tmpl:47:        &lt;td&gt;{{.ToolNames}}&lt;/td&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:53</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me check how sessions are loaded and if Cursor sessions have prompts.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/debug_ci.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+package main
+
+import (
+    &#34;encoding/json&#34;
+    &#34;fmt&#34;
+    &#34;os&#34;
+    &#34;os/exec&#34;
+)
+
+func main() {
+    // Get notes for 7389bea
+    out, _ := exec.Command(&#34;git&#34;, &#34;notes&#34;, &#34;--ref=prompt-story&#34;, &#34;show&#34;, &#34;7389bea&#34;).Output()
+    
+    var note struct {
+        Sessions []struct {
+            Tool string `json:&#34;tool&#34;`
+            ID   string `json:&#34;id&#34;`
+            Path string `json:&#34;path&#34;`
+        } `json:&#34;sessions&#34;`
+    }
+    json.Unmarshal(out, &amp;note)
+    
+    fmt.Println(&#34;Sessions in note for 7389bea:&#34;)
+    for _, s := range note.Sessions {
+        fmt.Printf(&#34;  Tool: %s, ID: %s\n&#34;, s.Tool, s.ID)
+    }
+}
+EOF
+go run /tmp/debug_ci.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+# command-line-arguments
+/tmp/debug_ci.go:7:5: &#34;os&#34; imported and not used</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/debug_ci.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+package main
+
+import (
+    &#34;encoding/json&#34;
+    &#34;fmt&#34;
+    &#34;os/exec&#34;
+)
+
+func main() {
+    out, _ := exec.Command(&#34;git&#34;, &#34;notes&#34;, &#34;--ref=prompt-story&#34;, &#34;show&#34;, &#34;7389bea&#34;).Output()
+    
+    var note struct {
+        Sessions []struct {
+            Tool string `json:&#34;tool&#34;`
+            ID   string `json:&#34;id&#34;`
+            Path string `json:&#34;path&#34;`
+        } `json:&#34;sessions&#34;`
+    }
+    json.Unmarshal(out, &amp;note)
+    
+    fmt.Println(&#34;Sessions in note for 7389bea:&#34;)
+    for _, s := range note.Sessions {
+        fmt.Printf(&#34;  Tool: %s, ID: %s\n&#34;, s.Tool, s.ID)
+    }
+}
+EOF
+go run /tmp/debug_ci.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Sessions in note for 7389bea:
+  Tool: claude-code, ID: dfe3709f-e4ed-4768-b644-1d05b27563b6
+  Tool: cursor, ID: 1c0a8a6e-8a5b-46ff-9da7-f20412e06a95</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The note has both sessions. Let me check if the problem is in how the summary loads and parses sessions.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">parseSession|loadSession</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No matches found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Sessions.*append|append.*Sessions</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">170:			cs.Sessions = append(cs.Sessions, *ss)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! Line 189 uses `session.ParseMessages(content)` - the old Claude Code specific parser, not the new parser registry. Let me check this.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">import.*session</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No matches found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found the bug! The CI summary uses `session.ParseMessages()` which only parses Claude Code format. It doesn&#39;t use the parser registry. Let me fix this.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">18:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package ci
+     2 
+     3 import (
+     4 	&#34;encoding/json&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;html&#34;
+     7 	&#34;path/filepath&#34;
+     8 	&#34;regexp&#34;
+     9 	&#34;sort&#34;
+    10 	&#34;strings&#34;
+    11 	&#34;time&#34;
+    12 
+    13 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/display&#34;
+    14 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    15 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    16 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/parser&#34;
+    17 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/session&#34;
+    18 
+    19 	// Import parsers to register them
+    20 	_ &#34;github.com/QuesmaOrg/git-prompt-story/internal/parser/claude&#34;
+    21 	_ &#34;github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor&#34;
+    22 )
+    23 
+    24 const (
+    25 	// Size limits for markdown output to stay under GitHub&#39;s 65KB comment limit
+    26 	maxUserPromptsSize = 20000 // Budget for user prompts section</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to update `analyzeSession` to use the parser registry. Let me check the difference between session.Message and parser.UnifiedEntry.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">type Message struct|type UnifiedEntry struct</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">internal/session/types.go:42:type Message struct {
+internal/session/types.go-43-	Role       string          `json:&#34;role&#34;` // &#34;user&#34;, &#34;assistant&#34;
+internal/session/types.go-44-	RawContent json.RawMessage `json:&#34;content&#34;`
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-45-}
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-46-
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-47-// GetTextContent extracts text content from the message
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-48-// Handles both string content and array of content parts
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-49-func (m *Message) GetTextContent() string {
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-50-	if m == nil || len(m.RawContent) == 0 {
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-51-		return &#34;&#34;
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-52-	}
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-53-
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-54-	// Try to parse as string first
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-55-	var strContent string
+internal/session/types.go-56-	if err := json.Unmarshal(m.RawContent, &amp;strContent); err == nil {
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/session/types.go-57-		return strContent
+--
+internal/parser/parser.go:20:type UnifiedEntry struct {
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/parser.go-21-	Time      time.Time // When this entry occurred
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/parser.go-22-	Type      EntryType // Type of entry
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/parser.go-23-	Role      string    // &#34;user&#34;, &#34;assistant&#34;, &#34;system&#34;
+/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/parser.go-24-	Te...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The existing code is complex and expects Claude Code&#39;s LogEntry format. For Cursor, we need a simpler conversion. Let me update analyzeSession to handle both.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   178 
+   179 	return cs, nil
+   180 }
+   181 
+   182 // analyzeSession extracts all entries from a session, marking which are in work period
+   183 func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full bool) (*SessionSummary, error) {
+   184 	// Extract relative path from full ref path
+   185 	relPath := strings.TrimPrefix(sess.Path, note.TranscriptsRef&#43;&#34;/&#34;)
+   186 
+   187 	// Fetch transcript content
+   188 	content, err := git.GetBlobContent(note.TranscriptsRef, relPath)
+   189 	if err != nil {
+   190 		return nil, fmt.Errorf(&#34;failed to fetch transcript: %w&#34;, err)
+   191 	}
+   192 
+   193 	ss := &amp;SessionSummary{
+   194 		Tool:    sess.Tool,
+   195 		ID:      sess.ID,
+   196 		IsAgent: IsAgentSession(sess.ID),
+   197 		Start:   sess.Created,
+   198 		End:     sess.Modified,
+   199 		Prompts: make([]PromptEntry, 0),
+   200 	}
+   201 
+   202 	// For non-Claude Code tools, use the parser registry
+   203 	if sess.Tool != &#34;claude-code&#34; {
+   204 		p := parser.Get(sess.Tool)
+   205 		if p == nil {
+   206 			return nil, fmt.Errorf(&#34;no parser for tool: %s&#34;, sess.Tool)
+   207 		}
+   208 		entries, err := p.Parse(content, startWork, endWork)
+   209 		if err != nil {
+   210 			return nil, fmt.Errorf(&#34;failed to parse %s session: %w&#34;, sess.Tool, err)
+   211 		}
+   212 		for _, entry := range entries {
+   213 			inWorkPeriod := !entry.Time.Before(startWork) &amp;&amp; !entry.Time.After(endWork)
+   214 			if !inWorkPeriod {
+   215 				continue
+   216 			}
+   217 			var peType string
+   218 			switch entry.Type {
+   219 			case parser.EntryUser:
+   220 				peType = &#34;PROMPT&#34;
+   221 			case parser.EntryAssistant:
+   222 				peType = &#34;ASSISTANT&#34;
+   223 			default:
+   224 				continue // Skip system entries
+   225 			}
+   226 			pe := PromptEntry{
+   227 				Time:         entry.Time,
+   228 				Type: ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . 2&gt;&amp;1</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run . ci-summary &#34;origin/main..HEAD&#34; --format=markdown 2&gt;&amp;1 | head -30</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"># 8 user prompts (35 file edits)
+
+
+#### 6e43d71: Add Cursor IDE support for session di...
+
+- Add branch &amp;#34;cursor-support&amp;#34;. It works for Claude Code. Make it works for Cursor as well. Investigate deeply what is neede. I already made some commits with Cursor AI to this (for branch README), so study that. Web search as much as you need.
+  - 6 Bash, 5 Read, 1 Task, 4 WebFetch, 2 WebSearch, 1 Edit
+- Branch: Should I work from the existing cursor-support branch (which has architecture docs but no implementation), or start fresh from main?   Read and evaluate idea, but start a new banch based on main. 
+  - 28 Bash, 1 ExitPlanMode, 1 Grep, 6 Read, 9 TodoWrite, 26 Edit
+
+#### 241e41e: Fix Cursor provider to handle new bub...
+
+- So, what you see for this repo?
+  - 6 Bash
+- Study if there wre some previous prompts in Cursor for this repo - tell me which (there were).
+  - 12 Bash, 1 Read, 1 TodoWrite, 8 Edit
+
+#### 7389bea: Docs: Add Cursor integration details
+
+- Mark that there is Cursor integration in checkpoints, and add in JSON data example with cursor.
+- commit and push
+
+#### 4487654: Fix JSON formatting in README Cursor ...
+
+- Now, check what are cursor promtps for THIS branch. There is one.
+  - 4 Bash
+- nice! comit, push
+  - 3 Bash
+# All 194 steps</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run . ci-summary &#34;origin/main..HEAD&#34; --format=markdown 2&gt;&amp;1 | tail -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  - 17:44 🔧 Bash: go test -v -run TestDiscoverSessionsGitPromptStory ./inte...
+  - 17:44 🤖 Both Cursor sessions are now discovered:  | Session | Time | Name | Prompts | |---------|------|-...
+  - 17:44 🔧 Bash: rm /tmp/find_*.go 2&amp;gt;/dev/null; echo &amp;#34;Cleaned up temp files&amp;#34;
+  - 17:44 🤖 The **cursor-support branch Cursor session** had 2 prompts:  1. **&amp;#34;Mark that there is Cursor inte...
+  - 18:14 💬 nice! comit, push
+  - 18:14 🔧 Bash: git status
+  - 18:14 🔧 Bash: git diff README.md
+  - 18:14 🔧 Bash: git add -A &amp;amp;&amp;amp; git commit -m &amp;#34;$(cat &amp;lt;&amp;lt;&amp;#39;EOF&amp;#39; Fix JSON forma...
+
+&lt;/details&gt;
+
+| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| 6e43d71 | Add Cursor IDE support for session di... | Claude Code | 2 | 120 |
+| 241e41e | Fix Cursor provider to handle new bub... | Claude Code | 2 | 38 |
+| 7389bea | Docs: Add Cursor integration details | tools (2) | 2 | 24 |
+| 4487654 | Fix JSON formatting in README Cursor ... | Claude Code | 2 | 12 |
+
+---
+*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story) dev*</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now it shows &#34;tools (2)&#34; for 7389bea. Let me improve the display to show the actual tool names.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">func formatToolDisplay</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">1451:func formatToolDisplay(tools map[string]bool) string {
+1452-	if len(tools) == 1 {
+1453-		for t := range tools {
+1454-			return t
+1455-		}
+1456-	}
+1457-	return fmt.Sprintf(&#34;tools (%d)&#34;, len(tools))
+1458-}</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+  1447 	return count
+  1448 }
+  1449 
+  1450 // formatToolDisplay formats tool names for display in the summary table
+  1451 func formatToolDisplay(tools map[string]bool) string {
+  1452 	if len(tools) == 0 {
+  1453 		return &#34;&#34;
+  1454 	}
+  1455 	if len(tools) == 1 {
+  1456 		for t := range tools {
+  1457 			return t
+  1458 		}
+  1459 	}
+  1460 	// Multiple tools - show all names
+  1461 	names := make([]string, 0, len(tools))
+  1462 	for t := range tools {
+  1463 		names = append(names, t)
+  1464 	}
+  1465 	sort.Strings(names)
+  1466 	return strings.Join(names, &#34;, &#34;)
+  1467 }
+  1468 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go run . ci-summary &#34;origin/main..HEAD&#34; --format=markdown 2&gt;&amp;1 | grep -E &#34;^\|.*\|$&#34; | tail -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">| Commit | Subject | Tool(s) | User Prompts | Steps |
+|--------|---------|---------|--------------|-------|
+| 6e43d71 | Add Cursor IDE support for session di... | Claude Code | 2 | 120 |
+| 241e41e | Fix Cursor provider to handle new bub... | Claude Code | 2 | 38 |
+| 7389bea | Docs: Add Cursor integration details | Claude Code, Cursor | 2 | 24 |
+| 4487654 | Fix JSON formatting in README Cursor ... | Claude Code | 2 | 12 |</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now it shows &#34;Claude Code, Cursor&#34;. Let me run tests and commit.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1 | tail -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">FAIL
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.217s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/parser	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/parser/claude	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/provider	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/provider/claude	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	10.823s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	0.467s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v ./internal/ci/... 2&gt;&amp;1 | tail -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">--- PASS: TestFormatMarkdownEntryCollapsible_LongText (0.00s)
+=== RUN   TestFormatMarkdownEntryCollapsible_EscapesHTML
+--- PASS: TestFormatMarkdownEntryCollapsible_EscapesHTML (0.00s)
+=== RUN   TestFormatMarkdownEntry_EscapesHTML
+--- PASS: TestFormatMarkdownEntry_EscapesHTML (0.00s)
+=== RUN   TestIsAgentSession
+=== RUN   TestIsAgentSession/agent-aa5fd63
+=== RUN   TestIsAgentSession/agent-123abc
+=== RUN   TestIsAgentSession/agent-
+=== RUN   TestIsAgentSession/fb813892-a738-4fc4-bcf8-b6f175a27a93
+=== RUN   TestIsAgentSession/7b383e66-9fd6-4c9e-b17e-839042a6cd81
+=== RUN   TestIsAgentSession/main-session
+=== RUN   TestIsAgentSession/#00
+=== RUN   TestIsAgentSession/AGENT-uppercase
+--- PASS: TestIsAgentSession (0.00s)
+    --- PASS: TestIsAgentSession/agent-aa5fd63 (0.00s)
+    --- PASS: TestIsAgentSession/agent-123abc (0.00s)
+    --- PASS: TestIsAgentSession/agent- (0.00s)
+    --- PASS: TestIsAgentSession/fb813892-a738-4fc4-bcf8-b6f175a27a93 (0.00s)
+    --- PASS: TestIsAgentSession/7b383e66-9fd6-4c9e-b17e-839042a6cd81 (0.00s)
+    --- PASS: TestIsAgentSession/main-session (0.00s)
+    --- PASS: TestIsAgentSession/#00 (0.00s)
+    --- PASS: TestIsAgentSession/AGENT-uppercase (0.00s)
+=== RUN   TestRenderMarkdown_AgentSessionCounts
+--- PASS: TestRenderMarkdown_AgentSessionCounts (0.00s)
+=== RUN   TestRenderMarkdown_NoAgentSessions
+--- PASS: TestRenderMarkdown_NoAgentSessions (0.00s)
+=== RUN   TestRenderUserTimelineWithTruncation
+=== RUN   TestRenderUserTimelineWithTruncation/no_truncation_when_under_limit
+=== RUN   TestRenderUserTimelineWithTruncation/truncates_when_over_limit
+--- PASS: TestRenderUserTimelineWithTruncation (0.00s)
+    --- PASS: TestRenderUserTimelineWithTruncation/no_truncation_when_under_limit (0.00s)
+    --- PASS: TestRenderUserTimelineWithTruncation/truncates_when_over_limit (0.00s)
+=== RUN   TestRenderAllSteps
+=== RUN   TestRenderAllSteps/renders_sessions_grouped_with_headers
+=== RUN   TestRenderAllSteps/truncates_sessions_when_over_limit
+=== RUN   TestR...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v ./internal/ci/... 2&gt;&amp;1 | grep -E &#34;(FAIL|panic|Error)&#34; | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">--- FAIL: TestFormatToolDisplay (0.00s)
+    --- FAIL: TestFormatToolDisplay/two_tools (0.00s)
+    --- FAIL: TestFormatToolDisplay/three_tools (0.00s)
+--- FAIL: TestRenderMarkdown_MultipleTools (0.00s)
+FAIL
+FAIL	github.com/QuesmaOrg/git-prompt-story/internal/ci	0.202s
+FAIL</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">TestFormatToolDisplay|TestRenderMarkdown_MultipleTools</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">90:func TestFormatToolDisplay(t *testing.T) {
+91-	tests := []struct {
+92-		name     string
+93-		tools    map[string]bool
+94-		expected string
+95-	}{
+96-		{
+97-			name:     &#34;single tool&#34;,
+98-			tools:    map[string]bool{&#34;Claude Code&#34;: true},
+99-			expected: &#34;Claude Code&#34;,
+100-		},
+101-		{
+102-			name:     &#34;two tools&#34;,
+103-			tools:    map[string]bool{&#34;Claude Code&#34;: true, &#34;Cursor&#34;: true},
+104-			expected: &#34;tools (2)&#34;,
+105-		},
+106-		{
+107-			name:     &#34;three tools&#34;,
+108-			tools:    map[string]bool{&#34;Claude Code&#34;: true, &#34;Cursor&#34;: true, &#34;Codex&#34;: true},
+109-			expected: &#34;tools (3)&#34;,
+110-		},
+111-	}
+112-
+113-	for _, tt := range tests {
+114-		t.Run(tt.name, func(t *testing.T) {
+115-			result := formatToolDisplay(tt.tools)
+116-			if result != tt.expected {
+117-				t.Errorf(&#34;formatToolDisplay() = %v, want %v&#34;, result, tt.expected)
+118-			}
+119-		})
+120-	}
+--
+200:func TestRenderMarkdown_MultipleTools(t *testing.T) {
+201-	now := time.Now()
+202-	summary := &amp;Summary{
+203-		CommitsWithNotes: 1,
+204-		Commits: []CommitSummary{
+205-			{
+206-				ShortSHA: &#34;def5678&#34;,
+207-				Subject:  &#34;Multi-tool commit&#34;,
+208-				Sessions: []SessionSummary{
+209-					{
+210-						Tool: &#34;claude-code&#34;,
+211-						Prompts: []PromptEntry{
+212-							{Type: &#34;PROMPT&#34;, Text: &#34;Prompt 1&#34;, Time: now},
+213-						},
+214-					},
+215-					{
+216-						Tool: &#34;cursor&#34;,
+217-						Prompts: []PromptEntry{
+218-							{Type: &#34;PROMPT&#34;, Text: &#34;Prompt 2&#34;, Time: now},
+219-						},
+220-					},
+221-				},
+222-			},
+223-		},
+224-	}
+225-
+226-	result := RenderMarkdown(summary, &#34;&#34;, &#34;test&#34;)
+227-
+228-	// Should show &#34;tools (2)&#34; for multiple tools
+229-	if !strings.Contains(result, &#34;tools (2)&#34;) {
+230-		t.Error(&#34;Should show &#39;tools (2)&#39; for multiple tools&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;File has not been read yet. Read it first before writing to it.&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    97 			name:     &#34;single tool&#34;,
+    98 			tools:    map[string]bool{&#34;Claude Code&#34;: true},
+    99 			expected: &#34;Claude Code&#34;,
+   100 		},
+   101 		{
+   102 			name:     &#34;two tools&#34;,
+   103 			tools:    map[string]bool{&#34;Claude Code&#34;: true, &#34;Cursor&#34;: true},
+   104 			expected: &#34;Claude Code, Cursor&#34;,
+   105 		},
+   106 		{
+   107 			name:     &#34;three tools&#34;,
+   108 			tools:    map[string]bool{&#34;Claude Code&#34;: true, &#34;Cursor&#34;: true, &#34;Codex&#34;: true},
+   109 			expected: &#34;Claude Code, Codex, Cursor&#34;,
+   110 		},
+   111 	}
+   112 
+   113 	for _, tt := range tests {
+   114 		t.Run(tt.name, func(t *testing.T) {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/ci/summary_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   222 			},
+   223 		},
+   224 	}
+   225 
+   226 	result := RenderMarkdown(summary, &#34;&#34;, &#34;test&#34;)
+   227 
+   228 	// Should show both tool names for multiple tools
+   229 	if !strings.Contains(result, &#34;Claude Code, Cursor&#34;) {
+   230 		t.Error(&#34;Should show &#39;Claude Code, Cursor&#39; for multiple tools&#34;)
+   231 	}
+   232 }
+   233 
+   234 func TestRenderMarkdown_PagesURL(t *testing.T) {
+   235 	now := time.Now()
+   236 	summary := &amp;Summary{</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test ./... 2&gt;&amp;1 | tail -10</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story/internal/parser/claude	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/provider	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/provider/claude	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Let me install and commit this fix.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go install . &amp;&amp; git-prompt-story --version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story version v0.15.2-0.20260110171449-4487654e273f&#43;dirty 4487654 2026-01-10</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/cursor-support
+Your branch is up to date with &#39;origin/feature/cursor-support&#39;.
+
+Changes to be committed:
+  (use &#34;git restore --staged &lt;file&gt;...&#34; to unstage)
+	modified:   internal/ci/summary.go
+	modified:   internal/ci/summary_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix CI summary to display Cursor sessions
+
+- Add parser registry to CI summary for non-Claude Code tools
+- Update formatToolDisplay to show tool names instead of &#34;tools (N)&#34;
+- Cursor prompts now appear in PR summaries
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
+  
+  <div class="commit-card">
+    <div class="commit-header">
       <h3><code>4487654</code> Fix JSON formatting in README Cursor example</h3>
       <div class="commit-meta">
         Work period: 2026-01-10 16:39 - 2026-01-10 17:14
@@ -590,7 +3360,7 @@ pre {
     
     <div class="session">
       <div class="session-header">
-        Claude Code | 2026-01-10 14:47 - 2026-01-10 17:14 | <span class="session-count">12</span> entries
+        Claude Code | 2026-01-10 14:47 - 2026-01-10 17:37 | <span class="session-count">12</span> entries
       </div>
       <ul class="prompt-list">
         
@@ -1177,6 +3947,13 @@ EOF
 )&#34; &amp;&amp; git push</div>
             
             
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/cursor-support 4487654] Fix JSON formatting in README Cursor example
+ 1 file changed, 1 insertion(&#43;), 3 deletions(-)
+git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+   7389bea..4487654  feature/cursor-support -&gt; feature/cursor-support</div>
+            
           </details>
           
           
@@ -1197,7 +3974,7 @@ EOF
     
     <div class="session">
       <div class="session-header">
-        Claude Code | 2026-01-10 14:47 - 2026-01-10 16:28 | <span class="session-count">3</span> entries
+        Claude Code | 2026-01-10 14:47 - 2026-01-10 17:37 | <span class="session-count">3</span> entries
       </div>
       <ul class="prompt-list">
         
