@@ -497,20 +497,20 @@ pre {
 <body>
   <div class="header">
     <h1>Prompt Story</h1>
-    <p class="meta">PR #46 | 3 commit(s) with LLM sessions</p>
+    <p class="meta">PR #46 | 4 commit(s) with LLM sessions</p>
   </div>
 
   <div class="stats">
     <div class="stat">
-      <div class="stat-value">4</div>
+      <div class="stat-value">5</div>
       <div class="stat-label">Commits Analyzed</div>
     </div>
     <div class="stat">
-      <div class="stat-value">3</div>
+      <div class="stat-value">4</div>
       <div class="stat-label">With Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">161</div>
+      <div class="stat-value" id="visible-count">173</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
@@ -528,6 +528,14 @@ pre {
       </tr>
     </thead>
     <tbody>
+      
+      <tr>
+        <td><code>4487654</code></td>
+        <td>Fix JSON formatting in README Cursor example</td>
+        <td>Claude Code</td>
+        <td>12</td>
+        <td><a href="4487654.html">View transcript</a></td>
+      </tr>
       
       <tr>
         <td><code>7389bea</code></td>
@@ -571,6 +579,613 @@ pre {
     </label>
   </div>
 
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3><code>4487654</code> Fix JSON formatting in README Cursor example</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-10 16:39 - 2026-01-10 17:14
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-10 14:47 - 2026-01-10 17:14 | <span class="session-count">12</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:40</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Now, check what are cursor promtps for THIS branch. There is one.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:40</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_cursor_branch.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;sort&#34;
+	&#34;strings&#34;
+	&#34;time&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	// Search for cursor-support in any value
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;composerData:%&#39;`)
+	defer rows.Close()
+
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		// Check if this session mentions cursor-support or cursor support
+		valStr := string(value)
+		if strings.Contains(strings.ToLower(valStr), &#34;cursor&#34;) &amp;&amp; 
+		   (strings.Contains(valStr, &#34;git-prompt-story&#34;) || strings.Contains(valStr, &#34;support&#34;)) {
+			
+			var data struct {
+				ComposerID    string `json:&#34;composerId&#34;`
+				CreatedAt     int64  `json:&#34;createdAt&#34;`
+				LastUpdatedAt int64  `json:&#34;lastUpdatedAt&#34;`
+				Name          string `json:&#34;name&#34;`
+				Subtitle      string `json:&#34;subtitle&#34;`
+			}
+			json.Unmarshal(value, &amp;data)
+
+			created := time.UnixMilli(data.CreatedAt)
+			modified := time.UnixMilli(data.LastUpdatedAt)
+			
+			fmt.Printf(&#34;\n=== Session: %s ===\n&#34;, data.ComposerID)
+			fmt.Printf(&#34;Name: %s\n&#34;, data.Name)
+			fmt.Printf(&#34;Subtitle: %s\n&#34;, data.Subtitle)
+			fmt.Printf(&#34;Time: %s - %s\n&#34;, created.Format(&#34;2006-01-02 15:04&#34;), modified.Format(&#34;2006-01-02 15:04&#34;))
+
+			// Fetch bubbles
+			bubbleRows, _ := db.Query(`SELECT value FROM cursorDiskKV WHERE key LIKE ?`, &#34;bubbleId:&#34;&#43;data.ComposerID&#43;&#34;:%&#34;)
+			defer bubbleRows.Close()
+
+			type Bubble struct {
+				Type       int    `json:&#34;type&#34;`
+				Text       string `json:&#34;text&#34;`
+				TimingInfo struct {
+					ClientStartTime int64 `json:&#34;clientStartTime&#34;`
+				} `json:&#34;timingInfo&#34;`
+			}
+
+			var bubbles []Bubble
+			for bubbleRows.Next() {
+				var bval []byte
+				bubbleRows.Scan(&amp;bval)
+				var b Bubble
+				json.Unmarshal(bval, &amp;b)
+				bubbles = append(bubbles, b)
+			}
+
+			// Sort by time
+			sort.Slice(bubbles, func(i, j int) bool {
+				return bubbles[i].TimingInfo.ClientStartTime &lt; bubbles[j].TimingInfo.ClientStartTime
+			})
+
+			fmt.Printf(&#34;\nUser prompts (%d total):\n&#34;, len(bubbles))
+			for i, b := range bubbles {
+				if b.Type == 1 &amp;&amp; b.Text != &#34;&#34; {
+					text := b.Text
+					if len(text) &gt; 300 {
+						text = text[:300] &#43; &#34;...&#34;
+					}
+					fmt.Printf(&#34;[%d] %s\n\n&#34;, i&#43;1, text)
+				}
+			}
+		}
+	}
+}
+EOF
+go run /tmp/find_cursor_branch.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;persisted-output&gt;
+Output too large (102.1KB). Full output saved to: /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-git-prompt-story/dfe3709f-e4ed-4768-b644-1d05b27563b6/tool-results/toolu_016o5x1N1DH82eUS1PsUM2nU.txt
+
+Preview (first 2KB):
+=== Session: f0bbfd1e-3bb0-4a9f-aa32-c06259e8e6c6 ===
+Name: How do you suggest changing terminy, so it is reactive
+Subtitle: 
+Time: 2024-10-25 14:05 - 2024-10-25 14:13
+
+User prompts (0 total):
+
+=== Session: de6f3cde-2025-4a48-b4de-1ae6e3004aea ===
+Name: Access to Healthcare: The NFZ Map Conversation
+Subtitle: 
+Time: 2024-10-04 20:05 - 2024-10-04 20:05
+
+User prompts (0 total):
+
+=== Session: 5ec456fd-f592-4ac7-98f4-d4f191151bb2 ===
+Name: Modify benefit selector, so first it selects none, but has
+Subtitle: 
+Time: 2024-10-29 16:59 - 2024-10-29 17:01
+
+User prompts (0 total):
+
+=== Session: eab63119-64ef-4031-8beb-ccd4c32e1486 ===
+Name: Improving Terminy for Mobile Responsiveness
+Subtitle: 
+Time: 2024-10-24 16:36 - 2024-10-24 16:36
+
+User prompts (0 total):
+
+=== Session: 860dc8b6-cab6-4036-bee7-133cdbff0fa3 ===
+Name: Localizing Texts in Astro React Components
+Subtitle: 
+Time: 2024-10-22 11:35 - 2024-10-22 11:35
+
+User prompts (0 total):
+
+=== Session: 67b85aeb-15b0-465c-a757-2e7f1941dd08 ===
+Name: Improve UX/UI of &#34;terminy&#34; for a modern web app.
+Subtitle: 
+Time: 2024-10-21 02:15 - 2024-10-21 02:17
+
+User prompts (0 total):
+
+=== Session: 84502288-0de4-4ac2-9658-aed9de45b15d ===
+Name: Differences Between Base and Basic Layouts
+Subtitle: 
+Time: 2024-11-24 14:16 - 2024-11-24 14:46
+
+User prompts (0 total):
+
+=== Session: a6ce1cf5-5576-4017-8a59-d5e7ff68f66a ===
+Name: Enhancing Landing Page Metadata for SEO
+Subtitle: 
+Time: 2024-11-24 14:27 - 2024-11-24 14:42
+
+User prompts (0 total):
+
+=== Session: 86483deb-0951-40be-bca0-fc6f0bd30ff3 ===
+Name: The code works and build on Node 16. But once I use Node 18, it has issue with building (`yarn serve` works fine). How it fix that?
+
+---
+
+…al-lab on  dev-184-make-it-build-on-node-18 [$] ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:41</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_today.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;sort&#34;
+	&#34;strings&#34;
+	&#34;time&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;composerData:%&#39;`)
+	defer rows.Close()
+
+	today := time.Now().Truncate(24 * time.Hour)
+
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		var data struct {
+			ComposerID         string                 `json:&#34;composerId&#34;`
+			CreatedAt          int64                  `json:&#34;createdAt&#34;`
+			LastUpdatedAt      int64                  `json:&#34;lastUpdatedAt&#34;`
+			Name               string                 `json:&#34;name&#34;`
+			Subtitle           string                 `json:&#34;subtitle&#34;`
+			OriginalFileStates map[string]interface{} `json:&#34;originalFileStates&#34;`
+		}
+		json.Unmarshal(value, &amp;data)
+
+		created := time.UnixMilli(data.CreatedAt)
+		
+		// Only today&#39;s sessions
+		if created.Before(today) {
+			continue
+		}
+
+		// Check if related to git-prompt-story
+		hasGPS := false
+		for uri := range data.OriginalFileStates {
+			if strings.Contains(uri, &#34;git-prompt-story&#34;) {
+				hasGPS = true
+				break
+			}
+		}
+		if !hasGPS &amp;&amp; !strings.Contains(string(value), &#34;git-prompt-story&#34;) {
+			continue
+		}
+
+		modified := time.UnixMilli(data.LastUpdatedAt)
+
+		fmt.Printf(&#34;\n=== Session: %s ===\n&#34;, data.ComposerID)
+		fmt.Printf(&#34;Name: %s\n&#34;, data.Name)
+		fmt.Printf(&#34;Subtitle: %s\n&#34;, data.Subtitle)
+		fmt.Printf(&#34;Time: %s - %s\n&#34;, created.Format(&#34;15:04&#34;), modified.Format(&#34;15:04&#34;))
+
+		// Show file paths
+		fmt.Println(&#34;Files:&#34;)
+		for uri := range data.OriginalFileStates {
+			if strings.Contains(uri, &#34;git-prompt-story&#34;) {
+				fmt.Printf(&#34;  %s\n&#34;, strings.TrimPrefix(uri, &#34;file://&#34;))
+			}
+		}
+
+		// Fetch bubbles
+		bubbleRows, _ := db.Query(`SELECT value FROM cursorDiskKV WHERE key LIKE ?`, &#34;bubbleId:&#34;&#43;data.ComposerID&#43;&#34;:%&#34;)
+		
+		type Bubble struct {
+			Type       int    `json:&#34;type&#34;`
+			Text       string `json:&#34;text&#34;`
+			TimingInfo struct {
+				ClientStartTime int64 `json:&#34;clientStartTime&#34;`
+			} `json:&#34;timingInfo&#34;`
+		}
+
+		var bubbles []Bubble
+		for bubbleRows.Next() {
+			var bval []byte
+			bubbleRows.Scan(&amp;bval)
+			var b Bubble
+			json.Unmarshal(bval, &amp;b)
+			bubbles = append(bubbles, b)
+		}
+		bubbleRows.Close()
+
+		sort.Slice(bubbles, func(i, j int) bool {
+			return bubbles[i].TimingInfo.ClientStartTime &lt; bubbles[j].TimingInfo.ClientStartTime
+		})
+
+		fmt.Printf(&#34;\nUser prompts:\n&#34;)
+		for _, b := range bubbles {
+			if b.Type == 1 &amp;&amp; b.Text != &#34;&#34; {
+				text := b.Text
+				if len(text) &gt; 400 {
+					text = text[:400] &#43; &#34;...&#34;
+				}
+				fmt.Printf(&#34;---\n%s\n&#34;, text)
+			}
+		}
+	}
+}
+EOF
+go run /tmp/find_today.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session: 08c579f1-7711-40a8-ac8b-046f3790b317 ===
+Name: The commit concept
+Subtitle: README.md
+Time: 14:04 - 15:21
+Files:
+  /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/README.md
+
+User prompts:
+---
+commit
+---
+push
+---
+Change &#34;Store LLM prompts and sessions alongside your git commits using git notes.&#34; so there is clear value proposition.
+---
+No. Do NOT commit without explicit permission.
+---
+Now, read https://quesma.com/blog/prompts-source-code/  (we should link in somewhere, as it is our blog post). But for the first linke, focus on the value proposition. Including that you will easily see prompts in Pull Requests, for reviewing and learning.
+---
+Now, create a new opening, so it captures VP of this plugin.
+---
+Forget about &#34;why&#34; there. Make it clear that it will make it easy to automatically share prompts in pull requests without changing workflow.
+---
+commit, push
+---
+push
+---
+What can be improved, so it is cleared, up to the point, up to date, etc. Make it explicit yet without unnecessary stuff or fluff. Focus on things below &#34;## Setup&#34;
+---
+It is FAR from good quiality yet.
+&#34;&amp; Configure&#34; -&gt; wtf? there is no configuration; don&#39;t add words that make no sense here
+---
+You removed a lot, including important references. There is a reason why there is a difference between quick start and technical part.
+---
+NO! You still removed most of crucial tehcnical parts from the technical section. It is for nerds, developers and potential sontributors.
+---
+&#34;Without --auto-push, push notes manually with:
+#   git push origin refs/notes/prompt-story &#43;refs/notes/
+prompt-story-transcripts&#34;
+
+this is prettu much CRUCIAL part you missed. ALL details like that are crucial - if anything, rephrase it or so.
+
+Tehnical part is oimportant to make it explicit, here with go as dependency, etc.
+
+Things like git-prompt-story ci-preview main..HEAD
+
+should have clear e...
+---
+Now it is stil MESSY! Why quotations, not normal texts? Why you removed creucial part on how Claude Code stores things...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! **Two sessions today**:
+
+1. **`08c579f1`** - &#34;The commit concept&#34; (14:04 - 15:21) - 16 prompts about README
+2. **`1c0a8a6e`** - &#34;Checkpoint cursor integration and JSON example&#34; (17:37 - 17:39) - **This is the cursor-support one!**
+
+**Cursor prompts for cursor-support branch:**
+```
+1. &#34;Mark that there is Cursor integration in checkpoints, and add in JSON data example with cursor.&#34;
+2. &#34;commit and push&#34;
+```
+
+Let me verify the provider finds this second session:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v -run TestDiscoverSessionsGitPromptStory ./internal/provider/cursor/... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestDiscoverSessionsGitPromptStory
+    cursor_test.go:55: Found 2 Cursor sessions for git-prompt-story
+    cursor_test.go:57:   - 08c579f1: 2026-01-10 14:04 - 2026-01-10 15:21
+    cursor_test.go:57:   - 1c0a8a6e: 2026-01-10 17:37 - 2026-01-10 17:39
+--- PASS: TestDiscoverSessionsGitPromptStory (5.03s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	5.272s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Both Cursor sessions are now discovered:
+
+| Session | Time | Name | Prompts |
+|---------|------|------|---------|
+| `08c579f1` | 14:04-15:21 | &#34;The commit concept&#34; | 16 (README improvements) |
+| `1c0a8a6e` | 17:37-17:39 | &#34;Checkpoint cursor integration...&#34; | 2 (cursor-support branch) |</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">rm /tmp/find_*.go 2&gt;/dev/null; echo &#34;Cleaned up temp files&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Cleaned up temp files</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The **cursor-support branch Cursor session** had 2 prompts:
+
+1. **&#34;Mark that there is Cursor integration in checkpoints, and add in JSON data example with cursor.&#34;**
+2. **&#34;commit and push&#34;**
+
+This was a quick README update to document the Cursor integration work - done in Cursor before you switched to Claude Code for the actual implementation!</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">17:14</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">nice! comit, push</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/cursor-support
+Your branch is up to date with &#39;origin/feature/cursor-support&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   README.md
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">diff --git a/README.md b/README.md
+index c5edfd3..ab72231 100644
+--- a/README.md
+&#43;&#43;&#43; b/README.md
+@@ -261,9 &#43;261,7 @@ It reads the `cursorDiskKV` table where keys start with `composerData:`. The dat
+         }
+       ],
+       &#34;checkpoint&#34;: {
+-         &#34;files&#34;: [
+-            { &#34;uri&#34;: { &#34;fsPath&#34;: &#34;/users/me/repo/main.go&#34; } }
+-         ]
+&#43;        &#34;files&#34;: [{ &#34;uri&#34;: { &#34;fsPath&#34;: &#34;/users/me/repo/main.go&#34; } }]
+       }
+     }
+   ]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">17:14</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix JSON formatting in README Cursor example
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34; &amp;&amp; git push</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
   
   <div class="commit-card">
     <div class="commit-header">
