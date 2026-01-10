@@ -33,10 +33,12 @@ func (p *Provider) FileExtension() string {
 
 // ComposerData represents the structure of Cursor's composerData entries
 type ComposerData struct {
-	ComposerID   string        `json:"composerId"`
-	CreatedAt    int64         `json:"createdAt"`    // epoch ms
-	Conversation []Bubble      `json:"conversation"` // array of bubbles
-	RawJSON      []byte        `json:"-"`            // original JSON for storage
+	ComposerID         string            `json:"composerId"`
+	CreatedAt          int64             `json:"createdAt"`          // epoch ms
+	LastUpdatedAt      int64             `json:"lastUpdatedAt"`      // epoch ms
+	Conversation       []Bubble          `json:"conversation"`       // array of bubbles (old format)
+	OriginalFileStates map[string]interface{} `json:"originalFileStates"` // file:///path -> state (new format)
+	RawJSON            []byte            `json:"-"`                  // original JSON for storage
 }
 
 // Bubble represents a single message in a Cursor conversation
@@ -165,6 +167,7 @@ func (p *Provider) DiscoverSessions(repoPath string, startWork, endWork time.Tim
 }
 
 // ReadTranscript reads the raw JSON content for storage
+// This combines composerData with all associated bubbles
 func (p *Provider) ReadTranscript(sess provider.RawSession) ([]byte, error) {
 	dbPath := GetDBPath()
 
@@ -174,18 +177,53 @@ func (p *Provider) ReadTranscript(sess provider.RawSession) ([]byte, error) {
 	}
 	defer db.Close()
 
-	var value []byte
-	err = db.QueryRow(`SELECT value FROM cursorDiskKV WHERE key = ?`, sess.Path).Scan(&value)
+	// Read main composer data
+	var composerValue []byte
+	err = db.QueryRow(`SELECT value FROM cursorDiskKV WHERE key = ?`, sess.Path).Scan(&composerValue)
 	if err != nil {
 		return nil, err
 	}
 
-	return value, nil
+	// Parse composer data
+	var data map[string]interface{}
+	if err := json.Unmarshal(composerValue, &data); err != nil {
+		return composerValue, nil // Return as-is if we can't parse
+	}
+
+	// Fetch associated bubbles (stored separately in new Cursor format)
+	bubbleRows, err := db.Query(`SELECT value FROM cursorDiskKV WHERE key LIKE ?`, "bubbleId:"+sess.ID+":%")
+	if err == nil {
+		defer bubbleRows.Close()
+		var bubbles []map[string]interface{}
+		for bubbleRows.Next() {
+			var bubbleValue []byte
+			if bubbleRows.Scan(&bubbleValue) == nil {
+				var bubble map[string]interface{}
+				if json.Unmarshal(bubbleValue, &bubble) == nil {
+					bubbles = append(bubbles, bubble)
+				}
+			}
+		}
+		if len(bubbles) > 0 {
+			// Add bubbles to data for storage
+			data["_bubbles"] = bubbles
+		}
+	}
+
+	// Re-encode with bubbles included
+	return json.Marshal(data)
 }
 
 // getLastTimestamp finds the most recent timestamp in the conversation
 func getLastTimestamp(data *ComposerData) time.Time {
 	var latest time.Time
+
+	// Check lastUpdatedAt field (new format)
+	if data.LastUpdatedAt > 0 {
+		latest = time.UnixMilli(data.LastUpdatedAt)
+	}
+
+	// Also check conversation bubbles (old format)
 	for _, bubble := range data.Conversation {
 		if bubble.TimingInfo.ClientStartTime > 0 {
 			ts := time.UnixMilli(bubble.TimingInfo.ClientStartTime)
@@ -201,6 +239,18 @@ func getLastTimestamp(data *ComposerData) time.Time {
 func extractWorkspacePath(data *ComposerData) string {
 	var paths []string
 
+	// New format: extract from originalFileStates (keys are file:///path URIs)
+	for uri := range data.OriginalFileStates {
+		if strings.HasPrefix(uri, "file://") {
+			// Convert file:///Users/... to /Users/...
+			path := strings.TrimPrefix(uri, "file://")
+			if path != "" {
+				paths = append(paths, path)
+			}
+		}
+	}
+
+	// Old format: extract from conversation bubbles
 	for _, bubble := range data.Conversation {
 		// Collect file paths from codeBlocks
 		for _, cb := range bubble.CodeBlocks {

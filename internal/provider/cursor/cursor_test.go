@@ -35,6 +35,29 @@ func TestDiscoverSessions(t *testing.T) {
 	t.Logf("Found %d Cursor sessions for %s", len(sessions), repoPath)
 }
 
+func TestDiscoverSessionsGitPromptStory(t *testing.T) {
+	// Skip if Cursor DB doesn't exist
+	dbPath := GetDBPath()
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		t.Skip("Cursor database not found, skipping test")
+	}
+
+	p := &Provider{}
+	repoPath := "/Users/pmigdal/my_repos/quesma/git-prompt-story"
+	startWork := time.Now().Add(-365 * 24 * time.Hour)
+	endWork := time.Now()
+
+	sessions, err := p.DiscoverSessions(repoPath, startWork, endWork)
+	if err != nil {
+		t.Errorf("DiscoverSessions failed: %v", err)
+	}
+
+	t.Logf("Found %d Cursor sessions for git-prompt-story", len(sessions))
+	for _, s := range sessions {
+		t.Logf("  - %s: %s - %s", s.ID[:8], s.Created.Format("2006-01-02 15:04"), s.Modified.Format("2006-01-02 15:04"))
+	}
+}
+
 func TestExtractWorkspacePath(t *testing.T) {
 	data := &ComposerData{
 		Conversation: []Bubble{

@@ -24,6 +24,7 @@ type ComposerData struct {
 	ComposerID   string   `json:"composerId"`
 	CreatedAt    int64    `json:"createdAt"`
 	Conversation []Bubble `json:"conversation"`
+	Bubbles      []Bubble `json:"_bubbles"` // Bubbles from separate keys (new format)
 }
 
 // Bubble represents a single message in a Cursor conversation
@@ -46,8 +47,11 @@ func (p *Parser) Parse(content []byte, startWork, endWork time.Time) ([]parser.U
 		return nil, err
 	}
 
+	// Combine bubbles from both old and new format
+	allBubbles := append(data.Conversation, data.Bubbles...)
+
 	var result []parser.UnifiedEntry
-	for _, bubble := range data.Conversation {
+	for _, bubble := range allBubbles {
 		// Get timestamp
 		var ts time.Time
 		if bubble.TimingInfo.ClientStartTime > 0 {
@@ -95,8 +99,11 @@ func (p *Parser) CountUserActions(content []byte, startWork, endWork time.Time) 
 		return 0
 	}
 
+	// Combine bubbles from both old and new format
+	allBubbles := append(data.Conversation, data.Bubbles...)
+
 	count := 0
-	for _, bubble := range data.Conversation {
+	for _, bubble := range allBubbles {
 		if bubble.Type != 1 { // Only count user messages
 			continue
 		}
