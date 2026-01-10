@@ -2,6 +2,17 @@
 
 Store LLM prompts and sessions alongside your git commits using git notes.
 
+## Quick start
+
+It requires git and Go (`brew install go`).
+
+```bash
+go install github.com/QuesmaOrg/git-prompt-story@latest
+cd your_repository
+git-prompt-story install-hooks --auto-push  # --global if for all
+git-prompt-story generate-github-workflow
+```
+
 ## Why
 
 > "I've never felt this much behind as a programmer. The profession is being dramatically refactored."
@@ -225,6 +236,7 @@ git-prompt-story show --redact-message "claude-code/session-id@2025-01-15T10:00:
 Redacted messages show `<REDACTED BY USER>` placeholder. Both git notes and local `~/.claude/projects/` files are updated.
 
 **If notes were already pushed**, you'll need to force push:
+
 ```bash
 git push -f origin refs/notes/prompt-story refs/notes/prompt-story-transcripts
 ```
