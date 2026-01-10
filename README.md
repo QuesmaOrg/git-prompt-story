@@ -1,6 +1,8 @@
 # Git Prompt Story
 
-Store LLM prompts and sessions alongside your git commits using git notes.
+**Automatically share LLM prompts in Pull Requests without changing your workflow.**
+
+Git Prompt Story captures your AI sessions and links them to your commits. Your teammates get full context for code reviews, and you don't have to copy-paste a thing.
 
 ## Quick start
 
@@ -18,11 +20,13 @@ git-prompt-story generate-github-workflow
 > "I've never felt this much behind as a programmer. The profession is being dramatically refactored."
 > — [Andrej Karpathy](https://x.com/karpathy/status/2004607146781278521)
 
-When LLM writes your code, the conversation is part of the story.
+When LLM writes your code, the conversation is part of the story. See [Prompts are (not) the new source code](https://quesma.com/blog/prompts-source-code/) for a deeper dive.
+
+**Review what matters.** Thousands of lines of generated code are hard to audit. The prompts that produced them? That's the real signal - the intent, constraints, and reasoning. seeing prompts in Pull Requests makes reviews faster and deeper.
 
 **Learn from your teammates.** Prompts reveal problem-solving approaches, architectural decisions, and debugging strategies. Even Karpathy admits he could be "10X more powerful" by learning how others use AI tools.
 
-**Review what matters.** Thousands of lines of generated code are hard to audit. The prompts that produced them? That's the real signal - the intent, constraints, and reasoning.
+**Intent verification.** Understand the "why" behind the code. Was this architectural choice deliberate, or just what the LLM spit out? The prompt reveals the difference.
 
 **Require transparency.** Projects like [Ghostty now require AI disclosure](https://github.com/ghostty-org/ghostty/pull/8289) on PRs. We make it easy.
 
