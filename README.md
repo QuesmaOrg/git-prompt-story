@@ -167,7 +167,7 @@ refs/notes/prompt-story-transcripts/
 ├── claude-code/
 │   ├── 113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl
 │   └── 7f8a9b0c-1d2e-3f4a-5b6c-7d8e9f0a1b2c.jsonl
-└── cursor/ (planned)
+└── cursor/
 ```
 
 **Key design choices:**
@@ -184,7 +184,7 @@ git-prompt-story finds active sessions by checking:
 | Tool        | Location                                    | Status  |
 | ----------- | ------------------------------------------- | ------- |
 | Claude Code | `~/.claude/projects/<encoded-path>/*.jsonl` | Done    |
-| Cursor      | TBD                                         | Planned |
+| Cursor      | SQLite DB (`state.vscdb`)                   | Done    |
 | Codex       | TBD                                         | Planned |
 | Gemini CLI  | TBD                                         | Planned |
 
@@ -230,12 +230,54 @@ Example: `/home/user/myapp` → `-home-user-myapp`
 Each line is a JSON event with timestamps, making delta computation straightforward.
 `git-prompt-story` reads these files, computes the delta relevant to your commit, and links it.
 
+## How Cursor Stores Sessions
+
+Cursor stores conversation history in a local SQLite database:
+
+- **Mac**: `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`
+- **Linux**: `~/.config/Cursor/User/globalStorage/state.vscdb`
+- **Windows**: `%APPDATA%/Cursor/User/globalStorage/state.vscdb`
+
+It reads the `cursorDiskKV` table where keys start with `composerData:`. The data is a JSON structure containing the conversation history and file references.
+
+```json
+{
+  "composerId": "344a1234-5678-90ab-cdef-1234567890ab",
+  "createdAt": 1705222800000,
+  "conversation": [
+    {
+      "type": 1,
+      "text": "Refactor this function",
+      "bubbleId": "b1",
+      "timingInfo": { "clientStartTime": 1705222805000 }
+    },
+    {
+      "type": 2,
+      "text": "Here is the refactored code...",
+      "bubbleId": "b2",
+      "codeBlocks": [
+        {
+          "uri": { "fsPath": "/path/to/file.go" }
+        }
+      ],
+      "checkpoint": {
+         "files": [
+            { "uri": { "fsPath": "/users/me/repo/main.go" } }
+         ]
+      }
+    }
+  ]
+}
+```
+
+`git-prompt-story` parses this data to extract sessions relevant to your repository, filtering by the "workspace" path found in the conversation data.
+
 ## Roadmap
 
 - [x] Claude Code support
 - [x] Viewer (CLI & HTML export)
 - [x] GitHub Action (PR summaries & transcript pages)
-- [ ] Cursor integration
+- [x] Cursor integration
 - [ ] VS Code extension (show prompts inline)
 
 ## License
