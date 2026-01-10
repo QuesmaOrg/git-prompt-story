@@ -1,17 +1,32 @@
 # Git Prompt Story
 
-Store LLM prompts and sessions alongside your git commits using git notes.
+**Automatically share LLM prompts in Pull Requests without changing your workflow.**
+
+Git Prompt Story captures your AI sessions and links them to your commits. Your teammates get full context for code reviews, and you don't have to copy-paste a thing.
+
+## Quick start
+
+It requires git and Go (`brew install go`).
+
+```bash
+go install github.com/QuesmaOrg/git-prompt-story@latest
+cd your_repository
+git-prompt-story install-hooks --auto-push  # --global if for all
+git-prompt-story generate-github-workflow
+```
 
 ## Why
 
 > "I've never felt this much behind as a programmer. The profession is being dramatically refactored."
 > — [Andrej Karpathy](https://x.com/karpathy/status/2004607146781278521)
 
-When LLM writes your code, the conversation is part of the story.
+When LLM writes your code, the conversation is part of the story. See [Prompts are (not) the new source code](https://quesma.com/blog/prompts-source-code/) for a deeper dive.
+
+**Review what matters.** Thousands of lines of generated code are hard to audit. The prompts that produced them? That's the real signal - the intent, constraints, and reasoning. seeing prompts in Pull Requests makes reviews faster and deeper.
 
 **Learn from your teammates.** Prompts reveal problem-solving approaches, architectural decisions, and debugging strategies. Even Karpathy admits he could be "10X more powerful" by learning how others use AI tools.
 
-**Review what matters.** Thousands of lines of generated code are hard to audit. The prompts that produced them? That's the real signal - the intent, constraints, and reasoning.
+**Intent verification.** Understand the "why" behind the code. Was this architectural choice deliberate, or just what the LLM spit out? The prompt reveals the difference.
 
 **Require transparency.** Projects like [Ghostty now require AI disclosure](https://github.com/ghostty-org/ghostty/pull/8289) on PRs. We make it easy.
 
@@ -33,32 +48,36 @@ git-prompt-story captures LLM sessions in your git history - making prompts revi
 
 ## Setup
 
-### Individual Developer
+### 1. Install
 
-Set up git-prompt-story on your machine to capture LLM sessions in all your repos.
+It requires git and Go (`brew install go`).
 
 ```bash
-# 1. Install
 go install github.com/QuesmaOrg/git-prompt-story@latest
-
-# 2. Install git hooks globally
-# Add --auto-push to install pre-push hook that syncs notes automatically
-# Without --auto-push, push notes manually with:
-#   git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
-git-prompt-story install-hooks --global --auto-push
 ```
 
-That's it. Future commits will automatically capture active LLM sessions.
+### 2. Configure Repository
 
-### Repository CI Integration
+Navigate to your repository and install the hooks:
 
-To add GitHub Action integration for your repository:
+```bash
+cd your_repository
+git-prompt-story install-hooks --auto-push  # Add --global to install for all repos
+```
+
+The `--auto-push` flag installs a `pre-push` hook that automatically syncs your notes. If you omit it, you must push notes manually:
+
+```bash
+git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
+```
+
+### 3. GitHub Actions
+
+Generate a workflow to post summaries on Pull Requests:
 
 ```bash
 git-prompt-story generate-github-workflow
 ```
-
-This interactively generates a workflow file that posts PR summaries and optionally deploys full transcripts to GitHub Pages.
 
 ## How It Works
 
@@ -91,70 +110,6 @@ This interactively generates a workflow file that posts PR summaries and optiona
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Storage Format
-
-Git Prompt Story uses two storage locations:
-
-#### 1. Commit Metadata (`refs/notes/prompt-story`)
-
-Git notes attached to commits in a dedicated namespace. Contains a lightweight JSON manifest:
-
-```json
-{
-  "v": 1,
-  "start_work": "2025-01-15T09:00:00Z",
-  "sessions": [
-    {
-      "tool": "claude-code",
-      "id": "113e0c55-64df-4b55-88f3-e06bcbc5b526",
-      "path": "refs/notes/prompt-story-transcripts/claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl",
-      "created": "2025-01-15T09:15:00Z",
-      "modified": "2025-01-15T14:22:00Z"
-    },
-    {
-      "tool": "cursor",
-      "id": "a1b2c3d4",
-      "path": "refs/notes/prompt-story-transcripts/cursor/a1b2c3d4.json",
-      "created": "2025-01-15T10:00:00Z",
-      "modified": "2025-01-15T12:45:00Z"
-    }
-  ]
-}
-```
-
-#### 2. Transcripts (`refs/notes/prompt-story-transcripts`)
-
-A tree ref containing raw session files, organized by tool:
-
-```
-refs/notes/prompt-story-transcripts/
-├── claude-code/
-│   ├── 113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl
-│   └── 7f8a9b0c-1d2e-3f4a-5b6c-7d8e9f0a1b2c.jsonl
-├── cursor/
-│   └── a1b2c3d4.json
-└── codex/
-    └── session-2025-01-15.jsonl
-```
-
-**Key design choices:**
-
-- **Many-to-many**: One session can be referenced by many commits. One commit can reference many sessions.
-- **Whole sessions**: Transcripts stored as-is, no slicing. Parsing happens in viewer.
-- **Deduplication**: Same session blob is referenced, not copied.
-- **Lightweight capture**: Minimal processing at commit time.
-
-### Auto-Detection
-
-git-prompt-story finds active sessions by checking:
-
-| Tool        | Location                                    | Status  |
-| ----------- | ------------------------------------------- | ------- |
-| Claude Code | `~/.claude/projects/<encoded-path>/*.jsonl` | Done    |
-| Cursor      | TBD                                         | Planned |
-| Codex       | TBD                                         | Planned |
-| Gemini CLI  | TBD                                         | Planned |
-
 ## Architecture
 
 Git Prompt Story has two components:
@@ -179,71 +134,87 @@ Two actions are available:
 
 Both run on Pull Requests. Use `generate-github-workflow` to create the appropriate workflow.
 
-## Viewer Integration
+## Storage Format
 
-Notes are JSON - view them anywhere:
+Git Prompt Story uses two storage locations to keep your main branch clean:
 
-```bash
-# Raw JSON
-git notes --ref=prompt-story show HEAD
+### 1. Commit Metadata (`refs/notes/prompt-story`)
 
-# Local pretty-print
-git-prompt-story show HEAD
+Git notes attached to commits in a dedicated namespace. Contains a lightweight JSON manifest:
 
-# Preview how it will look in GitHub Actions PR comment
-git-prompt-story ci-preview              # Last commit
-git-prompt-story ci-preview main..HEAD   # Current branch vs main (PR style)
+```json
+{
+  "v": 1,
+  "start_work": "2025-01-15T09:00:00Z",
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "113e0c55-64df-4b55-88f3-e06bcbc5b526",
+      "path": "refs/notes/prompt-story-transcripts/claude-code/113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl",
+      "created": "2025-01-15T09:15:00Z",
+      "modified": "2025-01-15T14:22:00Z"
+    }
+  ]
+}
 ```
 
-## Privacy & Curation
+### 2. Transcripts (`refs/notes/prompt-story-transcripts`)
 
-Notes are local until you push them. Before sharing:
+A tree ref containing raw session files, organized by tool:
+
+```
+refs/notes/prompt-story-transcripts/
+├── claude-code/
+│   ├── 113e0c55-64df-4b55-88f3-e06bcbc5b526.jsonl
+│   └── 7f8a9b0c-1d2e-3f4a-5b6c-7d8e9f0a1b2c.jsonl
+└── cursor/ (planned)
+```
+
+**Key design choices:**
+
+- **Many-to-many**: One session can be referenced by many commits. One commit can reference many sessions.
+- **Whole sessions**: Transcripts stored as-is, no slicing. Parsing happens in viewer.
+- **Deduplication**: Same session blob is referenced, not copied.
+- **Lightweight capture**: Minimal processing at commit time.
+
+## Auto-Detection
+
+git-prompt-story finds active sessions by checking:
+
+| Tool        | Location                                    | Status  |
+| ----------- | ------------------------------------------- | ------- |
+| Claude Code | `~/.claude/projects/<encoded-path>/*.jsonl` | Done    |
+| Cursor      | TBD                                         | Planned |
+| Codex       | TBD                                         | Planned |
+| Gemini CLI  | TBD                                         | Planned |
+
+## View Notes
 
 ```bash
-# Review what you're about to push
-git-prompt-story review
+# Pretty-print notes for the last commit
+git-prompt-story show HEAD
 
-# Interactive viewer - browse sessions and messages
+# Preview PR comment style
+# You can compare any two commits, branches, or ranges
+git-prompt-story ci-preview main..HEAD
+```
+
+## Privacy
+
+Notes are local until pushed.
+
+```bash
+# Interactive viewer: browse sessions, press 'r' to redact messages
 git-prompt-story show HEAD
 ```
 
-### Redacting Content
+**Redaction**: Replaces sensitive content with `<REDACTED BY USER>` in git notes and local logs.
 
-Use the interactive TUI or CLI flags to redact sensitive content:
+If you've already pushed sensitive notes, redact locally and force-push:
 
-```bash
-# Interactive: press 'r' on a message to redact, 'D' to clear a session
-git-prompt-story show HEAD
-
-# CLI: Clear entire session (replaces content with empty file)
-git-prompt-story show --clear-session "claude-code/session-id"
-
-# CLI: Redact specific message by timestamp
-git-prompt-story show --redact-message "claude-code/session-id@2025-01-15T10:00:00Z"
-```
-
-Redacted messages show `<REDACTED BY USER>` placeholder. Both git notes and local `~/.claude/projects/` files are updated.
-
-**If notes were already pushed**, you'll need to force push:
 ```bash
 git push -f origin refs/notes/prompt-story refs/notes/prompt-story-transcripts
 ```
-
-Notes live in separate refs and can be explicitly pushed (unless you use `--auto-push`):
-
-```bash
-git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
-```
-
-## Roadmap
-
-- [x] Claude Code support
-- [x] Viewer (HTML export via `ci-html` and `ci-summary` commands)
-- [x] GitHub Action for PR summaries and transcript pages
-- [ ] Cursor integration
-- [ ] Codex integration
-- [ ] Gemini CLI integration
-- [ ] VS Code extension (show prompts inline)
 
 ## How Claude Code Stores Sessions
 
@@ -257,6 +228,15 @@ Where `<encoded-path>` is your project path with `/` replaced by `-`.
 Example: `/home/user/myapp` → `-home-user-myapp`
 
 Each line is a JSON event with timestamps, making delta computation straightforward.
+`git-prompt-story` reads these files, computes the delta relevant to your commit, and links it.
+
+## Roadmap
+
+- [x] Claude Code support
+- [x] Viewer (CLI & HTML export)
+- [x] GitHub Action (PR summaries & transcript pages)
+- [ ] Cursor integration
+- [ ] VS Code extension (show prompts inline)
 
 ## License
 
