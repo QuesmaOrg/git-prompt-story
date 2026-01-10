@@ -1,0 +1,2514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>241e41e - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>241e41e</code></h1>
+    <p class="meta">Fix Cursor provider to handle new bubble storage format</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">38</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>241e41e7cb85829c1d120218dd3f6546eae36b51</code><br>
+    <strong>Work period:</strong> 2026-01-10 15:52 - 2026-01-10 16:26
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">dfe3709f-e4ed-4768-b644-1d05b27563b6</code> |
+        2026-01-10 14:47 - 2026-01-10 16:23 | <span class="session-count">38</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:52</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push -u origin feature/cursor-support</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+branch &#39;feature/cursor-support&#39; set up to track &#39;origin/feature/cursor-support&#39;.
+remote: 
+remote: Create a pull request for &#39;feature/cursor-support&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/feature/cursor-support        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      feature/cursor-support -&gt; feature/cursor-support</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:52</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done! I&#39;ve implemented Cursor IDE support. Here&#39;s a summary:
+
+## Implementation Summary
+
+### New Files Created
+- **`internal/provider/`** - Provider abstraction for multi-tool support
+  - `provider.go` - Interface definition (`DiscoverSessions`, `ReadTranscript`)
+  - `registry.go` - Provider registration
+  - `claude/claude.go` - Claude Code provider
+  - `cursor/cursor.go` - Cursor provider (reads from SQLite)
+  - `cursor/cursor_test.go` - Test for Cursor discovery
+
+- **`internal/parser/`** - Parser abstraction for viewing conversations
+  - `parser.go` - Interface &#43; `UnifiedEntry` type
+  - `registry.go` - Parser registration
+  - `claude/claude.go` - Claude Code parser
+  - `cursor/cursor.go` - Cursor parser
+
+### Modified Files
+- `go.mod/go.sum` - Added `modernc.org/sqlite` (pure Go, no CGO)
+- `internal/hooks/prepare_commit_msg.go` - Uses provider registry
+- `internal/note/metadata.go` - Supports multiple tools
+- `internal/note/transcript.go` - Tool-specific file extensions
+- `internal/repair/repair.go` - Uses provider registry
+- `internal/show/show.go` - Uses parser registry for Cursor
+
+### Key Features
+1. **Provider pattern** - Discovers sessions from Claude Code and Cursor simultaneously
+2. **SQLite database access** - Reads Cursor&#39;s `state.vscdb` for `composerData:*` entries
+3. **Workspace detection** - Derives repo path from file paths in Cursor conversations
+4. **Parser pattern** - Unified display format for different tools
+
+### Testing
+- Cursor provider successfully discovered 119 sessions from a real Cursor database
+- All existing tests pass
+
+### Branch
+Pushed to `feature/cursor-support` - ready for PR creation.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">So, what you see for this repo?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git-prompt-story explain 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session Discovery ===
+
+Repository: /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story
+Candidate directories: 38
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal--claude-skills-nano-banana-pro
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-CompileBench
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-anthropicing-taiga-compilebench
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-claude-daytona
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-gemini-claude-skills
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-git-prompt-story
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-harbor-experiments
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-harbor-studio
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-is-claude-ok
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-eval-analysis-public
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-harbor
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-llmday
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-not-ours-llmday-llmday-astro
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-claude-skills
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code-octopodes-octopus1
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code-octopodes-octopus2
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-quesma-com-src-content-blog-prompts-source-code-octopodes-octopus3
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-test
+  - /&lt;REDACTED&gt;/.claude/projects/-Users-pmigdal-my-repos-quesma-vibe-co...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The `explain` command only shows **Claude Code** sessions (1 session from our current conversation). It doesn&#39;t show Cursor sessions yet because the `explain` command wasn&#39;t updated to use the provider registry.
+
+Let me check directly for Cursor sessions:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/check_cursor.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+package main
+
+import (
+	&#34;fmt&#34;
+	&#34;time&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+
+	&#34;github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor&#34;
+)
+
+func main() {
+	repoPath := os.Args[1]
+	startWork := time.Now().Add(-365 * 24 * time.Hour)
+	endWork := time.Now()
+
+	p := &amp;cursor.Provider{}
+	sessions, err := p.DiscoverSessions(repoPath, startWork, endWork)
+	if err != nil {
+		fmt.Printf(&#34;Error: %v\n&#34;, err)
+		return
+	}
+
+	fmt.Printf(&#34;Cursor sessions for %s: %d\n&#34;, filepath.Base(repoPath), len(sessions))
+	for i, s := range sessions {
+		if i &lt; 5 {
+			fmt.Printf(&#34;  - %s (%s - %s)\n&#34;, s.ID[:8], s.Created.Format(&#34;2006-01-02&#34;), s.Modified.Format(&#34;2006-01-02&#34;))
+		}
+	}
+	if len(sessions) &gt; 5 {
+		fmt.Printf(&#34;  ... and %d more\n&#34;, len(sessions)-5)
+	}
+}
+EOF
+go run /tmp/check_cursor.go /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+package command-line-arguments
+	/tmp/check_cursor.go:10:2: use of internal package github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor not allowed</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:54</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v -run TestDiscoverSessions ./internal/provider/cursor/... 2&gt;&amp;1 | tail -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestDiscoverSessions
+    cursor_test.go:35: Found 263 Cursor sessions for /&lt;REDACTED&gt;/my_repos/quesma
+--- PASS: TestDiscoverSessions (5.77s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	6.148s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:55</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/manual_test.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package cursor
+
+import (
+	&#34;fmt&#34;
+	&#34;time&#34;
+)
+
+func main() {
+	p := &amp;Provider{}
+	repoPath := &#34;/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story&#34;
+	startWork := time.Now().Add(-365 * 24 * time.Hour)
+	endWork := time.Now()
+
+	sessions, _ := p.DiscoverSessions(repoPath, startWork, endWork)
+	fmt.Printf(&#34;Cursor sessions for git-prompt-story: %d\n&#34;, len(sessions))
+}
+EOF
+cd /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor &amp;&amp; go run manual_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+go: cannot run *_test.go files (manual_test.go)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">15:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/check_cursor.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;strings&#34;
+	&#34;time&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;composerData:%&#39;`)
+	defer rows.Close()
+
+	repoPath := &#34;/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story&#34;
+	startWork := time.Now().Add(-365 * 24 * time.Hour)
+	endWork := time.Now()
+	
+	count := 0
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		var data struct {
+			ComposerID   string `json:&#34;composerId&#34;`
+			CreatedAt    int64  `json:&#34;createdAt&#34;`
+			Conversation []struct {
+				CodeBlocks []struct {
+					URI struct{ FSPath string `json:&#34;fsPath&#34;` } `json:&#34;uri&#34;`
+				} `json:&#34;codeBlocks&#34;`
+			} `json:&#34;conversation&#34;`
+		}
+		json.Unmarshal(value, &amp;data)
+
+		created := time.UnixMilli(data.CreatedAt)
+		if created.Before(startWork) || created.After(endWork) {
+			continue
+		}
+
+		// Check file paths
+		for _, bubble := range data.Conversation {
+			for _, cb := range bubble.CodeBlocks {
+				if strings.HasPrefix(cb.URI.FSPath, repoPath) {
+					count&#43;&#43;
+					fmt.Printf(&#34;Found: %s (%s)\n&#34;, data.ComposerID[:8], created.Format(&#34;2006-01-02&#34;))
+					goto next
+				}
+			}
+		}
+		next:
+	}
+	fmt.Printf(&#34;\nTotal Cursor sessions for git-prompt-story: %d\n&#34;, count)
+}
+EOF
+go run /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/check_cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Total Cursor sessions for git-prompt-story: 0</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">rm /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/check_cursor.go /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/manual_test.go 2&gt;/dev/null; echo &#34;Cleaned up&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Cleaned up</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:02</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">For **this repo (git-prompt-story)**:
+
+| Tool | Sessions |
+|------|----------|
+| **Claude Code** | 1 (current conversation) |
+| **Cursor** | 0 |
+
+You&#39;ve been using Claude Code for git-prompt-story, not Cursor. The Cursor database has sessions for other repos like `charts-backend` (119 sessions), `quesma-chart-gradio`, `virtual-lab`, etc. - but none for this repo.
+
+The implementation is ready though - when you commit in a repo that has both Claude Code and Cursor sessions, the hook will discover and record both.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">16:05</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Study if there wre some previous prompts in Cursor for this repo - tell me which (there were).</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:05</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_gps.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;strings&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;composerData:%&#39;`)
+	defer rows.Close()
+
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		// Search for git-prompt-story anywhere in the value
+		if strings.Contains(string(value), &#34;git-prompt-story&#34;) {
+			var data struct {
+				ComposerID   string `json:&#34;composerId&#34;`
+				CreatedAt    int64  `json:&#34;createdAt&#34;`
+				Conversation []struct {
+					Type int    `json:&#34;type&#34;`
+					Text string `json:&#34;text&#34;`
+					CodeBlocks []struct {
+						URI struct{ FSPath string `json:&#34;fsPath&#34;` } `json:&#34;uri&#34;`
+					} `json:&#34;codeBlocks&#34;`
+				} `json:&#34;conversation&#34;`
+			}
+			json.Unmarshal(value, &amp;data)
+
+			fmt.Printf(&#34;\n=== Session: %s ===\n&#34;, data.ComposerID)
+			
+			// Find the file paths
+			var paths []string
+			for _, bubble := range data.Conversation {
+				for _, cb := range bubble.CodeBlocks {
+					if cb.URI.FSPath != &#34;&#34; &amp;&amp; strings.Contains(cb.URI.FSPath, &#34;git-prompt-story&#34;) {
+						paths = append(paths, cb.URI.FSPath)
+					}
+				}
+			}
+			if len(paths) &gt; 0 {
+				fmt.Println(&#34;Files:&#34;)
+				for _, p := range paths[:min(5, len(paths))] {
+					fmt.Printf(&#34;  %s\n&#34;, p)
+				}
+			}
+
+			// Show first user message
+			for _, bubble := range data.Conversation {
+				if bubble.Type == 1 &amp;&amp; bubble.Text != &#34;&#34; {
+					text := bubble.Text
+					if len(text) &gt; 200 {
+						text = text[:200] &#43; &#34;...&#34;
+					}
+					fmt.Printf(&#34;First prompt: %s\n&#34;, text)
+					break
+				}
+			}
+		}
+	}
+}
+
+func min(a, b int) int {
+	if a &lt; b {
+		return a
+	}
+	return b
+}
+EOF
+go run /tmp/find_gps.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session: 08c579f1-7711-40a8-ac8b-046f3790b317 ===</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_gps2.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;strings&#34;
+	&#34;time&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;composerData:%&#39;`)
+	defer rows.Close()
+
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		// Search for git-prompt-story anywhere in the value
+		if strings.Contains(string(value), &#34;git-prompt-story&#34;) {
+			var data struct {
+				ComposerID   string `json:&#34;composerId&#34;`
+				CreatedAt    int64  `json:&#34;createdAt&#34;`
+				Conversation []struct {
+					Type int    `json:&#34;type&#34;`
+					Text string `json:&#34;text&#34;`
+					BubbleId string `json:&#34;bubbleId&#34;`
+					CodeBlocks []struct {
+						URI struct{ FSPath string `json:&#34;fsPath&#34;` } `json:&#34;uri&#34;`
+					} `json:&#34;codeBlocks&#34;`
+				} `json:&#34;conversation&#34;`
+			}
+			if err := json.Unmarshal(value, &amp;data); err != nil {
+				fmt.Printf(&#34;Parse error: %v\n&#34;, err)
+				continue
+			}
+
+			created := time.UnixMilli(data.CreatedAt)
+			fmt.Printf(&#34;\n=== Session: %s (%s) ===\n&#34;, data.ComposerID, created.Format(&#34;2006-01-02 15:04&#34;))
+			fmt.Printf(&#34;Bubbles: %d\n&#34;, len(data.Conversation))
+			
+			// Show all user messages
+			for i, bubble := range data.Conversation {
+				if bubble.Type == 1 &amp;&amp; bubble.Text != &#34;&#34; {
+					text := bubble.Text
+					if len(text) &gt; 300 {
+						text = text[:300] &#43; &#34;...&#34;
+					}
+					fmt.Printf(&#34;\n[%d] USER: %s\n&#34;, i, text)
+				}
+			}
+
+			// Find where git-prompt-story appears
+			if idx := strings.Index(string(value), &#34;git-prompt-story&#34;); idx != -1 {
+				start := idx - 50
+				if start &lt; 0 {
+					start = 0
+				}
+				end := idx &#43; 100
+				if end &gt; len(value) {
+					end = len(value)
+				}
+				fmt.Printf(&#34;\nContext: ...%s...\n&#34;, string(value[start:end]))
+			}
+		}
+	}
+}
+EOF
+go run /tmp/find_gps2.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session: 08c579f1-7711-40a8-ac8b-046f3790b317 (2026-01-10 14:04) ===
+Bubbles: 0
+
+Context: ...leStates&#34;:{&#34;file:///&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/README.md&#34;:{&#34;content&#34;:&#34;# Git Prompt Story\n\nStore LLM prompts and sessions alongsi...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:16</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_gps3.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;strings&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;composerData:%&#39;`)
+	defer rows.Close()
+
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		if strings.Contains(string(value), &#34;git-prompt-story&#34;) {
+			// Parse as generic map to see all keys
+			var data map[string]interface{}
+			json.Unmarshal(value, &amp;data)
+
+			fmt.Printf(&#34;\n=== Session: %s ===\n&#34;, key)
+			fmt.Println(&#34;Top-level keys:&#34;)
+			for k := range data {
+				fmt.Printf(&#34;  - %s\n&#34;, k)
+			}
+
+			// Check for tabs which might contain the actual conversation
+			if tabs, ok := data[&#34;tabs&#34;].([]interface{}); ok {
+				fmt.Printf(&#34;\nTabs: %d\n&#34;, len(tabs))
+				for i, tab := range tabs {
+					if tabMap, ok := tab.(map[string]interface{}); ok {
+						fmt.Printf(&#34;\nTab %d keys: &#34;, i)
+						for k := range tabMap {
+							fmt.Printf(&#34;%s &#34;, k)
+						}
+						fmt.Println()
+						
+						// Check for bubbles in tab
+						if bubbles, ok := tabMap[&#34;bubbles&#34;].([]interface{}); ok {
+							fmt.Printf(&#34;  Bubbles: %d\n&#34;, len(bubbles))
+							for j, b := range bubbles {
+								if j &gt;= 3 {
+									fmt.Printf(&#34;  ... and %d more\n&#34;, len(bubbles)-3)
+									break
+								}
+								if bubble, ok := b.(map[string]interface{}); ok {
+									if text, ok := bubble[&#34;text&#34;].(string); ok &amp;&amp; text != &#34;&#34; {
+										truncated := text
+										if len(truncated) &gt; 150 {
+											truncated = truncated[:150] &#43; &#34;...&#34;
+										}
+										btype := bubble[&#34;type&#34;]
+										fmt.Printf(&#34;  [%v] %s\n&#34;, btype, truncated)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+EOF
+go run /tmp/find_gps3.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session: composerData:08c579f1-7711-40a8-ac8b-046f3790b317 ===
+Top-level keys:
+  - fullConversationHeadersOnly
+  - name
+  - usageData
+  - isQueueExpanded
+  - isUndoingWorktree
+  - generatingBubbleIds
+  - newlyCreatedFolders
+  - contextUsagePercent
+  - subComposerIds
+  - isCreatingWorktree
+  - pendingCreateWorktree
+  - gitGraphFileSuggestions
+  - isBestOfNSubcomposer
+  - isBestOfNParent
+  - isNAL
+  - planModeSuggestionUsed
+  - subtitle
+  - context
+  - forceMode
+  - allAttachedFileCodeChunksUris
+  - speculativeSummarizationEncryptionKey
+  - composerId
+  - browserChipManuallyDisabled
+  - hasUnreadMessages
+  - isAgentic
+  - stopHookLoopCount
+  - codeBlockData
+  - activeTabsShouldBeReactive
+  - isSpecSubagentDone
+  - removedFiles
+  - text
+  - isReadingLongFile
+  - newlyCreatedFiles
+  - lastUpdatedAt
+  - isApplyingWorktree
+  - isFileListExpanded
+  - contextTokenLimit
+  - bestOfNJudgeWinner
+  - debugModeSuggestionUsed
+  - modelConfig
+  - _v
+  - conversationMap
+  - status
+  - applied
+  - isSpec
+  - hasLoaded
+  - createdAt
+  - hasChangedContext
+  - isDraft
+  - originalFileStates
+  - contextTokensUsed
+  - totalLinesAdded
+  - richText
+  - browserChipManuallyEnabled
+  - unifiedMode
+  - totalLinesRemoved
+  - latestChatGenerationUUID
+  - filesChangedCount
+  - capabilities
+  - capabilityContexts
+  - todos
+  - gitHubPromptDismissed
+  - addedFiles
+  - isArchived
+  - conversationState</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_gps4.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;strings&#34;
+	&#34;time&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;composerData:%&#39;`)
+	defer rows.Close()
+
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		if strings.Contains(string(value), &#34;git-prompt-story&#34;) {
+			var data map[string]interface{}
+			json.Unmarshal(value, &amp;data)
+
+			composerId := data[&#34;composerId&#34;]
+			createdAt := int64(0)
+			if ca, ok := data[&#34;createdAt&#34;].(float64); ok {
+				createdAt = int64(ca)
+			}
+			created := time.UnixMilli(createdAt)
+
+			fmt.Printf(&#34;\n=== Session: %s (%s) ===\n&#34;, composerId, created.Format(&#34;2006-01-02 15:04&#34;))
+
+			// Check conversationMap
+			if convMap, ok := data[&#34;conversationMap&#34;].(map[string]interface{}); ok {
+				fmt.Printf(&#34;conversationMap entries: %d\n&#34;, len(convMap))
+				for bubbleId, bubble := range convMap {
+					if bubbleMap, ok := bubble.(map[string]interface{}); ok {
+						btype := bubbleMap[&#34;type&#34;]
+						text := &#34;&#34;
+						if t, ok := bubbleMap[&#34;text&#34;].(string); ok {
+							text = t
+							if len(text) &gt; 200 {
+								text = text[:200] &#43; &#34;...&#34;
+							}
+						}
+						if text != &#34;&#34; {
+							fmt.Printf(&#34;\n[%v] %s\n  -&gt; %s\n&#34;, btype, bubbleId[:8], text)
+						}
+					}
+				}
+			}
+
+			// Check text field (user&#39;s current input)
+			if text, ok := data[&#34;text&#34;].(string); ok &amp;&amp; text != &#34;&#34; {
+				fmt.Printf(&#34;\nCurrent text: %s\n&#34;, text)
+			}
+
+			// Check name/subtitle
+			if name, ok := data[&#34;name&#34;].(string); ok &amp;&amp; name != &#34;&#34; {
+				fmt.Printf(&#34;Name: %s\n&#34;, name)
+			}
+			if subtitle, ok := data[&#34;subtitle&#34;].(string); ok &amp;&amp; subtitle != &#34;&#34; {
+				fmt.Printf(&#34;Subtitle: %s\n&#34;, subtitle)
+			}
+		}
+	}
+}
+EOF
+go run /tmp/find_gps4.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session: 08c579f1-7711-40a8-ac8b-046f3790b317 (2026-01-10 14:04) ===
+conversationMap entries: 0
+Name: The commit concept
+Subtitle: README.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:17</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_gps5.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;strings&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	// Search ALL keys for git-prompt-story
+	rows, _ := db.Query(`SELECT key FROM cursorDiskKV WHERE value LIKE &#39;%git-prompt-story%&#39;`)
+	defer rows.Close()
+
+	fmt.Println(&#34;Keys containing &#39;git-prompt-story&#39;:&#34;)
+	for rows.Next() {
+		var key string
+		rows.Scan(&amp;key)
+		
+		// Truncate long keys
+		if len(key) &gt; 80 {
+			key = key[:80] &#43; &#34;...&#34;
+		}
+		fmt.Printf(&#34;  %s\n&#34;, key)
+	}
+
+	// Also check workspaceStorage
+	wsDir := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;workspaceStorage&#34;)
+	filepath.Walk(wsDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(path, &#34;state.vscdb&#34;) {
+			// Check this DB
+			wsDb, err := sql.Open(&#34;sqlite&#34;, path&#43;&#34;?mode=ro&#34;)
+			if err != nil {
+				return nil
+			}
+			defer wsDb.Close()
+
+			var count int
+			wsDb.QueryRow(`SELECT COUNT(*) FROM cursorDiskKV WHERE value LIKE &#39;%git-prompt-story%&#39;`).Scan(&amp;count)
+			if count &gt; 0 {
+				fmt.Printf(&#34;\nFound in workspace DB: %s (%d matches)\n&#34;, path, count)
+			}
+		}
+		return nil
+	})
+}
+EOF
+go run /tmp/find_gps5.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Keys containing &#39;git-prompt-story&#39;:
+  composerData:08c579f1-7711-40a8-ac8b-046f3790b317
+  checkpointId:08c579f1-7711-40a8-ac8b-046f3790b317:a754a211-2eb8-4029-8ddf-5cd65e...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:11e3fe66-af70-4bbe-8ead-c1d176f6cc...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:965dad39-45ac-4cc6-b3e0-7e60bf5c85...
+  composer.content.703ce27c4dfac2c415ab0a51cf046f95e90be3ca730eea28dcbb3dc68418708...
+  composer.content.9a737f7005a42a5ea9b31acd8b021bd6b5ac4d65d7485e8a133a80fa0fb2ce3...
+  inlineDiffUndoRedo-b8c578b9-0b48-49e5-a9da-00f4c86f2e0a-0339a204-ded7-4c31-bd8a-...
+  checkpointId:08c579f1-7711-40a8-ac8b-046f3790b317:ecbd02ef-4325-4326-9d31-73ad6a...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:fa28e4a4-3f47-4476-9629-201cdbccb3...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:b04076b2-43a5-4ea1-a183-90cef97f90...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:5adcec24-e95b-4a6b-829d-7beb46671a...
+  checkpointId:08c579f1-7711-40a8-ac8b-046f3790b317:57fffd38-a162-4f70-a889-ee639a...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:56a6f865-02d3-40ff-b79f-54db5411ce...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:18f6e14b-f4cd-41e9-b383-4639520cdb...
+  composer.content.bb85165efa9bb1c85a3dbb902a64569af7a9a916292d045771a6e326c97b575...
+  inlineDiffUndoRedo-86a6b3fb-af6a-4978-a015-b60a9dba0f03-1d351696-bfca-442f-b6e6-...
+  checkpointId:08c579f1-7711-40a8-ac8b-046f3790b317:30c79b8e-a671-474c-9d73-61c5c4...
+  checkpointId:08c579f1-7711-40a8-ac8b-046f3790b317:4f372d90-54d7-4593-937e-c71d43...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:b03f7644-5fb1-4d77-8845-d5b6b130fe...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:a2fc0455-8276-415d-a88b-3726f1c064...
+  composer.content.addf1ec37553e142c3e97e174db61e4fdbd72a079a022a5202887c8daf11213...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:78b135f7-6e95-4d48-8c0a-345e240635...
+  bubbleId:08c579f1-7711-40a8-ac8b-046f3790b317:14600621-9df2-4447-8407-e90867d833...
+  checkpointId:08...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:17</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The bubbles are stored separately. Let me fetch them:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:18</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cat &gt; /tmp/find_gps6.go &lt;&lt; &#39;EOF&#39;
+//go:build ignore
+
+package main
+
+import (
+	&#34;database/sql&#34;
+	&#34;encoding/json&#34;
+	&#34;fmt&#34;
+	&#34;os&#34;
+	&#34;path/filepath&#34;
+	&#34;sort&#34;
+	&#34;time&#34;
+
+	_ &#34;modernc.org/sqlite&#34;
+)
+
+type Bubble struct {
+	Type       int    `json:&#34;type&#34;`
+	Text       string `json:&#34;text&#34;`
+	BubbleId   string `json:&#34;bubbleId&#34;`
+	TimingInfo struct {
+		ClientStartTime int64 `json:&#34;clientStartTime&#34;`
+	} `json:&#34;timingInfo&#34;`
+}
+
+func main() {
+	homeDir, _ := os.UserHomeDir()
+	dbPath := filepath.Join(homeDir, &#34;Library&#34;, &#34;Application Support&#34;, &#34;Cursor&#34;, &#34;User&#34;, &#34;globalStorage&#34;, &#34;state.vscdb&#34;)
+
+	db, _ := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+	defer db.Close()
+
+	composerId := &#34;08c579f1-7711-40a8-ac8b-046f3790b317&#34;
+
+	// Fetch all bubbles for this composer
+	rows, _ := db.Query(`SELECT key, value FROM cursorDiskKV WHERE key LIKE &#39;bubbleId:` &#43; composerId &#43; `:%&#39;`)
+	defer rows.Close()
+
+	var bubbles []Bubble
+	for rows.Next() {
+		var key string
+		var value []byte
+		rows.Scan(&amp;key, &amp;value)
+
+		var bubble Bubble
+		if err := json.Unmarshal(value, &amp;bubble); err == nil {
+			bubbles = append(bubbles, bubble)
+		}
+	}
+
+	// Sort by timestamp
+	sort.Slice(bubbles, func(i, j int) bool {
+		return bubbles[i].TimingInfo.ClientStartTime &lt; bubbles[j].TimingInfo.ClientStartTime
+	})
+
+	fmt.Printf(&#34;=== Session: %s ===\n&#34;, composerId)
+	fmt.Printf(&#34;Name: The commit concept\n&#34;)
+	fmt.Printf(&#34;Total bubbles: %d\n\n&#34;, len(bubbles))
+
+	// Show user prompts (type 1)
+	fmt.Println(&#34;USER PROMPTS:&#34;)
+	fmt.Println(&#34;-------------&#34;)
+	promptNum := 0
+	for _, b := range bubbles {
+		if b.Type == 1 &amp;&amp; b.Text != &#34;&#34; {
+			promptNum&#43;&#43;
+			ts := time.UnixMilli(b.TimingInfo.ClientStartTime)
+			text := b.Text
+			if len(text) &gt; 500 {
+				text = text[:500] &#43; &#34;...&#34;
+			}
+			fmt.Printf(&#34;\n[%d] %s\n%s\n&#34;, promptNum, ts.Format(&#34;15:04:05&#34;), text)
+		}
+	}
+}
+EOF
+go run /tmp/find_gps6.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== Session: 08c579f1-7711-40a8-ac8b-046f3790b317 ===
+Name: The commit concept
+Total bubbles: 98
+
+USER PROMPTS:
+-------------
+
+[1] 01:00:00
+commit
+
+[2] 01:00:00
+push
+
+[3] 01:00:00
+Change &#34;Store LLM prompts and sessions alongside your git commits using git notes.&#34; so there is clear value proposition.
+
+[4] 01:00:00
+No. Do NOT commit without explicit permission.
+
+[5] 01:00:00
+Now, read https://quesma.com/blog/prompts-source-code/  (we should link in somewhere, as it is our blog post). But for the first linke, focus on the value proposition. Including that you will easily see prompts in Pull Requests, for reviewing and learning.
+
+[6] 01:00:00
+Now, create a new opening, so it captures VP of this plugin.
+
+[7] 01:00:00
+Forget about &#34;why&#34; there. Make it clear that it will make it easy to automatically share prompts in pull requests without changing workflow.
+
+[8] 01:00:00
+commit, push
+
+[9] 01:00:00
+push
+
+[10] 01:00:00
+What can be improved, so it is cleared, up to the point, up to date, etc. Make it explicit yet without unnecessary stuff or fluff. Focus on things below &#34;## Setup&#34;
+
+[11] 01:00:00
+It is FAR from good quiality yet.
+&#34;&amp; Configure&#34; -&gt; wtf? there is no configuration; don&#39;t add words that make no sense here
+
+[12] 01:00:00
+You removed a lot, including important references. There is a reason why there is a difference between quick start and technical part.
+
+[13] 01:00:00
+NO! You still removed most of crucial tehcnical parts from the technical section. It is for nerds, developers and potential sontributors.
+
+[14] 01:00:00
+&#34;Without --auto-push, push notes manually with:
+#   git push origin refs/notes/prompt-story &#43;refs/notes/
+prompt-story-transcripts&#34;
+
+this is prettu much CRUCIAL part you missed. ALL details like that are crucial - if anything, rephrase it or so.
+
+Tehnical part is oimportant to make it explicit, here with go as dependency, etc.
+
+Things like git-prompt-story ci-preview main..HEAD
+
+should have clear explanation that it can be commmits or branches, etc.
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! Session **`08c579f1-7711-40a8-ac8b-046f3790b317`** named **&#34;The commit concept&#34;** with **16 user prompts** about improving the README.
+
+The prompts include:
+1. &#34;commit&#34;, &#34;push&#34;
+2. Improving the value proposition
+3. Reading the blog post for context
+4. Creating a better opening
+5. Fixing the Quick Start section
+6. Multiple iterations on technical documentation
+7. Frustration with removed crucial technical details
+
+**Why my provider missed it:** Cursor stores bubbles **separately** as `bubbleId:composerId:bubbleId` keys, not in the `conversation` array. My provider only checked the `conversation` array which was empty.
+
+Let me fix the Cursor provider:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    30 func (p *Provider) FileExtension() string {
+    31 	return &#34;.json&#34;
+    32 }
+    33 
+    34 // ComposerData represents the structure of Cursor&#39;s composerData entries
+    35 type ComposerData struct {
+    36 	ComposerID         string            `json:&#34;composerId&#34;`
+    37 	CreatedAt          int64             `json:&#34;createdAt&#34;`          // epoch ms
+    38 	LastUpdatedAt      int64             `json:&#34;lastUpdatedAt&#34;`      // epoch ms
+    39 	Conversation       []Bubble          `json:&#34;conversation&#34;`       // array of bubbles (old format)
+    40 	OriginalFileStates map[string]interface{} `json:&#34;originalFileStates&#34;` // file:///path -&gt; state (new format)
+    41 	RawJSON            []byte            `json:&#34;-&#34;`                  // original JSON for storage
+    42 }
+    43 
+    44 // Bubble represents a single message in a Cursor conversation
+    45 type Bubble struct {
+    46 	Type       int        `json:&#34;type&#34;`       // 1=user, 2=AI</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   184 
+   185 	return value, nil
+   186 }
+   187 
+   188 // getLastTimestamp finds the most recent timestamp in the conversation
+   189 func getLastTimestamp(data *ComposerData) time.Time {
+   190 	var latest time.Time
+   191 
+   192 	// Check lastUpdatedAt field (new format)
+   193 	if data.LastUpdatedAt &gt; 0 {
+   194 		latest = time.UnixMilli(data.LastUpdatedAt)
+   195 	}
+   196 
+   197 	// Also check conversation bubbles (old format)
+   198 	for _, bubble := range data.Conversation {
+   199 		if bubble.TimingInfo.ClientStartTime &gt; 0 {
+   200 			ts := time.UnixMilli(bubble.TimingInfo.ClientStartTime)
+   201 			if ts.After(latest) {
+   202 				latest = ts
+   203 			}
+   204 		}
+   205 	}
+   206 	return latest
+   207 }
+   208 
+   209 // extractWorkspacePath derives the workspace path from file paths in the conversation
+   210 func extractWorkspacePath(data *ComposerData) string {
+   211 	var paths []string</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   205 	}
+   206 	return latest
+   207 }
+   208 
+   209 // extractWorkspacePath derives the workspace path from file paths in the conversation
+   210 func extractWorkspacePath(data *ComposerData) string {
+   211 	var paths []string
+   212 
+   213 	// New format: extract from originalFileStates (keys are file:///path URIs)
+   214 	for uri := range data.OriginalFileStates {
+   215 		if strings.HasPrefix(uri, &#34;file://&#34;) {
+   216 			// Convert file:///Users/... to /Users/...
+   217 			path := strings.TrimPrefix(uri, &#34;file://&#34;)
+   218 			if path != &#34;&#34; {
+   219 				paths = append(paths, path)
+   220 			}
+   221 		}
+   222 	}
+   223 
+   224 	// Old format: extract from conversation bubbles
+   225 	for _, bubble := range data.Conversation {
+   226 		// Collect file paths from codeBlocks
+   227 		for _, cb := range bubble.CodeBlocks {
+   228 			if cb.URI.FSPath != &#34;&#34; {
+   229 				paths = append(paths, cb.URI.FSPath)
+   230 			}
+   231 		}
+   232 
+   233 		// Collect file paths from checkpoints
+   234 		if bubble.Checkpoint != nil {
+   235 			for _, f := range bubble.Checkpoint.Files {
+   236 				if f.URI.FSPath != &#34;&#34; {
+   237 					paths = append(paths, f.URI.FSPath)
+   238 				}
+   239 			}
+   240 		}
+   241 	}
+   242 
+   243 	if len(paths) == 0 {
+   244 		return &#34;&#34;
+   245 	}
+   246 
+   247 	// Find common ancestor directory
+   248 	common := findCommonAncestor(paths)
+   249 	if common == &#34;&#34; {
+   250 		return &#34;&#34;
+   251 	}
+   252 
+   253 	// Walk up to find .git directory (repo root)
+   254 	return findGitRoot(common)
+   255 }
+   256 
+   257 // findCommonAncestor finds the longest common directory prefix of all paths
+   258 func findCommonAncestor(paths []string) string {
+   259 	if len(paths) == 0 {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I need to update `ReadTranscript` to include the bubbles from separate keys:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   165 
+   166 	return sessions, nil
+   167 }
+   168 
+   169 // ReadTranscript reads the raw JSON content for storage
+   170 // This combines composerData with all associated bubbles
+   171 func (p *Provider) ReadTranscript(sess provider.RawSession) ([]byte, error) {
+   172 	dbPath := GetDBPath()
+   173 
+   174 	db, err := sql.Open(&#34;sqlite&#34;, dbPath&#43;&#34;?mode=ro&#34;)
+   175 	if err != nil {
+   176 		return nil, err
+   177 	}
+   178 	defer db.Close()
+   179 
+   180 	// Read main composer data
+   181 	var composerValue []byte
+   182 	err = db.QueryRow(`SELECT value FROM cursorDiskKV WHERE key = ?`, sess.Path).Scan(&amp;composerValue)
+   183 	if err != nil {
+   184 		return nil, err
+   185 	}
+   186 
+   187 	// Parse composer data
+   188 	var data map[string]interface{}
+   189 	if err := json.Unmarshal(composerValue, &amp;data); err != nil {
+   190 		return composerValue, nil // Return as-is if we can&#39;t parse
+   191 	}
+   192 
+   193 	// Fetch associated bubbles (stored separately in new Cursor format)
+   194 	bubbleRows, err := db.Query(`SELECT value FROM cursorDiskKV WHERE key LIKE ?`, &#34;bubbleId:&#34;&#43;sess.ID&#43;&#34;:%&#34;)
+   195 	if err == nil {
+   196 		defer bubbleRows.Close()
+   197 		var bubbles []map[string]interface{}
+   198 		for bubbleRows.Next() {
+   199 			var bubbleValue []byte
+   200 			if bubbleRows.Scan(&amp;bubbleValue) == nil {
+   201 				var bubble map[string]interface{}
+   202 				if json.Unmarshal(bubbleValue, &amp;bubble) == nil {
+   203 					bubbles = append(bubbles, bubble)
+   204 				}
+   205 			}
+   206 		}
+   207 		if len(bubbles) &gt; 0 {
+   208 			// Add bubbles to data for storage
+   209 			data[&#34;_bubbles&#34;] = bubbles
+   210 		}
+   211 	}
+   212 
+   213 	// Re-encode with bubbles included
+   214 	return json.Marshal(data)
+   215 }
+   216 
+   217 // getLastTimestamp finds the most recent timestamp in...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me update the Cursor parser to handle the `_bubbles` field:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/cursor/cursor.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    18 func (p *Parser) Name() string {
+    19 	return &#34;cursor&#34;
+    20 }
+    21 
+    22 // ComposerData represents the structure of Cursor&#39;s composerData entries
+    23 type ComposerData struct {
+    24 	ComposerID   string   `json:&#34;composerId&#34;`
+    25 	CreatedAt    int64    `json:&#34;createdAt&#34;`
+    26 	Conversation []Bubble `json:&#34;conversation&#34;`
+    27 	Bubbles      []Bubble `json:&#34;_bubbles&#34;` // Bubbles from separate keys (new format)
+    28 }
+    29 
+    30 // Bubble represents a single message in a Cursor conversation
+    31 type Bubble struct {
+    32 	Type       int        `json:&#34;type&#34;` // 1=user, 2=AI</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/cursor/cursor.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    39 type TimingInfo struct {
+    40 	ClientStartTime int64 `json:&#34;clientStartTime&#34;` // epoch ms
+    41 }
+    42 
+    43 // Parse converts Cursor JSON content to unified entries
+    44 func (p *Parser) Parse(content []byte, startWork, endWork time.Time) ([]parser.UnifiedEntry, error) {
+    45 	var data ComposerData
+    46 	if err := json.Unmarshal(content, &amp;data); err != nil {
+    47 		return nil, err
+    48 	}
+    49 
+    50 	// Combine bubbles from both old and new format
+    51 	allBubbles := append(data.Conversation, data.Bubbles...)
+    52 
+    53 	var result []parser.UnifiedEntry
+    54 	for _, bubble := range allBubbles {
+    55 		// Get timestamp
+    56 		var ts time.Time
+    57 		if bubble.TimingInfo.ClientStartTime &gt; 0 {
+    58 			ts = time.UnixMilli(bubble.TimingInfo.ClientStartTime)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/cursor/cursor.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/parser/cursor/cursor.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    91 
+    92 	return result, nil
+    93 }
+    94 
+    95 // CountUserActions counts user actions in the content
+    96 func (p *Parser) CountUserActions(content []byte, startWork, endWork time.Time) int {
+    97 	var data ComposerData
+    98 	if err := json.Unmarshal(content, &amp;data); err != nil {
+    99 		return 0
+   100 	}
+   101 
+   102 	// Combine bubbles from both old and new format
+   103 	allBubbles := append(data.Conversation, data.Bubbles...)
+   104 
+   105 	count := 0
+   106 	for _, bubble := range allBubbles {
+   107 		if bubble.Type != 1 { // Only count user messages
+   108 			continue
+   109 		}
+   110 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build . &amp;&amp; go test ./... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">?   	github.com/QuesmaOrg/git-prompt-story	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/cmd	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/ci	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/cloud	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/display	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/explain	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/git	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/hooks	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/note	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/parser	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/parser/claude	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/provider	[no test files]
+?   	github.com/QuesmaOrg/git-prompt-story/internal/provider/claude	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	5.841s
+?   	github.com/QuesmaOrg/git-prompt-story/internal/repair	[no test files]
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/scrubber	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/session	(cached)
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/show	(cached)
+?   	github.com/QuesmaOrg/git-prompt-story/internal/workflow	[no test files]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now let me test if we can find the git-prompt-story Cursor session:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v -run TestDiscoverSessions ./internal/provider/cursor/... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestDiscoverSessions
+    cursor_test.go:35: Found 323 Cursor sessions for /&lt;REDACTED&gt;/my_repos/quesma
+--- PASS: TestDiscoverSessions (5.78s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	6.041s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor_test.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story/internal/provider/cursor/cursor_test.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     6 	&#34;testing&#34;
+     7 	&#34;time&#34;
+     8 )
+     9 
+    10 func TestDiscoverSessions(t *testing.T) {
+    11 	// Skip if Cursor DB doesn&#39;t exist
+    12 	dbPath := GetDBPath()
+    13 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+    14 		t.Skip(&#34;Cursor database not found, skipping test&#34;)
+    15 	}
+    16 
+    17 	p := &amp;Provider{}
+    18 	// Use current directory as repo path (this test file is in a git repo)
+    19 	repoPath, _ := os.Getwd()
+    20 	// Go up to the repo root (git-prompt-story)
+    21 	for i := 0; i &lt; 4; i&#43;&#43; {
+    22 		repoPath = filepath.Dir(repoPath)
+    23 	}
+    24 
+    25 	startWork := time.Now().Add(-365 * 24 * time.Hour) // 1 year ago
+    26 	endWork := time.Now()
+    27 
+    28 	sessions, err := p.DiscoverSessions(repoPath, startWork, endWork)
+    29 	if err != nil {
+    30 		t.Errorf(&#34;DiscoverSessions failed: %v&#34;, err)
+    31 	}
+    32 
+    33 	// This test just verifies the function runs without error
+    34 	// It may or may not find sessions depending on the machine
+    35 	t.Logf(&#34;Found %d Cursor sessions for %s&#34;, len(sessions), repoPath)
+    36 }
+    37 
+    38 func TestDiscoverSessionsGitPromptStory(t *testing.T) {
+    39 	// Skip if Cursor DB doesn&#39;t exist
+    40 	dbPath := GetDBPath()
+    41 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+    42 		t.Skip(&#34;Cursor database not found, skipping test&#34;)
+    43 	}
+    44 
+    45 	p := &amp;Provider{}
+    46 	repoPath := &#34;/&lt;REDACTED&gt;/my_repos/quesma/git-prompt-story&#34;
+    47 	startWork := time.Now().Add(-365 * 24 * time.Hour)
+    48 	endWork := time.Now()
+    49 
+    50 	sessions, err := p.DiscoverSessions(repoPath, startWork, endWork)
+    51 	if err != nil {
+    52 		t.Errorf(&#34;DiscoverSessions failed: %v&#34;, err)
+    53 	}
+    54 
+    55 	t.Logf(&#34;Found %d Cursor sessions for git-prompt-story&#34;, len(sessions))
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go test -v -run TestDiscoverSessionsGitPromptStory ./internal/provider/cursor/... 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">=== RUN   TestDiscoverSessionsGitPromptStory
+    cursor_test.go:55: Found 1 Cursor sessions for git-prompt-story
+    cursor_test.go:57:   - 08c579f1: 2026-01-10 14:04 - 2026-01-10 15:21
+--- PASS: TestDiscoverSessionsGitPromptStory (5.24s)
+PASS
+ok  	github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor	5.580s</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it! **Session `08c579f1`** - &#34;The commit concept&#34; (2026-01-10 14:04 - 15:21) with 16 user prompts about README improvements.
+
+Let me commit this fix:</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">rm /tmp/find_gps*.go 2&gt;/dev/null; git add -A &amp;&amp; git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/cursor-support
+Your branch is up to date with &#39;origin/feature/cursor-support&#39;.
+
+Changes to be committed:
+  (use &#34;git restore --staged &lt;file&gt;...&#34; to unstage)
+	modified:   internal/parser/cursor/cursor.go
+	modified:   internal/provider/cursor/cursor.go
+	modified:   internal/provider/cursor/cursor_test.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">16:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix Cursor provider to handle new bubble storage format
+
+Cursor now stores bubbles separately as bubbleId:composerId:bubbleId keys
+instead of in the conversation array. This update:
+
+- Extract file paths from originalFileStates field (new format)
+- Use lastUpdatedAt for modified time
+- Fetch bubbles from separate keys and combine in ReadTranscript
+- Update parser to handle _bubbles field
+
+Tested: Found 1 Cursor session for git-prompt-story (&#34;The commit concept&#34;)
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
