@@ -4,18 +4,31 @@ import (
 	"fmt"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
+	"github.com/QuesmaOrg/git-prompt-story/internal/provider"
 	"github.com/QuesmaOrg/git-prompt-story/internal/scrubber"
-	"github.com/QuesmaOrg/git-prompt-story/internal/session"
 )
 
-// StoreTranscripts stores session transcripts in the transcript tree
+// TranscriptBlob represents a stored transcript blob
+type TranscriptBlob struct {
+	Tool string // Tool name (e.g., "claude-code", "cursor")
+	ID   string // Session/composer ID
+	SHA  string // Git blob SHA
+	Ext  string // File extension (e.g., ".jsonl", ".json")
+}
+
+// StoreTranscriptsMulti stores session transcripts from multiple providers
 // If scrub is not nil, PII is scrubbed from content before storing
-// Returns map of session ID -> blob SHA
-func StoreTranscripts(sessions []session.ClaudeSession, scrub scrubber.Scrubber) (map[string]string, error) {
-	blobs := make(map[string]string)
+// Returns list of stored transcript blobs
+func StoreTranscriptsMulti(sessions []provider.RawSession, scrub scrubber.Scrubber) ([]TranscriptBlob, error) {
+	var blobs []TranscriptBlob
 
 	for _, s := range sessions {
-		content, err := session.ReadSessionContent(s.Path)
+		p := provider.Get(s.Tool)
+		if p == nil {
+			continue // Skip unknown providers
+		}
+
+		content, err := p.ReadTranscript(s)
 		if err != nil {
 			continue // Skip files we can't read
 		}
@@ -32,67 +45,98 @@ func StoreTranscripts(sessions []session.ClaudeSession, scrub scrubber.Scrubber)
 		if err != nil {
 			return nil, err
 		}
-		blobs[s.ID] = sha
+
+		blobs = append(blobs, TranscriptBlob{
+			Tool: s.Tool,
+			ID:   s.ID,
+			SHA:  sha,
+			Ext:  p.FileExtension(),
+		})
 	}
 
 	return blobs, nil
 }
 
-// UpdateTranscriptTree updates the transcript tree ref with transcripts
-func UpdateTranscriptTree(blobs map[string]string) error {
-	// Build tree entries for claude-code/
-	var claudeEntries []git.TreeEntry
-	for id, sha := range blobs {
-		claudeEntries = append(claudeEntries, git.TreeEntry{
-			Mode: "100644",
-			Type: "blob",
-			SHA:  sha,
-			Name: id + ".jsonl",
-		})
+// UpdateTranscriptTreeMulti updates the transcript tree ref with transcripts from multiple tools
+func UpdateTranscriptTreeMulti(blobs []TranscriptBlob) error {
+	if len(blobs) == 0 {
+		return nil
 	}
 
-	// Check if we already have a transcript tree to merge with
+	// Group blobs by tool
+	toolBlobs := make(map[string][]TranscriptBlob)
+	for _, b := range blobs {
+		toolBlobs[b.Tool] = append(toolBlobs[b.Tool], b)
+	}
+
+	// Read existing tree to merge with
+	existingSubtrees := make(map[string]string) // tool -> tree SHA
 	existingTreeSHA, _ := git.GetRef(TranscriptsRef)
 	if existingTreeSHA != "" {
-		// Read existing tree
 		rootEntries, err := git.ReadTree(existingTreeSHA)
 		if err == nil {
-			// Find existing claude-code subtree
 			for _, entry := range rootEntries {
-				if entry.Name == "claude-code" && entry.Type == "tree" {
-					// Read existing claude-code entries
-					existingClaudeEntries, err := git.ReadTree(entry.SHA)
-					if err == nil {
-						// Merge: add existing entries that aren't being replaced
-						existingIDs := make(map[string]bool)
-						for _, e := range claudeEntries {
-							existingIDs[e.Name] = true
-						}
-						for _, e := range existingClaudeEntries {
-							if !existingIDs[e.Name] {
-								claudeEntries = append(claudeEntries, e)
-							}
-						}
-					}
-					break
+				if entry.Type == "tree" {
+					existingSubtrees[entry.Name] = entry.SHA
 				}
 			}
 		}
 	}
 
-	// Create claude-code subtree
-	claudeCodeTreeSHA, err := git.CreateTree(claudeEntries)
-	if err != nil {
-		return err
+	// Build subtrees for each tool
+	var rootEntries []git.TreeEntry
+	for tool, tblobs := range toolBlobs {
+		// Build entries for this tool
+		var entries []git.TreeEntry
+		newIDs := make(map[string]bool)
+		for _, b := range tblobs {
+			entries = append(entries, git.TreeEntry{
+				Mode: "100644",
+				Type: "blob",
+				SHA:  b.SHA,
+				Name: b.ID + b.Ext,
+			})
+			newIDs[b.ID+b.Ext] = true
+		}
+
+		// Merge with existing entries for this tool
+		if existingSHA, ok := existingSubtrees[tool]; ok {
+			existingEntries, err := git.ReadTree(existingSHA)
+			if err == nil {
+				for _, e := range existingEntries {
+					if !newIDs[e.Name] {
+						entries = append(entries, e)
+					}
+				}
+			}
+			delete(existingSubtrees, tool) // Mark as handled
+		}
+
+		// Create subtree
+		subtreeSHA, err := git.CreateTree(entries)
+		if err != nil {
+			return err
+		}
+
+		rootEntries = append(rootEntries, git.TreeEntry{
+			Mode: "040000",
+			Type: "tree",
+			SHA:  subtreeSHA,
+			Name: tool,
+		})
 	}
 
-	// Build root tree with claude-code subtree
-	rootEntries := []git.TreeEntry{{
-		Mode: "040000",
-		Type: "tree",
-		SHA:  claudeCodeTreeSHA,
-		Name: "claude-code",
-	}}
+	// Include existing subtrees that weren't updated
+	for tool, sha := range existingSubtrees {
+		rootEntries = append(rootEntries, git.TreeEntry{
+			Mode: "040000",
+			Type: "tree",
+			SHA:  sha,
+			Name: tool,
+		})
+	}
+
+	// Create root tree
 	rootTreeSHA, err := git.CreateTree(rootEntries)
 	if err != nil {
 		return err

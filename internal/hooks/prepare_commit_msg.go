@@ -9,8 +9,15 @@ import (
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
+	"github.com/QuesmaOrg/git-prompt-story/internal/parser"
+	"github.com/QuesmaOrg/git-prompt-story/internal/provider"
 	"github.com/QuesmaOrg/git-prompt-story/internal/scrubber"
-	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+
+	// Import providers and parsers to register them
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/parser/claude"
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor"
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/provider/claude"
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor"
 )
 
 // PrepareCommitMsg implements the prepare-commit-msg hook logic
@@ -49,35 +56,30 @@ func PrepareCommitMsg(msgFile, source, sha, version string) error {
 	endWork := time.Now().UTC()
 	debugLog.log("Work period: %s - %s (now)", startWork.UTC().Format(time.RFC3339), endWork.Format(time.RFC3339))
 
-	// Find Claude Code sessions for this repo (includes time filtering)
-	sessions, err := session.FindSessions(repoRoot, startWork, endWork, nil)
-	if err != nil {
-		// Don't fail the commit, just log
-		fmt.Fprintf(os.Stderr, "git-prompt-story: warning: %v\n", err)
-		debugLog.log("FindSessions error: %v", err)
-		sessions = nil
-	}
-	debugLog.log("FindSessions returned %d sessions", len(sessions))
-	for _, s := range sessions {
-		debugLog.log("  - %s: created=%s, modified=%s", s.ID, s.Created.UTC().Format(time.RFC3339), s.Modified.UTC().Format(time.RFC3339))
-	}
-
-	// Filter to only sessions with actual user messages in work period
-	if len(sessions) > 0 {
-		beforeMsgFilter := len(sessions)
-		sessions = session.FilterSessionsByUserMessages(sessions, startWork, endWork, nil)
-		debugLog.log("FilterSessionsByUserMessages: %d -> %d sessions", beforeMsgFilter, len(sessions))
-
-		for _, s := range sessions {
-			debugLog.log("  - kept: %s", s.ID)
+	// Discover sessions from all registered providers
+	var allSessions []provider.RawSession
+	for _, p := range provider.All() {
+		debugLog.log("Discovering sessions from %s...", p.Name())
+		sessions, err := p.DiscoverSessions(repoRoot, startWork, endWork)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "git-prompt-story: warning: %s discovery failed: %v\n", p.Name(), err)
+			debugLog.log("%s discovery error: %v", p.Name(), err)
+			continue
 		}
+		debugLog.log("%s found %d sessions", p.Name(), len(sessions))
+		for _, s := range sessions {
+			debugLog.log("  - %s: created=%s, modified=%s", s.ID, s.Created.UTC().Format(time.RFC3339), s.Modified.UTC().Format(time.RFC3339))
+		}
+		allSessions = append(allSessions, sessions...)
 	}
+
+	debugLog.log("Total sessions from all providers: %d", len(allSessions))
 
 	pendingFile := filepath.Join(gitDir, "PENDING-PROMPT-STORY")
 
 	var summary string
 
-	if len(sessions) == 0 {
+	if len(allSessions) == 0 {
 		summary = fmt.Sprintf("Prompt-Story: none [%s]", version)
 		// Clean up any stale pending file
 		os.Remove(pendingFile)
@@ -92,18 +94,18 @@ func PrepareCommitMsg(msgFile, source, sha, version string) error {
 		}
 
 		// Store transcripts as blobs (with optional PII scrubbing)
-		blobs, err := note.StoreTranscripts(sessions, piiScrubber)
+		blobs, err := note.StoreTranscriptsMulti(allSessions, piiScrubber)
 		if err != nil {
 			return fmt.Errorf("failed to store transcripts: %w", err)
 		}
 
 		// Update transcript tree ref
-		if err := note.UpdateTranscriptTree(blobs); err != nil {
+		if err := note.UpdateTranscriptTreeMulti(blobs); err != nil {
 			return fmt.Errorf("failed to update transcript tree: %w", err)
 		}
 
 		// Create PromptStoryNote
-		psNote := note.NewPromptStoryNote(sessions, isAmend)
+		psNote := note.NewPromptStoryNoteMulti(allSessions, isAmend)
 		noteJSON, err := psNote.ToJSON()
 		if err != nil {
 			return fmt.Errorf("failed to serialize note: %w", err)
@@ -120,10 +122,8 @@ func PrepareCommitMsg(msgFile, source, sha, version string) error {
 			return fmt.Errorf("failed to write pending file: %w", err)
 		}
 
-		// Count user actions (prompts, commands, tool rejects) for the summary
-		startWork, _ := git.CalculateWorkStartTime(isAmend)
-		endWork := time.Now().UTC()
-		promptCount := session.CountUserActionsInRange(sessions, startWork, endWork)
+		// Count user actions using parsers
+		promptCount := countUserActions(allSessions, startWork, endWork)
 
 		summary = psNote.GenerateSummary(promptCount, version)
 	}
@@ -181,4 +181,28 @@ func (d *debugLogger) log(format string, args ...interface{}) {
 	}
 	defer f.Close()
 	fmt.Fprintf(f, format+"\n", args...)
+}
+
+// countUserActions counts user actions across all sessions using the parser registry
+func countUserActions(sessions []provider.RawSession, startWork, endWork time.Time) int {
+	count := 0
+	for _, sess := range sessions {
+		p := provider.Get(sess.Tool)
+		if p == nil {
+			continue
+		}
+
+		content, err := p.ReadTranscript(sess)
+		if err != nil {
+			continue
+		}
+
+		pr := parser.Get(sess.Tool)
+		if pr == nil {
+			continue
+		}
+
+		count += pr.CountUserActions(content, startWork, endWork)
+	}
+	return count
 }

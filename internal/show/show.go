@@ -8,7 +8,12 @@ import (
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
+	"github.com/QuesmaOrg/git-prompt-story/internal/parser"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+
+	// Import parsers to register them
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/parser/claude"
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor"
 )
 
 // ShowPrompts displays prompts for a given commit or range
@@ -106,83 +111,118 @@ func showSession(sess note.SessionEntry, startWork, endWork time.Time, full bool
 		return false, fmt.Errorf("failed to fetch transcript: %w", err)
 	}
 
-	// Parse messages
-	entries, err := session.ParseMessages(content)
-	if err != nil {
-		return false, fmt.Errorf("failed to parse messages: %w", err)
-	}
-
-	// Collect displayable entries within the work period
+	// Try to use the parser registry for non-Claude tools
 	var displayEntries []displayEntry
-	for _, entry := range entries {
-		// Get timestamp
-		ts := entry.Timestamp
-		if ts.IsZero() && entry.Snapshot != nil {
-			ts = entry.Snapshot.Timestamp
-		}
 
-		// Skip entries outside work period or without timestamp
-		if ts.IsZero() {
-			continue
-		}
-		if ts.Before(startWork) || ts.After(endWork) {
-			continue
-		}
-
-		// Skip meta/system-injected messages
-		if entry.IsMeta {
-			continue
-		}
-
-		// Determine entry type and text to display
-		var entryType, text string
-
-		switch entry.Type {
-		case "user":
-			if entry.Message != nil {
-				text = entry.Message.GetTextContent()
-				if text != "" {
-					entryType = "PROMPT"
+	if sess.Tool != "claude-code" {
+		// Use parser registry for other tools
+		p := parser.Get(sess.Tool)
+		if p != nil {
+			entries, err := p.Parse(content, startWork, endWork)
+			if err == nil {
+				for _, entry := range entries {
+					if entry.IsMeta {
+						continue
+					}
+					var entryType string
+					switch entry.Type {
+					case parser.EntryUser:
+						if entry.Text != "" {
+							entryType = "PROMPT"
+						}
+					case parser.EntryToolResult:
+						if entry.Rejected {
+							entryType = "TOOL_REJECT"
+						}
+					}
+					if entryType != "" {
+						displayEntries = append(displayEntries, displayEntry{
+							ts:        entry.Time,
+							entryType: entryType,
+							text:      entry.Text,
+						})
+					}
 				}
 			}
-		case "tool_reject":
-			entryType = "TOOL_REJECT"
-			if entry.Message != nil {
-				text = entry.Message.GetTextContent()
-			}
-			if text == "" {
-				text = "User rejected tool call"
-			}
+		}
+	} else {
+		// Use existing Claude Code parsing
+		entries, err := session.ParseMessages(content)
+		if err != nil {
+			return false, fmt.Errorf("failed to parse messages: %w", err)
 		}
 
-		// Check for user commands (messages starting with <command-name>)
-		if entry.Type == "user" && entry.Message != nil {
-			msgText := entry.Message.GetTextContent()
-			if strings.HasPrefix(msgText, "<command-name>") {
-				// Extract command name
-				start := strings.Index(msgText, "<command-name>") + len("<command-name>")
-				end := strings.Index(msgText, "</command-name>")
-				if end > start {
-					cmdName := msgText[start:end]
-					// Remove leading slash if present (command names may include it)
-					cmdName = strings.TrimPrefix(cmdName, "/")
-					entryType = "COMMAND"
-					text = "/" + cmdName
+		// Collect displayable entries within the work period
+		for _, entry := range entries {
+			// Get timestamp
+			ts := entry.Timestamp
+			if ts.IsZero() && entry.Snapshot != nil {
+				ts = entry.Snapshot.Timestamp
+			}
+
+			// Skip entries outside work period or without timestamp
+			if ts.IsZero() {
+				continue
+			}
+			if ts.Before(startWork) || ts.After(endWork) {
+				continue
+			}
+
+			// Skip meta/system-injected messages
+			if entry.IsMeta {
+				continue
+			}
+
+			// Determine entry type and text to display
+			var entryType, text string
+
+			switch entry.Type {
+			case "user":
+				if entry.Message != nil {
+					text = entry.Message.GetTextContent()
+					if text != "" {
+						entryType = "PROMPT"
+					}
+				}
+			case "tool_reject":
+				entryType = "TOOL_REJECT"
+				if entry.Message != nil {
+					text = entry.Message.GetTextContent()
+				}
+				if text == "" {
+					text = "User rejected tool call"
 				}
 			}
-			// Skip local command output entries
-			if strings.HasPrefix(msgText, "<local-command-stdout>") {
-				entryType = ""
-				text = ""
-			}
-		}
 
-		if entryType != "" {
-			displayEntries = append(displayEntries, displayEntry{
-				ts:       ts,
-				entryType: entryType,
-				text:     text,
-			})
+			// Check for user commands (messages starting with <command-name>)
+			if entry.Type == "user" && entry.Message != nil {
+				msgText := entry.Message.GetTextContent()
+				if strings.HasPrefix(msgText, "<command-name>") {
+					// Extract command name
+					start := strings.Index(msgText, "<command-name>") + len("<command-name>")
+					end := strings.Index(msgText, "</command-name>")
+					if end > start {
+						cmdName := msgText[start:end]
+						// Remove leading slash if present (command names may include it)
+						cmdName = strings.TrimPrefix(cmdName, "/")
+						entryType = "COMMAND"
+						text = "/" + cmdName
+					}
+				}
+				// Skip local command output entries
+				if strings.HasPrefix(msgText, "<local-command-stdout>") {
+					entryType = ""
+					text = ""
+				}
+			}
+
+			if entryType != "" {
+				displayEntries = append(displayEntries, displayEntry{
+					ts:        ts,
+					entryType: entryType,
+					text:      text,
+				})
+			}
 		}
 	}
 

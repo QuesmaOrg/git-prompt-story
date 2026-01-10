@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
-	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+	"github.com/QuesmaOrg/git-prompt-story/internal/provider"
 )
 
 // PromptStoryNote is the JSON structure stored as a git note on commits
@@ -27,10 +27,10 @@ type SessionEntry struct {
 	Modified time.Time `json:"modified"`
 }
 
-// NewPromptStoryNote creates a new note from discovered sessions
+// NewPromptStoryNoteMulti creates a new note from discovered sessions across multiple providers
 // isAmend should be true when amending a commit (affects start_work calculation)
 // Optional startTime can be provided to use an explicit start time instead of calculating from git
-func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool, startTime ...time.Time) *PromptStoryNote {
+func NewPromptStoryNoteMulti(sessions []provider.RawSession, isAmend bool, startTime ...time.Time) *PromptStoryNote {
 	n := &PromptStoryNote{
 		Version:  1,
 		Sessions: make([]SessionEntry, 0, len(sessions)),
@@ -44,10 +44,15 @@ func NewPromptStoryNote(sessions []session.ClaudeSession, isAmend bool, startTim
 	}
 
 	for _, s := range sessions {
+		p := provider.Get(s.Tool)
+		ext := ".jsonl"
+		if p != nil {
+			ext = p.FileExtension()
+		}
 		n.Sessions = append(n.Sessions, SessionEntry{
-			Tool:     "claude-code",
+			Tool:     s.Tool,
 			ID:       s.ID,
-			Path:     GetTranscriptPath("claude-code", s.ID),
+			Path:     GetTranscriptPathWithExt(s.Tool, s.ID, ext),
 			Created:  s.Created,
 			Modified: s.Modified,
 		})
@@ -86,6 +91,11 @@ func (n *PromptStoryNote) GenerateSummary(promptCount int, version string) strin
 // GetTranscriptPath returns the path within the transcript tree for a session
 func GetTranscriptPath(tool, sessionID string) string {
 	return fmt.Sprintf("%s/%s.jsonl", tool, sessionID)
+}
+
+// GetTranscriptPathWithExt returns the path with a specific file extension
+func GetTranscriptPathWithExt(tool, sessionID, ext string) string {
+	return fmt.Sprintf("%s/%s%s", tool, sessionID, ext)
 }
 
 // FormatToolName converts a tool ID to its display name
