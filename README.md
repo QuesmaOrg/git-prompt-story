@@ -261,9 +261,7 @@ It reads the `cursorDiskKV` table where keys start with `composerData:`. The dat
         }
       ],
       "checkpoint": {
-         "files": [
-            { "uri": { "fsPath": "/users/me/repo/main.go" } }
-         ]
+        "files": [{ "uri": { "fsPath": "/users/me/repo/main.go" } }]
       }
     }
   ]
