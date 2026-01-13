@@ -9,33 +9,65 @@ import (
 )
 
 const prepareCommitMsgScript = `#!/bin/sh
-# Chain to original hook if it exists
+# Chain to original hook if it exists (backup from local install)
 if [ -x "$(dirname "$0")/prepare-commit-msg.orig" ]; then
     "$(dirname "$0")/prepare-commit-msg.orig" "$@" || exit $?
+fi
+# Chain to local repo hook (only when running from global hooks, not local)
+GIT_HOOKS_DIR="$(git rev-parse --git-dir 2>/dev/null)/hooks"
+if [ "$(cd "$(dirname "$0")" && pwd)" != "$(cd "$GIT_HOOKS_DIR" 2>/dev/null && pwd)" ]; then
+    LOCAL_HOOK="$GIT_HOOKS_DIR/prepare-commit-msg"
+    if [ -x "$LOCAL_HOOK" ]; then
+        "$LOCAL_HOOK" "$@" || exit $?
+    fi
 fi
 exec git-prompt-story prepare-commit-msg "$@"
 `
 
 const postCommitScript = `#!/bin/sh
-# Chain to original hook if it exists
+# Chain to original hook if it exists (backup from local install)
 if [ -x "$(dirname "$0")/post-commit.orig" ]; then
     "$(dirname "$0")/post-commit.orig" "$@" || exit $?
+fi
+# Chain to local repo hook (only when running from global hooks, not local)
+GIT_HOOKS_DIR="$(git rev-parse --git-dir 2>/dev/null)/hooks"
+if [ "$(cd "$(dirname "$0")" && pwd)" != "$(cd "$GIT_HOOKS_DIR" 2>/dev/null && pwd)" ]; then
+    LOCAL_HOOK="$GIT_HOOKS_DIR/post-commit"
+    if [ -x "$LOCAL_HOOK" ]; then
+        "$LOCAL_HOOK" "$@" || exit $?
+    fi
 fi
 exec git-prompt-story post-commit
 `
 
 const postRewriteScript = `#!/bin/sh
-# Chain to original hook if it exists
+# Chain to original hook if it exists (backup from local install)
 if [ -x "$(dirname "$0")/post-rewrite.orig" ]; then
     "$(dirname "$0")/post-rewrite.orig" "$@" || exit $?
+fi
+# Chain to local repo hook (only when running from global hooks, not local)
+GIT_HOOKS_DIR="$(git rev-parse --git-dir 2>/dev/null)/hooks"
+if [ "$(cd "$(dirname "$0")" && pwd)" != "$(cd "$GIT_HOOKS_DIR" 2>/dev/null && pwd)" ]; then
+    LOCAL_HOOK="$GIT_HOOKS_DIR/post-rewrite"
+    if [ -x "$LOCAL_HOOK" ]; then
+        "$LOCAL_HOOK" "$@" || exit $?
+    fi
 fi
 exec git-prompt-story post-rewrite "$@"
 `
 
 const prePushScript = `#!/bin/sh
-# Chain to original hook if it exists
+# Chain to original hook if it exists (backup from local install)
 if [ -x "$(dirname "$0")/pre-push.orig" ]; then
     "$(dirname "$0")/pre-push.orig" "$@" || exit $?
+fi
+# Chain to local repo hook (only when running from global hooks, not local)
+GIT_HOOKS_DIR="$(git rev-parse --git-dir 2>/dev/null)/hooks"
+if [ "$(cd "$(dirname "$0")" && pwd)" != "$(cd "$GIT_HOOKS_DIR" 2>/dev/null && pwd)" ]; then
+    LOCAL_HOOK="$GIT_HOOKS_DIR/pre-push"
+    if [ -x "$LOCAL_HOOK" ]; then
+        "$LOCAL_HOOK" "$@" || exit $?
+    fi
 fi
 # Pass remote name and URL to git-prompt-story
 # stdin contains ref info, pass it through

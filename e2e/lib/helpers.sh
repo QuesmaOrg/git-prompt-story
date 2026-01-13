@@ -435,3 +435,15 @@ EOF
 
     echo "  Created mock agent session: $session_dir/$session_id.jsonl"
 }
+
+# =============================================================================
+# Global Hooks Test Helpers
+# =============================================================================
+
+# Clean up global hooks configuration and directory
+# Usage: cleanup_global_hooks
+cleanup_global_hooks() {
+    git config --global --unset core.hooksPath 2>/dev/null || true
+    rm -rf ~/.config/git/hooks
+    rm -rf /tmp/custom-hooks
+}
