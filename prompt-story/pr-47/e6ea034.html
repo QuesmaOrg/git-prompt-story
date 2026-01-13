@@ -1,0 +1,3144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e6ea034 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>e6ea034</code></h1>
+    <p class="meta">Fix global hook installation to chain to local repo hooks</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">89</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>e6ea034353733cdeaa4bfd907735fe8a989c3c15</code><br>
+    <strong>Work period:</strong> 2026-01-10 14:45 - 2026-01-13 19:48
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56</code> |
+        2026-01-13 19:19 - 2026-01-13 19:48 | <span class="session-count">88</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:19</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">switch to new feature plan out of origin/main. I suspect that hook installation with --global hook doesn&#39;t really work. Can you write e2e to test for that?</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll explore the codebase to understand the hook installation mechanism and existing e2e test patterns, then plan an e2e test for the `--global` hook installation.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Find and analyze the hook installation code in this project. I need to understand:
+1. How hooks a...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Excellent! I now have a comprehensive understanding of the hook installation system. Let me provide you with a detailed analysis.
+
+## Hook Installation Code Analysis
+
+Based on my investigation, here&#39;s how the hook installation system works in this project:
+
+### 1. **Hook Installation Files**
+
+**Primary Files:**
+- `/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go` - CLI command definition
+- `/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go` - Core hook installation logic
+
+---
+
+### 2. **How Hooks Are Installed**
+
+The installation process has three main steps:
+
+**A. Command Entry Point** (`cmd/install_hooks.go`):
+```go
+var installHooksCmd = &amp;cobra.Command{
+    Use:   &#34;install-hooks&#34;,
+    Short: &#34;Install git hooks for prompt capture&#34;,
+    ...
+}
+
+// Flags
+globalFlag   bool   // --global flag
+autoPushFlag bool   // --auto-push flag
+```
+
+**B. Core Installation Logic** (`internal/hooks/installer.go`):
+
+The `InstallHooks()` function performs these operations:
+
+1. **Determines hook directory** via `getHooksDir()` (based on local vs global)
+2. **Creates the hooks directory** if it doesn&#39;t exist
+3. **Writes 4 hook scripts**:
+   - `prepare-commit-msg` - Captures session info before commit message is finalized
+   - `post-commit` - Creates git notes after commit is made
+   - `post-rewrite` - Preserves notes during rebase/squash operations
+   - `pre-push` - (Optional, only with `--auto-push`) Syncs notes to remote
+
+**C. Hook Script Pattern** - All hooks follow a chaining pattern:
+```sh
+#!/bin/sh
+# Chain to original hook if it exists
+if [ -x &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; ]; then
+    &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; &#34;$@&#34; || exit $?
+fi
+exec git-prompt-story prepare-commit-msg &#34;$@&#34;
+```
+
+This ensures **existing custom hooks still run** before the git-prompt-story hooks.
+
+---
+
+### 3. **The `--global` Flag Mechanism**
+
+The `--global` flag changes where hooks are installed by leveraging Git&#39;s **`core.hooksPath`** configuration:
+
+**Local Installation...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the e2e test directory and understand:
+1. How e2e tests are structured in this project
+2....</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Now I have a comprehensive understanding of the e2e test structure. Let me provide a detailed summary:
+
+## E2E Testing Structure Summary
+
+Based on my exploration of the `/&lt;REDACTED&gt;/git/git-prompt-story/e2e/` directory, here&#39;s a complete understanding of how e2e tests are structured:
+
+### 1. Test Architecture Overview
+
+**Test Runner** (`/e2e/run-tests.sh`):
+- Simple bash script that runs all test files in `/e2e/tests/` sequentially
+- Tracks PASSED/FAILED counts
+- Uses Docker container for isolated test environment
+- Sources shared helper functions
+
+**Docker Container** (`/e2e/Dockerfile`):
+- Alpine Linux with Go 1.24
+- Installs critical tools: `git`, `bash`, `jq`, `libfaketime`, `socat`
+- Builds the binary and configures git globally
+- Sets working directory to `/workspace` for tests
+- Runs `/e2e/lib/runner.sh` as entry point
+
+### 2. Test Helpers Library (`/e2e/lib/helpers.sh`)
+
+The helpers file (19KB) provides essential test utilities organized into sections:
+
+**Basic Functions**:
+- `fail()` - Exit with error message
+- `init_test_repo()` - Create fresh test repository at specified path
+
+**Session Creation Helpers**:
+- `create_mock_session()` - Basic Claude Code session with JSONL format
+- `create_mock_session_with_long_prompt()` - Session with prompts &gt; 250 chars
+- `create_mock_session_with_tools()` - Session with tool uses (Read, Edit, commits)
+- `create_mock_session_for_path()` - Session for specific project path
+- `create_stale_session()` - Session with user messages before work period but assistant response within
+- `create_mock_agent_session()` - Sessions with &#34;agent-&#34; prefix
+- `create_mock_session_for_subfolder()` - Session from repo subfolder
+- `create_mock_session_for_parent_dir()` - Session from parent directory
+- `cleanup_sessions()` - Remove all mock sessions
+
+**Cloud API Mocking**:
+- `setup_mock_credentials()` - Creates fake security command and `.claude.json`
+- `create_mock_cloud_session()` - Creates mock API response files
+- `start_mock_api()` - St...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me read the existing hook installation tests and the installer code to understand exactly what needs to be tested for `--global`.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/13-hook-installation.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/14-pre-push-hook.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:20</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me also check the helpers file for session creation utilities and Docker setup.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/Dockerfile</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:20</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I have a complete understanding. Let me write the plan for the e2e test.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:21</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me get a second opinion from a Plan agent to validate the test design.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:21</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">I&#39;m planning an e2e test for the `--global` flag of `git-prompt-story install-hooks`.
+
+Context:
+-...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Now I have a comprehensive understanding of the codebase. Let me provide my analysis.
+
+---
+
+## Analysis and Recommendations for Global Hook Installation E2E Test
+
+### 1. Edge Cases You Are Missing
+
+Based on my review of the installer code (`internal/hooks/installer.go`) and existing tests, here are important edge cases:
+
+**a) Pre-existing `core.hooksPath` configuration**
+- The installer checks if `core.hooksPath` is already set globally (lines 99-106 in `installer.go`)
+- If already set, it uses that path instead of `~/.config/git/hooks`
+- You should test both scenarios:
+  - Fresh install (no existing `core.hooksPath`)
+  - Install when `core.hooksPath` is already configured to a custom location
+
+**b) Path expansion with `~`**
+- The `expandPath()` function handles `~/` prefix (lines 161-167)
+- Test that hooks work correctly when `core.hooksPath` contains `~` vs absolute path
+
+**c) Multiple repos scenario**
+- Global hooks should work across multiple separate repositories
+- Test that a commit in repo A with global hooks, then a commit in repo B (also using global hooks) both work correctly
+
+**d) Interaction between `--global` and `--auto-push`**
+- You should verify that `--global --auto-push` installs the pre-push hook in the global hooks directory
+
+**e) Non-existent global hooks directory**
+- The code creates `~/.config/git/hooks` if it does not exist (line 59)
+- Test this case explicitly
+
+### 2. Potential Issues with the Test Approach
+
+**a) CRITICAL: Git&#39;s hook precedence behavior is OPPOSITE to what you stated**
+- When `core.hooksPath` is set, Git uses ONLY that directory - it does NOT fall back to `.git/hooks`
+- Your test case &#34;Test that global hooks take precedence over local .git/hooks&#34; is actually the ONLY behavior - local `.git/hooks` are completely ignored when `core.hooksPath` is set
+- This is an important distinction: global hooks do not &#34;take precedence&#34; - they **replace** local hooks entirely
+
+**b) Docker environment quirks**
+- The Dockerfile sets `git c...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Excellent analysis. Let me update the plan with these insights.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: E2E Test for Global Hook Installation
+     2 
+     3 ## Problem Statement
+     4 The `--global` flag for `install-hooks` is not tested. User suspects it may not work correctly.
+     5 
+     6 ## How Global Installation Works
+     7 From `internal/hooks/installer.go`:
+     8 1. Checks if `core.hooksPath` is already set globally
+     9 2. If not, sets it to `~/.config/git/hooks`
+    10 3. Installs hooks to that directory
+    11 4. These hooks then apply to **all** git repositories on the system
+    12 
+    13 **Important git behavior:** When `core.hooksPath` is set, local `.git/hooks/` are completely **ignored** - not overridden, but excluded entirely.
+    14 
+    15 ## Test Strategy
+    16 The key verification is that hooks work in a **different** repository than where `install-hooks --global` was run.
+    17 
+    18 ## New Test File: `e2e/tests/21-global-hook-installation.sh`
+    19 
+    20 ### Test 1: Fresh global install sets config and creates hooks
+    21 - Clean up any existing global hooks config
+    22 - Run `git-prompt-story install-hooks --global`
+    23 - Verify `git config --global --get core.hooksPath` returns `~/.config/git/hooks`
+    24 - Verify all hooks exist: `prepare-commit-msg`, `post-commit`, `post-rewrite`
+    25 - Verify hooks contain the `git-prompt-story` marker
+    26 
+    27 ### Test 2: Global hooks work in a fresh repository
+    28 - Keep global hooks from Test 1
+    29 - Create a **new** git repo (without running `install-hooks`)
+    30 - Verify `.git/hooks` has no our hooks
+    31 - Create a mock session
+    32 - Make a commit with faketime
+    33 - Verify `Prompt-Story:` marker in commit message (prepare-commit-msg hook ran)
+    34 - Verify git note exists on commit (post-commit hook ran)
+    35 
+    36 ### Test 3: Local .git/hooks are IGNORED when global hooks active
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The plan is complete. It covers:
+- 6 test cases including edge cases identified during analysis
+- Helper function for cleanup
+- Key insight about git&#39;s behavior with `core.hooksPath`</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;allowedPrompts&#34;:[{&#34;prompt&#34;:&#34;run e2e tests&#34;,&#34;tool&#34;:&#34;Bash&#34;}],&#34;plan&#34;:&#34;# Plan: E2E Test for Global Hook Installation\n\n## Problem Statement\nThe `--global` flag for `install-hooks` is not tested. Us...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_REJECT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:25</span>
+          <span class="prompt-type">TOOL_REJECT</span>
+          
+          <span class="prompt-text">Ok, before doing test, is it even a good pattern to rewrite core.hooksPath globally and does it really work or per repo, do online research on similar projects.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good question - let me research how other projects handle global git hooks and whether `core.hooksPath` is the right approach.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">WebSearch</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git core.hooksPath global hooks best practice 2025</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Web search results for query: &#34;git core.hooksPath global hooks best practice 2025&#34;
+
+Links: [{&#34;title&#34;:&#34;Git - githooks Documentation&#34;,&#34;url&#34;:&#34;https://git-scm.com/docs/githooks&#34;},{&#34;title&#34;:&#34;Git Hooks Complete Guide: Installation, Usage, and Tips | DataCamp&#34;,&#34;url&#34;:&#34;https://www.datacamp.com/tutorial/git-hooks-complete-guide&#34;},{&#34;title&#34;:&#34;GitHub - pivotal-cf/git-hooks-core: An opinionated use of the core.hooksPath feature released in Git 2.9.&#34;,&#34;url&#34;:&#34;https://github.com/pivotal-cf/git-hooks-core&#34;},{&#34;title&#34;:&#34;Standardize git hooks across a repository | Bitbucket Cloud | Atlassian Support&#34;,&#34;url&#34;:&#34;https://support.atlassian.com/bitbucket-cloud/kb/standardize-git-hooks-across-a-repository/&#34;},{&#34;title&#34;:&#34;GitHub - secretlint/git-hooks: Global git hooks integration example&#34;,&#34;url&#34;:&#34;https://github.com/secretlint/git-hooks&#34;},{&#34;title&#34;:&#34;If git core.hooksPath is set, hk doesn&#39;t work · jdx/hk · Discussion #385&#34;,&#34;url&#34;:&#34;https://github.com/jdx/hk/discussions/385&#34;},{&#34;title&#34;:&#34;Git Hooks: How to Fix `core.hooksPath` Not Working – Troubleshooting Custom Pre-Commit Hooks Not Running&#34;,&#34;url&#34;:&#34;https://www.tutorialpedia.org/blog/git-hooks-applying-git-config-core-hookspath/&#34;},{&#34;title&#34;:&#34;GitHub - gabyx/Githooks: 🦎 Githooks: per-repo and shared Git hooks with version control and auto update. [✩Star] if you&#39;re using it!&#34;,&#34;url&#34;:&#34;https://github.com/gabyx/Githooks&#34;},{&#34;title&#34;:&#34;Tip: Share a Git Hooks Directory Across Your Repositories&#34;,&#34;url&#34;:&#34;https://community.dynamics.com/blogs/post/?postid=6c45f84a-1174-44d1-b6ec-aea42903163f&#34;},{&#34;title&#34;:&#34;GitHub - rycus86/githooks: Githooks: per-repo and global Git hooks with version control&#34;,&#34;url&#34;:&#34;https://github.com/rycus86/githooks&#34;}]
+
+Links: [{&#34;title&#34;:&#34;Git - githooks Documentation&#34;,&#34;url&#34;:&#34;https://git-scm.com/docs/githooks&#34;},{&#34;title&#34;:&#34;Git Hooks Complete Guide: Installation, Usage, and Tips | DataCamp&#34;,&#34;url&#34;:&#34;https://www.datacamp.com/tutorial/git-hooks-complete-guide&#34;},{&#34;title&#34;:&#34;GitHub - pivotal-cf/git-hooks-core: An opinionated use of the core.hooksPath feature relea...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">WebSearch</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">pre-commit husky global git hooks installation pattern</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Web search results for query: &#34;pre-commit husky global git hooks installation pattern&#34;
+
+Links: [{&#34;title&#34;:&#34;How To | Husky&#34;,&#34;url&#34;:&#34;https://&lt;CREDENTIALS&gt;@shubhi15sood/installing-husky-in-a-subfolder-and-configuring-pre-commit-commit-msg-hooks-225541a43467&#34;},{&#34;title&#34;:&#34;Configuration for Husky &#43; pre-commit - DEV Community&#34;,&#34;url&#34;:&#34;https://&lt;CREDENTIALS&gt;@shubhi15sood/installing-husky-in-a-subfolder-and-configuring-pre-commit-commit-msg-hooks-225541a43467&#34;},{&#34;title&#34;:&#34;Configuration for Husky &#43; pre-commit - DEV Community&#34;,&#34;url&#34;:&#34;https://dev.to/maithanhdanh/configuration-for-husky-pre-commit-1fo5&#34;},{&#34;title&#34;:&#34;How to set up a pre-commit Git hook with Husky and lint-staged - Olivia Coumans&#34;,&#34;url&#34;:&#34;https://oliviac.dev/blog/set_up_pre_commit_hook_husky_lint_staged/&#34;},{&#34;title&#34;:&#34;Getting Started with Git Hooks and Husky | Tower Blog&#34;,&#34;url&#34;:&#34;https://www.git-tower.com/blog/git-hooks-husky&#34;},{&#34;title&#34;:&#34;pre-commit&#34;,&#34;url&#34;:&#34;https://pre-commit.com/&#34;},{&#34;title&#34;:&#34;Install Husky in your project for proper commit lint with pre-commit hooks - DEV Community&#34;,&#34;url&#34;:&#34;https://dev.to/mahmudulhsn/install-husky-in-your-project-for-proper-commit-lint-with-pre-commit-hooks-25b2&#34;}]
+
+Here are the search results for pre-commit husky global git hooks installation patterns:
+
+## Husky Installation &amp; Setup
+
+Husky is a project that allows us to run scripts (hooks) before some git commands. The most common one is a pre-commit hook, which means a set of commands that can be run before a git commit.
+
+### Basic Installation
+
+Install Husky as a dev dependency: `npm install --save-dev husky` - it&#39;s a dev dependency because you only need it locally.(no content)Once installed, initialize it with `npx husky init`. This adds a folder into your root with the name husky. Inside this you will find a file called pre-commit.
+
+### How Husky Works
+
+When husky is installed, it runs a script that updates the .git/config file by setting the core.hooksPath to the .husky directory. This tells Git to look in .husky for hook scripts inste...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:25</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me dig deeper into how the more sophisticated projects handle this problem.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">WebFetch</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">https://github.com/pivotal-cf/git-hooks-core</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"># Git Hooks Core: Global and Local Hook Coexistence
+
+## The Problem They Solve
+
+The project addresses a core limitation: Git&#39;s `core.hooksPath` feature &#34;is used in place of any local, repository-specific hooks in `.git/hooks`.&#34; This creates a conflict between wanting shared hooks across all repositories and maintaining repository-specific hooks.
+
+## Their Solution Architecture
+
+Git Hooks Core enables coexistence through a layered approach:
+
+1. **Modular Hook Organization**: Instead of single hook files, they use `.d` directories (e.g., `commit-msg.d/`, `pre-commit.d/`) that can contain multiple executable scripts. This allows aggregating different hook implementations.
+
+2. **Global Hooks Directory**: The repository itself becomes the `core.hooksPath` target, positioned outside any individual repository so global hooks can be version-controlled.
+
+3. **Repository-Specific Preservation**: &#34;Retain any repository-specific hooks in `.git/hooks`&#34; remains possible because wrapper scripts in the `.d` directories can be designed to execute alongside local hooks.
+
+4. **Selective Whitelisting**: They implement a whitelist system where specific repositories can be exempted from particular global hooks, useful for repositories with conflicting requirements (like those containing secrets).
+
+## Key Benefit
+
+By separating the global hooks directory from individual repositories, teams can &#34;commit the global hooks&#34; to version control while preserving local hook functionality—solving the fundamental tension between standardization and customization.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:25</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">WebFetch</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">https://github.com/gabyx/Githooks</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output"># Githooks&#39; Approach to Global and Per-Repo Hooks
+
+Githooks uses Git&#39;s `core.hooksPath` configuration variable to manage the relationship between global and repository-specific hooks, offering two distinct installation modes.
+
+## Installation Modes
+
+**Manual Mode (Default)**
+In this approach, users selectively enable Githooks in individual repositories by running `git hooks install`. The system maintains run-wrappers in a common location (`~/.githooks/templates/` by default), and each repository that needs hooks must explicitly opt-in. As the documentation states: &#34;Run `git hooks install` or `git hooks uninstall` to install run wrappers explicitly.&#34;
+
+**Centralized Mode**
+This mode sets the global `core.hooksPath` variable, making Githooks available across all repositories by default. The documentation explains that &#34;all repositories will start using the Githooks run-wrappers (thus launching Githooks), regardless of their location.&#34;
+
+## Coexistence Strategy
+
+Githooks supports coexistence by allowing local overrides. The documentation notes: &#34;It is possible to override the behavior for a specific repository, by setting a local `core.hooksPath` variable with value `${GIT_DIR}/hooks`, which will revert Git back to its default behavior for that specific repository.&#34;
+
+Additionally, Githooks automatically integrates existing Git LFS hooks and searches for hooks in both `.githooks` directories (repository-specific) and shared hook repositories (global configuration), executing them sequentially without conflict.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">This is very insightful. Let me update the plan with these findings - there&#39;s actually a potential design issue here.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:26</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: E2E Test for Global Hook Installation
+     2 
+     3 ## Problem Statement
+     4 The `--global` flag for `install-hooks` is not tested. User suspects it may not work correctly.
+     5 
+     6 ## Research Findings: Industry Patterns for Global Git Hooks
+     7 
+     8 ### The Core Problem with `core.hooksPath --global`
+     9 When `core.hooksPath` is set globally, Git **completely ignores** local `.git/hooks/` directories. This has serious implications:
+    10 
+    11 1. **Breaks other hook tools**: Projects using Husky, pre-commit, or lefthook stop working
+    12 2. **Loses repo-specific hooks**: Any custom per-repo hooks are ignored
+    13 3. **No opt-out mechanism**: Users can&#39;t exempt specific repos
+    14 
+    15 ### How Mature Projects Handle This
+    16 
+    17 **[git-hooks-core](https://github.com/pivotal-cf/git-hooks-core)** (Pivotal):
+    18 - Uses `.d` directories (e.g., `pre-commit.d/`) containing multiple scripts
+    19 - Wrapper scripts explicitly call both global AND local hooks
+    20 - Supports whitelisting to exempt specific repos
+    21 
+    22 **[Githooks](https://github.com/gabyx/Githooks)** (gabyx):
+    23 - Offers two modes: **Manual** (per-repo opt-in) vs **Centralized** (global default)
+    24 - Even in centralized mode, repos can override with local `core.hooksPath=${GIT_DIR}/hooks`
+    25 - Wrapper scripts search BOTH `.githooks/` AND shared repos
+    26 
+    27 **Husky** (most popular JS tool):
+    28 - Sets `core.hooksPath` to `.husky/` directory **per-project only**
+    29 - Never touches global config - purely local installation
+    30 - Relies on npm `prepare` script to auto-install on `npm install`
+    31 
+    32 ### Current git-prompt-story Implementation
+    33 The current `--global` implementation is **naive**:
+    34 - Simply sets `git config --global core.hooksP...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:26</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Based on my research, here&#39;s what I found:
+
+## Summary of Research
+
+**The core issue with `core.hooksPath --global`:** When set globally, Git completely ignores local `.git/hooks/` directories. This means:
+- Projects using Husky, pre-commit, or lefthook break
+- Any existing per-repo custom hooks are ignored
+- No way to opt-out specific repos
+
+**How other projects handle this:**
+- **[Githooks](https://github.com/gabyx/Githooks)** uses wrapper scripts that explicitly look in both global and local locations
+- **[git-hooks-core](https://github.com/pivotal-cf/git-hooks-core)** chains multiple scripts together via `.d/` directories
+- **Husky** avoids global entirely - only sets `core.hooksPath` per-project
+
+**Current git-prompt-story `--global` design:**
+The hooks chain to `*.orig` files in the same directory, but they do NOT call the original `.git/hooks/` of each repo. So global hooks will silently break any existing repo-specific hooks.</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">19:26</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Approach)</span>
+          <span class="prompt-text">Given the research findings, how do you want to proceed with the --global hook feature?</span>
+          <span class="decision-answer">→ Fix the design</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:27</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me update the plan to include fixing the design. I&#39;ll first explore exactly how the hooks need to be modified.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:27</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Now I understand the fix needed. Let me update the plan with the complete implementation details.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    44 1. **Test as-is**: Write e2e tests but document the limitation
+    45 2. **Fix the design**: Modify hooks to chain to local `.git/hooks/*.orig` or the original local hook
+    46 3. **Deprecate --global**: Remove the flag if it causes more problems than it solves
+    47 
+    48 ## Implementation Plan
+    49 
+    50 ### Step 1: Modify hook scripts to chain to local `.git/hooks/`
+    51 
+    52 In `internal/hooks/installer.go`, update each hook script constant to also check for and run the local repo hook.
+    53 
+    54 **Current pattern (only chains to *.orig in same dir):**
+    55 ```sh
+    56 #!/bin/sh
+    57 if [ -x &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; ]; then
+    58     &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; &#34;$@&#34; || exit $?
+    59 fi
+    60 exec git-prompt-story post-commit
+    61 ```
+    62 
+    63 **New pattern (also chains to local .git/hooks/):**
+    64 ```sh
+    65 #!/bin/sh
+    66 # Chain to backup in same directory (for local install with existing hook)
+    67 if [ -x &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; ]; then
+    68     &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; &#34;$@&#34; || exit $?
+    69 fi
+    70 # Chain to local repo hook (for global install, preserves per-repo hooks)
+    71 LOCAL_HOOK=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks/post-commit&#34;
+    72 if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    73     &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    74 fi
+    75 exec git-prompt-story post-commit
+    76 ```
+    77 
+    78 This needs to be done for all 4 hooks:
+    79 - `prepareCommitMsgScript`
+    80 - `postCommitScript`
+    81 - `postRewriteScript`
+    82 - `prePushScript`
+    83 
+    84 ### Step 2: Write e2e test for global installation
+    85 
+    86 Create `e2e/tests/21-global-hook-installation.sh` with tests:
+    87 
+    88 1. **Fresh global install** - verify hooks created in `~/.config/git/hooks`
+    89 2. **Global hooks work in ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me clean up the plan file by removing the duplicate/redundant sections that are now superseded by the implementation plan.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I need to fix Test 3 - with the design fix, local hooks should now be CHAINED, not ignored. Let me update the plan.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   143 - Make a commit with faketime
+   144 - Verify `Prompt-Story:` marker in commit message (prepare-commit-msg hook ran)
+   145 - Verify git note exists on commit (post-commit hook ran)
+   146 
+   147 ### Test 3: Global hooks chain to local .git/hooks (THE KEY FIX TEST)
+   148 - Create a repo with a custom local `.git/hooks/post-commit` (creates marker file)
+   149 - Keep global `core.hooksPath` active
+   150 - Make a commit
+   151 - Verify custom local hook **DID** run (marker file created) - this is the fix!
+   152 - Verify global hook **ALSO** ran (note attached to HEAD)
+   153 - Both hooks should execute in sequence
+   154 
+   155 ### Test 4: Reinstall is idempotent
+   156 - Run `install-hooks --global` again
+   157 - Verify &#34;already installed&#34; messages</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   165 ### Test 6: Global install with --auto-push
+   166 - Clean up, run `git-prompt-story install-hooks --global --auto-push`
+   167 - Verify `pre-push` hook exists in global hooks directory
+   168 
+   169 ## Important Notes
+   170 
+   171 **Cleanup at START of each test section** - ensures tests are isolated and subsequent tests aren&#39;t affected if test fails mid-way.
+   172 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">The plan is complete and includes:
+
+1. **Research findings** explaining why `core.hooksPath --global` is problematic
+2. **Implementation plan** with the fix to chain local `.git/hooks/` 
+3. **6 e2e test cases** covering all scenarios
+4. **Verification steps** including manual testing</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:28</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;allowedPrompts&#34;:[{&#34;prompt&#34;:&#34;run e2e tests&#34;,&#34;tool&#34;:&#34;Bash&#34;},{&#34;prompt&#34;:&#34;create git branch&#34;,&#34;tool&#34;:&#34;Bash&#34;},{&#34;prompt&#34;:&#34;build go project&#34;,&#34;tool&#34;:&#34;Bash&#34;}],&#34;plan&#34;:&#34;# Plan: E2E Test for Global Hook Instal...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: E2E Test for Global Hook Installation
+
+## Problem Statement
+The `--global` flag for `install-hooks` is not tested. User suspects it may not work correctly.
+
+## Research Findings: Industry Patterns for Global Git Hooks
+
+### The Core Problem with `core.hooksPath --global`
+When `core.hooksPath` is set globally, Git **completely ignores** local `.git/hooks/` directories. This has serious implications:
+
+1. **Breaks other hook tools**: Projects using Husky, pre-commit, or lefthook stop working
+2. **Loses repo-specific hooks**: Any custom per-repo hooks are ignored
+3. **No opt-out mechanism**: Users can&#39;t exempt specific repos
+
+### How Mature Projects Handle This
+
+**[git-hooks-core](https://github.com/pivotal-cf/git-hooks-core)** (Pivotal):
+- Uses `.d` directories (e.g., `pre-commit.d/`) containing multiple scripts
+- Wrapper scripts explicitly call both global AND local hooks
+- Supports whitelisting to exempt specific repos
+
+**[Githooks](https://github.com/gabyx/Githooks)** (gabyx):
+- Offers two modes: **Manual** (per-repo opt-in) vs **Centralized** (global default)
+- Even in centralized mode, repos can override with local `core.hooksPath=${GIT_DIR}/hooks`
+- Wrapper scripts search BOTH `.githooks/` AND shared repos
+
+**Husky** (most popular JS tool):
+- Sets `core.hooksPath` to `.husky/` directory **per-project only**
+- Never touches global config - purely local installation
+- Relies on npm `prepare` script to auto-install on `npm install`
+
+### Current git-prompt-story Implementation
+The current `--global` implementation is **naive**:
+- Simply sets `git config --global core.hooksPath ~/.config/git/hooks`
+- Does NOT chain to local `.git/hooks/`
+- No way to opt-out for specific repos
+
+### Recommendation
+T...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:30</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me create the feature branch and set up the task list.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin &amp;&amp; git checkout -b feature/fix-global-hooks origin/main</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">branch &#39;feature/fix-global-hooks&#39; set up to track &#39;origin/main&#39;.
+From github.com:QuesmaOrg/git-prompt-story
+ * [new branch]      feature/cursor-support -&gt; origin/feature/cursor-support
+ * [new branch]      feature/local-gha-preview -&gt; origin/feature/local-gha-preview
+   9d4f6a9..ae2f9cb  gh-pages               -&gt; origin/gh-pages
+   30dba00..f6a5c7a  main                   -&gt; origin/main
+Previous HEAD position was 30dba00 Merge pull request #44 from QuesmaOrg/fix/force-push-notes
+Switched to a new branch &#39;feature/fix-global-hooks&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;pending&#34;},{&#34;activeForm&#34;:&#34;Addin...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;A...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     7 	&#34;path/filepath&#34;
+     8 	&#34;strings&#34;
+     9 )
+    10 
+    11 const prepareCommitMsgScript = `#!/bin/sh
+    12 # Chain to original hook if it exists (backup from local install)
+    13 if [ -x &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; ]; then
+    14     &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; &#34;$@&#34; || exit $?
+    15 fi
+    16 # Chain to local repo hook (for global install, preserves per-repo hooks)
+    17 LOCAL_HOOK=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks/prepare-commit-msg&#34;
+    18 if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    19     &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    20 fi
+    21 exec git-prompt-story prepare-commit-msg &#34;$@&#34;
+    22 `
+    23 
+    24 const postCommitScript = `#!/bin/sh
+    25 # Chain to original hook if it exists
+    26 if [ -x &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; ]; then</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:30</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    20 fi
+    21 exec git-prompt-story prepare-commit-msg &#34;$@&#34;
+    22 `
+    23 
+    24 const postCommitScript = `#!/bin/sh
+    25 # Chain to original hook if it exists (backup from local install)
+    26 if [ -x &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; ]; then
+    27     &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; &#34;$@&#34; || exit $?
+    28 fi
+    29 # Chain to local repo hook (for global install, preserves per-repo hooks)
+    30 LOCAL_HOOK=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks/post-commit&#34;
+    31 if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    32     &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    33 fi
+    34 exec git-prompt-story post-commit
+    35 `
+    36 
+    37 const postRewriteScript = `#!/bin/sh
+    38 # Chain to original hook if it exists
+    39 if [ -x &#34;$(dirname &#34;$0&#34;)/post-rewrite.orig&#34; ]; then</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    33 fi
+    34 exec git-prompt-story post-commit
+    35 `
+    36 
+    37 const postRewriteScript = `#!/bin/sh
+    38 # Chain to original hook if it exists (backup from local install)
+    39 if [ -x &#34;$(dirname &#34;$0&#34;)/post-rewrite.orig&#34; ]; then
+    40     &#34;$(dirname &#34;$0&#34;)/post-rewrite.orig&#34; &#34;$@&#34; || exit $?
+    41 fi
+    42 # Chain to local repo hook (for global install, preserves per-repo hooks)
+    43 LOCAL_HOOK=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks/post-rewrite&#34;
+    44 if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    45     &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    46 fi
+    47 exec git-prompt-story post-rewrite &#34;$@&#34;
+    48 `
+    49 
+    50 const prePushScript = `#!/bin/sh
+    51 # Chain to original hook if it exists
+    52 if [ -x &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; ]; then</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    46 fi
+    47 exec git-prompt-story post-rewrite &#34;$@&#34;
+    48 `
+    49 
+    50 const prePushScript = `#!/bin/sh
+    51 # Chain to original hook if it exists (backup from local install)
+    52 if [ -x &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; ]; then
+    53     &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; &#34;$@&#34; || exit $?
+    54 fi
+    55 # Chain to local repo hook (for global install, preserves per-repo hooks)
+    56 LOCAL_HOOK=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks/pre-push&#34;
+    57 if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    58     &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    59 fi
+    60 # Pass remote name and URL to git-prompt-story
+    61 # stdin contains ref info, pass it through
+    62 exec git-prompt-story pre-push &#34;$@&#34;
+    63 `
+    64 
+    65 // InstallOptions configures hook installation
+    66 type InstallOptions struct {
+    67 	Global   bool</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Add...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/lib/helpers.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   427     local session_dir=&#34;$HOME/.claude/projects/$encoded_path&#34;
+   428 
+   429     mkdir -p &#34;$session_dir&#34;
+   430 
+   431     cat &gt; &#34;$session_dir/$session_id.jsonl&#34; &lt;&lt; EOF
+   432 {&#34;type&#34;:&#34;user&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$start_time&#34;,&#34;cwd&#34;:&#34;$repo_path&#34;,&#34;gitBranch&#34;:&#34;main&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;user&#34;,&#34;content&#34;:&#34;[Agent task] Explore the codebase for pattern X&#34;}}
+   433 {&#34;type&#34;:&#34;assistant&#34;,&#34;sessionId&#34;:&#34;$session_id&#34;,&#34;timestamp&#34;:&#34;$end_time&#34;,&#34;message&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:[{&#34;type&#34;:&#34;text&#34;,&#34;text&#34;:&#34;Found pattern X in the following files...&#34;}]}}
+   434 EOF
+   435 
+   436     echo &#34;  Created mock agent session: $session_dir/$session_id.jsonl&#34;
+   437 }
+   438 
+   439 # =============================================================================
+   440 # Global Hooks Test Helpers
+   441 # =============================================================================
+   442 
+   443 # Clean up global hooks configuration and directory
+   444 # Usage: cleanup_global_hooks
+   445 cleanup_global_hooks() {
+   446     git config --global --unset core.hooksPath 2&gt;/dev/null || true
+   447     rm -rf ~/.config/git/hooks
+   448     rm -rf /tmp/custom-hooks
+   449 }
+   450 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Add...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:31</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/21-global-hook-installation.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/21-global-hook-installation.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">chmod &#43;x /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/21-global-hook-installation.sh</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Add...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Command running in background with ID: b8d8419. Output is being written to: /tmp/claude/-Users-jacek-git-git-prompt-story/tasks/b8d8419.output</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/tmp/claude/-Users-jacek-git-git-prompt-story/tasks/b8d8419.output</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TaskOutput</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;block&#34;:false,&#34;task_id&#34;:&#34;b8d8419&#34;,&#34;timeout&#34;:5000}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;retrieval_status&gt;not_ready&lt;/retrieval_status&gt;
+
+&lt;task_id&gt;b8d8419&lt;/task_id&gt;
+
+&lt;task_type&gt;local_bash&lt;/task_type&gt;
+
+&lt;status&gt;running&lt;/status&gt;
+
+&lt;output&gt;
+#0 building with &#34;default&#34; instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 509B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/golang:1.24-alpine
+#2 DONE 1.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae
+#4 resolve docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 17.50MB 0.4s done
+#5 DONE 0.4s
+
+#6 [2/8] RUN apk add --no-cache git bash jq libfaketime socat
+#6 CACHED
+
+#7 [3/8] WORKDIR /build
+#7 CACHED
+
+#8 [4/8] COPY . .
+#8 DONE 0.8s
+
+#9 [5/8] RUN go build -o /usr/local/bin/git-prompt-story .
+#9 0.199 go: downloading github.com/mattn/go-isatty v0.0.20
+#9 0.200 go: downloading github.com/spf13/cobra v1.10.2
+#9 0.201 go: downloading github.com/charmbracelet/bubbletea v1.3.10
+#9 0.201 go: downloading github.com/charmbracelet/lipgloss v1.1.0
+#9 0.452 go: downloading golang.org/x/sys v0.36.0
+#9 0.463 go: downloading github.com/rivo/uniseg v0.4.7
+#9 0.463 go: downloading github.com/charmbracelet/x/ansi v0.10.1
+#9 0.463 go: downloading github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd
+#9 0.464 go: downloading github.com/muesli/termenv v0.16.0
+#9 0.554 go: downloading github.com/charmbracelet/x/term v0.2.1
+#9 0.554 go: downloading github.com/muesli/cancelreader v0.2.2
+#9 0.554 go: downloading github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6
+#9 0.608 go: downloading github.com/spf13/pflag v1.0.9
+#9 0.919 go: downloading github.com/mattn/go-runewidth v0.0.16
+#9 0.919 go: downloading github.com/charmbracelet/colorprofile v0....</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TaskOutput</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;block&#34;:true,&#34;task_id&#34;:&#34;b8d8419&#34;,&#34;timeout&#34;:480000}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[Request interrupted by user for tool use]</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:44</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">The test got killed, it is a regression, go fix it.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:45</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">The test got killed, it is a regression, go fix it.</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:45</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">[Request interrupted by user for tool use]</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:45</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">The test got killed, it is a regression, go fix it.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:45</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I see the issue - the hooks are causing infinite recursion. When installed locally, the hook tries to run `.git/hooks/post-commit` which is itself! Let me fix this.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Add...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     7 	&#34;path/filepath&#34;
+     8 	&#34;strings&#34;
+     9 )
+    10 
+    11 const prepareCommitMsgScript = `#!/bin/sh
+    12 # Chain to original hook if it exists (backup from local install)
+    13 if [ -x &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; ]; then
+    14     &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; &#34;$@&#34; || exit $?
+    15 fi
+    16 # Chain to local repo hook (only when running from global hooks, not local)
+    17 GIT_HOOKS_DIR=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks&#34;
+    18 if [ &#34;$(cd &#34;$(dirname &#34;$0&#34;)&#34; &amp;&amp; pwd)&#34; != &#34;$(cd &#34;$GIT_HOOKS_DIR&#34; 2&gt;/dev/null &amp;&amp; pwd)&#34; ]; then
+    19     LOCAL_HOOK=&#34;$GIT_HOOKS_DIR/prepare-commit-msg&#34;
+    20     if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    21         &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    22     fi
+    23 fi
+    24 exec git-prompt-story prepare-commit-msg &#34;$@&#34;
+    25 `
+    26 
+    27 const postCommitScript = `#!/bin/sh
+    28 # Chain to original hook if it exists (backup from local install)
+    29 if [ -x &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; ]; then</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:45</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">&lt;task-notification&gt;
+&lt;task-id&gt;b8d8419&lt;/task-id&gt;
+&lt;output-file&gt;/tmp/claude/-Users-jacek-git-git-prompt-story/tasks/b8d8419.output&lt;/output-file&gt;
+&lt;status&gt;failed&lt;/status&gt;
+&lt;summary&gt;Background command &#34;Run e2e tests&#34; failed with exit code 137&lt;/summary&gt;
+&lt;/task-notification&gt;
+Read the output file to retrieve the result: /tmp/claude/-Users-jacek-git-git-prompt-story/tasks/b8d8419.output</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    23 fi
+    24 exec git-prompt-story prepare-commit-msg &#34;$@&#34;
+    25 `
+    26 
+    27 const postCommitScript = `#!/bin/sh
+    28 # Chain to original hook if it exists (backup from local install)
+    29 if [ -x &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; ]; then
+    30     &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; &#34;$@&#34; || exit $?
+    31 fi
+    32 # Chain to local repo hook (only when running from global hooks, not local)
+    33 GIT_HOOKS_DIR=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks&#34;
+    34 if [ &#34;$(cd &#34;$(dirname &#34;$0&#34;)&#34; &amp;&amp; pwd)&#34; != &#34;$(cd &#34;$GIT_HOOKS_DIR&#34; 2&gt;/dev/null &amp;&amp; pwd)&#34; ]; then
+    35     LOCAL_HOOK=&#34;$GIT_HOOKS_DIR/post-commit&#34;
+    36     if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    37         &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    38     fi
+    39 fi
+    40 exec git-prompt-story post-commit
+    41 `
+    42 
+    43 const postRewriteScript = `#!/bin/sh
+    44 # Chain to original hook if it exists (backup from local install)
+    45 if [ -x &#34;$(dirname &#34;$0&#34;)/post-rewrite.orig&#34; ]; then</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    39 fi
+    40 exec git-prompt-story post-commit
+    41 `
+    42 
+    43 const postRewriteScript = `#!/bin/sh
+    44 # Chain to original hook if it exists (backup from local install)
+    45 if [ -x &#34;$(dirname &#34;$0&#34;)/post-rewrite.orig&#34; ]; then
+    46     &#34;$(dirname &#34;$0&#34;)/post-rewrite.orig&#34; &#34;$@&#34; || exit $?
+    47 fi
+    48 # Chain to local repo hook (only when running from global hooks, not local)
+    49 GIT_HOOKS_DIR=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks&#34;
+    50 if [ &#34;$(cd &#34;$(dirname &#34;$0&#34;)&#34; &amp;&amp; pwd)&#34; != &#34;$(cd &#34;$GIT_HOOKS_DIR&#34; 2&gt;/dev/null &amp;&amp; pwd)&#34; ]; then
+    51     LOCAL_HOOK=&#34;$GIT_HOOKS_DIR/post-rewrite&#34;
+    52     if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    53         &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    54     fi
+    55 fi
+    56 exec git-prompt-story post-rewrite &#34;$@&#34;
+    57 `
+    58 
+    59 const prePushScript = `#!/bin/sh
+    60 # Chain to original hook if it exists (backup from local install)
+    61 if [ -x &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; ]; then</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    55 fi
+    56 exec git-prompt-story post-rewrite &#34;$@&#34;
+    57 `
+    58 
+    59 const prePushScript = `#!/bin/sh
+    60 # Chain to original hook if it exists (backup from local install)
+    61 if [ -x &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; ]; then
+    62     &#34;$(dirname &#34;$0&#34;)/pre-push.orig&#34; &#34;$@&#34; || exit $?
+    63 fi
+    64 # Chain to local repo hook (only when running from global hooks, not local)
+    65 GIT_HOOKS_DIR=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks&#34;
+    66 if [ &#34;$(cd &#34;$(dirname &#34;$0&#34;)&#34; &amp;&amp; pwd)&#34; != &#34;$(cd &#34;$GIT_HOOKS_DIR&#34; 2&gt;/dev/null &amp;&amp; pwd)&#34; ]; then
+    67     LOCAL_HOOK=&#34;$GIT_HOOKS_DIR/pre-push&#34;
+    68     if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+    69         &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+    70     fi
+    71 fi
+    72 # Pass remote name and URL to git-prompt-story
+    73 # stdin contains ref info, pass it through
+    74 exec git-prompt-story pre-push &#34;$@&#34;
+    75 `
+    76 
+    77 // InstallOptions configures hook installation
+    78 type InstallOptions struct {
+    79 	Global   bool</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Add...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">KillShell</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;shell_id&#34;:&#34;b8d8419&#34;}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Shell b8d8419 is not running, so cannot be killed (status: failed)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;persisted-output&gt;
+Output too large (41.6KB). Full output saved to: /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story/0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56/tool-results/toolu_01B3t5RN7XQrUt5DDX7AT2Vy.txt
+
+Preview (first 2KB):
+#0 building with &#34;default&#34; instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 509B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/golang:1.24-alpine
+#2 DONE 1.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae
+#4 resolve docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 14.30MB 0.4s done
+#5 DONE 0.4s
+
+#6 [2/8] RUN apk add --no-cache git bash jq libfaketime socat
+#6 CACHED
+
+#7 [3/8] WORKDIR /build
+#7 CACHED
+
+#8 [4/8] COPY . .
+#8 DONE 1.1s
+
+#9 [5/8] RUN go build -o /usr/local/bin/git-prompt-story .
+#9 0.228 go: downloading github.com/mattn/go-isatty v0.0.20
+#9 0.228 go: downloading github.com/spf13/cobra v1.10.2
+#9 0.242 go: downloading github.com/charmbracelet/bubbletea v1.3.10
+#9 0.242 go: downloading github.com/charmbracelet/lipgloss v1.1.0
+#9 0.495 go: downloading github.com/charmbracelet/x/term v0.2.1
+#9 0.495 go: downloading github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6
+#9 0.495 go: downloading github.com/charmbracelet/x/ansi v0.10.1
+#9 0.495 go: downloading github.com/muesli/cancelreader v0.2.2
+#9 0.502 go: downloading golang.org/x/sys v0.36.0
+#9 0.513 go: downloading github.com/spf13/pflag v1.0.9
+#9 0.602 go: downloading github.com/rivo/uniseg v0.4.7
+#9 0.602 go: downloading github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd
+#9 0.602 go: downloading github.com/muesli/termenv v0.16.0
+#9 0.712 go: downloading github.com/m...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">tail -100 /&lt;REDACTED&gt;/.claude/projects/-Users-jacek-git-git-prompt-story/0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56/tool-results/toolu_01B3t5RN7XQrUt5DDX7AT2Vy.txt</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">  Step 3: Installing hooks...
+Hooks installed to .git/hooks
+  Step 4: Creating mock sessions...
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-root.jsonl
+  Created mock session for subfolder src: /root/.claude/projects/-workspace-test-repo-src/session-subfolder.jsonl
+  Created mock session for parent dir /workspace writing to /workspace/test-repo: /root/.claude/projects/-workspace/session-parent.jsonl
+  Created mock session for /workspace/test-repo-v2: /root/.claude/projects/-workspace-test-repo-v2/session-other-repo.jsonl
+  Session directories created:
+drwxr-xr-x    2 root     root          4096 Jan 13 19:46 -workspace
+drwxr-xr-x    2 root     root          4096 Jan 13 19:46 -workspace-test-repo
+drwxr-xr-x    2 root     root          4096 Jan 13 19:46 -workspace-test-repo-src
+drwxr-xr-x    2 root     root          4096 Jan 13 19:46 -workspace-test-repo-v2
+  Step 5: Creating feature commit at 10:30...
+[main 66a899e] Add feature
+ 1 file changed, 1 insertion(&#43;)
+  Step 6: Verifying results...
+    Checking commit message...
+    - Commit message contains Prompt-Story trailer
+    Checking note attachment...
+    - Note is attached to HEAD
+    Checking correct sessions are detected...
+    - Exactly 3 sessions detected
+    - session-root (repo root) detected
+    - session-subfolder (src/) detected
+    - session-parent (/workspace writing to repo) detected
+    - session-other-repo (test-repo-v2) correctly NOT detected
+
+  All assertions passed!
+
+Running: 19-redaction
+[19] Show Command - Redaction and Session Clearing
+  Step 1: Creating test repo with sessions...
+Initialized empty Git repository in /workspace/test-repo/.git/
+[main (root-commit) 00da66a] Initial commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+Hooks installed to .git/hooks
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-to-clear.jsonl
+  Created mock session: /root/.claude/projects/-workspace-test-repo/session-to-keep.jsonl
+[main f91db...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All 21 tests passed. Let me update the todo list.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Modifying hook scripts to chain to local .git/hooks/&#34;,&#34;content&#34;:&#34;Modify hook scripts in installer.go to chain to local .git/hooks/&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Add...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All tests pass. Here&#39;s a summary of the changes:
+
+## Changes Made
+
+### 1. Fixed hook scripts in `internal/hooks/installer.go`
+- Added logic to chain to local `.git/hooks/` when running from global hooks
+- Added guard to prevent infinite recursion when running from local hooks
+- The check compares `$(dirname &#34;$0&#34;)` with `$(git rev-parse --git-dir)/hooks` to detect if we&#39;re running locally
+
+### 2. Added `cleanup_global_hooks()` helper in `e2e/lib/helpers.sh`
+
+### 3. Created `e2e/tests/21-global-hook-installation.sh` with 6 tests:
+- Test 1: Fresh global install sets config and creates hooks
+- Test 2: Global hooks work in a fresh repository  
+- Test 3: Global hooks chain to local .git/hooks (THE KEY FIX)
+- Test 4: Reinstall is idempotent
+- Test 5: Global install respects existing core.hooksPath
+- Test 6: Global install with --auto-push
+
+Would you like me to commit these changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:47</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">&lt;task-notification&gt;
+&lt;task-id&gt;b8d8419&lt;/task-id&gt;
+&lt;output-file&gt;/tmp/claude/-Users-jacek-git-git-prompt-story/tasks/b8d8419.output&lt;/output-file&gt;
+&lt;status&gt;failed&lt;/status&gt;
+&lt;summary&gt;Background command &#34;Run e2e tests&#34; failed with exit code 137&lt;/summary&gt;
+&lt;/task-notification&gt;
+Read the output file to retrieve the result: /tmp/claude/-Users-jacek-git-git-prompt-story/tasks/b8d8419.output</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">19:47</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">That notification is from the earlier failed test run (the one with infinite recursion). The second run after my fix passed all 21 tests successfully:
+
+```
+=== 21/21 tests passed ===
+```
+
+Would you like me to commit these changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:48</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Yes commit and PR.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/fix-global-hooks
+Your branch is up to date with &#39;origin/main&#39;.
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   e2e/lib/helpers.sh
+	modified:   internal/hooks/installer.go
+
+Untracked files:
+  (use &#34;git add &lt;file&gt;...&#34; to include in what will be committed)
+	e2e/tests/21-global-hook-installation.sh
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">diff --git a/e2e/lib/helpers.sh b/e2e/lib/helpers.sh
+index d4cfce1..bc76b02 100755
+--- a/e2e/lib/helpers.sh
+&#43;&#43;&#43; b/e2e/lib/helpers.sh
+@@ -435,3 &#43;435,15 @@ EOF
+ 
+     echo &#34;  Created mock agent session: $session_dir/$session_id.jsonl&#34;
+ }
+&#43;
+&#43;# =============================================================================
+&#43;# Global Hooks Test Helpers
+&#43;# =============================================================================
+&#43;
+&#43;# Clean up global hooks configuration and directory
+&#43;# Usage: cleanup_global_hooks
+&#43;cleanup_global_hooks() {
+&#43;    git config --global --unset core.hooksPath 2&gt;/dev/null || true
+&#43;    rm -rf ~/.config/git/hooks
+&#43;    rm -rf /tmp/custom-hooks
+&#43;}
+diff --git a/internal/hooks/installer.go b/internal/hooks/installer.go
+index b5d2fcc..40cc44f 100644
+--- a/internal/hooks/installer.go
+&#43;&#43;&#43; b/internal/hooks/installer.go
+@@ -9,34 &#43;9,66 @@ import (
+ )
+ 
+ const prepareCommitMsgScript = `#!/bin/sh
+-# Chain to original hook if it exists
+&#43;# Chain to original hook if it exists (backup from local install)
+ if [ -x &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; ]; then
+     &#34;$(dirname &#34;$0&#34;)/prepare-commit-msg.orig&#34; &#34;$@&#34; || exit $?
+ fi
+&#43;# Chain to local repo hook (only when running from global hooks, not local)
+&#43;GIT_HOOKS_DIR=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks&#34;
+&#43;if [ &#34;$(cd &#34;$(dirname &#34;$0&#34;)&#34; &amp;&amp; pwd)&#34; != &#34;$(cd &#34;$GIT_HOOKS_DIR&#34; 2&gt;/dev/null &amp;&amp; pwd)&#34; ]; then
+&#43;    LOCAL_HOOK=&#34;$GIT_HOOKS_DIR/prepare-commit-msg&#34;
+&#43;    if [ -x &#34;$LOCAL_HOOK&#34; ]; then
+&#43;        &#34;$LOCAL_HOOK&#34; &#34;$@&#34; || exit $?
+&#43;    fi
+&#43;fi
+ exec git-prompt-story prepare-commit-msg &#34;$@&#34;
+ `
+ 
+ const postCommitScript = `#!/bin/sh
+-# Chain to original hook if it exists
+&#43;# Chain to original hook if it exists (backup from local install)
+ if [ -x &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; ]; then
+     &#34;$(dirname &#34;$0&#34;)/post-commit.orig&#34; &#34;$@&#34; || exit $?
+ fi
+&#43;# Chain to local repo hook (only when running from global hooks, not local)
+&#43;GIT_HOOKS_DIR=&#34;$(git rev-parse --git-dir 2&gt;/dev/null)/hooks&#34;
+&#43;if [ &#34;$(cd &#34;$(dirname &#34;$0&#34;)&#34; ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log origin/main..HEAD --oneline 2&gt;/dev/null || echo &#34;No commits ahead of origin/main&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">19:48</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add internal/hooks/installer.go e2e/lib/helpers.sh e2e/tests/21-global-hook-installation.sh &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix global hook installation to chain to local repo hooks
+
+When using `install-hooks --global`, Git&#39;s core.hooksPath completely
+ignores local .git/hooks/ directories. This broke workflows for users
+with existing per-repo hooks (Husky, pre-commit, custom hooks).
+
+Changes:
+- Modified hook scripts to chain to local .git/hooks/ when running
+  from global hooks directory
+- Added guard to prevent infinite recursion when running locally
+  (compares current hook dir vs git hooks dir)
+- Added e2e test covering global hook installation scenarios
+
+The fix ensures global hooks preserve per-repo hook functionality
+while still running git-prompt-story hooks.
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">c587fb2a-bec0-40ce-a07d-fefdf3a41aad</code> |
+        2026-01-13 19:18 - 2026-01-13 19:18 | <span class="session-count">1</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item COMMAND"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">19:18</span>
+          <span class="prompt-type">COMMAND</span>
+          
+          <span class="prompt-text">/clear</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
