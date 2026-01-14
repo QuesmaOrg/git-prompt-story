@@ -76,6 +76,7 @@ type Summary struct {
 	TotalSteps         int             `json:"total_steps"`          // Count of all entries
 	TotalAgentSessions int             `json:"total_agent_sessions"` // Count of agent sessions
 	TotalFileEdits     int             `json:"total_file_edits"`     // Count of Write/Edit operations
+	TotalFailedTasks   int             `json:"total_failed_tasks"`   // Count of failed background tasks
 	CommitsWithNotes   int             `json:"commits_with_notes"`
 	CommitsAnalyzed    int             `json:"commits_analyzed"`
 }
@@ -106,9 +107,11 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 				stepCount := len(sess.Prompts)
 				userPromptCount := countUserPrompts(sess.Prompts)
 				fileEditCount := countFileEdits(sess.Prompts)
+				failedTaskCount := countFailedTasks(sess.Prompts)
 				summary.TotalSteps += stepCount
 				summary.TotalPrompts += stepCount // Keep for backward compatibility
 				summary.TotalFileEdits += fileEditCount
+				summary.TotalFailedTasks += failedTaskCount
 
 				// Separate counts for main vs agent sessions
 				if sess.IsAgent {
@@ -253,6 +256,28 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 
 				// Skip local command output entries
 				if strings.HasPrefix(msgText, "<local-command-stdout>") {
+					continue
+				}
+
+				// Handle task notifications - format them nicely
+				if strings.Contains(msgText, "<task-notification>") {
+					status := extractXMLTag(msgText, "status")
+					summary := extractXMLTag(msgText, "summary")
+					var displayText string
+					if status == "failed" {
+						displayText = fmt.Sprintf("🔔 Background task failed: %s", summary)
+					} else {
+						displayText = fmt.Sprintf("✅ Background task completed: %s", summary)
+					}
+					pe := PromptEntry{
+						Time:         ts,
+						Type:         "TASK_NOTIFICATION",
+						Text:         displayText,
+						InWorkPeriod: inWorkPeriod,
+					}
+					if inWorkPeriod {
+						ss.Prompts = append(ss.Prompts, pe)
+					}
 					continue
 				}
 
@@ -432,6 +457,27 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 			if entry.Operation == "enqueue" && entry.Content != "" {
 				// Skip system notifications (bash notifications, etc.)
 				if strings.HasPrefix(entry.Content, "<bash-notification>") {
+					continue
+				}
+				// Handle task notifications - format them nicely
+				if strings.Contains(entry.Content, "<task-notification>") {
+					status := extractXMLTag(entry.Content, "status")
+					summary := extractXMLTag(entry.Content, "summary")
+					var displayText string
+					if status == "failed" {
+						displayText = fmt.Sprintf("🔔 Background task failed: %s", summary)
+					} else {
+						displayText = fmt.Sprintf("✅ Background task completed: %s", summary)
+					}
+					pe := PromptEntry{
+						Time:         ts,
+						Type:         "TASK_NOTIFICATION",
+						Text:         displayText,
+						InWorkPeriod: inWorkPeriod,
+					}
+					if inWorkPeriod {
+						ss.Prompts = append(ss.Prompts, pe)
+					}
 					continue
 				}
 				// Skip commands (they'll be processed as separate entries)
@@ -795,6 +841,9 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 		return userTimeline[i].Entry.Time.Before(userTimeline[j].Entry.Time)
 	})
 
+	// Deduplicate consecutive identical entries
+	userTimeline = deduplicateConsecutive(userTimeline)
+
 	// Count file edits (Write/Edit operations) from fullTimeline
 	fileEditCount := 0
 	for _, te := range fullTimeline {
@@ -807,11 +856,23 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 	if len(userTimeline) == 0 {
 		sb.WriteString("*No user prompts in this PR*\n\n")
 	} else {
+		// Build header with optional extras
+		header := fmt.Sprintf("# %d user prompts", len(userTimeline))
+		var extras []string
 		if fileEditCount > 0 {
-			sb.WriteString(fmt.Sprintf("# %d user prompts (%d file edits)\n\n", len(userTimeline), fileEditCount))
-		} else {
-			sb.WriteString(fmt.Sprintf("# %d user prompts\n\n", len(userTimeline)))
+			extras = append(extras, fmt.Sprintf("%d file edits", fileEditCount))
 		}
+		if summary.TotalFailedTasks > 0 {
+			noun := "task"
+			if summary.TotalFailedTasks > 1 {
+				noun = "tasks"
+			}
+			extras = append(extras, fmt.Sprintf("%d failed %s", summary.TotalFailedTasks, noun))
+		}
+		if len(extras) > 0 {
+			header += " (" + strings.Join(extras, ", ") + ")"
+		}
+		sb.WriteString(header + "\n\n")
 
 		if len(userTimeline) <= 10 {
 			// Show all prompts
@@ -1155,6 +1216,16 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
 	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
 
+	// [Request interrupted] entries: format as user action
+	if strings.HasPrefix(text, "[Request interrupted") {
+		return fmt.Sprintf("- ⏸️ User interrupted%s\n", toolCountsStr)
+	}
+
+	// TASK_NOTIFICATION entries: show the formatted text directly
+	if entry.Type == "TASK_NOTIFICATION" {
+		return fmt.Sprintf("- %s%s\n", text, toolCountsStr)
+	}
+
 	// COMMAND entries: format with backticks
 	if entry.Type == "COMMAND" {
 		text = html.EscapeString(text)
@@ -1331,10 +1402,10 @@ func formatToolCountsSubBullet(counts map[string]int, editedFiles []string) stri
 }
 
 // IsUserAction returns true if the entry type represents a user action
-// (PROMPT, COMMAND, TOOL_REJECT, DECISION) vs system/assistant actions.
+// (PROMPT, COMMAND, TOOL_REJECT, DECISION, TASK_NOTIFICATION) vs system/assistant actions.
 func IsUserAction(entryType string) bool {
 	switch entryType {
-	case "PROMPT", "COMMAND", "TOOL_REJECT", "DECISION":
+	case "PROMPT", "COMMAND", "TOOL_REJECT", "DECISION", "TASK_NOTIFICATION":
 		return true
 	default:
 		return false
@@ -1355,8 +1426,19 @@ func allPromptsShort(entries []TimelineEntry) bool {
 // formatMarkdownEntrySimple formats an entry as a simple bullet without details tags
 func formatMarkdownEntrySimple(entry PromptEntry) string {
 	text := strings.ReplaceAll(entry.Text, "\n", " ")
-	text = html.EscapeString(text)
 	toolCountsStr := formatToolCountsSubBullet(entry.ToolCounts, entry.EditedFiles)
+
+	// [Request interrupted] entries: format as user action
+	if strings.HasPrefix(text, "[Request interrupted") {
+		return fmt.Sprintf("- ⏸️ User interrupted%s\n", toolCountsStr)
+	}
+
+	// TASK_NOTIFICATION entries: show the formatted text directly
+	if entry.Type == "TASK_NOTIFICATION" {
+		return fmt.Sprintf("- %s%s\n", text, toolCountsStr)
+	}
+
+	text = html.EscapeString(text)
 
 	// COMMAND entries: format with backticks
 	if entry.Type == "COMMAND" {
@@ -1415,4 +1497,41 @@ func formatToolDisplay(tools map[string]bool) string {
 		}
 	}
 	return fmt.Sprintf("tools (%d)", len(tools))
+}
+
+// extractXMLTag extracts content between XML-like tags
+func extractXMLTag(text, tag string) string {
+	start := "<" + tag + ">"
+	end := "</" + tag + ">"
+	startIdx := strings.Index(text, start)
+	endIdx := strings.Index(text, end)
+	if startIdx >= 0 && endIdx > startIdx {
+		return text[startIdx+len(start) : endIdx]
+	}
+	return ""
+}
+
+// deduplicateConsecutive removes consecutive duplicate entries, keeping only the first
+func deduplicateConsecutive(entries []TimelineEntry) []TimelineEntry {
+	if len(entries) <= 1 {
+		return entries
+	}
+	var result []TimelineEntry
+	for i, e := range entries {
+		if i == 0 || e.Entry.Text != entries[i-1].Entry.Text || e.Entry.Type != entries[i-1].Entry.Type {
+			result = append(result, e)
+		}
+	}
+	return result
+}
+
+// countFailedTasks counts task notification entries with failed status
+func countFailedTasks(prompts []PromptEntry) int {
+	count := 0
+	for _, p := range prompts {
+		if p.Type == "TASK_NOTIFICATION" && strings.Contains(p.Text, "failed") {
+			count++
+		}
+	}
+	return count
 }
