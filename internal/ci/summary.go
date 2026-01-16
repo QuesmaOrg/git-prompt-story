@@ -13,7 +13,12 @@ import (
 	"github.com/QuesmaOrg/git-prompt-story/internal/display"
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
+	"github.com/QuesmaOrg/git-prompt-story/internal/parser"
 	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+
+	// Import parsers to register them
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/parser/claude"
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/parser/cursor"
 )
 
 const (
@@ -188,12 +193,6 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 		return nil, fmt.Errorf("failed to fetch transcript: %w", err)
 	}
 
-	// Parse messages
-	entries, err := session.ParseMessages(content)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse messages: %w", err)
-	}
-
 	ss := &SessionSummary{
 		Tool:    sess.Tool,
 		ID:      sess.ID,
@@ -201,6 +200,47 @@ func analyzeSession(sess note.SessionEntry, startWork, endWork time.Time, full b
 		Start:   sess.Created,
 		End:     sess.Modified,
 		Prompts: make([]PromptEntry, 0),
+	}
+
+	// For non-Claude Code tools, use the parser registry
+	if sess.Tool != "claude-code" {
+		p := parser.Get(sess.Tool)
+		if p == nil {
+			return nil, fmt.Errorf("no parser for tool: %s", sess.Tool)
+		}
+		entries, err := p.Parse(content, startWork, endWork)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse %s session: %w", sess.Tool, err)
+		}
+		for _, entry := range entries {
+			inWorkPeriod := !entry.Time.Before(startWork) && !entry.Time.After(endWork)
+			if !inWorkPeriod {
+				continue
+			}
+			var peType string
+			switch entry.Type {
+			case parser.EntryUser:
+				peType = "PROMPT"
+			case parser.EntryAssistant:
+				peType = "ASSISTANT"
+			default:
+				continue // Skip system entries
+			}
+			pe := PromptEntry{
+				Time:         entry.Time,
+				Type:         peType,
+				Text:         entry.Text,
+				InWorkPeriod: inWorkPeriod,
+			}
+			ss.Prompts = append(ss.Prompts, pe)
+		}
+		return ss, nil
+	}
+
+	// For Claude Code, use the existing detailed parser
+	entries, err := session.ParseMessages(content)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse messages: %w", err)
 	}
 
 	// Map to track tool use entries by ID for linking with results
@@ -1491,12 +1531,21 @@ func countFileEdits(prompts []PromptEntry) int {
 
 // formatToolDisplay formats tool names for display in the summary table
 func formatToolDisplay(tools map[string]bool) string {
+	if len(tools) == 0 {
+		return ""
+	}
 	if len(tools) == 1 {
 		for t := range tools {
 			return t
 		}
 	}
-	return fmt.Sprintf("tools (%d)", len(tools))
+	// Multiple tools - show all names
+	names := make([]string, 0, len(tools))
+	for t := range tools {
+		names = append(names, t)
+	}
+	sort.Strings(names)
+	return strings.Join(names, ", ")
 }
 
 // extractXMLTag extracts content between XML-like tags

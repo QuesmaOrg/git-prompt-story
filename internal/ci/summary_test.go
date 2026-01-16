@@ -101,12 +101,12 @@ func TestFormatToolDisplay(t *testing.T) {
 		{
 			name:     "two tools",
 			tools:    map[string]bool{"Claude Code": true, "Cursor": true},
-			expected: "tools (2)",
+			expected: "Claude Code, Cursor",
 		},
 		{
 			name:     "three tools",
 			tools:    map[string]bool{"Claude Code": true, "Cursor": true, "Codex": true},
-			expected: "tools (3)",
+			expected: "Claude Code, Codex, Cursor",
 		},
 	}
 
@@ -225,9 +225,9 @@ func TestRenderMarkdown_MultipleTools(t *testing.T) {
 
 	result := RenderMarkdown(summary, "", "test")
 
-	// Should show "tools (2)" for multiple tools
-	if !strings.Contains(result, "tools (2)") {
-		t.Error("Should show 'tools (2)' for multiple tools")
+	// Should show both tool names for multiple tools
+	if !strings.Contains(result, "Claude Code, Cursor") {
+		t.Error("Should show 'Claude Code, Cursor' for multiple tools")
 	}
 }
 
