@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "start_work": "2026-01-16T07:37:05Z",
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56",
+      "path": "claude-code/0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56.jsonl",
+      "created": "2026-01-13T19:19:35.001Z",
+      "modified": "2026-01-16T08:03:09.524Z"
+    }
+  ]
+}
