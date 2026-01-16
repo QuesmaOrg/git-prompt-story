@@ -497,20 +497,20 @@ pre {
 <body>
   <div class="header">
     <h1>Prompt Story</h1>
-    <p class="meta">PR #49 | 1 commit(s) with LLM sessions</p>
+    <p class="meta">PR #49 | 2 commit(s) with LLM sessions</p>
   </div>
 
   <div class="stats">
     <div class="stat">
-      <div class="stat-value">2</div>
+      <div class="stat-value">3</div>
       <div class="stat-label">Commits Analyzed</div>
     </div>
     <div class="stat">
-      <div class="stat-value">1</div>
+      <div class="stat-value">2</div>
       <div class="stat-label">With Sessions</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="visible-count">58</div>
+      <div class="stat-value" id="visible-count">70</div>
       <div class="stat-label">Entries</div>
     </div>
   </div>
@@ -528,6 +528,14 @@ pre {
       </tr>
     </thead>
     <tbody>
+      
+      <tr>
+        <td><code>d5deddf</code></td>
+        <td>Update README with Homebrew installation instru...</td>
+        <td>Claude Code</td>
+        <td>12</td>
+        <td><a href="d5deddf.html">View transcript</a></td>
+      </tr>
       
       <tr>
         <td><code>10a6050</code></td>
@@ -555,6 +563,324 @@ pre {
     </label>
   </div>
 
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3><code>d5deddf</code> Update README with Homebrew installation instructions</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-16 08:45 - 2026-01-16 08:50
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-16 08:21 - 2026-01-16 08:49 | <span class="session-count">12</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/homebrew-tap
+nothing to commit, working tree clean</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:46</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Committed on `feature/homebrew-tap`. Ready to push and create a PR when you&#39;re ready.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[]}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:46</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please create PR</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git push -u origin feature/homebrew-tap</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+branch &#39;feature/homebrew-tap&#39; set up to track &#39;origin/feature/homebrew-tap&#39;.
+remote: 
+remote: Create a pull request for &#39;feature/homebrew-tap&#39; on GitHub by visiting:        
+remote:      https://github.com/QuesmaOrg/git-prompt-story/pull/new/feature/homebrew-tap        
+remote: 
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new branch]      feature/homebrew-tap -&gt; feature/homebrew-tap</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:47</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">gh pr create --title &#34;Add Homebrew tap support for brew install&#34; --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
+## Summary
+- Configure GoReleaser to publish formula to `QuesmaOrg/homebrew-tap`
+- Update release workflow to use `HOMEBREW_TAP_TOKEN` for cross-repo access
+- Add token regeneration instructions in workflow comments
+
+## User Installation
+
+After the next release, users can install via:
+
+```bash
+brew install QuesmaOrg/tap/git-prompt-story
+```
+
+## Prerequisites (already done)
+- [x] Created `QuesmaOrg/homebrew-tap` repository
+- [x] Created fine-grained PAT with Contents write access
+- [x] Added `HOMEBREW_TAP_TOKEN` secret to this repo
+
+## Test plan
+- [ ] Merge and create a new tag (e.g., `v0.15.3`)
+- [ ] Verify GoReleaser creates formula in `homebrew-tap` repo
+- [ ] Test: `brew tap QuesmaOrg/tap &amp;&amp; brew install git-prompt-story`
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">https://github.com/QuesmaOrg/git-prompt-story/pull/49</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:48</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">PR created: https://github.com/QuesmaOrg/git-prompt-story/pull/49</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:49</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Can you also update Readme.md instructions to install it that way?</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     3 **Automatically share LLM prompts in Pull Requests without changing your workflow.**
+     4 
+     5 Git Prompt Story captures your AI sessions and links them to your commits. Your teammates get full context for code reviews, and you don&#39;t have to copy-paste a thing.
+     6 
+     7 ## Quick start
+     8 
+     9 ```bash
+    10 brew install QuesmaOrg/tap/git-prompt-story
+    11 cd your_repository
+    12 git-prompt-story install-hooks --auto-push  # --global if for all
+    13 git-prompt-story install-github-workflow
+    14 ```
+    15 
+    16 ## Why
+    17 
+    18 &gt; &#34;I&#39;ve never felt this much behind as a programmer. The profession is being dramatically refactored.&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/README.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    45 - **Prompt tracking** - Commit messages show which tools and how many prompts were used
+    46 
+    47 ## Setup
+    48 
+    49 ### 1. Install
+    50 
+    51 **Homebrew (macOS/Linux):**
+    52 ```bash
+    53 brew install QuesmaOrg/tap/git-prompt-story
+    54 ```
+    55 
+    56 **Go:**
+    57 ```bash
+    58 go install github.com/QuesmaOrg/git-prompt-story@latest
+    59 ```
+    60 
+    61 ### 2. Configure Repository
+    62 
+    63 Navigate to your repository and install the hooks:</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:49</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add README.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Update README with Homebrew installation instructions
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/homebrew-tap d0b20e2] Update README with Homebrew installation instructions
+ 1 file changed, 6 insertions(&#43;), 4 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
   
   <div class="commit-card">
     <div class="commit-header">
@@ -1626,6 +1952,10 @@ Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
 EOF
 )&#34;</div>
             
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">[feature/homebrew-tap 10a6050] Add Homebrew tap support for brew install
+ 2 files changed, 23 insertions(&#43;), 1 deletion(-)</div>
             
           </details>
           
