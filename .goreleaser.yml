@@ -56,3 +56,17 @@ release:
   draft: false
   prerelease: auto
   name_template: "v{{.Version}}"
+
+brews:
+  - name: git-prompt-story
+    homepage: https://github.com/QuesmaOrg/git-prompt-story
+    description: "Git commit prompt generator using AI to create meaningful commit messages"
+    license: "Apache-2.0"
+    repository:
+      owner: QuesmaOrg
+      name: homebrew-tap
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    install: |
+      bin.install "git-prompt-story"
