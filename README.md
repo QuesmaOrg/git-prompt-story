@@ -6,10 +6,8 @@ Git Prompt Story captures your AI sessions and links them to your commits. Your 
 
 ## Quick start
 
-It requires git and Go (`brew install go`).
-
 ```bash
-go install github.com/QuesmaOrg/git-prompt-story@latest
+brew install QuesmaOrg/tap/git-prompt-story
 cd your_repository
 git-prompt-story install-hooks --auto-push  # --global if for all
 git-prompt-story install-github-workflow
@@ -50,8 +48,12 @@ git-prompt-story captures LLM sessions in your git history - making prompts revi
 
 ### 1. Install
 
-It requires git and Go (`brew install go`).
+**Homebrew (macOS):**
+```bash
+brew install QuesmaOrg/tap/git-prompt-story
+```
 
+**Go:**
 ```bash
 go install github.com/QuesmaOrg/git-prompt-story@latest
 ```
