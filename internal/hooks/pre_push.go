@@ -89,10 +89,8 @@ func maybeShowGitHubWorkflowNudge(remoteURL string) {
 		return
 	}
 
-	fmt.Println()
-	fmt.Println("💡 Tip: Add CI integration to show prompts in PRs:")
-	fmt.Println("   git-prompt-story install-github-workflow")
-	fmt.Println("   (To hide this message: touch .git/prompt-story-no-nudge)")
+	fmt.Println("💡 Show in PRs → git-prompt-story install-github-workflow")
+	fmt.Println("   Snooze: touch .git/prompt-story-no-nudge")
 }
 
 // isGitHubRemote checks if the remote URL points to GitHub
