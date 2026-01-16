@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "start_work": "2026-01-16T08:10:04Z",
+  "sessions": [
+    {
+      "tool": "claude-code",
+      "id": "022691ca-f5e0-4a60-8083-1ab846f8ca62",
+      "path": "claude-code/022691ca-f5e0-4a60-8083-1ab846f8ca62.jsonl",
+      "created": "2026-01-16T08:21:19.005Z",
+      "modified": "2026-01-16T08:44:46.635Z"
+    },
+    {
+      "tool": "claude-code",
+      "id": "0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56",
+      "path": "claude-code/0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56.jsonl",
+      "created": "2026-01-13T19:19:35.001Z",
+      "modified": "2026-01-16T08:19:32.513Z"
+    }
+  ]
+}
