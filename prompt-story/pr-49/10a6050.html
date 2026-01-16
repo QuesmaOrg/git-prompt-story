@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10a6050 - Prompt Story</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">&larr; Back to PR overview</a>
+  </nav>
+
+  <div class="header">
+    <h1><code>10a6050</code></h1>
+    <p class="meta">Add Homebrew tap support for brew install</p>
+  </div>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-agent-sessions" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show agent sessions</span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">58</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  <div class="commit-meta" style="margin-bottom: 24px;">
+    <strong>Full SHA:</strong> <code>10a60508b2bebcd93b2a33b4dba7f4b9fd4561bd</code><br>
+    <strong>Work period:</strong> 2026-01-16 08:10 - 2026-01-16 08:45
+  </div>
+
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 1: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">022691ca-f5e0-4a60-8083-1ab846f8ca62</code> |
+        2026-01-16 08:21 - 2026-01-16 08:44 | <span class="session-count">43</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item COMMAND"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:21</span>
+          <span class="prompt-type">COMMAND</span>
+          
+          <span class="prompt-text">/clear</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:21</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please use feature branch, I want to migrate to brew install, please research how should I provide that binary for my users who might don&#39;t want to install go or use that installation method.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ll research how to distribute your Go binary via Homebrew. Let me first explore your current build/release setup and then research the Homebrew options.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore this codebase to understand the current build and release setup for git-prompt-story. Loo...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">WebSearch</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">how to distribute Go binary via Homebrew tap GoReleaser 2025</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Web search results for query: &#34;how to distribute Go binary via Homebrew tap GoReleaser 2025&#34;
+
+Links: [{&#34;title&#34;:&#34;Homebrew Casks - GoReleaser&#34;,&#34;url&#34;:&#34;https://&lt;CREDENTIALS&gt;@goreleaser binaries, powered by @goreleaser&#34;,&#34;url&#34;:&#34;https://github.com/goreleaser/homebrew-tap&#34;},{&#34;title&#34;:&#34;GoReleaser: How To Distribute Your Binaries With Homebrew Or GoFish | by Engin Diri | GoReleaser&#34;,&#34;url&#34;:&#34;https://blog.goreleaser.com/goreleaser-how-to-distribute-your-binaries-with-homebrew-or-gofish-472e007b7992&#34;},{&#34;title&#34;:&#34;Create a Custom CLI Tool and Distribute with HomeBrew Using Goreleaser and Github Actions&#34;,&#34;url&#34;:&#34;https://askcloudarchitech.com/posts/tutorials/create-homebrew-tap-golang-goreleaser-cobra-cli/&#34;},{&#34;title&#34;:&#34;Packaging a project release (goreleaser part 2) · Applied Go&#34;,&#34;url&#34;:&#34;https://appliedgo.net/release2/&#34;}]
+
+Here&#39;s how to distribute a Go binary via Homebrew tap using GoReleaser:
+
+## Overview
+
+After releasing to GitHub, GitLab, or Gitea, GoReleaser can generate and publish a Homebrew Cask into a repository (Tap) that you have access to.
+
+## Key Concepts
+
+A tap is a separate Git repository with a unique naming that only contains instructions for HomeBrew (so it knows how to install your stuff). They recommend that the repository&#39;s name start with `homebrew-` so the short `brew tap` command can be used. For example, if you name the Git repository as `&lt;my-org&gt;homebrew-tools`, then you should use the tap name as `&lt;my-org&gt;/tools` while adding the tap.
+
+## Setting Up GoReleaser
+
+Add the following section to your `.goreleaser.yml` file:
+
+```yaml
+brews:
+  - name: gophersay
+    homepage: https://github.com/scraly/homebrew-tools
+    tap:
+      owner: scraly
+      name: homebrew-tools
+```
+
+The **builds** section instructs Goreleaser to compile your code to a binary of the name you provide. You can specify the OS and the architecture as well as any additional flags needed.(no content)The **brews** section tells Goreleaser to publish this project to a homebrew Tap. Replace my details...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:22</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good news - your project already uses GoReleaser which has built-in Homebrew tap support. Let me check your current configuration and create a plan.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:22</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:23</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I have all the information needed. Let me write the plan.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:23</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">I&#39;ve created a plan for adding Homebrew tap distribution. The good news is your GoReleaser setup already does most of the work - you just need to:
+
+1. **Create a tap repository** (`QuesmaOrg/homebrew-tap`)
+2. **Create a GitHub PAT** with write access to that repo
+3. **Add a `brews` section** to `.goreleaser.yml`
+4. **Update the release workflow** to use the PAT
+
+After that, users can install with:
+```bash
+brew install QuesmaOrg/tap/git-prompt-story
+```</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:23</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;allowedPrompts&#34;:[{&#34;prompt&#34;:&#34;run go build&#34;,&#34;tool&#34;:&#34;Bash&#34;}],&#34;plan&#34;:&#34;# Plan: Add Homebrew Tap Distribution\n\n## Summary\n\nAdd Homebrew tap support to `git-prompt-story` so users can install via `b...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_REJECT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_REJECT</span>
+          
+          <span class="prompt-text">Almost, do we use MIT license, I though we are Apache 2? Also you use QuesmaOrg/tap or QuesmaOrg/homebrew-tap, which one? I preffer the homebrew-tap</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good catches. Let me verify the license and fix those inconsistencies.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">head -5 /&lt;REDACTED&gt;/git/git-prompt-story/LICENSE</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Exit code 1
+head: /&lt;REDACTED&gt;/git/git-prompt-story/LICENSE: No such file or directory</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">**/LICENSE*</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No files found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">license|License|LICENSE</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">.goreleaser.yml:36:      - LICENSE*
+README.md:241:## License
+README.md:243:[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Found it - the README confirms Apache License 2.0. Let me update the plan with the correct license and consistent naming.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Add Homebrew Tap Distribution
+     2 
+     3 ## Summary
+     4 
+     5 Add Homebrew tap support to `git-prompt-story` so users can install via `brew install QuesmaOrg/tap/git-prompt-story` without needing Go installed.
+     6 
+     7 Your project already uses GoReleaser which has built-in Homebrew support - we just need to add a `brews` section and create a tap repository.
+     8 
+     9 ## Prerequisites (Manual Steps - Done by You)
+    10 
+    11 ### 1. Create a Homebrew Tap Repository
+    12 Create a new GitHub repository: **`QuesmaOrg/homebrew-tap`**
+    13 - Can be empty (GoReleaser will populate it)
+    14 - Must be public for Homebrew to work
+    15 - The `homebrew-` prefix is a Homebrew convention - it allows users to use `brew tap QuesmaOrg/tap` (prefix is stripped)
+    16 
+    17 ### 2. Create a GitHub Personal Access Token (PAT)
+    18 GoReleaser needs write access to the tap repository:
+    19 1. Go to GitHub   Settings   Developer settings   Personal access tokens   Fine-grained tokens</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    30 
+    31 Add `brews` section after `release`:
+    32 
+    33 ```yaml
+    34 brews:
+    35   - name: git-prompt-story
+    36     homepage: https://&lt;CREDENTIALS&gt;@goreleaser.com
+    45     install: |
+    46       bin.install &#34;git-prompt-story&#34;
+    47 ```
+    48 
+    49 ### 2. Update `.github/workflows/release.yml`
+    50 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    85       If you get a security warning, run:
+    86         xattr -d com.apple.quarantine $(brew --prefix)/bin/git-prompt-story
+    87 ```
+    88 
+    89 ## Verification
+    90 
+    91 1. Create `QuesmaOrg/homebrew-tap` repo and PAT (manual)
+    92 2. Make the code changes on a feature branch
+    93 3. Merge to main and create a new tag (e.g., `v0.15.3`)
+    94 4. Check that GoReleaser creates a formula in `QuesmaOrg/homebrew-tap`
+    95 5. Test: `brew tap QuesmaOrg/tap &amp;&amp; brew install git-prompt-story`
+    96 
+    97 ## Files to Modify
+    98 
+    99 - `.goreleaser.yml` - Add `brews` section</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Fixed both issues:
+- **License**: Changed from MIT to Apache-2.0
+- **Naming**: Consistently using `QuesmaOrg/homebrew-tap` (and explained that `brew tap QuesmaOrg/tap` works because Homebrew strips the `homebrew-` prefix)</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:29</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;allowedPrompts&#34;:[{&#34;prompt&#34;:&#34;run go build&#34;,&#34;tool&#34;:&#34;Bash&#34;}],&#34;plan&#34;:&#34;# Plan: Add Homebrew Tap Distribution\n\n## Summary\n\nAdd Homebrew tap support to `git-prompt-story` so users can install via `b...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/glowing-growing-pond.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Add Homebrew Tap Distribution
+
+## Summary
+
+Add Homebrew tap support to `git-prompt-story` so users can install via `brew install QuesmaOrg/tap/git-prompt-story` without needing Go installed.
+
+Your project already uses GoReleaser which has built-in Homebrew support - we just need to add a `brews` section and create a tap repository.
+
+## Prerequisites (Manual Steps - Done by You)
+
+### 1. Create a Homebrew Tap Repository
+Create a new GitHub repository: **`QuesmaOrg/homebrew-tap`**
+- Can be empty (GoReleaser will populate it)
+- Must be public for Homebrew to work
+- The `homebrew-` prefix is a Homebrew convention - it allows users to use `brew tap QuesmaOrg/tap` (prefix is stripped)
+
+### 2. Create a GitHub Personal Access Token (PAT)
+GoReleaser needs write access to the tap repository:
+1. Go to GitHub   Settings   Developer settings   Personal access tokens   Fine-grained tokens
+2. Create token with:
+   - Repository access: Select `QuesmaOrg/homebrew-tap`
+   - Permissions: Contents (Read and Write)
+3. Add as repository secret in `git-prompt-story`:
+   - Name: `HOMEBREW_TAP_TOKEN`
+   - Value: The PAT you created
+
+## Code Changes
+
+### 1. Update `.goreleaser.yml`
+
+Add `brews` section after `release`:
+
+```yaml
+brews:
+  - name: git-prompt-story
+    homepage: https://&lt;CREDENTIALS&gt;@goreleaser.com
+    install: |
+      bin.install &#34;git-prompt-story&#34;
+```
+
+### 2. Update `.github/workflows/release.yml`
+
+Change the token from `GITHUB_TOKEN` to the PAT:
+
+```yaml
+- name: Run GoReleaser
+  uses: goreleaser/goreleaser-action@v6
+  with:
+    version: latest
+    args: release --clean
+  env:
+    GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+```
+
+## User Installation
+
+After the next release, users can install with:
+
+```bash
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Let me start implementing the changes.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating feature branch for Homebrew tap&#34;,&#34;content&#34;:&#34;Create feature branch for Homebrew tap&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Adding brews section to .goreleaser.yml&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout -b feature/homebrew-tap</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Switched to a new branch &#39;feature/homebrew-tap&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating feature branch for Homebrew tap&#34;,&#34;content&#34;:&#34;Create feature branch for Homebrew tap&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding brews section to .goreleaser.yml&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.goreleaser.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    48       - &#39;^chore:&#39;
+    49       - Merge pull request
+    50       - Merge branch
+    51 
+    52 release:
+    53   github:
+    54     owner: QuesmaOrg
+    55     name: git-prompt-story
+    56   draft: false
+    57   prerelease: auto
+    58   name_template: &#34;v{{.Version}}&#34;
+    59 
+    60 brews:
+    61   - name: git-prompt-story
+    62     homepage: https://&lt;CREDENTIALS&gt;@goreleaser.com
+    71     install: |
+    72       bin.install &#34;git-prompt-story&#34;
+    73 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/workflows/release.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating feature branch for Homebrew tap&#34;,&#34;content&#34;:&#34;Create feature branch for Homebrew tap&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding brews section to .goreleaser.yml&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/workflows/release.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.github/workflows/release.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    19       - uses: actions/setup-go@v5
+    20         with:
+    21           go-version: &#39;1.21&#39;
+    22 
+    23       - name: Run GoReleaser
+    24         uses: goreleaser/goreleaser-action@v6
+    25         with:
+    26           version: &#39;~&gt; v2&#39;
+    27           args: release --clean
+    28         env:
+    29           GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    30 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Creating feature branch for Homebrew tap&#34;,&#34;content&#34;:&#34;Create feature branch for Homebrew tap&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding brews section to .goreleaser.yml&#34;,&#34;...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git diff</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml
+index d91bf8e..69461c2 100644
+--- a/.github/workflows/release.yml
+&#43;&#43;&#43; b/.github/workflows/release.yml
+@@ -26,4 &#43;26,4 @@ jobs:
+           version: &#39;~&gt; v2&#39;
+           args: release --clean
+         env:
+-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+&#43;          GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+diff --git a/.goreleaser.yml b/.goreleaser.yml
+index 3fdbe6c..0a66dde 100644
+--- a/.goreleaser.yml
+&#43;&#43;&#43; b/.goreleaser.yml
+@@ -56,3 &#43;56,17 @@ release:
+   draft: false
+   prerelease: auto
+   name_template: &#34;v{{.Version}}&#34;
+&#43;
+&#43;brews:
+&#43;  - name: git-prompt-story
+&#43;    homepage: https://&lt;CREDENTIALS&gt;@goreleaser.com
+&#43;    install: |
+&#43;      bin.install &#34;git-prompt-story&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:32</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Code changes are complete on `feature/homebrew-tap` branch. Here&#39;s the summary:
+
+**Changes made:**
+1. `.goreleaser.yml` - Added `brews` section for Homebrew tap
+2. `.github/workflows/release.yml` - Changed token to `HOMEBREW_TAP_TOKEN`
+
+**Before you can release, you need to:**
+
+1. **Create the tap repository**: https://github.com/organizations/QuesmaOrg/repositories/new
+   - Name: `homebrew-tap`
+   - Public visibility
+   - Can leave it empty
+
+2. **Create a GitHub PAT**:
+   - Go to https://github.com/settings/personal-access-tokens/new
+   - Repository access: Select `QuesmaOrg/homebrew-tap`
+   - Permissions: Contents → Read and Write
+
+3. **Add the PAT as a secret**:
+   - Go to https://github.com/QuesmaOrg/git-prompt-story/settings/secrets/actions
+   - New repository secret: `HOMEBREW_TAP_TOKEN`
+
+Would you like me to commit these changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:34</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">I created the repository, don&#39;t see a way to create GitHub PAT for QuesmaOrg/* repos, tell me how</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:34</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">WebSearch</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">GitHub fine-grained personal access token organization repository access 2025</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Web search results for query: &#34;GitHub fine-grained personal access token organization repository access 2025&#34;
+
+Links: [{&#34;title&#34;:&#34;Introducing fine-grained personal access tokens for GitHub - The GitHub Blog&#34;,&#34;url&#34;:&#34;https://github.blog/security/application-security/introducing-fine-grained-personal-access-tokens-for-github/&#34;},{&#34;title&#34;:&#34;What permissions does a fine-grained token need in order to access a private repository for the checkout action? · community · Discussion #160497&#34;,&#34;url&#34;:&#34;https://github.com/orgs/community/discussions/160497&#34;},{&#34;title&#34;:&#34;Managing your personal access tokens - GitHub Docs&#34;,&#34;url&#34;:&#34;https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens&#34;},{&#34;title&#34;:&#34;No option \&#34;Only select repositories\&#34; when creating a fine grained acces token. · community · Discussion #73027&#34;,&#34;url&#34;:&#34;https://github.com/orgs/community/discussions/73027&#34;},{&#34;title&#34;:&#34;Create access token for organization · community · Discussion #74701&#34;,&#34;url&#34;:&#34;https://github.com/orgs/community/discussions/74701&#34;},{&#34;title&#34;:&#34;Permissions required for fine-grained personal access tokens - GitHub Docs&#34;,&#34;url&#34;:&#34;https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens&#34;},{&#34;title&#34;:&#34;Managing requests for personal access tokens in your organization - GitHub Docs&#34;,&#34;url&#34;:&#34;https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/managing-requests-for-personal-access-tokens-in-your-organization&#34;},{&#34;title&#34;:&#34;Setting a personal access token policy for your organization - GitHub Docs&#34;,&#34;url&#34;:&#34;https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization&#34;},{&#34;title&#34;:&#34;GitHub Fine Grained Personal Access Token | GitGuardian documentation&#34;,&#34;url&#34;:&#34;https://docs.gitguardian.com/secrets-detection/secrets-detection-engine/detectors/specifics/github_fine_grained_pat&#34;},{&#34;title&#34;:&#34;Unable to ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:35</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">There are two options:
+
+## Option 1: Enable Fine-Grained PATs for QuesmaOrg (Recommended)
+
+The organization must opt-in to allow fine-grained PATs:
+
+1. Go to **https://github.com/organizations/QuesmaOrg/settings/personal-access-tokens**
+2. Under &#34;Fine-grained personal access tokens&#34;, select **&#34;Allow access via fine-grained personal access tokens&#34;**
+3. Optionally set approval policy (you can require admin approval or allow without approval)
+4. Save
+
+Then create the token:
+1. Go to https://github.com/settings/personal-access-tokens/new
+2. **Resource owner**: Select `QuesmaOrg` (it will now appear)
+3. **Repository access**: Select `QuesmaOrg/homebrew-tap`
+4. **Permissions**: Contents → Read and Write
+5. Generate token
+
+## Option 2: Use a Classic PAT (Simpler)
+
+Classic PATs work with organizations without extra setup:
+
+1. Go to **https://github.com/settings/tokens/new**
+2. Note: Something like &#34;GoReleaser Homebrew&#34;
+3. Expiration: Set as desired (or no expiration)
+4. Scopes: Check **`repo`** (full control of private repositories)
+5. Generate token
+6. Add it as `HOMEBREW_TAP_TOKEN` secret in git-prompt-story
+
+The downside of classic PATs is they have broader access (all your repos), but it&#39;s simpler to set up.
+
+**Sources:**
+- [GitHub Docs: Managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+- [GitHub Docs: Setting a PAT policy for your organization](https://docs.github.com/en/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization)</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:44</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Ok, added. Please add comment that it will expire in year from now and add  instructions (option 1) to regenerate them as comment (second part)</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.github/workflows/release.yml</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/.github/workflows/release.yml has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    19       - uses: actions/setup-go@v5
+    20         with:
+    21           go-version: &#39;1.21&#39;
+    22 
+    23       - name: Run GoReleaser
+    24         uses: goreleaser/goreleaser-action@v6
+    25         with:
+    26           version: &#39;~&gt; v2&#39;
+    27           args: release --clean
+    28         env:
+    29           # HOMEBREW_TAP_TOKEN expires ~January 2027
+    30           # To regenerate:
+    31           # 1. Go to https://github.com/settings/personal-access-tokens/new
+    32           # 2. Resource owner: QuesmaOrg
+    33           # 3. Repository access: Select QuesmaOrg/homebrew-tap
+    34           # 4. Permissions: Contents   Read and Write
+    35           # 5. Generate token and update the secret at:
+    36           #    https://github.com/QuesmaOrg/git-prompt-story/settings/secrets/actions
+    37           GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    38 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:44</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Done. Added expiration note and regeneration instructions. Would you like me to commit these changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:44</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Yes commit</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/homebrew-tap
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   .github/workflows/release.yml
+	modified:   .goreleaser.yml
+
+no changes added to commit (use &#34;git add&#34; and/or &#34;git commit -a&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log --oneline -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">e85255a Merge pull request #48 from QuesmaOrg/feature/prompt-story-nudges
+19a4dc6 Add nudges to encourage Prompt-Story adoption
+a1c9724 Merge pull request #47 from QuesmaOrg/feature/fix-global-hooks
+e57f64d Improve CI summary formatting for task notifications and interrupts
+e6ea034 Fix global hook installation to chain to local repo hooks</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:44</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add .github/workflows/release.yml .goreleaser.yml &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add Homebrew tap support for brew install
+
+Configure GoReleaser to publish formula to QuesmaOrg/homebrew-tap,
+allowing users to install via: brew install QuesmaOrg/tap/git-prompt-story
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="commit-card" data-is-agent="false">
+    <div class="commit-header">
+      <h3>
+        <span class="badge main">Main</span>
+        Session 2: Claude Code
+      </h3>
+      <div class="commit-meta">
+        <code class="session-id">0a1c76ca-7ac3-4ec1-9e7f-d2fd882e2f56</code> |
+        2026-01-13 19:19 - 2026-01-16 08:19 | <span class="session-count">15</span> entries
+      </div>
+    </div>
+    <div class="session">
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:11</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please tag latest version to kick release job.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: Prompt-Story Nudges\n\nAdd messaging to encourage users to fully adopt Prompt-Story.\n\n## Features\n\n### 1. Post-Install Tips\nAfter `install-hooks` completes, show helpful next ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Prompt-Story Nudges
+
+Add messaging to encourage users to fully adopt Prompt-Story.
+
+## Features
+
+### 1. Post-Install Tips
+After `install-hooks` completes, show helpful next steps.
+
+**Location:** `cmd/install_hooks.go` (after InstallHooks call)
+
+**Output:**
+```
+Hooks installed to .git/hooks
+
+📋 Next steps:
+  • Make a commit to start tracking prompts
+  • Run &#39;git-prompt-story show&#39; to view your prompt history
+  • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration
+```
+
+### 2. GitHub Workflow Nudge on Push
+When pushing to a GitHub remote without the workflow installed, suggest adding it.
+
+**Location:** `internal/hooks/pre_push.go` (in PrePush function)
+
+**Logic:**
+1. Parse remote URL to detect if it&#39;s GitHub (contains `github.com`)
+2. Check if `.github/workflows/prompt-story.yml` exists in repo
+3. If GitHub but no workflow, show nudge (only once per push)
+4. Respect suppression via `.git/prompt-story-no-nudge` marker file
+
+**Output:**
+```
+git-prompt-story: pushed notes to origin
+
+💡 Tip: Add CI integration to show prompts in PRs:
+   git-prompt-story install-github-workflow
+   (Run &#39;git-prompt-story disable-nudges&#39; to hide this message)
+```
+
+### 3. Rename Command
+Rename `generate-github-workflow`   `install-github-workflow`
+
+## Files to Modify
+
+1. **`cmd/install_hooks.go`** - Add post-install tips after successful installation
+2. **`internal/hooks/pre_push.go`** - Add GitHub workflow detection and nudge
+3. **`cmd/generate_github_workflow.go`** - Rename to `cmd/install_github_workflow.go`
+4. **`cmd/root.go`** - Update command registration
+5. **New: `cmd/disable_nudges.go`** - Add command to create suppression file
+
+## Implementation Details
+
+### GitHub URL Detection
+```go
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:11</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag --sort=-v:refname | head -5</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">v0.15.1
+v0.15.0
+v0.14.0
+v0.13.0
+v0.12.2</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">08:11</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Version)</span>
+          <span class="prompt-text">What version should the new tag be? Latest is v0.15.1</span>
+          <span class="decision-answer">→ v0.15.2</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git checkout main &amp;&amp; git pull origin main</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Your branch is behind &#39;origin/main&#39; by 20 commits, and can be fast-forwarded.
+  (use &#34;git pull&#34; to update your local branch)
+Updating d83e577..e85255a
+Fast-forward
+ .github/actions/prompt-story-with-pages/action.yml |   4 &#43;-
+ .github/actions/prompt-story/action.yml            |   4 &#43;-
+ .../actions/prompt-story/scripts/fetch-notes.sh    |   4 &#43;
+ CLAUDE.md                                          |   8 &#43;
+ README.md                                          | 188 &#43;&#43;&#43;&#43;&#43;-----
+ cmd/ci_preview.go                                  | 166 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ ...thub_workflow.go =&gt; install_github_workflow.go} |  10 &#43;-
+ cmd/install_hooks.go                               |   6 &#43;
+ e2e/lib/helpers.sh                                 |  12 &#43;
+ ...generate-workflow.sh =&gt; 16-install-workflow.sh} |  12 &#43;-
+ e2e/tests/21-global-hook-installation.sh           | 170 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;
+ internal/ci/summary.go                             | 383 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;--
+ internal/ci/summary_test.go                        |  17 &#43;-
+ internal/hooks/installer.go                        |  40 &#43;&#43;-
+ internal/hooks/pre_push.go                         |  49 &#43;&#43;-
+ 15 files changed, 916 insertions(&#43;), 157 deletions(-)
+ create mode 100644 cmd/ci_preview.go
+ rename cmd/{generate_github_workflow.go =&gt; install_github_workflow.go} (61%)
+ rename e2e/tests/{16-generate-workflow.sh =&gt; 16-install-workflow.sh} (92%)
+ create mode 100755 e2e/tests/21-global-hook-installation.sh
+Switched to branch &#39;main&#39;
+From github.com:QuesmaOrg/git-prompt-story
+ * branch            main       -&gt; FETCH_HEAD
+   a1c9724..e85255a  main       -&gt; origin/main</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:12</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag v0.15.2 &amp;&amp; git push origin v0.15.2</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story: pushed notes to origin
+To github.com:QuesmaOrg/git-prompt-story.git
+ * [new tag]         v0.15.2 -&gt; v0.15.2</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git log v0.15.1..v0.15.2 --oneline</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">e85255a Merge pull request #48 from QuesmaOrg/feature/prompt-story-nudges
+19a4dc6 Add nudges to encourage Prompt-Story adoption
+a1c9724 Merge pull request #47 from QuesmaOrg/feature/fix-global-hooks
+e57f64d Improve CI summary formatting for task notifications and interrupts
+e6ea034 Fix global hook installation to chain to local repo hooks
+f6a5c7a Merge pull request #45 from QuesmaOrg/readme
+bbbd438 Refactor README structure and technical details
+f6cd3ba Update README value proposition and opening
+57bdaad Add Quick start section to README</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git tag -d v0.15.2 &amp;&amp; git push origin :refs/tags/v0.15.2</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_REJECT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:13</span>
+          <span class="prompt-type">TOOL_REJECT</span>
+          
+          <span class="prompt-text">do not delete this tag, please add comment if possible</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:13</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">gh release create v0.15.2 --title &#34;v0.15.2&#34; --notes &#34;$(cat &lt;&lt;&#39;EOF&#39;
+## What&#39;s Changed
+
+### New Features
+- **Nudges for adoption**: Post-install tips and GitHub workflow suggestions on push
+- **Renamed command**: `generate-github-workflow` → `install-github-workflow`
+
+### Bug Fixes
+- **Global hooks now chain to local hooks**: When using `--global`, hooks properly call local `.git/hooks/` scripts
+
+### Improvements
+- **CI summary formatting**: Task notifications show as `🔔 Background task failed` instead of raw XML
+- **Interrupted messages**: Format as `⏸️ User interrupted`
+- **Deduplication**: Consecutive identical prompts shown once
+- **README**: Restructured with Quick Start section
+EOF
+)&#34;</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">https://github.com/QuesmaOrg/git-prompt-story/releases/tag/v0.15.2</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:13</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Created release with notes: https://github.com/QuesmaOrg/git-prompt-story/releases/tag/v0.15.2</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:19</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Install new release, check Readme.md how to use build</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">grep -A5 &#34;Install&#34; README.md | head -15</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">### 1. Install
+
+It requires git and Go (`brew install go`).
+
+```bash
+go install github.com/QuesmaOrg/git-prompt-story@latest
+--
+Single binary, no runtime dependencies. Install once, works everywhere.
+
+### GitHub Action
+
+Two actions are available:</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:19</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go install github.com/QuesmaOrg/git-prompt-story@latest &amp;&amp; git-prompt-story --version</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">git-prompt-story version v0.15.2
+go: downloading github.com/QuesmaOrg/git-prompt-story v0.15.2</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">08:19</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Installed `git-prompt-story v0.15.2`.</span>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const toggleAgentSessions = document.getElementById('toggle-agent-sessions');
+    const visibleCount = document.getElementById('visible-count');
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      const showAgents = toggleAgentSessions.checked;
+      let count = 0;
+
+      
+      document.querySelectorAll('.commit-card').forEach(card => {
+        const isAgent = card.dataset.isAgent === 'true';
+        if (isAgent && !showAgents) {
+          card.classList.add('hidden');
+        } else {
+          card.classList.remove('hidden');
+        }
+      });
+
+      
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const card = el.closest('.commit-card');
+        if (card && card.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          return;
+        }
+
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.commit-card:not(.hidden)').forEach(card => {
+        const visible = card.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = card.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+    toggleAgentSessions.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
