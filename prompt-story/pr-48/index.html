@@ -1,0 +1,2689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Story - PR #48</title>
+  <style>:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #f0f2f4;
+  --text-primary: #1f2328;
+  --text-secondary: #59636e;
+  --text-muted: #8b949e;
+  --border-color: #d0d7de;
+  --accent-color: #0969da;
+  --accent-hover: #0550ae;
+  --prompt-bg: #ddf4ff;
+  --command-bg: #dafbe1;
+  --reject-bg: #ffebe9;
+  --assistant-bg: #f5f0ff;
+  --tool-bg: #fff8e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --accent-color: #58a6ff;
+    --accent-hover: #79c0ff;
+    --prompt-bg: #1f3a5f;
+    --command-bg: #1f3a2f;
+    --reject-bg: #3f2a2a;
+    --assistant-bg: #2d2a3f;
+    --tool-bg: #3f3a1f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+h1, h2, h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 8px 16px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.commit-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.commit-header {
+  background-color: var(--bg-secondary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commit-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commit-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prompt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.prompt-item.PROMPT {
+  background-color: var(--prompt-bg);
+  border-left-color: var(--accent-color);
+}
+
+.prompt-item.COMMAND {
+  background-color: var(--command-bg);
+  border-left-color: #2da44e;
+}
+
+.prompt-item.TOOL_REJECT {
+  background-color: var(--reject-bg);
+  border-left-color: #cf222e;
+}
+
+.prompt-item.ASSISTANT {
+  background-color: var(--assistant-bg);
+  border-left-color: #8b5cf6;
+}
+
+.prompt-item.TOOL_USE {
+  background-color: var(--tool-bg);
+  border-left-color: #f59e0b;
+}
+
+.prompt-item.DECISION {
+  background-color: #fdf4ff;
+  border-left-color: #a855f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prompt-item.DECISION {
+    background-color: #3b2a4a;
+    border-left-color: #a855f7;
+  }
+}
+
+.prompt-item.outside-work-period {
+  opacity: 0.6;
+}
+
+.prompt-time {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.prompt-type {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.truncated::after {
+  content: "...";
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge.main {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.badge.agent {
+  background-color: #fff8e6;
+  color: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.main {
+    background-color: #1f3a5f;
+    color: #58a6ff;
+  }
+  .badge.agent {
+    background-color: #3f3a1f;
+    color: #f59e0b;
+  }
+}
+
+.agent-session {
+  border-left: 3px solid #f59e0b;
+}
+
+.session-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
+pre {
+  background-color: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-label:hover {
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background-color: white;
+}
+
+.toggle-input:focus + .toggle-switch {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-color);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Tool details collapsible */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.tool-details summary:hover {
+  color: var(--text-primary);
+}
+
+.tool-details[open] summary {
+  margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tool-input {
+  border-left: 3px solid var(--accent-color);
+}
+
+.tool-output {
+  border-left: 3px solid #2da44e;
+}
+
+.tool-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Tool name in header */
+.tool-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Decision entries */
+.decision-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.decision-answer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: #a855f7;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .decision-answer {
+    background-color: #7c3aed;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Prompt Story</h1>
+    <p class="meta">PR #48 | 1 commit(s) with LLM sessions</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Commits Analyzed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">With Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="visible-count">68</div>
+      <div class="stat-label">Entries</div>
+    </div>
+  </div>
+
+  
+  <h2>Commits</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Commit</th>
+        <th>Subject</th>
+        <th>Tool</th>
+        <th>Entries</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td><code>19a4dc6</code></td>
+        <td>Add nudges to encourage Prompt-Story adoption</td>
+        <td>Claude Code</td>
+        <td>68</td>
+        <td><a href="19a4dc6.html">View transcript</a></td>
+      </tr>
+      
+    </tbody>
+  </table>
+
+  <h2>Session Details</h2>
+
+  <div class="filter-controls">
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-all-entries" class="toggle-input" checked>
+      <span class="toggle-switch"></span>
+      <span>Show all entries</span>
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="toggle-whole-session" class="toggle-input">
+      <span class="toggle-switch"></span>
+      <span>Show whole session</span>
+    </label>
+  </div>
+
+  
+  <div class="commit-card">
+    <div class="commit-header">
+      <h3><code>19a4dc6</code> Add nudges to encourage Prompt-Story adoption</h3>
+      <div class="commit-meta">
+        Work period: 2026-01-16 07:37 - 2026-01-16 08:03
+      </div>
+    </div>
+    
+    <div class="session">
+      <div class="session-header">
+        Claude Code | 2026-01-13 19:19 - 2026-01-16 08:03 | <span class="session-count">68</span> entries
+      </div>
+      <ul class="prompt-list">
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">07:37</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please start new feature branch, we should add messaging doing nodges to use Prompt-Story</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;plan&#34;:&#34;# Plan: CI Summary Formatting Improvements - FINAL REMAINING TASKS\n\n## Status: Almost Complete\n\nMost implementation is already done. Only 3 small changes remain in `internal/ci/summary...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: CI Summary Formatting Improvements - FINAL REMAINING TASKS
+
+## Status: Almost Complete
+
+Most implementation is already done. Only 3 small changes remain in `internal/ci/summary.go`:
+
+### 1. Apply deduplication to userTimeline (after line 840)
+After sorting userTimeline, add:
+```go
+userTimeline = deduplicateConsecutive(userTimeline)
+```
+
+### 2. Count failed tasks in GenerateSummary (lines 106-121)
+In the loop that counts prompts, add failed task counting:
+```go
+failedTaskCount := countFailedTasks(sess.Prompts)
+summary.TotalFailedTasks &#43;= failedTaskCount
+```
+
+### 3. Update header rendering (lines 854-858)
+Change from simple format to include failed task count:
+```go
+header := fmt.Sprintf(&#34;# %d user prompts&#34;, len(userTimeline))
+var extras []string
+if fileEditCount &gt; 0 {
+    extras = append(extras, fmt.Sprintf(&#34;%d file edits&#34;, fileEditCount))
+}
+if summary.TotalFailedTasks &gt; 0 {
+    noun := &#34;task&#34;
+    if summary.TotalFailedTasks &gt; 1 {
+        noun = &#34;tasks&#34;
+    }
+    extras = append(extras, fmt.Sprintf(&#34;%d failed %s&#34;, summary.TotalFailedTasks, noun))
+}
+if len(extras) &gt; 0 {
+    header &#43;= &#34; (&#34; &#43; strings.Join(extras, &#34;, &#34;) &#43; &#34;)&#34;
+}
+sb.WriteString(header &#43; &#34;\n\n&#34;)
+```
+
+## Verification
+```bash
+go build . &amp;&amp; ./git-prompt-story ci-summary &#34;origin/main..HEAD&#34; --format=markdown | head -30
+```
+</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:37</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git fetch origin &amp;&amp; git checkout -b feature/prompt-story-nudges origin/main</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">branch &#39;feature/prompt-story-nudges&#39; set up to track &#39;origin/main&#39;.
+From github.com:QuesmaOrg/git-prompt-story
+   ae2f9cb..14b4ead  gh-pages   -&gt; origin/gh-pages
+   f6a5c7a..a1c9724  main       -&gt; origin/main
+Switched to a new branch &#39;feature/prompt-story-nudges&#39;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:38</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Created branch `feature/prompt-story-nudges` from `origin/main`.</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">07:38</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Nudge type)</span>
+          <span class="prompt-text">Where should these nudges appear and what should they encourage?</span>
+          <span class="decision-answer">→ Post-install, Git hook output</span>
+          
+        </li>
+        
+        <li class="prompt-item DECISION"
+            data-entry-type="other"
+            data-in-work-period="true">
+          <span class="prompt-time">07:39</span>
+          <span class="prompt-type">DECISION</span>
+          
+          <span class="decision-header">(Hook nudges)</span>
+          <span class="prompt-text">What kind of tips/nudges do you want to show during git hook output?</span>
+          <span class="decision-answer">→ Usage stats, When pushing you should check if repo is GitHub and using GitHub action to show prompts, if not you should ask them to install workflow. There should be also way to surpress that.</span>
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:40</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Got it. Let me explore the codebase to understand the current hook output and how to implement these nudges.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:40</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Explore the git-prompt-story codebase to understand:
+
+1. The install-hooks command - where is it ...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Excellent! Now I have a comprehensive understanding of the codebase. Let me create a detailed research report.
+
+## Research Report: git-prompt-story Codebase Architecture
+
+Based on my exploration of the git-prompt-story repository, here&#39;s a comprehensive analysis of the key components relevant to your requested features:
+
+### 1. **Install-Hooks Command** (`/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go`)
+
+**Current Output:**
+- Line 115: `&#34;Pre-push hook installed (notes will auto-sync on push)&#34;`
+- Lines 119-122: Global vs local installation messages
+- Very minimal feedback - just installation confirmation
+
+**Key Flow:**
+- Uses `hooks.InstallHooks()` from `/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/installer.go`
+- Supports two flags: `--global` and `--auto-push`
+- Global hooks installed to: `~/.config/git/hooks` (line 145)
+- Backs up existing hooks if they exist (line 178)
+
+**Current Limitations:**
+- No post-install tips shown
+- No usage guidance provided
+- No help text on how to verify installation
+- No suggestions for next steps
+
+---
+
+### 2. **Pre-Push Hook Flow** (`/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go`)
+
+**What Happens on Push:**
+1. Checks for existing notes refs (`refs/notes/prompt-story` and `refs/notes/prompt-story-transcripts`)
+2. Reads stdin (ref information from git) but doesn&#39;t need the content
+3. Force pushes note refs to the same remote being pushed to (line 63-64)
+4. Outputs: `&#34;git-prompt-story: pushed notes to {remoteName}&#34;` (line 76)
+
+**Key Details:**
+- Uses `GIT_PROMPT_STORY_PUSHING_NOTES` env var to prevent recursive invocation (line 15)
+- Force pushes are safe because notes are metadata-only (lines 44-48 comments)
+- Silently returns if no note refs exist (line 59)
+- Doesn&#39;t block main push on failure (cmd/pre_push.go line 20-21)
+
+**Detection Opportunities:**
+- Runs during every push event
+- Has access to remote name and URL
+- Could detect CI/CD environments via environment variables
+
+---
+
+### 3. **Post-Commit Hoo...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:42</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">Good research. Let me plan the implementation.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">EnterPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Entered plan mode. You should now focus on exploring the codebase and designing an implementation approach.
+
+In plan mode, you should:
+1. Thoroughly explore the codebase to understand existing patterns
+2. Identify similar features and architectural approaches
+3. Consider multiple approaches and their trade-offs
+4. Use AskUserQuestion if you need to clarify the approach
+5. Design a concrete implementation strategy
+6. When ready, use ExitPlanMode to present your plan for approval
+
+Remember: DO NOT write or edit any files yet. This is a read-only exploration and planning phase.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Prompt-Story Nudges
+     2 
+     3 Add messaging to encourage users to fully adopt Prompt-Story.
+     4 
+     5 ## Features
+     6 
+     7 ### 1. Post-Install Tips
+     8 After `install-hooks` completes, show helpful next steps.
+     9 
+    10 **Location:** `cmd/install_hooks.go` (after InstallHooks call)
+    11 
+    12 **Output:**
+    13 ```
+    14 Hooks installed to .git/hooks
+    15 
+    16 📋 Next steps:
+    17   • Make a commit to start tracking prompts
+    18   • Run &#39;git-prompt-story show&#39; to view your prompt history
+    19   • Run &#39;git-prompt-story generate-github-workflow&#39; to add CI integration
+    20 ```
+    21 
+    22 ### 2. GitHub Workflow Nudge on Push
+    23 When pushing to a GitHub remote without the workflow installed, suggest adding it.
+    24 
+    25 **Location:** `internal/hooks/pre_push.go` (in PrePush function)
+    26 
+    27 **Logic:**
+    28 1. Parse remote URL to detect if it&#39;s GitHub (contains `github.com`)
+    29 2. Check if `.github/workflows/prompt-story.yml` exists in repo
+    30 3. If GitHub but no workflow, show nudge (only once per push)
+    31 4. Respect suppression via `GIT_PROMPT_STORY_NO_NUDGE=1` env var
+    32 
+    33 **Output:**
+    34 ```
+    35 git-prompt-story: pushed notes to origin
+    36 
+    37 💡 Tip: Add CI integration to show prompts in PRs:
+    38    git-prompt-story generate-github-workflow
+    39    (Set GIT_PROMPT_STORY_NO_NUDGE=1 to hide this message)
+    40 ```
+    41 
+    42 ## Files to Modify
+    43 
+    44 1. **`cmd/install_hooks.go`** - Add post-install tips after successful installation
+    45 2. **`internal/hooks/pre_push.go`** - Add GitHub workflow detection and nudge
+    46 
+    47 ## Implementation Details
+    48 
+    49 ### GitHub URL Detection
+    50 ```go
+    51 func isGitHubRemote(remoteURL string) bool {
+    52     return...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:42</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;allowedPrompts&#34;:[{&#34;prompt&#34;:&#34;build go project&#34;,&#34;tool&#34;:&#34;Bash&#34;},{&#34;prompt&#34;:&#34;test install-hooks command&#34;,&#34;tool&#34;:&#34;Bash&#34;},{&#34;prompt&#34;:&#34;test git push&#34;,&#34;tool&#34;:&#34;Bash&#34;}],&#34;plan&#34;:&#34;# Plan: Prompt-Story Nudges\n\...</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_REJECT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">07:45</span>
+          <span class="prompt-type">TOOL_REJECT</span>
+          
+          <span class="prompt-text">Overall, yes, but supression should be done through some internal file in .git/... directory (research eight pattern). While there please also rename generate-github-workflow to install-github-workflow</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ls -la .git/ | head -20</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">total 984
+drwxr-xr-x@  18 jacek  staff     576 Jan 16 08:38 .
+drwxr-xr-x@  17 jacek  staff     544 Jan 14 08:09 ..
+-rw-r--r--@   1 jacek  staff     549 Jan 14 09:29 COMMIT_EDITMSG
+-rw-r--r--@   1 jacek  staff    2638 Jan 16 08:38 FETCH_HEAD
+-rw-r--r--@   1 jacek  staff      44 Jan 16 08:38 HEAD
+-rw-r--r--@   1 jacek  staff      41 Jan  9 08:31 ORIG_HEAD
+-rw-r--r--@   1 jacek  staff      41 Jan  5 17:28 REBASE_HEAD
+-rw-r--r--@   1 jacek  staff    4165 Jan 16 08:38 config
+-rw-r--r--@   1 jacek  staff      73 Dec 28 19:57 description
+drwxr-xr-x@  19 jacek  staff     608 Jan  4 16:10 hooks
+-rw-r--r--@   1 jacek  staff    9974 Jan 16 08:38 index
+drwxr-xr-x@   3 jacek  staff      96 Dec 28 19:57 info
+drwxr-xr-x@   4 jacek  staff     128 Dec 28 20:20 logs
+drwxr-xr-x@ 260 jacek  staff    8320 Jan 16 08:38 objects
+-rw-r--r--@   1 jacek  staff      46 Jan  7 13:10 packed-refs
+-rw-r--r--@   1 jacek  staff  450780 Jan 14 09:29 prompt-story-debug.log
+drwxr-xr-x@   7 jacek  staff     224 Jan  9 08:31 refs
+drwxr-xr-x@   3 jacek  staff      96 Dec 29 19:10 worktrees</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">ls -la .git/info/</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">total 8
+drwxr-xr-x@  3 jacek  staff   96 Dec 28 19:57 .
+drwxr-xr-x@ 18 jacek  staff  576 Jan 16 08:38 ..
+-rw-r--r--@  1 jacek  staff  240 Dec 28 19:57 exclude</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:45</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/.git/info/exclude</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 # Plan: Prompt-Story Nudges
+     2 
+     3 Add messaging to encourage users to fully adopt Prompt-Story.
+     4 
+     5 ## Features
+     6 
+     7 ### 1. Post-Install Tips
+     8 After `install-hooks` completes, show helpful next steps.
+     9 
+    10 **Location:** `cmd/install_hooks.go` (after InstallHooks call)
+    11 
+    12 **Output:**
+    13 ```
+    14 Hooks installed to .git/hooks
+    15 
+    16 📋 Next steps:
+    17   • Make a commit to start tracking prompts
+    18   • Run &#39;git-prompt-story show&#39; to view your prompt history
+    19   • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration
+    20 ```
+    21 
+    22 ### 2. GitHub Workflow Nudge on Push
+    23 When pushing to a GitHub remote without the workflow installed, suggest adding it.
+    24 
+    25 **Location:** `internal/hooks/pre_push.go` (in PrePush function)
+    26 
+    27 **Logic:**
+    28 1. Parse remote URL to detect if it&#39;s GitHub (contains `github.com`)
+    29 2. Check if `.github/workflows/prompt-story.yml` exists in repo
+    30 3. If GitHub but no workflow, show nudge (only once per push)
+    31 4. Respect suppression via `.git/prompt-story-no-nudge` marker file
+    32 
+    33 **Output:**
+    34 ```
+    35 git-prompt-story: pushed notes to origin
+    36 
+    37 💡 Tip: Add CI integration to show prompts in PRs:
+    38    git-prompt-story install-github-workflow
+    39    (Run &#39;git-prompt-story disable-nudges&#39; to hide this message)
+    40 ```
+    41 
+    42 ### 3. Rename Command
+    43 Rename `generate-github-workflow`   `install-github-workflow`
+    44 
+    45 ## Files to Modify
+    46 
+    47 1. **`cmd/install_hooks.go`** - Add post-install tips after successful installation
+    48 2. **`internal/hooks/pre_push.go`** - Add GitHub workflow detection and nudge
+    49 3. **`cmd/generate_github_workflow.go`** - ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">ExitPlanMode</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;allowedPrompts&#34;:[{&#34;prompt&#34;:&#34;build go project&#34;,&#34;tool&#34;:&#34;Bash&#34;},{&#34;prompt&#34;:&#34;test install-hooks command&#34;,&#34;tool&#34;:&#34;Bash&#34;},{&#34;prompt&#34;:&#34;test git push&#34;,&#34;tool&#34;:&#34;Bash&#34;},{&#34;prompt&#34;:&#34;rename file with git mv&#34;,&#34;to...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">User has approved your plan. You can now start coding. Start with updating your todo list if applicable
+
+Your plan has been saved to: /&lt;REDACTED&gt;/.claude/plans/parallel-toasting-pretzel.md
+You can refer back to it if needed during implementation.
+
+## Approved Plan:
+# Plan: Prompt-Story Nudges
+
+Add messaging to encourage users to fully adopt Prompt-Story.
+
+## Features
+
+### 1. Post-Install Tips
+After `install-hooks` completes, show helpful next steps.
+
+**Location:** `cmd/install_hooks.go` (after InstallHooks call)
+
+**Output:**
+```
+Hooks installed to .git/hooks
+
+📋 Next steps:
+  • Make a commit to start tracking prompts
+  • Run &#39;git-prompt-story show&#39; to view your prompt history
+  • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration
+```
+
+### 2. GitHub Workflow Nudge on Push
+When pushing to a GitHub remote without the workflow installed, suggest adding it.
+
+**Location:** `internal/hooks/pre_push.go` (in PrePush function)
+
+**Logic:**
+1. Parse remote URL to detect if it&#39;s GitHub (contains `github.com`)
+2. Check if `.github/workflows/prompt-story.yml` exists in repo
+3. If GitHub but no workflow, show nudge (only once per push)
+4. Respect suppression via `.git/prompt-story-no-nudge` marker file
+
+**Output:**
+```
+git-prompt-story: pushed notes to origin
+
+💡 Tip: Add CI integration to show prompts in PRs:
+   git-prompt-story install-github-workflow
+   (Run &#39;git-prompt-story disable-nudges&#39; to hide this message)
+```
+
+### 3. Rename Command
+Rename `generate-github-workflow`   `install-github-workflow`
+
+## Files to Modify
+
+1. **`cmd/install_hooks.go`** - Add post-install tips after successful installation
+2. **`internal/hooks/pre_push.go`** - Add GitHub workflow detection and nudge
+3. **`cmd/generate_github_workflow.go`** - Rename to `cmd/install_github_workflow.go`
+4. **`cmd/root.go`** - Update command registration
+5. **New: `cmd/disable_nudges.go`** - Add command to create suppression file
+
+## Implementation Details
+
+### GitHub URL Detection
+```go
+...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Renaming generate-github-workflow command&#34;,&#34;content&#34;:&#34;Rename generate-github-workflow to install-github-workflow&#34;,&#34;status&#34;:&#34;in_progress&#34;},{&#34;activeForm&#34;:&#34;Adding post-install...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/generate_github_workflow.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:46</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git mv cmd/generate_github_workflow.go cmd/install_github_workflow.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_github_workflow.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_github_workflow.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     7 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/workflow&#34;
+     8 	&#34;github.com/spf13/cobra&#34;
+     9 )
+    10 
+    11 var installGitHubWorkflowCmd = &amp;cobra.Command{
+    12 	Use:   &#34;install-github-workflow&#34;,
+    13 	Short: &#34;Install GitHub Action workflow for prompt-story&#34;,
+    14 	Long: `Install a GitHub Action workflow file that analyzes LLM sessions
+    15 and posts summaries on pull requests.
+    16 
+    17 The command will prompt you to enable GitHub Pages for full transcripts.`,
+    18 	Run: func(cmd *cobra.Command, args []string) {
+    19 		if err := workflow.Generate(); err != nil {
+    20 			fmt.Fprintf(os.Stderr, &#34;Error: %v\n&#34;, err)
+    21 			os.Exit(1)
+    22 		}
+    23 	},
+    24 }
+    25 
+    26 func init() {
+    27 	rootCmd.AddCommand(installGitHubWorkflowCmd)
+    28 }
+    29 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Renaming generate-github-workflow command&#34;,&#34;content&#34;:&#34;Rename generate-github-workflow to install-github-workflow&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding post-install t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    20 
+    21 By default, installs hooks in the current repository.
+    22 Use --global to install hooks globally for all repositories.
+    23 Use --auto-push to also install a pre-push hook that syncs notes.`,
+    24 	Run: func(cmd *cobra.Command, args []string) {
+    25 		opts := hooks.InstallOptions{
+    26 			Global:   globalFlag,
+    27 			AutoPush: autoPushFlag,
+    28 		}
+    29 		if err := hooks.InstallHooks(opts); err != nil {
+    30 			fmt.Fprintf(os.Stderr, &#34;Error: %v\n&#34;, err)
+    31 			os.Exit(1)
+    32 		}
+    33 
+    34 		// Show post-install tips
+    35 		fmt.Println()
+    36 		fmt.Println(&#34;📋 Next steps:&#34;)
+    37 		fmt.Println(&#34;  • Make a commit to start tracking prompts&#34;)
+    38 		fmt.Println(&#34;  • Run &#39;git-prompt-story show&#39; to view your prompt history&#34;)
+    39 		fmt.Println(&#34;  • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration&#34;)
+    40 	},
+    41 }
+    42 
+    43 func init() {
+    44 	installHooksCmd.Flags().BoolVar(&amp;globalFlag, &#34;global&#34;, false, &#34;Install hooks globally&#34;)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Renaming generate-github-workflow command&#34;,&#34;content&#34;:&#34;Rename generate-github-workflow to install-github-workflow&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding post-install t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">GetGitDir|git-dir|git rev-parse --git-dir</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 4 files
+internal/hooks/installer.go
+internal/hooks/prepare_commit_msg.go
+internal/hooks/post_commit.go
+internal/git/repo.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/git/repo.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 package hooks
+     2 
+     3 import (
+     4 	&#34;bufio&#34;
+     5 	&#34;fmt&#34;
+     6 	&#34;io&#34;
+     7 	&#34;os&#34;
+     8 	&#34;os/exec&#34;
+     9 	&#34;path/filepath&#34;
+    10 	&#34;strings&#34;
+    11 
+    12 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/git&#34;
+    13 	&#34;github.com/QuesmaOrg/git-prompt-story/internal/note&#34;
+    14 )
+    15 
+    16 // Environment variable to prevent recursive hook invocation
+    17 const prePushEnvVar = &#34;GIT_PROMPT_STORY_PUSHING_NOTES&#34;
+    18 </div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:56</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+    74 		}
+    75 		return fmt.Errorf(&#34;pushing notes: %s&#34;, strings.TrimSpace(outputStr))
+    76 	}
+    77 
+    78 	fmt.Printf(&#34;git-prompt-story: pushed notes to %s\n&#34;, remoteName)
+    79 
+    80 	// Show GitHub workflow nudge if applicable
+    81 	maybeShowGitHubWorkflowNudge(remoteURL)
+    82 
+    83 	return nil
+    84 }
+    85 
+    86 // maybeShowGitHubWorkflowNudge shows a tip to install GitHub workflow if pushing to GitHub
+    87 // without the workflow file present
+    88 func maybeShowGitHubWorkflowNudge(remoteURL string) {
+    89 	// Skip if not a GitHub remote
+    90 	if !isGitHubRemote(remoteURL) {
+    91 		return
+    92 	}
+    93 
+    94 	// Skip if nudges are disabled
+    95 	if nudgesDisabled() {
+    96 		return
+    97 	}
+    98 
+    99 	// Skip if workflow already exists
+   100 	if hasPromptStoryWorkflow() {
+   101 		return
+   102 	}
+   103 
+   104 	fmt.Println()
+   105 	fmt.Println(&#34;💡 Tip: Add CI integration to show prompts in PRs:&#34;)
+   106 	fmt.Println(&#34;   git-prompt-story install-github-workflow&#34;)
+   107 	fmt.Println(&#34;   (Run &#39;git-prompt-story disable-nudges&#39; to hide this message)&#34;)
+   108 }
+   109 
+   110 // isGitHubRemote checks if the remote URL points to GitHub
+   111 func isGitHubRemote(remoteURL string) bool {
+   112 	return strings.Contains(remoteURL, &#34;github.com&#34;)
+   113 }
+   114 
+   115 // hasPromptStoryWorkflow checks if the GitHub workflow file exists
+   116 func hasPromptStoryWorkflow() bool {
+   117 	_, err := os.Stat(&#34;.github/workflows/prompt-story.yml&#34;)
+   118 	return err == nil
+   119 }
+   120 
+   121 // nudgesDisabled checks if nudges have been disabled via marker file
+   122 func nudgesDisabled() bool {
+   123 	gitDir, err := git.GetGitDir()
+   124 	if err != nil {
+   125 		return false
+   126 	}
+   127 	_, err = os.Stat(filepath.Join(gitDir, &#34;prompt-story-no-nudge&#34;))
+   ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Renaming generate-github-workflow command&#34;,&#34;content&#34;:&#34;Rename generate-github-workflow to install-github-workflow&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding post-install t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/version.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Glob</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">cmd/*.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/explain.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/show.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/annotate_cloud.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_html.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_summary.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_commit.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/post_rewrite.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/pre_push.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/repair.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/root.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/prepare_commit_msg.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/ci_preview.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_github_workflow.go
+/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Write</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/cmd/disable_nudges.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">File created successfully at: /&lt;REDACTED&gt;/git/git-prompt-story/cmd/disable_nudges.go</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Renaming generate-github-workflow command&#34;,&#34;content&#34;:&#34;Rename generate-github-workflow to install-github-workflow&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding post-install t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story install-hooks --help</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Install git hooks to automatically capture LLM sessions on commit.
+
+By default, installs hooks in the current repository.
+Use --global to install hooks globally for all repositories.
+Use --auto-push to also install a pre-push hook that syncs notes.
+
+Usage:
+  git-prompt-story install-hooks [flags]
+
+Flags:
+      --auto-push   Install pre-push hook to auto-sync notes
+      --global      Install hooks globally
+  -h, --help        help for install-hooks</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story install-github-workflow --help</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Install a GitHub Action workflow file that analyzes LLM sessions
+and posts summaries on pull requests.
+
+The command will prompt you to enable GitHub Pages for full transcripts.
+
+Usage:
+  git-prompt-story install-github-workflow [flags]
+
+Flags:
+  -h, --help   help for install-github-workflow</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:57</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story disable-nudges --help</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Disable nudge messages (tips and suggestions) that prompt-story shows
+during git operations like push.
+
+This creates a marker file in .git/ to suppress nudges for this repository.
+To re-enable nudges, delete the .git/prompt-story-no-nudge file.
+
+Usage:
+  git-prompt-story disable-nudges [flags]
+
+Flags:
+  -h, --help   help for disable-nudges</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story generate-github-workflow --help 2&gt;&amp;1 || true</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Error: unknown command &#34;generate-github-workflow&#34; for &#34;git-prompt-story&#34;
+Run &#39;git-prompt-story --help&#39; for usage.
+unknown command &#34;generate-github-workflow&#34; for &#34;git-prompt-story&#34;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story install-hooks</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Hook prepare-commit-msg already installed, skipping
+Hook post-commit already installed, skipping
+Hook post-rewrite already installed, skipping
+Hooks installed to .git/hooks
+
+📋 Next steps:
+  • Make a commit to start tracking prompts
+  • Run &#39;git-prompt-story show&#39; to view your prompt history
+  • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">./git-prompt-story disable-nudges &amp;&amp; ls -la .git/prompt-story-no-nudge</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Nudges disabled for this repository.
+To re-enable, delete: .git/prompt-story-no-nudge
+-rw-r--r--@ 1 jacek  staff  0 Jan 16 08:58 .git/prompt-story-no-nudge</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:58</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">rm .git/prompt-story-no-nudge</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">07:59</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TodoWrite</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;todos&#34;:[{&#34;activeForm&#34;:&#34;Renaming generate-github-workflow command&#34;,&#34;content&#34;:&#34;Rename generate-github-workflow to install-github-workflow&#34;,&#34;status&#34;:&#34;completed&#34;},{&#34;activeForm&#34;:&#34;Adding post-install t...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Todos have been modified successfully. Ensure that you continue to use the todo list to track your progress. Please proceed with the current tasks if applicable</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item ASSISTANT"
+            data-entry-type="assistant"
+            data-in-work-period="true">
+          <span class="prompt-time">07:59</span>
+          <span class="prompt-type">ASSISTANT</span>
+          
+          <span class="prompt-text">All done. Here&#39;s what was implemented:
+
+1. **Renamed command**: `generate-github-workflow` → `install-github-workflow`
+
+2. **Post-install tips**: After `install-hooks` shows:
+   ```
+   📋 Next steps:
+     • Make a commit to start tracking prompts
+     • Run &#39;git-prompt-story show&#39; to view your prompt history
+     • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration
+   ```
+
+3. **GitHub workflow nudge on push**: When pushing to GitHub without the workflow file, shows:
+   ```
+   💡 Tip: Add CI integration to show prompts in PRs:
+      git-prompt-story install-github-workflow
+      (Run &#39;git-prompt-story disable-nudges&#39; to hide this message)
+   ```
+
+4. **New `disable-nudges` command**: Creates `.git/prompt-story-no-nudge` marker file to suppress nudges
+
+Would you like me to commit these changes?</span>
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">Please commit, but there will be more changes, I don&#39;t like disable-nudges command, just tell use to do touch git/prompt-story-no-nudge. Please also run code simplifier as well as check that there are no mentions to generate-github-workflow and run e2e tests.</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">rm cmd/disable_nudges.go</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">generate-github-workflow</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Found 2 files
+README.md
+e2e/tests/16-generate-workflow.sh</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+   100 	if hasPromptStoryWorkflow() {
+   101 		return
+   102 	}
+   103 
+   104 	fmt.Println()
+   105 	fmt.Println(&#34;💡 Tip: Add CI integration to show prompts in PRs:&#34;)
+   106 	fmt.Println(&#34;   git-prompt-story install-github-workflow&#34;)
+   107 	fmt.Println(&#34;   (To hide this message: touch .git/prompt-story-no-nudge)&#34;)
+   108 }
+   109 
+   110 // isGitHubRemote checks if the remote URL points to GitHub
+   111 func isGitHubRemote(remoteURL string) bool {</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/README.md</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/README.md has been updated. All occurrences of &#39;generate-github-workflow&#39; were successfully replaced with &#39;install-github-workflow&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Read</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-generate-workflow.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;REDACTED&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:00</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git mv e2e/tests/16-generate-workflow.sh e2e/tests/16-install-workflow.sh</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-install-workflow.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-install-workflow.sh has been updated. All occurrences of &#39;generate-github-workflow&#39; were successfully replaced with &#39;install-github-workflow&#39;.</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-install-workflow.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">The file /&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-install-workflow.sh has been updated. Here&#39;s the result of running `cat -n` on a snippet of the edited file:
+     1 #!/bin/bash
+     2 set -euo pipefail
+     3 source /e2e/lib/helpers.sh
+     4 
+     5 echo &#34;[16/21] Install GitHub Workflow&#34;
+     6 
+     7 # ============================================
+     8 # Test 1: Generate workflow with Pages disabled (default)
+     9 # ============================================</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Edit</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">/&lt;REDACTED&gt;/git/git-prompt-story/e2e/tests/16-install-workflow.sh</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;tool_use_error&gt;No changes to make: old_string and new_string are exactly the same.&lt;/tool_use_error&gt;</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Run the code simplifier on the recently modified files in this branch:
+- cmd/install_hooks.go
+- c...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Agent type &#39;code-simplifier&#39; not found. Available agents: Bash, general-purpose, statusline-setup, Explore, Plan, claude-code-guide, code-simplifier:code-simplifier</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Task</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">Run the code simplifier on the recently modified files in this branch:
+- cmd/install_hooks.go
+- c...</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">I have completed the code simplification. Here is a summary of the changes:
+
+## Summary of Changes
+
+### `/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_hooks.go`
+- **Removed redundant comment** (line 33): Deleted `// Show post-install tips` comment since the following `fmt.Println` statements clearly show the intent without needing a comment.
+
+### `/&lt;REDACTED&gt;/git/git-prompt-story/cmd/install_github_workflow.go`
+- **No changes needed**: This file was already minimal and clean.
+
+### `/&lt;REDACTED&gt;/git/git-prompt-story/internal/hooks/pre_push.go`
+- **Removed redundant comment in loop** (line 38-39): Deleted the inner comment `// We don&#39;t need the ref info, just consume it` since this is already explained by the comment above the loop.
+- **Consolidated guard conditions** (lines 87-90): Combined three separate early-return checks in `maybeShowGitHubWorkflowNudge` into a single conditional:
+  ```go
+  // Before: Three separate if-return blocks (12 lines)
+  if !isGitHubRemote(remoteURL) {
+      return
+  }
+  if nudgesDisabled() {
+      return
+  }
+  if hasPromptStoryWorkflow() {
+      return
+  }
+  
+  // After: Single consolidated condition (3 lines)
+  if !isGitHubRemote(remoteURL) || nudgesDisabled() || hasPromptStoryWorkflow() {
+      return
+  }
+  ```
+
+The build succeeds and all functionality is preserved. Would you like me to reinstall the global `git-prompt-story` with `go install .`?
+agentId: a1a458b (for resuming to continue this agent&#39;s work if needed)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:01</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">e2e/run-tests.sh 2&gt;&amp;1 | tail -50</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">Command running in background with ID: baebc90. Output is being written to: /tmp/claude/-Users-jacek-git-git-prompt-story/tasks/baebc90.output</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">TaskOutput</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">{&#34;block&#34;:true,&#34;task_id&#34;:&#34;baebc90&#34;,&#34;timeout&#34;:300000}</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">&lt;retrieval_status&gt;success&lt;/retrieval_status&gt;
+
+&lt;task_id&gt;baebc90&lt;/task_id&gt;
+
+&lt;task_type&gt;local_bash&lt;/task_type&gt;
+
+&lt;status&gt;completed&lt;/status&gt;
+
+&lt;exit_code&gt;0&lt;/exit_code&gt;
+
+&lt;output&gt;
+    - Assistant message preserved
+
+  All assertions passed!
+
+Running: 21-global-hook-installation
+[21/21] Global Hook Installation
+  Test 1: Fresh global install sets config and creates hooks...
+Hooks installed globally to /root/.config/git/hooks
+
+📋 Next steps:
+  • Make a commit to start tracking prompts
+  • Run &#39;git-prompt-story show&#39; to view your prompt history
+  • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration
+    - Global install sets core.hooksPath and creates hooks
+  Test 2: Global hooks work in a fresh repository...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Created mock session: /root/.claude/projects/-workspace-test-repo/global-test-session.jsonl
+[main (root-commit) 51d70af] Test commit
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+    - Global hooks work in fresh repo without local install-hooks
+  Test 3: Global hooks chain to local .git/hooks...
+Initialized empty Git repository in /workspace/test-repo/.git/
+  Created mock session: /root/.claude/projects/-workspace-test-repo/chain-test-session.jsonl
+[main (root-commit) 09f7c88] Test chaining
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 file.txt
+    - Both local and global hooks ran (chaining works!)
+  Test 4: Reinstall is idempotent...
+    - Reinstall is idempotent (no changes made)
+  Test 5: Global install respects existing core.hooksPath...
+Hooks installed globally to /tmp/custom-hooks
+
+📋 Next steps:
+  • Make a commit to start tracking prompts
+  • Run &#39;git-prompt-story show&#39; to view your prompt history
+  • Run &#39;git-prompt-story install-github-workflow&#39; to add CI integration
+    - Global install respects existing core.hooksPath
+  Test 6: Global install with --auto-push...
+Pre-push hook installed (notes will auto-sync on push)
+Hooks installed globally ...</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item PROMPT"
+            data-entry-type="user"
+            data-in-work-period="true">
+          <span class="prompt-time">08:02</span>
+          <span class="prompt-type">PROMPT</span>
+          
+          <span class="prompt-text">&lt;task-notification&gt;
+&lt;task-id&gt;baebc90&lt;/task-id&gt;
+&lt;output-file&gt;/tmp/claude/-Users-jacek-git-git-prompt-story/tasks/baebc90.output&lt;/output-file&gt;
+&lt;status&gt;completed&lt;/status&gt;
+&lt;summary&gt;Background command &#34;Run e2e tests&#34; completed (exit code 0)&lt;/summary&gt;
+&lt;/task-notification&gt;
+Read the output file to retrieve the result: /tmp/claude/-Users-jacek-git-git-prompt-story/tasks/baebc90.output</span>
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Grep</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">generate-github-workflow</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">No files found</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:02</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">go build .</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git status &amp;&amp; git diff --stat</div>
+            
+            
+            <div class="tool-section-label">Output</div>
+            <div class="tool-output">On branch feature/prompt-story-nudges
+Your branch is up to date with &#39;origin/main&#39;.
+
+Changes to be committed:
+  (use &#34;git restore --staged &lt;file&gt;...&#34; to unstage)
+	renamed:    cmd/generate_github_workflow.go -&gt; cmd/install_github_workflow.go
+	renamed:    e2e/tests/16-generate-workflow.sh -&gt; e2e/tests/16-install-workflow.sh
+
+Changes not staged for commit:
+  (use &#34;git add &lt;file&gt;...&#34; to update what will be committed)
+  (use &#34;git restore &lt;file&gt;...&#34; to discard changes in working directory)
+	modified:   README.md
+	modified:   cmd/install_github_workflow.go
+	modified:   cmd/install_hooks.go
+	modified:   e2e/tests/16-install-workflow.sh
+	modified:   internal/hooks/pre_push.go
+
+ README.md                        |  6 &#43;&#43;&#43;---
+ cmd/install_github_workflow.go   | 10 &#43;&#43;&#43;&#43;&#43;-----
+ cmd/install_hooks.go             |  6 &#43;&#43;&#43;&#43;&#43;&#43;
+ e2e/tests/16-install-workflow.sh | 12 &#43;&#43;&#43;&#43;&#43;&#43;------
+ internal/hooks/pre_push.go       | 41 &#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;&#43;-
+ 5 files changed, 60 insertions(&#43;), 15 deletions(-)</div>
+            
+          </details>
+          
+          
+        </li>
+        
+        <li class="prompt-item TOOL_USE"
+            data-entry-type="tool"
+            data-in-work-period="true">
+          <span class="prompt-time">08:03</span>
+          <span class="prompt-type">TOOL_USE</span>
+          
+          <span class="tool-name">Bash</span>
+          
+          <details class="tool-details" open>
+            <summary>Hide details</summary>
+            
+            <div class="tool-section-label">Input</div>
+            <div class="tool-input">git add -A &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add nudges to encourage Prompt-Story adoption
+
+- Rename generate-github-workflow to install-github-workflow
+- Add post-install tips after install-hooks showing next steps
+- Add GitHub workflow nudge on push (when pushing to GitHub without workflow)
+- Suppression via .git/prompt-story-no-nudge marker file
+
+Co-Authored-By: Claude Opus 4.5 &lt;&lt;EMAIL&gt;&gt;
+EOF
+)&#34;</div>
+            
+            
+          </details>
+          
+          
+        </li>
+        
+      </ul>
+    </div>
+    
+  </div>
+  
+  
+
+  <div class="footer">
+    Generated by <a href="https://github.com/QuesmaOrg/git-prompt-story">git-prompt-story</a>
+  </div>
+
+  <script>
+  (function() {
+    const toggleAllEntries = document.getElementById('toggle-all-entries');
+    const toggleWholeSession = document.getElementById('toggle-whole-session');
+    const visibleCount = document.getElementById('visible-count');
+
+    if (!toggleAllEntries || !toggleWholeSession) return;
+
+    function updateFilters() {
+      const showAll = toggleAllEntries.checked;
+      const wholeSession = toggleWholeSession.checked;
+      let count = 0;
+
+      document.querySelectorAll('.prompt-item').forEach(el => {
+        const isUser = el.dataset.entryType === 'user';
+        const inWorkPeriod = el.dataset.inWorkPeriod === 'true';
+
+        const showByType = showAll || isUser;
+        const showByTime = wholeSession || inWorkPeriod;
+
+        if (showByType && showByTime) {
+          el.classList.remove('hidden');
+          count++;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      visibleCount.textContent = count;
+
+      
+      document.querySelectorAll('.session').forEach(session => {
+        const visible = session.querySelectorAll('.prompt-item:not(.hidden)').length;
+        const countEl = session.querySelector('.session-count');
+        if (countEl) countEl.textContent = visible;
+      });
+    }
+
+    toggleAllEntries.addEventListener('change', updateFilters);
+    toggleWholeSession.addEventListener('change', updateFilters);
+
+    
+    updateFilters();
+  })();
+  </script>
+</body>
+</html>
