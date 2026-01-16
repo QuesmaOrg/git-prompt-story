@@ -7,13 +7,6 @@ echo "Analyzing commits..."
 COMMIT_RANGE="origin/${BASE_REF}..HEAD"
 echo "  Range: $COMMIT_RANGE"
 
-# Check if any commits have Prompt-Story markers in their messages
-COMMITS_WITH_ANY_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "Prompt-Story:" || echo "0")
-COMMITS_WITH_NONE_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "Prompt-Story: none" || echo "0")
-# Only count markers that indicate actual AI usage (not "none")
-COMMITS_WITH_MARKERS=$((COMMITS_WITH_ANY_MARKERS - COMMITS_WITH_NONE_MARKERS))
-echo "  Commits with AI markers: $COMMITS_WITH_MARKERS (total: $COMMITS_WITH_ANY_MARKERS, none: $COMMITS_WITH_NONE_MARKERS)"
-
 # Generate summary in JSON to extract stats
 ./git-prompt-story ci-summary "$COMMIT_RANGE" --format=json --output=./prompt-story-stats.json
 
@@ -27,7 +20,6 @@ echo "  Commits with notes: $COMMITS_WITH_NOTES"
 # Set outputs
 echo "commits-analyzed=$COMMITS_ANALYZED" >> $GITHUB_OUTPUT
 echo "commits-with-notes=$COMMITS_WITH_NOTES" >> $GITHUB_OUTPUT
-echo "commits-with-markers=$COMMITS_WITH_MARKERS" >> $GITHUB_OUTPUT
 
 # Check if we should fail
 if [ "$FAIL_IF_NO_NOTES" = "true" ] && [ "$COMMITS_WITH_NOTES" = "0" ]; then
