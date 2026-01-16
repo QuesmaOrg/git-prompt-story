@@ -6,8 +6,10 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
+	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
 )
 
@@ -34,7 +36,6 @@ func PrePush(remoteName, remoteURL string, stdin io.Reader) error {
 	// Consume stdin (required by git)
 	scanner := bufio.NewScanner(stdin)
 	for scanner.Scan() {
-		// We don't need the ref info, just consume it
 	}
 	if err := scanner.Err(); err != nil {
 		return fmt.Errorf("reading stdin: %w", err)
@@ -74,7 +75,45 @@ func PrePush(remoteName, remoteURL string, stdin io.Reader) error {
 	}
 
 	fmt.Printf("git-prompt-story: pushed notes to %s\n", remoteName)
+
+	// Show GitHub workflow nudge if applicable
+	maybeShowGitHubWorkflowNudge(remoteURL)
+
 	return nil
+}
+
+// maybeShowGitHubWorkflowNudge shows a tip to install GitHub workflow if pushing to GitHub
+// without the workflow file present
+func maybeShowGitHubWorkflowNudge(remoteURL string) {
+	if !isGitHubRemote(remoteURL) || nudgesDisabled() || hasPromptStoryWorkflow() {
+		return
+	}
+
+	fmt.Println()
+	fmt.Println("💡 Tip: Add CI integration to show prompts in PRs:")
+	fmt.Println("   git-prompt-story install-github-workflow")
+	fmt.Println("   (To hide this message: touch .git/prompt-story-no-nudge)")
+}
+
+// isGitHubRemote checks if the remote URL points to GitHub
+func isGitHubRemote(remoteURL string) bool {
+	return strings.Contains(remoteURL, "github.com")
+}
+
+// hasPromptStoryWorkflow checks if the GitHub workflow file exists
+func hasPromptStoryWorkflow() bool {
+	_, err := os.Stat(".github/workflows/prompt-story.yml")
+	return err == nil
+}
+
+// nudgesDisabled checks if nudges have been disabled via marker file
+func nudgesDisabled() bool {
+	gitDir, err := git.GetGitDir()
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(filepath.Join(gitDir, "prompt-story-no-nudge"))
+	return err == nil
 }
 
 // hasNotesRef checks if a notes ref exists locally

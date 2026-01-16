@@ -12,7 +12,7 @@ It requires git and Go (`brew install go`).
 go install github.com/QuesmaOrg/git-prompt-story@latest
 cd your_repository
 git-prompt-story install-hooks --auto-push  # --global if for all
-git-prompt-story generate-github-workflow
+git-prompt-story install-github-workflow
 ```
 
 ## Why
@@ -76,7 +76,7 @@ git push origin refs/notes/prompt-story +refs/notes/prompt-story-transcripts
 Generate a workflow to post summaries on Pull Requests:
 
 ```bash
-git-prompt-story generate-github-workflow
+git-prompt-story install-github-workflow
 ```
 
 ## How It Works
@@ -132,7 +132,7 @@ Two actions are available:
 - **`prompt-story`** - Posts PR comment with markdown summary (default)
 - **`prompt-story-with-pages`** - Posts PR comment + deploys full HTML transcripts to GitHub Pages
 
-Both run on Pull Requests. Use `generate-github-workflow` to create the appropriate workflow.
+Both run on Pull Requests. Use `install-github-workflow` to create the appropriate workflow.
 
 ## Storage Format
 

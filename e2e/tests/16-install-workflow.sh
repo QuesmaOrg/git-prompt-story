@@ -2,7 +2,7 @@
 set -euo pipefail
 source /e2e/lib/helpers.sh
 
-echo "[16/16] Generate GitHub Workflow"
+echo "[16/21] Install GitHub Workflow"
 
 # ============================================
 # Test 1: Generate workflow with Pages disabled (default)
@@ -18,7 +18,7 @@ git init
 [ ! -f .github/workflows/prompt-story.yml ] || fail "workflow should not exist yet"
 
 # Run command with Enter (default = no for Pages)
-echo "" | git-prompt-story generate-github-workflow
+echo "" | git-prompt-story install-github-workflow
 
 # Verify workflow created
 [ -f .github/workflows/prompt-story.yml ] || fail "workflow not created"
@@ -48,7 +48,7 @@ cd /workspace/test-repo
 git init
 
 # Run command with 'y' to enable Pages
-echo "y" | git-prompt-story generate-github-workflow
+echo "y" | git-prompt-story install-github-workflow
 
 # Verify workflow created
 [ -f .github/workflows/prompt-story.yml ] || fail "workflow not created"
@@ -77,7 +77,7 @@ git init
 # Ensure no .github directory exists
 [ ! -d .github ] || fail ".github should not exist yet"
 
-echo "" | git-prompt-story generate-github-workflow
+echo "" | git-prompt-story install-github-workflow
 
 # Verify directory structure created
 [ -d .github/workflows ] || fail ".github/workflows directory not created"
@@ -99,7 +99,7 @@ git init
 mkdir -p .github/workflows
 echo "old content" > .github/workflows/prompt-story.yml
 
-echo "" | git-prompt-story generate-github-workflow
+echo "" | git-prompt-story install-github-workflow
 
 # Verify new content replaced old
 ! grep -q "old content" .github/workflows/prompt-story.yml || fail "old content should be replaced"
@@ -107,4 +107,4 @@ grep -q "name: Prompt Story" .github/workflows/prompt-story.yml || fail "new con
 
 echo "    - Existing workflow file overwritten"
 
-echo "  All generate-github-workflow tests passed"
+echo "  All install-github-workflow tests passed"
