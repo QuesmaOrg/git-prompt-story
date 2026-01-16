@@ -26,6 +26,7 @@ jobs:
           version: '~> v2'
           args: release --clean
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # HOMEBREW_TAP_TOKEN expires ~January 2027
           # To regenerate:
           # 1. Go to https://github.com/settings/personal-access-tokens/new
@@ -34,4 +35,4 @@ jobs:
           # 4. Permissions: Contents → Read and Write
           # 5. Generate token and update the secret at:
           #    https://github.com/QuesmaOrg/git-prompt-story/settings/secrets/actions
-          GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
