@@ -30,6 +30,12 @@ Use --auto-push to also install a pre-push hook that syncs notes.`,
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
+
+		fmt.Println()
+		fmt.Println("📋 Next steps:")
+		fmt.Println("  • Make a commit to start tracking prompts")
+		fmt.Println("  • Run 'git-prompt-story show' to view your prompt history")
+		fmt.Println("  • Run 'git-prompt-story install-github-workflow' to add CI integration")
 	},
 }
 

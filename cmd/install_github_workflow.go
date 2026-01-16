@@ -8,10 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var generateGitHubWorkflowCmd = &cobra.Command{
-	Use:   "generate-github-workflow",
-	Short: "Generate GitHub Action workflow for prompt-story",
-	Long: `Generate a GitHub Action workflow file that analyzes LLM sessions
+var installGitHubWorkflowCmd = &cobra.Command{
+	Use:   "install-github-workflow",
+	Short: "Install GitHub Action workflow for prompt-story",
+	Long: `Install a GitHub Action workflow file that analyzes LLM sessions
 and posts summaries on pull requests.
 
 The command will prompt you to enable GitHub Pages for full transcripts.`,
@@ -24,5 +24,5 @@ The command will prompt you to enable GitHub Pages for full transcripts.`,
 }
 
 func init() {
-	rootCmd.AddCommand(generateGitHubWorkflowCmd)
+	rootCmd.AddCommand(installGitHubWorkflowCmd)
 }
