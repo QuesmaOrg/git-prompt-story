@@ -2,7 +2,7 @@
 set -euo pipefail
 source /e2e/lib/helpers.sh
 
-echo "[22/22] GitHub Action Analyze Regression Tests"
+echo "[22/22] PR Summary Regression Tests"
 
 # This test suite verifies that pr summary correctly handles edge cases
 # that previously caused false "Notes not found" warnings in GitHub Actions.
