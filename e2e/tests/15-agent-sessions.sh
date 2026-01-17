@@ -90,36 +90,25 @@ echo "    - Agent session 1 found (agent-explore1)"
 echo "$NOTE" | jq -e '.sessions[] | select(.id == "agent-explore2")' > /dev/null || fail "Should have agent-explore2"
 echo "    - Agent session 2 found (agent-explore2)"
 
-# Step 7: Verify pr summary counts
-echo "  Step 7: Verifying pr summary output..."
+# Step 7: Verify pr summary --gha counts
+echo "  Step 7: Verifying pr summary --gha output..."
 
 # Use HEAD~1..HEAD as commit range (from initial commit to current)
-SUMMARY=$(git-prompt-story pr summary HEAD~1..HEAD --format=json)
-echo "$SUMMARY" | jq .
+rm -f /tmp/agent-summary.md
+SUMMARY=$(git-prompt-story pr summary HEAD~1..HEAD --gha --output=/tmp/agent-summary.md)
+echo "$SUMMARY"
 
-# Check total_agent_sessions
-AGENT_SESSIONS=$(echo "$SUMMARY" | jq '.total_agent_sessions')
-if [[ "$AGENT_SESSIONS" != "2" ]]; then
-    echo "    ERROR: Expected total_agent_sessions=2, got $AGENT_SESSIONS"
-    fail "pr summary should report 2 agent sessions"
-fi
-echo "    - total_agent_sessions: 2"
+# Check commits-with-notes
+echo "$SUMMARY" | grep -q "commits-with-notes=1" || fail "pr summary should report 1 commit with notes"
+echo "    - commits-with-notes: 1"
 
-# Check total_agent_prompts (2 agents x 1 user prompt each = 2)
-AGENT_PROMPTS=$(echo "$SUMMARY" | jq '.total_agent_prompts')
-if [[ "$AGENT_PROMPTS" != "2" ]]; then
-    echo "    ERROR: Expected total_agent_prompts=2, got $AGENT_PROMPTS"
-    fail "pr summary should report 2 agent prompts"
-fi
-echo "    - total_agent_prompts: 2"
+# Check should-post-comment
+echo "$SUMMARY" | grep -q "should-post-comment=true" || fail "pr summary should indicate posting comment"
+echo "    - should-post-comment: true"
 
-# Check total_user_prompts (main session only = 1)
-USER_PROMPTS=$(echo "$SUMMARY" | jq '.total_user_prompts')
-if [[ "$USER_PROMPTS" != "1" ]]; then
-    echo "    ERROR: Expected total_user_prompts=1, got $USER_PROMPTS"
-    fail "pr summary should report 1 user prompt (main session only)"
-fi
-echo "    - total_user_prompts: 1 (main session only)"
+# Verify markdown file was created with agent session info
+test -f /tmp/agent-summary.md || fail "Markdown file should be created"
+echo "    - Markdown file created"
 
 # Step 8: Verify pr html output contains badges and toggle
 echo "  Step 8: Verifying pr html output..."
@@ -172,7 +161,7 @@ echo "    - Found data-is-agent='false' attribute"
 # Step 9: Verify markdown output shows only main session prompts
 echo "  Step 9: Verifying markdown output..."
 
-MARKDOWN=$(git-prompt-story pr summary HEAD~1..HEAD --format=markdown)
+MARKDOWN=$(git-prompt-story pr summary HEAD~1..HEAD)
 echo "$MARKDOWN"
 
 # Should show only main session prompt count (no agent indicator)
@@ -189,33 +178,8 @@ if ! echo "$MARKDOWN" | grep -q "1 user prompts"; then
 fi
 echo "    - Header shows '1 user prompts' (main session only)"
 
-# Step 10: Verify IsAgent field in session summary
-echo "  Step 10: Verifying session IsAgent fields..."
-
-# Check commits[0].sessions[*].is_agent
-MAIN_SESSION_IS_AGENT=$(echo "$SUMMARY" | jq '.commits[0].sessions[] | select(.id == "fb813892-a738-4fc4-bcf8-b6f175a27a93") | .is_agent')
-if [[ "$MAIN_SESSION_IS_AGENT" != "false" ]]; then
-    echo "    ERROR: Main session should have is_agent=false, got $MAIN_SESSION_IS_AGENT"
-    fail "Main session is_agent should be false"
-fi
-echo "    - Main session is_agent: false"
-
-AGENT1_IS_AGENT=$(echo "$SUMMARY" | jq '.commits[0].sessions[] | select(.id == "agent-explore1") | .is_agent')
-if [[ "$AGENT1_IS_AGENT" != "true" ]]; then
-    echo "    ERROR: Agent session 1 should have is_agent=true, got $AGENT1_IS_AGENT"
-    fail "Agent session is_agent should be true"
-fi
-echo "    - Agent session 1 is_agent: true"
-
-AGENT2_IS_AGENT=$(echo "$SUMMARY" | jq '.commits[0].sessions[] | select(.id == "agent-explore2") | .is_agent')
-if [[ "$AGENT2_IS_AGENT" != "true" ]]; then
-    echo "    ERROR: Agent session 2 should have is_agent=true, got $AGENT2_IS_AGENT"
-    fail "Agent session is_agent should be true"
-fi
-echo "    - Agent session 2 is_agent: true"
-
-# Step 11: Cleanup
-echo "  Step 11: Cleanup..."
+# Step 10: Cleanup
+echo "  Step 10: Cleanup..."
 cleanup_sessions
 rm -rf /tmp/ci-output
 

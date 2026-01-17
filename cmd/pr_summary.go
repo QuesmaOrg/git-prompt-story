@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	prSummaryFormat   string
 	prSummaryFull     bool
 	prSummaryPagesURL string
 	prSummaryOutput   string
+	prSummaryGHA      bool
 )
 
 var prSummaryCmd = &cobra.Command{
@@ -21,12 +21,11 @@ var prSummaryCmd = &cobra.Command{
 	Long: `Generate a summary of LLM sessions for commits in a range.
 
 This command is designed for CI/CD pipelines to create PR comments or reports.
-Output formats: markdown (default) or json.
 
 Examples:
   git-prompt-story pr summary HEAD~5..HEAD
-  git-prompt-story pr summary abc123..def456 --format=json
-  git-prompt-story pr summary main..feature-branch --pages-url=https://example.github.io/repo/pr-42/`,
+  git-prompt-story pr summary main..feature-branch --pages-url=https://example.github.io/repo/pr-42/
+  git-prompt-story pr summary origin/main..HEAD --gha --output=summary.md`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		commitRange := args[0]
@@ -37,21 +36,26 @@ Examples:
 			os.Exit(1)
 		}
 
-		var output string
-		switch prSummaryFormat {
-		case "markdown", "md":
-			output = ci.RenderMarkdown(summary, prSummaryPagesURL, GetVersion())
-		case "json":
-			jsonBytes, err := ci.RenderJSON(summary)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "git-prompt-story: failed to render JSON: %v\n", err)
-				os.Exit(1)
+		if prSummaryGHA {
+			// GitHub Actions mode: output metadata to stdout
+			shouldPost := summary.CommitsWithNotes > 0
+			fmt.Printf("commits-analyzed=%d\n", summary.CommitsAnalyzed)
+			fmt.Printf("commits-with-notes=%d\n", summary.CommitsWithNotes)
+			fmt.Printf("should-post-comment=%t\n", shouldPost)
+
+			// Write markdown to file if we have notes
+			if shouldPost && prSummaryOutput != "" {
+				markdown := ci.RenderMarkdown(summary, prSummaryPagesURL, GetVersion())
+				if err := os.WriteFile(prSummaryOutput, []byte(markdown), 0644); err != nil {
+					fmt.Fprintf(os.Stderr, "git-prompt-story: failed to write output: %v\n", err)
+					os.Exit(1)
+				}
 			}
-			output = string(jsonBytes)
-		default:
-			fmt.Fprintf(os.Stderr, "git-prompt-story: unknown format: %s\n", prSummaryFormat)
-			os.Exit(1)
+			return
 		}
+
+		// Normal mode: output markdown
+		output := ci.RenderMarkdown(summary, prSummaryPagesURL, GetVersion())
 
 		if prSummaryOutput != "" {
 			if err := os.WriteFile(prSummaryOutput, []byte(output), 0644); err != nil {
@@ -65,9 +69,9 @@ Examples:
 }
 
 func init() {
-	prSummaryCmd.Flags().StringVar(&prSummaryFormat, "format", "markdown", "Output format: markdown or json")
 	prSummaryCmd.Flags().BoolVar(&prSummaryFull, "full", false, "Include full prompt text (not truncated)")
-	prSummaryCmd.Flags().StringVar(&prSummaryPagesURL, "pages-url", "", "URL to GitHub Pages transcripts (included in markdown output)")
-	prSummaryCmd.Flags().StringVar(&prSummaryOutput, "output", "", "Write output to file instead of stdout")
+	prSummaryCmd.Flags().StringVar(&prSummaryPagesURL, "pages-url", "", "URL to GitHub Pages transcripts")
+	prSummaryCmd.Flags().StringVar(&prSummaryOutput, "output", "", "Write markdown to file instead of stdout")
+	prSummaryCmd.Flags().BoolVar(&prSummaryGHA, "gha", false, "GitHub Actions mode: output metadata to stdout")
 	prCmd.AddCommand(prSummaryCmd)
 }

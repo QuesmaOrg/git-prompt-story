@@ -7,26 +7,23 @@ echo "Analyzing commits..."
 COMMIT_RANGE="origin/${BASE_REF}..HEAD"
 echo "  Range: $COMMIT_RANGE"
 
-# Use the pr analyze command which encapsulates all analysis logic
-# This avoids fragile bash-based marker detection
-./git-prompt-story pr analyze "$COMMIT_RANGE" \
-  --output-json=./prompt-story-analysis.json \
-  --output-markdown=./prompt-story-summary.md \
-  ${PAGES_URL:+--pages-url="$PAGES_URL"}
+# Use pr summary with --gha flag
+# Outputs metadata to stdout (goes to GITHUB_OUTPUT)
+# Writes markdown to file if there are notes
+./git-prompt-story pr summary "$COMMIT_RANGE" \
+  --gha \
+  --output=./prompt-story-summary.md \
+  ${PAGES_URL:+--pages-url="$PAGES_URL"} \
+  >> $GITHUB_OUTPUT
 
-# Extract stats from JSON using jq
-COMMITS_ANALYZED=$(jq -r '.commits_analyzed' ./prompt-story-analysis.json)
-COMMITS_WITH_NOTES=$(jq -r '.commits_with_notes' ./prompt-story-analysis.json)
-SHOULD_POST=$(jq -r '.should_post_comment' ./prompt-story-analysis.json)
+# Parse output for logging (metadata is also in GITHUB_OUTPUT now)
+COMMITS_ANALYZED=$(grep "commits-analyzed=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+COMMITS_WITH_NOTES=$(grep "commits-with-notes=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+SHOULD_POST=$(grep "should-post-comment=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
 
 echo "  Commits analyzed: $COMMITS_ANALYZED"
 echo "  Commits with notes: $COMMITS_WITH_NOTES"
 echo "  Should post comment: $SHOULD_POST"
-
-# Set outputs for GitHub Actions
-echo "commits-analyzed=$COMMITS_ANALYZED" >> $GITHUB_OUTPUT
-echo "commits-with-notes=$COMMITS_WITH_NOTES" >> $GITHUB_OUTPUT
-echo "should-post-comment=$SHOULD_POST" >> $GITHUB_OUTPUT
 
 # Check if we should fail
 if [ "$FAIL_IF_NO_NOTES" = "true" ] && [ "$COMMITS_WITH_NOTES" = "0" ]; then

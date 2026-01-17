@@ -45,34 +45,31 @@ faketime '2025-01-15 11:00:00' git commit -m "Add feature 2"
 unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 COMMIT2=$(git rev-parse HEAD)
 
-# Step 4: Test pr summary with JSON output
-echo "  Step 4: Testing pr summary JSON output..."
-OUTPUT=$(git-prompt-story pr summary "${INITIAL_COMMIT}..HEAD" --format=json)
+# Step 4: Test pr summary with --gha flag
+echo "  Step 4: Testing pr summary --gha output..."
+rm -f /tmp/gha-summary.md
+OUTPUT=$(git-prompt-story pr summary "${INITIAL_COMMIT}..HEAD" --gha --output=/tmp/gha-summary.md)
 
-# Verify JSON structure
-echo "$OUTPUT" | jq -e '.commits_analyzed == 2' > /dev/null || fail "Expected 2 commits analyzed"
-echo "    - commits_analyzed = 2"
+# Verify GHA output format (key=value lines)
+echo "$OUTPUT" | grep -q "commits-analyzed=2" || fail "Expected commits-analyzed=2"
+echo "    - commits-analyzed=2"
 
-echo "$OUTPUT" | jq -e '.commits_with_notes == 2' > /dev/null || fail "Expected 2 commits with notes"
-echo "    - commits_with_notes = 2"
+echo "$OUTPUT" | grep -q "commits-with-notes=2" || fail "Expected commits-with-notes=2"
+echo "    - commits-with-notes=2"
 
-echo "$OUTPUT" | jq -e '.commits | length == 2' > /dev/null || fail "Expected 2 commits in output"
-echo "    - commits array has 2 entries"
+echo "$OUTPUT" | grep -q "should-post-comment=true" || fail "Expected should-post-comment=true"
+echo "    - should-post-comment=true"
 
-# Verify first commit has sessions
-echo "$OUTPUT" | jq -e '.commits[0].sessions | length > 0' > /dev/null || fail "First commit should have sessions"
-echo "    - First commit has sessions"
+# Verify markdown file was created
+test -f /tmp/gha-summary.md || fail "Markdown file should be created in GHA mode"
+echo "    - Markdown file created"
 
-# Verify new count fields exist
-echo "$OUTPUT" | jq -e '.total_user_prompts >= 0' > /dev/null || fail "Should have total_user_prompts field"
-echo "    - Has total_user_prompts field"
-
-echo "$OUTPUT" | jq -e '.total_steps >= 0' > /dev/null || fail "Should have total_steps field"
-echo "    - Has total_steps field"
+grep -q "Claude Code" /tmp/gha-summary.md || fail "Markdown should mention Claude Code"
+echo "    - Markdown contains Claude Code"
 
 # Step 5: Test pr summary with Markdown output
 echo "  Step 5: Testing pr summary Markdown output..."
-MD_OUTPUT=$(git-prompt-story pr summary "${INITIAL_COMMIT}..HEAD" --format=markdown)
+MD_OUTPUT=$(git-prompt-story pr summary "${INITIAL_COMMIT}..HEAD")
 
 echo "$MD_OUTPUT" | grep -q "| Commit | Subject | Tool(s) | User Prompts | Steps |" || fail "Markdown should have new table header"
 echo "    - Has new table header"
@@ -111,7 +108,7 @@ export GIT_COMMITTER_DATE="2025-01-15T10:00:00Z"
 faketime '2025-01-15 10:00:00' git commit -m "Add feature with long prompt"
 unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 
-LONG_MD=$(git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown)
+LONG_MD=$(git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD")
 
 # Section should use markdown header
 echo "$LONG_MD" | grep -q "# 1 user prompts" || fail "Long prompts should have markdown header"
@@ -123,7 +120,7 @@ echo "    - Has collapsible entries for long prompts"
 
 # Step 6: Test pr summary with pages-url option
 echo "  Step 6: Testing pr summary with pages-url..."
-PAGES_MD=$(git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown --pages-url="https://example.github.io/repo/pr-42/")
+PAGES_MD=$(git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --pages-url="https://example.github.io/repo/pr-42/")
 
 echo "$PAGES_MD" | grep -q "https://example.github.io/repo/pr-42/" || fail "Markdown should contain pages URL"
 echo "    - Contains pages URL"
@@ -153,7 +150,7 @@ echo "    - index.html contains title"
 # Step 8: Test pr summary output to file
 echo "  Step 8: Testing pr summary file output..."
 rm -f /tmp/summary.md
-git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown --output=/tmp/summary.md
+git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --output=/tmp/summary.md
 
 test -f /tmp/summary.md || fail "Output file should be created"
 echo "    - Output file created"
@@ -171,8 +168,9 @@ faketime '2025-01-15 12:00:00' git commit -m "Commit without session"
 NO_SESSION_COMMIT=$(git rev-parse HEAD)
 
 # pr summary for just this commit should work but show 0 commits with notes
-NO_NOTES_OUTPUT=$(git-prompt-story pr summary "${LONG_PROMPT_COMMIT}..HEAD" --format=json)
-echo "$NO_NOTES_OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should show 0 commits with notes"
+NO_NOTES_OUTPUT=$(git-prompt-story pr summary "${LONG_PROMPT_COMMIT}..HEAD" --gha)
+echo "$NO_NOTES_OUTPUT" | grep -q "commits-with-notes=0" || fail "Should show commits-with-notes=0"
+echo "$NO_NOTES_OUTPUT" | grep -q "should-post-comment=false" || fail "Should show should-post-comment=false"
 echo "    - Handles commits without notes gracefully"
 
 echo ""

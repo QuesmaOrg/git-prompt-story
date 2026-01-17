@@ -1271,11 +1271,6 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 		summary, continuation, toolCountsStr)
 }
 
-// RenderJSON generates JSON output
-func RenderJSON(summary *Summary) ([]byte, error) {
-	return json.MarshalIndent(summary, "", "  ")
-}
-
 // extractFilePath extracts file_path from tool input string
 func extractFilePath(toolInput string) string {
 	// Try to find file_path in the input (could be JSON or key-value format)

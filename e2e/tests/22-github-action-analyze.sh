@@ -32,9 +32,10 @@ git add file.txt
 faketime '2025-01-15 10:00:00' git commit -m "Add feature without AI"
 
 # pr summary should report 0 commits with notes
-OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
-echo "$OUTPUT" | jq -e '.commits_analyzed == 1' > /dev/null || fail "Should analyze 1 commit"
-echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --gha)
+echo "$OUTPUT" | grep -q "commits-analyzed=1" || fail "Should analyze 1 commit"
+echo "$OUTPUT" | grep -q "commits-with-notes=0" || fail "Should report 0 commits with notes"
+echo "$OUTPUT" | grep -q "should-post-comment=false" || fail "Should not post comment"
 echo "    - Correctly reports 0 notes for regular commits"
 
 # ============================================
@@ -59,9 +60,9 @@ faketime '2025-01-15 10:00:00' git commit -m "Add feature
 
 Prompt-Story: none"
 
-OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
-echo "$OUTPUT" | jq -e '.commits_analyzed == 1' > /dev/null || fail "Should analyze 1 commit"
-echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --gha)
+echo "$OUTPUT" | grep -q "commits-analyzed=1" || fail "Should analyze 1 commit"
+echo "$OUTPUT" | grep -q "commits-with-notes=0" || fail "Should report 0 commits with notes"
 echo "    - Correctly handles 'Prompt-Story: none' marker"
 
 # ============================================
@@ -86,9 +87,9 @@ faketime '2025-01-15 10:00:00' git commit -m "Update tracking doc
 
 See the Prompt-Story: section in CONTRIBUTING.md for details"
 
-OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
-echo "$OUTPUT" | jq -e '.commits_analyzed == 1' > /dev/null || fail "Should analyze 1 commit"
-echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --gha)
+echo "$OUTPUT" | grep -q "commits-analyzed=1" || fail "Should analyze 1 commit"
+echo "$OUTPUT" | grep -q "commits-with-notes=0" || fail "Should report 0 commits with notes"
 echo "    - Correctly handles text that looks like marker pattern"
 
 # ============================================
@@ -121,9 +122,9 @@ echo "feature3" >> file.txt
 git add file.txt
 faketime '2025-01-15 12:00:00' git commit -m "Add feature 3"
 
-OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
-echo "$OUTPUT" | jq -e '.commits_analyzed == 3' > /dev/null || fail "Should analyze 3 commits"
-echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --gha)
+echo "$OUTPUT" | grep -q "commits-analyzed=3" || fail "Should analyze 3 commits"
+echo "$OUTPUT" | grep -q "commits-with-notes=0" || fail "Should report 0 commits with notes"
 echo "    - Correctly handles multiple commits without notes"
 
 # ============================================
@@ -166,9 +167,10 @@ echo "manual-feature-2" >> file.txt
 git add file.txt
 faketime '2025-01-15 12:00:00' git commit -m "Another manual feature"
 
-OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
-echo "$OUTPUT" | jq -e '.commits_analyzed == 3' > /dev/null || fail "Should analyze 3 commits"
-echo "$OUTPUT" | jq -e '.commits_with_notes == 1' > /dev/null || fail "Should report 1 commit with notes"
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --gha)
+echo "$OUTPUT" | grep -q "commits-analyzed=3" || fail "Should analyze 3 commits"
+echo "$OUTPUT" | grep -q "commits-with-notes=1" || fail "Should report 1 commit with notes"
+echo "$OUTPUT" | grep -q "should-post-comment=true" || fail "Should post comment when notes exist"
 echo "    - Correctly counts only commits with actual notes"
 
 # ============================================
@@ -192,7 +194,7 @@ faketime '2025-01-15 10:00:00' git commit -m "Add feature without AI
 
 Prompt-Story: none"
 
-MD_OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=markdown)
+MD_OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD")
 
 # Should NOT contain warning messages
 if echo "$MD_OUTPUT" | grep -q "Notes not found"; then

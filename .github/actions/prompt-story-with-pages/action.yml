@@ -120,7 +120,7 @@ runs:
           const fs = require('fs');
 
           // Read the generated markdown summary
-          // The pr analyze command only creates this file when there are actual notes
+          // The pr summary --gha command only creates this file when there are actual notes
           let body = fs.readFileSync('./prompt-story-summary.md', 'utf8');
 
           // Add pages link if available
