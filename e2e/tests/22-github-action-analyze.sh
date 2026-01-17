@@ -4,7 +4,7 @@ source /e2e/lib/helpers.sh
 
 echo "[22/22] GitHub Action Analyze Regression Tests"
 
-# This test suite verifies that ci-summary correctly handles edge cases
+# This test suite verifies that pr summary correctly handles edge cases
 # that previously caused false "Notes not found" warnings in GitHub Actions.
 # Regression test for: commit 5f848e2 (Remove 'Notes not found' warning)
 
@@ -31,8 +31,8 @@ echo "feature" >> file.txt
 git add file.txt
 faketime '2025-01-15 10:00:00' git commit -m "Add feature without AI"
 
-# ci-summary should report 0 commits with notes
-OUTPUT=$(git-prompt-story ci-summary "${INITIAL}..HEAD" --format=json)
+# pr summary should report 0 commits with notes
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
 echo "$OUTPUT" | jq -e '.commits_analyzed == 1' > /dev/null || fail "Should analyze 1 commit"
 echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
 echo "    - Correctly reports 0 notes for regular commits"
@@ -59,7 +59,7 @@ faketime '2025-01-15 10:00:00' git commit -m "Add feature
 
 Prompt-Story: none"
 
-OUTPUT=$(git-prompt-story ci-summary "${INITIAL}..HEAD" --format=json)
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
 echo "$OUTPUT" | jq -e '.commits_analyzed == 1' > /dev/null || fail "Should analyze 1 commit"
 echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
 echo "    - Correctly handles 'Prompt-Story: none' marker"
@@ -86,7 +86,7 @@ faketime '2025-01-15 10:00:00' git commit -m "Update tracking doc
 
 See the Prompt-Story: section in CONTRIBUTING.md for details"
 
-OUTPUT=$(git-prompt-story ci-summary "${INITIAL}..HEAD" --format=json)
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
 echo "$OUTPUT" | jq -e '.commits_analyzed == 1' > /dev/null || fail "Should analyze 1 commit"
 echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
 echo "    - Correctly handles text that looks like marker pattern"
@@ -121,7 +121,7 @@ echo "feature3" >> file.txt
 git add file.txt
 faketime '2025-01-15 12:00:00' git commit -m "Add feature 3"
 
-OUTPUT=$(git-prompt-story ci-summary "${INITIAL}..HEAD" --format=json)
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
 echo "$OUTPUT" | jq -e '.commits_analyzed == 3' > /dev/null || fail "Should analyze 3 commits"
 echo "$OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should report 0 commits with notes"
 echo "    - Correctly handles multiple commits without notes"
@@ -166,7 +166,7 @@ echo "manual-feature-2" >> file.txt
 git add file.txt
 faketime '2025-01-15 12:00:00' git commit -m "Another manual feature"
 
-OUTPUT=$(git-prompt-story ci-summary "${INITIAL}..HEAD" --format=json)
+OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=json)
 echo "$OUTPUT" | jq -e '.commits_analyzed == 3' > /dev/null || fail "Should analyze 3 commits"
 echo "$OUTPUT" | jq -e '.commits_with_notes == 1' > /dev/null || fail "Should report 1 commit with notes"
 echo "    - Correctly counts only commits with actual notes"
@@ -192,7 +192,7 @@ faketime '2025-01-15 10:00:00' git commit -m "Add feature without AI
 
 Prompt-Story: none"
 
-MD_OUTPUT=$(git-prompt-story ci-summary "${INITIAL}..HEAD" --format=markdown)
+MD_OUTPUT=$(git-prompt-story pr summary "${INITIAL}..HEAD" --format=markdown)
 
 # Should NOT contain warning messages
 if echo "$MD_OUTPUT" | grep -q "Notes not found"; then

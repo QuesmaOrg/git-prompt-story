@@ -45,9 +45,9 @@ faketime '2025-01-15 11:00:00' git commit -m "Add feature 2"
 unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 COMMIT2=$(git rev-parse HEAD)
 
-# Step 4: Test ci-summary with JSON output
-echo "  Step 4: Testing ci-summary JSON output..."
-OUTPUT=$(git-prompt-story ci-summary "${INITIAL_COMMIT}..HEAD" --format=json)
+# Step 4: Test pr summary with JSON output
+echo "  Step 4: Testing pr summary JSON output..."
+OUTPUT=$(git-prompt-story pr summary "${INITIAL_COMMIT}..HEAD" --format=json)
 
 # Verify JSON structure
 echo "$OUTPUT" | jq -e '.commits_analyzed == 2' > /dev/null || fail "Expected 2 commits analyzed"
@@ -70,9 +70,9 @@ echo "    - Has total_user_prompts field"
 echo "$OUTPUT" | jq -e '.total_steps >= 0' > /dev/null || fail "Should have total_steps field"
 echo "    - Has total_steps field"
 
-# Step 5: Test ci-summary with Markdown output
-echo "  Step 5: Testing ci-summary Markdown output..."
-MD_OUTPUT=$(git-prompt-story ci-summary "${INITIAL_COMMIT}..HEAD" --format=markdown)
+# Step 5: Test pr summary with Markdown output
+echo "  Step 5: Testing pr summary Markdown output..."
+MD_OUTPUT=$(git-prompt-story pr summary "${INITIAL_COMMIT}..HEAD" --format=markdown)
 
 echo "$MD_OUTPUT" | grep -q "| Commit | Subject | Tool(s) | User Prompts | Steps |" || fail "Markdown should have new table header"
 echo "    - Has new table header"
@@ -87,8 +87,8 @@ echo "    - Has All steps section"
 echo "$MD_OUTPUT" | grep -q "Claude Code" || fail "Markdown should mention Claude Code"
 echo "    - Mentions Claude Code"
 
-# Step 5b: Test ci-summary with long user prompt (should use <details> format)
-echo "  Step 5b: Testing ci-summary with long user prompt..."
+# Step 5b: Test pr summary with long user prompt (should use <details> format)
+echo "  Step 5b: Testing pr summary with long user prompt..."
 cleanup_sessions
 rm -rf /workspace/test-repo
 mkdir -p /workspace/test-repo
@@ -111,7 +111,7 @@ export GIT_COMMITTER_DATE="2025-01-15T10:00:00Z"
 faketime '2025-01-15 10:00:00' git commit -m "Add feature with long prompt"
 unset GIT_AUTHOR_DATE GIT_COMMITTER_DATE
 
-LONG_MD=$(git-prompt-story ci-summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown)
+LONG_MD=$(git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown)
 
 # Section should use markdown header
 echo "$LONG_MD" | grep -q "# 1 user prompts" || fail "Long prompts should have markdown header"
@@ -121,18 +121,18 @@ echo "    - Has markdown header for user prompts"
 echo "$LONG_MD" | grep -q "<details><summary>" || fail "Long prompts should have collapsible entries"
 echo "    - Has collapsible entries for long prompts"
 
-# Step 6: Test ci-summary with pages-url option
-echo "  Step 6: Testing ci-summary with pages-url..."
-PAGES_MD=$(git-prompt-story ci-summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown --pages-url="https://example.github.io/repo/pr-42/")
+# Step 6: Test pr summary with pages-url option
+echo "  Step 6: Testing pr summary with pages-url..."
+PAGES_MD=$(git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown --pages-url="https://example.github.io/repo/pr-42/")
 
 echo "$PAGES_MD" | grep -q "https://example.github.io/repo/pr-42/" || fail "Markdown should contain pages URL"
 echo "    - Contains pages URL"
 
-# Step 7: Test ci-html generation
-echo "  Step 7: Testing ci-html generation..."
+# Step 7: Test pr html generation
+echo "  Step 7: Testing pr html generation..."
 rm -rf /tmp/html-test
 LONG_PROMPT_COMMIT=$(git rev-parse HEAD)
-git-prompt-story ci-html "${LONG_PROMPT_INITIAL}..HEAD" --output-dir=/tmp/html-test --pr=42
+git-prompt-story pr html "${LONG_PROMPT_INITIAL}..HEAD" --output-dir=/tmp/html-test --pr=42
 
 test -f /tmp/html-test/index.html || fail "index.html should be created"
 echo "    - index.html created"
@@ -150,10 +150,10 @@ echo "    - index.html contains PR #42"
 grep -q "Prompt Story" /tmp/html-test/index.html || fail "index.html should contain title"
 echo "    - index.html contains title"
 
-# Step 8: Test ci-summary output to file
-echo "  Step 8: Testing ci-summary file output..."
+# Step 8: Test pr summary output to file
+echo "  Step 8: Testing pr summary file output..."
 rm -f /tmp/summary.md
-git-prompt-story ci-summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown --output=/tmp/summary.md
+git-prompt-story pr summary "${LONG_PROMPT_INITIAL}..HEAD" --format=markdown --output=/tmp/summary.md
 
 test -f /tmp/summary.md || fail "Output file should be created"
 echo "    - Output file created"
@@ -170,8 +170,8 @@ git add file.txt
 faketime '2025-01-15 12:00:00' git commit -m "Commit without session"
 NO_SESSION_COMMIT=$(git rev-parse HEAD)
 
-# ci-summary for just this commit should work but show 0 commits with notes
-NO_NOTES_OUTPUT=$(git-prompt-story ci-summary "${LONG_PROMPT_COMMIT}..HEAD" --format=json)
+# pr summary for just this commit should work but show 0 commits with notes
+NO_NOTES_OUTPUT=$(git-prompt-story pr summary "${LONG_PROMPT_COMMIT}..HEAD" --format=json)
 echo "$NO_NOTES_OUTPUT" | jq -e '.commits_with_notes == 0' > /dev/null || fail "Should show 0 commits with notes"
 echo "    - Handles commits without notes gracefully"
 

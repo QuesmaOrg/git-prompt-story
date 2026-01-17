@@ -90,18 +90,18 @@ echo "    - Agent session 1 found (agent-explore1)"
 echo "$NOTE" | jq -e '.sessions[] | select(.id == "agent-explore2")' > /dev/null || fail "Should have agent-explore2"
 echo "    - Agent session 2 found (agent-explore2)"
 
-# Step 7: Verify ci-summary counts
-echo "  Step 7: Verifying ci-summary output..."
+# Step 7: Verify pr summary counts
+echo "  Step 7: Verifying pr summary output..."
 
 # Use HEAD~1..HEAD as commit range (from initial commit to current)
-SUMMARY=$(git-prompt-story ci-summary HEAD~1..HEAD --format=json)
+SUMMARY=$(git-prompt-story pr summary HEAD~1..HEAD --format=json)
 echo "$SUMMARY" | jq .
 
 # Check total_agent_sessions
 AGENT_SESSIONS=$(echo "$SUMMARY" | jq '.total_agent_sessions')
 if [[ "$AGENT_SESSIONS" != "2" ]]; then
     echo "    ERROR: Expected total_agent_sessions=2, got $AGENT_SESSIONS"
-    fail "ci-summary should report 2 agent sessions"
+    fail "pr summary should report 2 agent sessions"
 fi
 echo "    - total_agent_sessions: 2"
 
@@ -109,7 +109,7 @@ echo "    - total_agent_sessions: 2"
 AGENT_PROMPTS=$(echo "$SUMMARY" | jq '.total_agent_prompts')
 if [[ "$AGENT_PROMPTS" != "2" ]]; then
     echo "    ERROR: Expected total_agent_prompts=2, got $AGENT_PROMPTS"
-    fail "ci-summary should report 2 agent prompts"
+    fail "pr summary should report 2 agent prompts"
 fi
 echo "    - total_agent_prompts: 2"
 
@@ -117,15 +117,15 @@ echo "    - total_agent_prompts: 2"
 USER_PROMPTS=$(echo "$SUMMARY" | jq '.total_user_prompts')
 if [[ "$USER_PROMPTS" != "1" ]]; then
     echo "    ERROR: Expected total_user_prompts=1, got $USER_PROMPTS"
-    fail "ci-summary should report 1 user prompt (main session only)"
+    fail "pr summary should report 1 user prompt (main session only)"
 fi
 echo "    - total_user_prompts: 1 (main session only)"
 
-# Step 8: Verify ci-html output contains badges and toggle
-echo "  Step 8: Verifying ci-html output..."
+# Step 8: Verify pr html output contains badges and toggle
+echo "  Step 8: Verifying pr html output..."
 
 mkdir -p /tmp/ci-output
-git-prompt-story ci-html HEAD~1..HEAD --output-dir=/tmp/ci-output
+git-prompt-story pr html HEAD~1..HEAD --output-dir=/tmp/ci-output
 
 # Check commit page for agent badges
 COMMIT_SHORT=$(git rev-parse --short HEAD)
@@ -133,7 +133,7 @@ COMMIT_PAGE="/tmp/ci-output/${COMMIT_SHORT}.html"
 
 if [[ ! -f "$COMMIT_PAGE" ]]; then
     echo "    ERROR: Commit page not found: $COMMIT_PAGE"
-    fail "ci-html should generate commit page"
+    fail "pr html should generate commit page"
 fi
 
 # Check for badge classes
@@ -172,20 +172,20 @@ echo "    - Found data-is-agent='false' attribute"
 # Step 9: Verify markdown output shows only main session prompts
 echo "  Step 9: Verifying markdown output..."
 
-MARKDOWN=$(git-prompt-story ci-summary HEAD~1..HEAD --format=markdown)
+MARKDOWN=$(git-prompt-story pr summary HEAD~1..HEAD --format=markdown)
 echo "$MARKDOWN"
 
 # Should show only main session prompt count (no agent indicator)
 if echo "$MARKDOWN" | grep -q "(+[0-9]* agent)"; then
     echo "    ERROR: Markdown should NOT show agent count in User Prompts"
-    fail "ci-summary markdown should not indicate agent prompts"
+    fail "pr summary markdown should not indicate agent prompts"
 fi
 echo "    - User Prompts shows main session only (no agent indicator)"
 
 # Verify user prompts header shows 1 (main session only)
 if ! echo "$MARKDOWN" | grep -q "1 user prompts"; then
     echo "    ERROR: Should show '1 user prompts' (main session only)"
-    fail "ci-summary should show only main session prompts in header"
+    fail "pr summary should show only main session prompts in header"
 fi
 echo "    - Header shows '1 user prompts' (main session only)"
 

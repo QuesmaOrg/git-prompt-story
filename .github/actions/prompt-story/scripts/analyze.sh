@@ -7,9 +7,9 @@ echo "Analyzing commits..."
 COMMIT_RANGE="origin/${BASE_REF}..HEAD"
 echo "  Range: $COMMIT_RANGE"
 
-# Use the analyze-pr command which encapsulates all analysis logic
+# Use the pr analyze command which encapsulates all analysis logic
 # This avoids fragile bash-based marker detection
-./git-prompt-story analyze-pr "$COMMIT_RANGE" \
+./git-prompt-story pr analyze "$COMMIT_RANGE" \
   --output-json=./prompt-story-analysis.json \
   --output-markdown=./prompt-story-summary.md \
   ${PAGES_URL:+--pages-url="$PAGES_URL"}

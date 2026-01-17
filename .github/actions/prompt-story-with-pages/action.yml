@@ -77,7 +77,7 @@ runs:
         BASE_REF: ${{ github.event.pull_request.base.ref }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
-        ./git-prompt-story ci-html "origin/${BASE_REF}..HEAD" \
+        ./git-prompt-story pr html "origin/${BASE_REF}..HEAD" \
           --output-dir="./prompt-story-pages/prompt-story/pr-${PR_NUMBER}" \
           --pr="${PR_NUMBER}"
 
@@ -120,7 +120,7 @@ runs:
           const fs = require('fs');
 
           // Read the generated markdown summary
-          // The analyze-pr command only creates this file when there are actual notes
+          // The pr analyze command only creates this file when there are actual notes
           let body = fs.readFileSync('./prompt-story-summary.md', 'utf8');
 
           // Add pages link if available

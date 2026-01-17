@@ -24,13 +24,13 @@ go install .
 
 Note: Local builds will show version "dev". Release builds get version from git tags via GoReleaser.
 
-## Previewing CI Summary Changes
+## Previewing PR Summary Changes
 
-When modifying CI summary output (`internal/ci/summary.go`), offer to preview changes locally before merging:
+When modifying PR summary output (`internal/ci/summary.go`), offer to preview changes locally before merging:
 
 1. Rebuild: `go build .`
-2. Run against the PR branch: `./git-prompt-story ci-summary "origin/main..HEAD" --format=markdown | pbcopy`
-3. Ask user paste as a GitHUB PR comment to preview how the output will look in GitHub
+2. Run against the PR branch: `./git-prompt-story pr summary "origin/main..HEAD" --format=markdown | pbcopy`
+3. Ask user paste as a GitHub PR comment to preview how the output will look in GitHub
 
 ## Git Workflow
 

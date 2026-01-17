@@ -198,7 +198,7 @@ git-prompt-story show HEAD
 
 # Preview PR comment style
 # You can compare any two commits, branches, or ranges
-git-prompt-story ci-preview main..HEAD
+git-prompt-story pr preview main..HEAD
 ```
 
 ## Privacy
