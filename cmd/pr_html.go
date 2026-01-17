@@ -9,12 +9,12 @@ import (
 )
 
 var (
-	ciHTMLOutputDir string
-	ciHTMLPRNumber  int
+	prHTMLOutputDir string
+	prHTMLPRNumber  int
 )
 
-var ciHTMLCmd = &cobra.Command{
-	Use:   "ci-html <commit-range>",
+var prHTMLCmd = &cobra.Command{
+	Use:   "html <commit-range>",
 	Short: "Generate HTML transcript pages",
 	Long: `Generate static HTML pages showing full transcripts for commits in a range.
 
@@ -22,13 +22,13 @@ This command creates an index.html and individual commit pages suitable for
 deployment to GitHub Pages.
 
 Examples:
-  git-prompt-story ci-html HEAD~5..HEAD --output-dir=./pages
-  git-prompt-story ci-html main..feature --output-dir=./pr-42 --pr=42`,
+  git-prompt-story pr html HEAD~5..HEAD --output-dir=./pages
+  git-prompt-story pr html main..feature --output-dir=./pr-42 --pr=42`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		commitRange := args[0]
 
-		if ciHTMLOutputDir == "" {
+		if prHTMLOutputDir == "" {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: --output-dir is required\n")
 			os.Exit(1)
 		}
@@ -40,12 +40,12 @@ Examples:
 			os.Exit(1)
 		}
 
-		if err := ci.GenerateHTML(summary, ciHTMLOutputDir, ciHTMLPRNumber); err != nil {
+		if err := ci.GenerateHTML(summary, prHTMLOutputDir, prHTMLPRNumber); err != nil {
 			fmt.Fprintf(os.Stderr, "git-prompt-story: %v\n", err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("Generated HTML pages in %s\n", ciHTMLOutputDir)
+		fmt.Printf("Generated HTML pages in %s\n", prHTMLOutputDir)
 		fmt.Printf("  - index.html\n")
 		for _, commit := range summary.Commits {
 			fmt.Printf("  - %s.html\n", commit.ShortSHA)
@@ -54,7 +54,7 @@ Examples:
 }
 
 func init() {
-	ciHTMLCmd.Flags().StringVar(&ciHTMLOutputDir, "output-dir", "", "Directory to write HTML files (required)")
-	ciHTMLCmd.Flags().IntVar(&ciHTMLPRNumber, "pr", 0, "PR number for page title")
-	rootCmd.AddCommand(ciHTMLCmd)
+	prHTMLCmd.Flags().StringVar(&prHTMLOutputDir, "output-dir", "", "Directory to write HTML files (required)")
+	prHTMLCmd.Flags().IntVar(&prHTMLPRNumber, "pr", 0, "PR number for page title")
+	prCmd.AddCommand(prHTMLCmd)
 }

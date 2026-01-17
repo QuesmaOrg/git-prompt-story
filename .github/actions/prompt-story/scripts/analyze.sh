@@ -7,27 +7,27 @@ echo "Analyzing commits..."
 COMMIT_RANGE="origin/${BASE_REF}..HEAD"
 echo "  Range: $COMMIT_RANGE"
 
-# Check if any commits have Prompt-Story markers in their messages
-COMMITS_WITH_ANY_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "Prompt-Story:" || echo "0")
-COMMITS_WITH_NONE_MARKERS=$(git log --format=%B ${COMMIT_RANGE} | grep -c "Prompt-Story: none" || echo "0")
-# Only count markers that indicate actual AI usage (not "none")
-COMMITS_WITH_MARKERS=$((COMMITS_WITH_ANY_MARKERS - COMMITS_WITH_NONE_MARKERS))
-echo "  Commits with AI markers: $COMMITS_WITH_MARKERS (total: $COMMITS_WITH_ANY_MARKERS, none: $COMMITS_WITH_NONE_MARKERS)"
+# Use pr summary with --gha flag
+# Outputs metadata to stdout (goes to GITHUB_OUTPUT)
+# Writes markdown to file if there are notes
+./git-prompt-story pr summary "$COMMIT_RANGE" \
+  --gha \
+  --output=./prompt-story-summary.md \
+  ${PAGES_URL:+--pages-url="$PAGES_URL"} \
+  >> $GITHUB_OUTPUT
 
-# Generate summary in JSON to extract stats
-./git-prompt-story ci-summary "$COMMIT_RANGE" --format=json --output=./prompt-story-stats.json
-
-# Extract stats from JSON
-COMMITS_ANALYZED=$(jq -r '.commits_analyzed' ./prompt-story-stats.json)
-COMMITS_WITH_NOTES=$(jq -r '.commits_with_notes' ./prompt-story-stats.json)
+# Parse output for logging (metadata is also in GITHUB_OUTPUT now)
+COMMITS_ANALYZED=$(grep "commits-analyzed=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+COMMITS_WITH_NOTES=$(grep "commits-with-notes=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+COMMITS_MISSING=$(grep "commits-missing-notes=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+NOTES_MISSING=$(grep "notes-missing=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+SHOULD_POST=$(grep "should-post-comment=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
 
 echo "  Commits analyzed: $COMMITS_ANALYZED"
 echo "  Commits with notes: $COMMITS_WITH_NOTES"
-
-# Set outputs
-echo "commits-analyzed=$COMMITS_ANALYZED" >> $GITHUB_OUTPUT
-echo "commits-with-notes=$COMMITS_WITH_NOTES" >> $GITHUB_OUTPUT
-echo "commits-with-markers=$COMMITS_WITH_MARKERS" >> $GITHUB_OUTPUT
+echo "  Commits missing notes: $COMMITS_MISSING"
+echo "  Notes missing: $NOTES_MISSING"
+echo "  Should post comment: $SHOULD_POST"
 
 # Check if we should fail
 if [ "$FAIL_IF_NO_NOTES" = "true" ] && [ "$COMMITS_WITH_NOTES" = "0" ]; then
@@ -35,8 +35,4 @@ if [ "$FAIL_IF_NO_NOTES" = "true" ] && [ "$COMMITS_WITH_NOTES" = "0" ]; then
   exit 1
 fi
 
-# Generate markdown summary
-./git-prompt-story ci-summary "$COMMIT_RANGE" --format=markdown --output=./prompt-story-summary.md
-
-echo "  Generated ./prompt-story-summary.md"
 echo "Done analyzing."

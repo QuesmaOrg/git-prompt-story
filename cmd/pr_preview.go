@@ -12,22 +12,22 @@ import (
 )
 
 var (
-	ciPreviewNoOpen bool
+	prPreviewNoOpen bool
 )
 
-var ciPreviewCmd = &cobra.Command{
-	Use:   "ci-preview [commit-range]",
-	Short: "Preview CI summary as rendered GitHub markdown",
-	Long: `Generate an HTML preview of how the CI summary will look in GitHub Actions.
+var prPreviewCmd = &cobra.Command{
+	Use:   "preview [commit-range]",
+	Short: "Preview summary as rendered GitHub markdown",
+	Long: `Generate an HTML preview of how the summary will look in GitHub Actions.
 
 Opens the preview in your default browser. Use --no-open to just generate the file.
 
 If no commit range is specified, defaults to showing the last commit (HEAD~1..HEAD).
 
 Examples:
-  git-prompt-story ci-preview
-  git-prompt-story ci-preview HEAD~3..HEAD
-  git-prompt-story ci-preview main..feature --no-open`,
+  git-prompt-story pr preview
+  git-prompt-story pr preview HEAD~3..HEAD
+  git-prompt-story pr preview main..feature --no-open`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		commitRange := "HEAD~1..HEAD"
@@ -43,7 +43,7 @@ Examples:
 
 		markdown := ci.RenderMarkdown(summary, "", GetVersion())
 
-		html := wrapMarkdownAsGitHubHTML(markdown)
+		html := prWrapMarkdownAsGitHubHTML(markdown)
 
 		// Write to temp file
 		tmpDir := os.TempDir()
@@ -55,8 +55,8 @@ Examples:
 
 		fmt.Printf("Preview generated: %s\n", htmlPath)
 
-		if !ciPreviewNoOpen {
-			if err := openBrowser(htmlPath); err != nil {
+		if !prPreviewNoOpen {
+			if err := prOpenBrowser(htmlPath); err != nil {
 				fmt.Fprintf(os.Stderr, "git-prompt-story: failed to open browser: %v\n", err)
 				fmt.Fprintf(os.Stderr, "Open manually: file://%s\n", htmlPath)
 			}
@@ -65,12 +65,12 @@ Examples:
 }
 
 func init() {
-	ciPreviewCmd.Flags().BoolVar(&ciPreviewNoOpen, "no-open", false, "Don't open browser, just generate the file")
-	rootCmd.AddCommand(ciPreviewCmd)
+	prPreviewCmd.Flags().BoolVar(&prPreviewNoOpen, "no-open", false, "Don't open browser, just generate the file")
+	prCmd.AddCommand(prPreviewCmd)
 }
 
-// openBrowser opens the specified URL in the default browser
-func openBrowser(url string) error {
+// prOpenBrowser opens the specified URL in the default browser
+func prOpenBrowser(url string) error {
 	var cmd *exec.Cmd
 
 	switch runtime.GOOS {
@@ -87,14 +87,14 @@ func openBrowser(url string) error {
 	return cmd.Start()
 }
 
-// wrapMarkdownAsGitHubHTML wraps markdown content in HTML that renders it like GitHub
-func wrapMarkdownAsGitHubHTML(markdown string) string {
+// prWrapMarkdownAsGitHubHTML wraps markdown content in HTML that renders it like GitHub
+func prWrapMarkdownAsGitHubHTML(markdown string) string {
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Git Prompt Story - CI Preview</title>
+  <title>Git Prompt Story - PR Preview</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
   <style>
@@ -135,7 +135,7 @@ func wrapMarkdownAsGitHubHTML(markdown string) string {
 <body>
   <div class="preview-header">
     <h1>GitHub Actions Comment Preview</h1>
-    <p>This is how your CI summary will appear in GitHub PR comments.</p>
+    <p>This is how your PR summary will appear in GitHub PR comments.</p>
   </div>
   <article class="markdown-body" id="content"></article>
   <script>
@@ -143,11 +143,11 @@ func wrapMarkdownAsGitHubHTML(markdown string) string {
     document.getElementById('content').innerHTML = marked.parse(markdown);
   </script>
 </body>
-</html>`, escapeJSString(markdown))
+</html>`, prEscapeJSString(markdown))
 }
 
-// escapeJSString escapes a string for use in JavaScript
-func escapeJSString(s string) string {
+// prEscapeJSString escapes a string for use in JavaScript
+func prEscapeJSString(s string) string {
 	result := "`"
 	for _, r := range s {
 		switch r {

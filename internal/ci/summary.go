@@ -28,7 +28,7 @@ type PromptEntry struct {
 	Type         string    `json:"type"` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT, DECISION
 	Text         string    `json:"text"`
 	Truncated    bool      `json:"truncated,omitempty"`
-	InWorkPeriod bool      `json:"in_work_period"` // true if within commit's work period
+	InWorkPeriod bool      `json:"in_work_period"`        // true if within commit's work period
 	ToolID       string    `json:"tool_id,omitempty"`     // For TOOL_USE/TOOL_RESULT: links them together
 	ToolName     string    `json:"tool_name,omitempty"`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
 	ToolInput    string    `json:"tool_input,omitempty"`  // For TOOL_USE: the tool input/command
@@ -43,12 +43,12 @@ type PromptEntry struct {
 
 // SessionSummary represents a summarized session within a commit
 type SessionSummary struct {
-	Tool     string        `json:"tool"`
-	ID       string        `json:"id"`
-	IsAgent  bool          `json:"is_agent"`  // True if this is an agent/subagent session
-	Start    time.Time     `json:"start"`
-	End      time.Time     `json:"end"`
-	Prompts  []PromptEntry `json:"prompts"`
+	Tool    string        `json:"tool"`
+	ID      string        `json:"id"`
+	IsAgent bool          `json:"is_agent"` // True if this is an agent/subagent session
+	Start   time.Time     `json:"start"`
+	End     time.Time     `json:"end"`
+	Prompts []PromptEntry `json:"prompts"`
 }
 
 // IsAgentSession returns true if the session ID indicates an agent session
@@ -69,16 +69,17 @@ type CommitSummary struct {
 
 // Summary represents the full analysis result
 type Summary struct {
-	Commits            []CommitSummary `json:"commits"`
-	TotalPrompts       int             `json:"total_prompts"`        // Kept for backward compatibility (equals TotalSteps)
-	TotalUserPrompts   int             `json:"total_user_prompts"`   // Count of user actions in main sessions only
-	TotalAgentPrompts  int             `json:"total_agent_prompts"`  // Count of user actions in agent sessions
-	TotalSteps         int             `json:"total_steps"`          // Count of all entries
-	TotalAgentSessions int             `json:"total_agent_sessions"` // Count of agent sessions
-	TotalFileEdits     int             `json:"total_file_edits"`     // Count of Write/Edit operations
-	TotalFailedTasks   int             `json:"total_failed_tasks"`   // Count of failed background tasks
-	CommitsWithNotes   int             `json:"commits_with_notes"`
-	CommitsAnalyzed    int             `json:"commits_analyzed"`
+	Commits             []CommitSummary `json:"commits"`
+	TotalPrompts        int             `json:"total_prompts"`        // Kept for backward compatibility (equals TotalSteps)
+	TotalUserPrompts    int             `json:"total_user_prompts"`   // Count of user actions in main sessions only
+	TotalAgentPrompts   int             `json:"total_agent_prompts"`  // Count of user actions in agent sessions
+	TotalSteps          int             `json:"total_steps"`          // Count of all entries
+	TotalAgentSessions  int             `json:"total_agent_sessions"` // Count of agent sessions
+	TotalFileEdits      int             `json:"total_file_edits"`     // Count of Write/Edit operations
+	TotalFailedTasks    int             `json:"total_failed_tasks"`   // Count of failed background tasks
+	CommitsWithNotes    int             `json:"commits_with_notes"`
+	CommitsAnalyzed     int             `json:"commits_analyzed"`
+	CommitsMissingNotes int             `json:"commits_missing_notes"` // Commits with markers but no notes
 }
 
 // GenerateSummary analyzes commits in a range and extracts prompt data
@@ -97,7 +98,10 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 	for _, sha := range commits {
 		cs, err := analyzeCommit(sha, full)
 		if err != nil {
-			// Skip commits without notes
+			// Check if commit has a marker indicating AI was used
+			if hasAIMarker(sha) {
+				summary.CommitsMissingNotes++
+			}
 			continue
 		}
 		if len(cs.Sessions) > 0 {
@@ -125,6 +129,17 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 	}
 
 	return summary, nil
+}
+
+// hasAIMarker checks if a commit message contains a Prompt-Story marker indicating AI was used
+// Returns true for "Prompt-Story: Used ..." but false for "Prompt-Story: none"
+func hasAIMarker(sha string) bool {
+	msg, err := git.GetCommitMessage(sha)
+	if err != nil {
+		return false
+	}
+	// Look for "Prompt-Story: Used" pattern (not "Prompt-Story: none")
+	return strings.Contains(msg, "Prompt-Story: Used")
 }
 
 // analyzeCommit extracts prompt data for a single commit
@@ -519,10 +534,10 @@ func parseToolResults(rawContent json.RawMessage) []ToolResultInfo {
 
 	// Tool results are typically in an array
 	var parts []struct {
-		Type       string `json:"type"`
-		ToolUseID  string `json:"tool_use_id"`
-		Content    any    `json:"content"`
-		IsError    bool   `json:"is_error,omitempty"`
+		Type      string `json:"type"`
+		ToolUseID string `json:"tool_use_id"`
+		Content   any    `json:"content"`
+		IsError   bool   `json:"is_error,omitempty"`
 	}
 	if err := json.Unmarshal(rawContent, &parts); err != nil {
 		return nil
@@ -964,6 +979,28 @@ func RenderMarkdown(summary *Summary, pagesURL string, version string) string {
 	return sb.String()
 }
 
+// RenderMissingNotesWarning generates markdown warning when commits have markers but notes are missing
+func RenderMissingNotesWarning(commitsMissing int, version string) string {
+	return fmt.Sprintf(`## ⚠️ Prompt Story Notes Not Found
+
+This PR has %d commit(s) with `+"`Prompt-Story:`"+` markers, but the notes could not be fetched.
+
+**Did you forget to push your notes?**
+
+`+"```bash"+`
+git push origin refs/notes/prompt-story
+`+"```"+`
+
+Or push all refs including notes:
+`+"```bash"+`
+git push --all && git push origin refs/notes/prompt-story
+`+"```"+`
+
+---
+*Generated by [git-prompt-story](https://github.com/QuesmaOrg/git-prompt-story) %s*
+`, commitsMissing, version)
+}
+
 // Format modes for renderTimeline
 const (
 	formatRegular     = "regular"     // Truncated display (100 chars) - for "All Steps"
@@ -1269,11 +1306,6 @@ func formatMarkdownEntryCollapsible(entry PromptEntry) string {
 
 	return fmt.Sprintf("- <details><summary>%s</summary>...%s</details>%s\n",
 		summary, continuation, toolCountsStr)
-}
-
-// RenderJSON generates JSON output
-func RenderJSON(summary *Summary) ([]byte, error) {
-	return json.MarshalIndent(summary, "", "  ")
 }
 
 // extractFilePath extracts file_path from tool input string

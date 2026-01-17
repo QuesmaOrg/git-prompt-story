@@ -592,7 +592,7 @@ func DefaultNodeRemovers() []NodeRemover {
 			// toolUseResult is a Claude Code-specific field that duplicates data
 			// from message.content in a different format. However, for AskUserQuestion
 			// responses, toolUseResult.answers contains structured decision data
-			// that is used by ci-summary to display DECISION entries.
+			// that is used by pr summary to display DECISION entries.
 			ShouldRemove: func(value any) bool {
 				// Preserve if it contains AskUserQuestion answers (decision data)
 				if m, ok := value.(map[string]interface{}); ok {

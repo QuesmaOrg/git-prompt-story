@@ -56,6 +56,16 @@ func GetCommitTimestamp(sha string) (time.Time, error) {
 	return time.Parse(time.RFC3339, strings.TrimSpace(string(out)))
 }
 
+// GetCommitMessage returns the full commit message for a specific commit
+func GetCommitMessage(sha string) (string, error) {
+	cmd := exec.Command("git", "log", "-1", "--format=%B", sha)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
 // GetCurrentBranch returns the current branch name
 func GetCurrentBranch() (string, error) {
 	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
