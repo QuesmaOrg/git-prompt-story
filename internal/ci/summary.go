@@ -79,6 +79,7 @@ type Summary struct {
 	TotalFailedTasks   int             `json:"total_failed_tasks"`   // Count of failed background tasks
 	CommitsWithNotes   int             `json:"commits_with_notes"`
 	CommitsAnalyzed    int             `json:"commits_analyzed"`
+	CommitsMissingNotes int            `json:"commits_missing_notes"` // Commits with markers but no notes
 }
 
 // GenerateSummary analyzes commits in a range and extracts prompt data
@@ -97,7 +98,10 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 	for _, sha := range commits {
 		cs, err := analyzeCommit(sha, full)
 		if err != nil {
-			// Skip commits without notes
+			// Check if commit has a marker indicating AI was used
+			if hasAIMarker(sha) {
+				summary.CommitsMissingNotes++
+			}
 			continue
 		}
 		if len(cs.Sessions) > 0 {
@@ -125,6 +129,17 @@ func GenerateSummary(commitRange string, full bool) (*Summary, error) {
 	}
 
 	return summary, nil
+}
+
+// hasAIMarker checks if a commit message contains a Prompt-Story marker indicating AI was used
+// Returns true for "Prompt-Story: Used ..." but false for "Prompt-Story: none"
+func hasAIMarker(sha string) bool {
+	msg, err := git.GetCommitMessage(sha)
+	if err != nil {
+		return false
+	}
+	// Look for "Prompt-Story: Used" pattern (not "Prompt-Story: none")
+	return strings.Contains(msg, "Prompt-Story: Used")
 }
 
 // analyzeCommit extracts prompt data for a single commit

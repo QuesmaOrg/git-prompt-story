@@ -19,10 +19,14 @@ echo "  Range: $COMMIT_RANGE"
 # Parse output for logging (metadata is also in GITHUB_OUTPUT now)
 COMMITS_ANALYZED=$(grep "commits-analyzed=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
 COMMITS_WITH_NOTES=$(grep "commits-with-notes=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+COMMITS_MISSING=$(grep "commits-missing-notes=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+NOTES_MISSING=$(grep "notes-missing=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
 SHOULD_POST=$(grep "should-post-comment=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
 
 echo "  Commits analyzed: $COMMITS_ANALYZED"
 echo "  Commits with notes: $COMMITS_WITH_NOTES"
+echo "  Commits missing notes: $COMMITS_MISSING"
+echo "  Notes missing: $NOTES_MISSING"
 echo "  Should post comment: $SHOULD_POST"
 
 # Check if we should fail

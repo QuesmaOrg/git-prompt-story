@@ -39,9 +39,12 @@ Examples:
 		if prSummaryGHA {
 			// GitHub Actions mode: output metadata to stdout
 			shouldPost := summary.CommitsWithNotes > 0
+			notesMissing := summary.CommitsMissingNotes > 0
 			fmt.Printf("commits-analyzed=%d\n", summary.CommitsAnalyzed)
 			fmt.Printf("commits-with-notes=%d\n", summary.CommitsWithNotes)
-			fmt.Printf("should-post-comment=%t\n", shouldPost)
+			fmt.Printf("commits-missing-notes=%d\n", summary.CommitsMissingNotes)
+			fmt.Printf("notes-missing=%t\n", notesMissing)
+			fmt.Printf("should-post-comment=%t\n", shouldPost || notesMissing)
 
 			// Write markdown to file if we have notes
 			if shouldPost && prSummaryOutput != "" {
