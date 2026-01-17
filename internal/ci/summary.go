@@ -28,7 +28,7 @@ type PromptEntry struct {
 	Type         string    `json:"type"` // PROMPT, COMMAND, TOOL_REJECT, ASSISTANT, TOOL_USE, TOOL_RESULT, DECISION
 	Text         string    `json:"text"`
 	Truncated    bool      `json:"truncated,omitempty"`
-	InWorkPeriod bool      `json:"in_work_period"` // true if within commit's work period
+	InWorkPeriod bool      `json:"in_work_period"`        // true if within commit's work period
 	ToolID       string    `json:"tool_id,omitempty"`     // For TOOL_USE/TOOL_RESULT: links them together
 	ToolName     string    `json:"tool_name,omitempty"`   // For TOOL_USE: the tool name (Bash, Edit, etc.)
 	ToolInput    string    `json:"tool_input,omitempty"`  // For TOOL_USE: the tool input/command
@@ -43,12 +43,12 @@ type PromptEntry struct {
 
 // SessionSummary represents a summarized session within a commit
 type SessionSummary struct {
-	Tool     string        `json:"tool"`
-	ID       string        `json:"id"`
-	IsAgent  bool          `json:"is_agent"`  // True if this is an agent/subagent session
-	Start    time.Time     `json:"start"`
-	End      time.Time     `json:"end"`
-	Prompts  []PromptEntry `json:"prompts"`
+	Tool    string        `json:"tool"`
+	ID      string        `json:"id"`
+	IsAgent bool          `json:"is_agent"` // True if this is an agent/subagent session
+	Start   time.Time     `json:"start"`
+	End     time.Time     `json:"end"`
+	Prompts []PromptEntry `json:"prompts"`
 }
 
 // IsAgentSession returns true if the session ID indicates an agent session
@@ -69,17 +69,17 @@ type CommitSummary struct {
 
 // Summary represents the full analysis result
 type Summary struct {
-	Commits            []CommitSummary `json:"commits"`
-	TotalPrompts       int             `json:"total_prompts"`        // Kept for backward compatibility (equals TotalSteps)
-	TotalUserPrompts   int             `json:"total_user_prompts"`   // Count of user actions in main sessions only
-	TotalAgentPrompts  int             `json:"total_agent_prompts"`  // Count of user actions in agent sessions
-	TotalSteps         int             `json:"total_steps"`          // Count of all entries
-	TotalAgentSessions int             `json:"total_agent_sessions"` // Count of agent sessions
-	TotalFileEdits     int             `json:"total_file_edits"`     // Count of Write/Edit operations
-	TotalFailedTasks   int             `json:"total_failed_tasks"`   // Count of failed background tasks
-	CommitsWithNotes   int             `json:"commits_with_notes"`
-	CommitsAnalyzed    int             `json:"commits_analyzed"`
-	CommitsMissingNotes int            `json:"commits_missing_notes"` // Commits with markers but no notes
+	Commits             []CommitSummary `json:"commits"`
+	TotalPrompts        int             `json:"total_prompts"`        // Kept for backward compatibility (equals TotalSteps)
+	TotalUserPrompts    int             `json:"total_user_prompts"`   // Count of user actions in main sessions only
+	TotalAgentPrompts   int             `json:"total_agent_prompts"`  // Count of user actions in agent sessions
+	TotalSteps          int             `json:"total_steps"`          // Count of all entries
+	TotalAgentSessions  int             `json:"total_agent_sessions"` // Count of agent sessions
+	TotalFileEdits      int             `json:"total_file_edits"`     // Count of Write/Edit operations
+	TotalFailedTasks    int             `json:"total_failed_tasks"`   // Count of failed background tasks
+	CommitsWithNotes    int             `json:"commits_with_notes"`
+	CommitsAnalyzed     int             `json:"commits_analyzed"`
+	CommitsMissingNotes int             `json:"commits_missing_notes"` // Commits with markers but no notes
 }
 
 // GenerateSummary analyzes commits in a range and extracts prompt data
@@ -534,10 +534,10 @@ func parseToolResults(rawContent json.RawMessage) []ToolResultInfo {
 
 	// Tool results are typically in an array
 	var parts []struct {
-		Type       string `json:"type"`
-		ToolUseID  string `json:"tool_use_id"`
-		Content    any    `json:"content"`
-		IsError    bool   `json:"is_error,omitempty"`
+		Type      string `json:"type"`
+		ToolUseID string `json:"tool_use_id"`
+		Content   any    `json:"content"`
+		IsError   bool   `json:"is_error,omitempty"`
 	}
 	if err := json.Unmarshal(rawContent, &parts); err != nil {
 		return nil
