@@ -46,12 +46,19 @@ Examples:
 			fmt.Printf("notes-missing=%t\n", notesMissing)
 			fmt.Printf("should-post-comment=%t\n", shouldPost || notesMissing)
 
-			// Write markdown to file if we have notes
-			if shouldPost && prSummaryOutput != "" {
-				markdown := ci.RenderMarkdown(summary, prSummaryPagesURL, GetVersion())
-				if err := os.WriteFile(prSummaryOutput, []byte(markdown), 0644); err != nil {
-					fmt.Fprintf(os.Stderr, "git-prompt-story: failed to write output: %v\n", err)
-					os.Exit(1)
+			// Write markdown to file
+			if prSummaryOutput != "" {
+				var markdown string
+				if shouldPost {
+					markdown = ci.RenderMarkdown(summary, prSummaryPagesURL, GetVersion())
+				} else if notesMissing {
+					markdown = ci.RenderMissingNotesWarning(summary.CommitsMissingNotes, GetVersion())
+				}
+				if markdown != "" {
+					if err := os.WriteFile(prSummaryOutput, []byte(markdown), 0644); err != nil {
+						fmt.Fprintf(os.Stderr, "git-prompt-story: failed to write output: %v\n", err)
+						os.Exit(1)
+					}
 				}
 			}
 			return
