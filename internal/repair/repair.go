@@ -7,8 +7,12 @@ import (
 
 	"github.com/QuesmaOrg/git-prompt-story/internal/git"
 	"github.com/QuesmaOrg/git-prompt-story/internal/note"
+	"github.com/QuesmaOrg/git-prompt-story/internal/provider"
 	"github.com/QuesmaOrg/git-prompt-story/internal/scrubber"
-	"github.com/QuesmaOrg/git-prompt-story/internal/session"
+
+	// Import providers to register them
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/provider/claude"
+	_ "github.com/QuesmaOrg/git-prompt-story/internal/provider/cursor"
 )
 
 // RepairResult holds the result of a repair operation
@@ -64,18 +68,19 @@ func RepairCommit(sha string, opts Options) (*RepairResult, error) {
 		return nil, fmt.Errorf("failed to get work period: %w", err)
 	}
 
-	// Find sessions (includes time filtering)
-	sessions, err := session.FindSessions(repoRoot, startWork, endWork, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find sessions: %w", err)
+	// Discover sessions from all providers
+	var allSessions []provider.RawSession
+	for _, p := range provider.All() {
+		sessions, err := p.DiscoverSessions(repoRoot, startWork, endWork)
+		if err != nil {
+			continue // Skip failed providers
+		}
+		allSessions = append(allSessions, sessions...)
 	}
 
-	// Filter by user messages
-	sessions = session.FilterSessionsByUserMessages(sessions, startWork, endWork, nil)
+	result.SessionsFound = len(allSessions)
 
-	result.SessionsFound = len(sessions)
-
-	if len(sessions) == 0 {
+	if len(allSessions) == 0 {
 		return result, nil
 	}
 
@@ -94,18 +99,18 @@ func RepairCommit(sha string, opts Options) (*RepairResult, error) {
 	}
 
 	// Store transcripts
-	blobs, err := note.StoreTranscripts(sessions, piiScrubber)
+	blobs, err := note.StoreTranscriptsMulti(allSessions, piiScrubber)
 	if err != nil {
 		return nil, fmt.Errorf("failed to store transcripts: %w", err)
 	}
 
 	// Update transcript tree
-	if err := note.UpdateTranscriptTree(blobs); err != nil {
+	if err := note.UpdateTranscriptTreeMulti(blobs); err != nil {
 		return nil, fmt.Errorf("failed to update transcript tree: %w", err)
 	}
 
 	// Create note with explicit start time (not using CalculateWorkStartTime)
-	psNote := note.NewPromptStoryNote(sessions, false, startWork)
+	psNote := note.NewPromptStoryNoteMulti(allSessions, false, startWork)
 	noteJSON, err := psNote.ToJSON()
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize note: %w", err)
